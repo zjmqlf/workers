@@ -4,5 +4,6 @@
   "TangBRebot_22p_0v_0d_jnv2bOBHmyFX",
   "TangBRebot_0p_2v_0d_4u11jxlfaO58",
   "TangBRebot_0p_1v_0d_ykkROKUTp1ji",
-  "TangBRebot_2p_0v_0d_NeuxMDT5jhsG"
+  "TangBRebot_2p_0v_0d_NeuxMDT5jhsG",
+  "TangBRebot_3p_2v_0d_WyfDhds6D0rT"
 ]

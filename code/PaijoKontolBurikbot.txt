@@ -100,5 +100,8 @@
   "PaijoKontolBurik_bot_v:hAds7klV5EXNv2UkVnGyEdTZidaioxGf",
   "PaijoKontolBurik_bot_v:Z5r383CcStO6ZfxZlFSanrpfboBnmXiW",
   "PaijoKontolBurik_bot_v:plYZtj9vQwei9NiXDgVHenuSpCCOuq2o",
-  "PaijoKontolBurik_bot_p:xg5t8MBvGiZ6BMp9OQ4Z6taMNTLMxMeQ"
+  "PaijoKontolBurik_bot_p:xg5t8MBvGiZ6BMp9OQ4Z6taMNTLMxMeQ",
+  "PaijoKontolBurik_bot_p:1zwUqCGZ8NxcbKGP0DQxOmvGJlqVcY0J",
+  "PaijoKontolBurik_bot_v:Nvs8CQlcBZE2MA8C7RuaQ7s5jaeNEt51",
+  "PaijoKontolBurik_bot_v:xOJ1Zh7Cs6lGFVpWkXI02R5hjfDFU5i5"
 ]

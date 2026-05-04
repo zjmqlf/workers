@@ -387,52 +387,52 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  // getCount(text, type) {
-  //   if (type === 1) {
-  //     let string = text.split("-");
-  //     if (string.length === 2) {
-  //       string = string[1].split("_");
-  //       const length = string.length;
-  //       for (let i = 0; i < length; i++) {
-  //         let temp = string[i].split("P");
-  //         if (temp.length === 2) {
-  //           this.photoCount = parseInt(temp[0]);
-  //           continue;
-  //         }
-  //         temp = string[i].split("V");
-  //         if (temp.length === 2) {
-  //           this.videoCount = parseInt(temp[0]);
-  //           continue;
-  //         }
-  //         temp = string[i].split("D");
-  //         if (temp.length === 2) {
-  //           this.fileCount = parseInt(temp[0]);
-  //           continue;
-  //         }
-  //       }
-  //     }
-  //   } else if (type === 2) {
-  //     let string = text.split("_");
-  //     const length = string.length;
-  //     for (let i = 1; i < length; i++) {
-  //       let temp = string[i].split("P");
-  //       if (temp.length === 2) {
-  //         this.photoCount = parseInt(temp[0]);
-  //         continue;
-  //       }
-  //       temp = string[i].split("V");
-  //       if (temp.length === 2) {
-  //         this.videoCount = parseInt(temp[0]);
-  //         continue;
-  //       }
-  //       temp = string[i].split("D");
-  //       if (temp.length === 2) {
-  //         this.fileCount = parseInt(temp[0]);
-  //         continue;
-  //       }
-  //     }
-  //   }
-  // }
+  getCount(text, type) {
+    if (type === 1) {
+      let string = text.split("-");
+      if (string.length === 2) {
+        string = string[1].split("_");
+        const length = string.length;
+        for (let i = 0; i < length; i++) {
+          let temp = string[i].split("P");
+          if (temp.length === 2) {
+            this.photoCount = parseInt(temp[0]);
+            continue;
+          }
+          temp = string[i].split("V");
+          if (temp.length === 2) {
+            this.videoCount = parseInt(temp[0]);
+            continue;
+          }
+          temp = string[i].split("D");
+          if (temp.length === 2) {
+            this.fileCount = parseInt(temp[0]);
+            continue;
+          }
+        }
+      }
+    } else if (type === 2) {
+      let string = text.split("_");
+      const length = string.length;
+      for (let i = 1; i < length; i++) {
+        let temp = string[i].split("P");
+        if (temp.length === 2) {
+          this.photoCount = parseInt(temp[0]);
+          continue;
+        }
+        temp = string[i].split("V");
+        if (temp.length === 2) {
+          this.videoCount = parseInt(temp[0]);
+          continue;
+        }
+        temp = string[i].split("D");
+        if (temp.length === 2) {
+          this.fileCount = parseInt(temp[0]);
+          continue;
+        }
+      }
+    }
+  }
 
   async sendQueryError(tryCount) {
     if (tryCount === 20) {
@@ -814,9 +814,9 @@ export class WebSocketServer extends DurableObject {
                   //console.log("(" + this.currentStep + ") 代码入库完毕");
                   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                 } else if (string[0] === "QQfile2_bot") {
-                  // await this.ctx.storage.put(message.split("_")[0], 1);
-                  await this.ctx.storage.put(message, 1);
-                  // this.getCount(message, 2);
+                  await this.ctx.storage.put(message.split("_")[0], 1);
+                  // await this.ctx.storage.put(message, 1);
+                  this.getCount(message, 2);
                   //console.log("(" + this.currentStep + ") 代码入库完毕");
                   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                 } else if (message.includes("您已被限制使用,限制期限为：") === true) {
@@ -1135,9 +1135,9 @@ export class WebSocketServer extends DurableObject {
                     //console.log("(" + this.currentStep + ") 代码入库完毕");
                     this.sendForward("start", "代码入库完毕", "", "add", false);
                   } else if (string[0] === "QQfile2_bot") {
-                    // await this.ctx.storage.put(message.split("_")[0], 1);
-                    await this.ctx.storage.put(message, 1);
-                    // this.getCount(message, 2);
+                    await this.ctx.storage.put(message.split("_")[0], 1);
+                    // await this.ctx.storage.put(message, 1);
+                    this.getCount(message, 2);
                     //console.log("(" + this.currentStep + ") 代码入库完毕");
                     this.sendForward("start", "代码入库完毕", "", "add", false);
                   } else if (message.includes("您已被限制使用,限制期限为：") === true) {
