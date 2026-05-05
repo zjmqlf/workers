@@ -800,9 +800,9 @@ export class WebSocketServer extends DurableObject {
                   if (this.queue === true) {
                     this.queue = false;
                     await this.ctx.storage.put("queue", false);
+                    //console.log("(" + this.currentStep + ") 文件获取完毕");
+                    this.sendForward("nextStep", "文件获取完毕", "", "update", false);
                   }
-                  //console.log("(" + this.currentStep + ") 文件获取完毕");
-                  this.sendForward("nextStep", "文件获取完毕", "", "update", false);
                 }
               } else {
                 const message = messageArray[messageIndex].message.trim();
@@ -833,6 +833,13 @@ export class WebSocketServer extends DurableObject {
                 } else if (message.includes("当前机器人无法解析") === true) {
                   //console.log("(" + this.currentStep + ") " + message);
                   this.sendLog("nextStep", message, "error", true);
+                } else if (message.includes("文件获取完毕 文件总数：") === true) {
+                  if (this.queue === true) {
+                    this.queue = false;
+                    await this.ctx.storage.put("queue", false);
+                    //console.log("(" + this.currentStep + ") 文件获取完毕");
+                    this.sendForward("nextStep", "文件获取完毕", "", "update", false);
+                  }
                 }
               }
             }
@@ -1121,9 +1128,9 @@ export class WebSocketServer extends DurableObject {
                     if (this.queue === true) {
                       this.queue = false;
                       await this.ctx.storage.put("queue", false);
+                      //console.log("(" + this.currentStep + ") 文件获取完毕");
+                      this.sendForward("start", "文件获取完毕", "", "update", false);
                     }
-                    //console.log("(" + this.currentStep + ") 文件获取完毕");
-                    this.sendForward("start", "文件获取完毕", "", "update", false);
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
@@ -1154,6 +1161,13 @@ export class WebSocketServer extends DurableObject {
                   } else if (message.includes("当前机器人无法解析") === true) {
                     //console.log("(" + this.currentStep + ") " + message);
                     this.sendLog("start", message, "error", true);
+                  } else if (message.includes("文件获取完毕 文件总数：") === true) {
+                    if (this.queue === true) {
+                      this.queue = false;
+                      await this.ctx.storage.put("queue", false);
+                      //console.log("(" + this.currentStep + ") 文件获取完毕");
+                      this.sendForward("start", "文件获取完毕", "", "update", false);
+                    }
                   }
                 }
               }
