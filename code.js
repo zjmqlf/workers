@@ -144,7 +144,8 @@ const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/gi;    
 const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/gi;   //parludecodingBot
 const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //teestpanbot
 const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //atfileslinksbot
-const lockHivebotRegexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot2Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
 const ZYXFilesBotRegexp = /(📌 取件码：[A-Za-z0-9]+)/gi;   //ZYXFilesBot
@@ -1691,15 +1692,29 @@ try {
           }
         }
 
-        const lockHivebotMatches = str.match(lockHivebotRegexp);
-        // console.log(lockHivebotMatches);  //测试
-        if (lockHivebotMatches) {
-          const lockHivebotMatchesLength = lockHivebotMatches.length;
-          // console.log("lockHivebotMatchesLength : " + lockHivebotMatchesLength);  //测试
-          if (lockHivebotMatchesLength > 0) {
-            for (let j = 0; j < lockHivebotMatchesLength; j++) {
-              if (lockHivebotMatches[j]) {
-                lockHivebot.push(lockHivebotMatches[j]);
+        const lockHivebot1Matches = str.match(lockHivebot1Regexp);
+        // console.log(lockHivebot1Matches);  //测试
+        if (lockHivebot1Matches) {
+          const lockHivebot1MatchesLength = lockHivebot1Matches.length;
+          // console.log("lockHivebot1MatchesLength : " + lockHivebot1MatchesLength);  //测试
+          if (lockHivebot1MatchesLength > 0) {
+            for (let j = 0; j < lockHivebot1MatchesLength; j++) {
+              if (lockHivebot1Matches[j]) {
+                lockHivebot.push(lockHivebot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const lockHivebot2Matches = str.match(lockHivebot2Regexp);
+        // console.log(lockHivebot2Matches);  //测试
+        if (lockHivebot2Matches) {
+          const lockHivebot2MatchesLength = lockHivebot2Matches.length;
+          // console.log("lockHivebot2MatchesLength : " + lockHivebot2MatchesLength);  //测试
+          if (lockHivebot2MatchesLength > 0) {
+            for (let j = 0; j < lockHivebot2MatchesLength; j++) {
+              if (lockHivebot2Matches[j]) {
+                lockHivebot.push(lockHivebot2Matches[j]);
               }
             }
           }

@@ -50,6 +50,9 @@ npm run deploy-paniang
 npm run build-zyxfiles
 npm run deploy-zyxfiles
 
+npm run build-lockhive
+npm run deploy-lockhive
+
 npm run build-qqfilef
 npm run deploy-qqfilef
 

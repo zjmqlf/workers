@@ -721,6 +721,7 @@ export class WebSocketServer extends DurableObject {
           this.sendLog("getMessage", this.chatArray[this.chatId].name + " : chat已不存在了", null, true);
           await this.getChat(1);
           await this.updateClient(1);
+          this.offsetId = 0;
           await this.getConfig(1);
         } else {
           //console.log(this.endChat + " : 超过最大chat了");  //测试
@@ -1581,6 +1582,7 @@ export class WebSocketServer extends DurableObject {
     if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
       await this.getChat(1);
       await this.updateClient(1);
+      this.offsetId = 0;
       await this.getConfig(1);
       if (this.fromPeer) {
         if (this.chatId != this.lastChat) {

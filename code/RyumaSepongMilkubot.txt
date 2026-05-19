@@ -99,5 +99,7 @@
   "RyumaSepongMilku_bot_d:Dnwo98cgbPRF7fRzqrAO26vPXgtk1YrT",
   "RyumaSepongMilku_bot_p:XgsgDm5BlNUm8LoI8InxbhzndjU8uq8g",
   "RyumaSepongMilku_bot_p:55SB7qjeyxSa0duxAj8lY40Be8ZLWZEl",
-  "RyumaSepongMilku_bot_v:U4F91tkfe9QCWgu9yehuaI87El5fC5S7"
+  "RyumaSepongMilku_bot_v:U4F91tkfe9QCWgu9yehuaI87El5fC5S7",
+  "RyumaSepongMilku_bot_v:fTZ4oTwYsnjRzdtgRa0cpyQI9cOX0J2d",
+  "RyumaSepongMilku_bot_v:qtCJYVYkGcWRJTEbYmw61CHT3Sw6Jcc5"
 ]

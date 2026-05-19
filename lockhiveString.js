@@ -1,4 +1,4 @@
-[
+export const codeString = [
   "LH_tUmstgD8jzcDtAkD",
   "LH_4tRxhWJ9nSmhVcys",
   "LH_q4Hu9PkA9R70E8z4",
@@ -1851,4 +1851,4 @@
   "LH_Iq9HoOzFUJAZkSsO",
   "LH_Z2sjk8Oya3gy8ojM",
   "LH_wJGiN6qZ9nHutbOM"
-]
+];

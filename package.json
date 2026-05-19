@@ -25,6 +25,8 @@
     "deploy-paniang": "wrangler deploy -c ./wrangler-paniang.jsonc",
     "build-zyxfiles": "wrangler deploy -c ./wrangler-zyxfiles.jsonc --dry-run --outdir=./bot/dist",
     "deploy-zyxfiles": "wrangler deploy -c ./wrangler-zyxfiles.jsonc",
+    "build-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc",
     "build-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc --dry-run --outdir=./bot/dist",
     "deploy-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc",
     "build-qqfilef": "wrangler deploy -c ./wrangler-qqfilef.jsonc --dry-run --outdir=./bot/dist",

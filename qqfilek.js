@@ -859,6 +859,13 @@ export class WebSocketServer extends DurableObject {
                       //console.log("(" + this.currentStep + ") 文件获取完毕");
                       this.sendForward("nextStep", "文件获取完毕", "", "update", false);
                     }
+                  } else if (message === "文件码解析失败") {
+                    if (this.queue === true) {
+                      this.queue = false;
+                      await this.ctx.storage.put("queue", false);
+                      //console.log("(" + this.currentStep + ") 文件码解析失败");
+                      this.sendForward("nextStep", "文件码解析失败", "", "update", true);
+                    }
                   }
                 }
               }
@@ -1180,6 +1187,13 @@ export class WebSocketServer extends DurableObject {
                         await this.ctx.storage.put("queue", false);
                         //console.log("(" + this.currentStep + ") 文件获取完毕");
                         this.sendForward("start", "文件获取完毕", "", "update", false);
+                      }
+                    } else if (message === "文件码解析失败") {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") 文件码解析失败");
+                        this.sendForward("start", "文件码解析失败", "", "update", true);
                       }
                     }
                   }

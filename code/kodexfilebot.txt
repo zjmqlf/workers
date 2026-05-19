@@ -61,5 +61,6 @@
   "kodexfilebot_col:2XCAWuJkF25DqR0GEplecBItpN9g86IO",
   "kodexfilebot_col:KNB4ZLQOaB2ajZrR2vvolhSJoaZitUQs",
   "kodexfilebot_p:QBFm1bQE3xzysW7gdOFCq2UXeRWIjZDQ",
-  "kodexfilebot_p:gQUbglN7zcuoF7rToCcxNz2lwIzKOY8R"
+  "kodexfilebot_p:gQUbglN7zcuoF7rToCcxNz2lwIzKOY8R",
+  "kodexfilebot_p:r8L7eUUO5XGm9ErTiqacF4ZtIlHMWGlH"
 ]

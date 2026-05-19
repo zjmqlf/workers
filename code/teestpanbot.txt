@@ -14,5 +14,10 @@
   "@Teestpanbot:_4P_3W7smwhrjJf2",
   "@Teestpanbot:_2P_T3wIdxKQuvEi",
   "@Teestpanbot:_2P_1V_evLL9XHQDOYL",
-  "@Teestpanbot:_1P_W3IrQj3Ajxgn"
+  "@Teestpanbot:_1P_W3IrQj3Ajxgn",
+  "@Teestpanbot:_2P_Wadi4OycWkTH",
+  "@Teestpanbot:_10V_0ubeKNB517ua",
+  "@Teestpanbot:_1V_BUQWd0aFk8ge",
+  "@Teestpanbot:_2P_1kTtGxUMwjbI",
+  "@Teestpanbot:_1P_ulKS2N8T4vo9"
 ]
