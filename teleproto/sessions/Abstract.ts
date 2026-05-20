@@ -12,9 +12,9 @@ export abstract class Session {
     abstract load(): Promise<void>;
     abstract setAuthKey(authKey?: AuthKey, dcId?: number): void;
     abstract getAuthKey(dcId?: number): AuthKey | undefined;
-    abstract getInputEntity(key: EntityLike): Api.TypeInputPeer;
+    abstract getInputEntity(key: EntityLike): Api.TypeInputPeer | Promise<Api.TypeInputPeer>;
     abstract close(): void;
     abstract save(): void;
-    abstract delete(): void;
+    abstract delete(): void | Promise<void>;
     abstract processEntities(tlo: any): void;
 }

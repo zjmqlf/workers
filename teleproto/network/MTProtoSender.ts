@@ -42,7 +42,6 @@ interface DEFAULT_OPTIONS {
     client: TelegramClient;
     onConnectionBreak?: CallableFunction;
     securityChecks: boolean;
-    _exportedSenderPromises: Map<number, Promise<MTProtoSender>>;
 }
 
 export class MTProtoSender {
@@ -102,7 +101,6 @@ export class MTProtoSender {
     private _cancelSend: boolean;
     private _abortController: AbortController;
     private _finishedConnecting: boolean;
-    private _exportedSenderPromises = new Map<number, Promise<MTProtoSender>>();
 
     constructor(authKey: undefined | AuthKey, opts: DEFAULT_OPTIONS) {
         const args = {
@@ -130,7 +128,6 @@ export class MTProtoSender {
         this._onConnectionBreak = args.onConnectionBreak;
         this._securityChecks = args.securityChecks;
         this._connectMutex = new Mutex();
-        this._exportedSenderPromises = args._exportedSenderPromises;
         this.userDisconnected = false;
         this.isConnecting = false;
         this._authenticated = false;
@@ -779,22 +776,6 @@ export class MTProtoSender {
         if (this._userConnected && !this.isReconnecting) {
             this.isReconnecting = true;
             this._currentRetries++;
-            if (this._isMainSender) {
-                this._log.debug("Reconnecting all senders");
-                for (const promise of this._exportedSenderPromises.values()) {
-                    promise
-                        .then((sender) => {
-                            if (sender && !sender._isMainSender) {
-                                sender.reconnect();
-                            }
-                        })
-                        .catch((error) => {
-                            this._log.warn(
-                                "Error getting sender to reconnect to"
-                            );
-                        });
-                }
-            }
             sleep(1000).then(() => {
                 this._log.info("Started reconnecting");
                 this._reconnect();

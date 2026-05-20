@@ -15,6 +15,7 @@ export class MemorySession extends Session {
     protected _entities: Map<string, any>;
     protected _updateStates: {};
     protected _authKey?: AuthKey;
+    protected _dcAuthKeys: Map<number, AuthKey> = new Map();
 
     constructor() {
         super();
@@ -62,19 +63,22 @@ export class MemorySession extends Session {
     }
 
     getAuthKey(dcId?: number) {
-        if (dcId && dcId !== this.dcId) {
-            return undefined;
+        if (dcId === undefined || dcId === this.dcId) {
+            return this.authKey;
         }
-
-        return this.authKey;
+        return this._dcAuthKeys.get(dcId);
     }
 
     setAuthKey(authKey?: AuthKey, dcId?: number) {
-        if (dcId && dcId !== this.dcId) {
-            return undefined;
+        if (dcId === undefined || dcId === this.dcId) {
+            this.authKey = authKey;
+            return;
         }
-
-        this.authKey = authKey;
+        if (authKey) {
+            this._dcAuthKeys.set(dcId, authKey);
+        } else {
+            this._dcAuthKeys.delete(dcId);
+        }
     }
 
     close() {}
@@ -83,7 +87,15 @@ export class MemorySession extends Session {
 
     async load() {}
 
-    delete() {}
+    delete() {
+        this._authKey = undefined;
+        this._dcId = 0;
+        this._serverAddress = undefined;
+        this._port = undefined;
+        this._dcAuthKeys.clear();
+        this._entities.clear();
+        this._updateStates = {};
+    }
 
     _entityValuesToRow(
         id: bigInt.BigInteger | string,

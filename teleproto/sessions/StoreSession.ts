@@ -46,6 +46,36 @@ export class StoreSession extends MemorySession {
         if (serverAddress) {
             this._serverAddress = serverAddress;
         }
+        const testServers = this.store.get(this.sessionName + "testServers");
+        if (testServers != null) {
+            super.testServers = !!testServers;
+        }
+        const dcKeys = this.store.get(this.sessionName + "dcAuthKeys");
+        if (dcKeys && typeof dcKeys === "object") {
+            for (const [k, v] of Object.entries(dcKeys)) {
+                const id = Number(k);
+                if (!Number.isFinite(id) || !v || typeof v !== "object") continue;
+                let buf: Buffer | undefined;
+                if (Buffer.isBuffer(v)) buf = v as Buffer;
+                else if ("data" in (v as any)) buf = Buffer.from((v as any).data);
+                if (!buf) continue;
+                const key = new AuthKey();
+                await key.setKey(buf);
+                this._dcAuthKeys.set(id, key);
+            }
+        }
+    }
+
+    setAuthKey(authKey?: AuthKey, dcId?: number) {
+        super.setAuthKey(authKey, dcId);
+        if (dcId !== undefined && dcId !== this._dcId) {
+            const snapshot: Record<string, Buffer | undefined> = {};
+            for (const [id, k] of this._dcAuthKeys) {
+                const raw = k.getKey();
+                if (raw) snapshot[String(id)] = raw;
+            }
+            this.store.set(this.sessionName + "dcAuthKeys", snapshot);
+        }
     }
 
     setDC(dcId: number, serverAddress: string, port: number) {
@@ -55,6 +85,15 @@ export class StoreSession extends MemorySession {
         super.setDC(dcId, serverAddress, port);
     }
 
+    set testServers(value: boolean) {
+        super.testServers = value;
+        this.store.set(this.sessionName + "testServers", value);
+    }
+
+    get testServers() {
+        return super.testServers;
+    }
+
     set authKey(value: AuthKey | undefined) {
         this._authKey = value;
         this.store.set(this.sessionName + "authKey", value?.getKey());
@@ -62,6 +101,11 @@ export class StoreSession extends MemorySession {
 
     get authKey() {
         return this._authKey;
+    }
+
+    delete() {
+        this.store.clearAll();
+        super.delete();
     }
 
     processEntities(tlo: any) {

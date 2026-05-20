@@ -140,7 +140,6 @@ export class TelegramClient extends TelegramBaseClient {
                 client: this,
                 securityChecks: this._securityChecks,
                 autoReconnectCallback: this._handleReconnect.bind(this),
-                _exportedSenderPromises: this._exportedSenderPromises,
                 reconnectRetries: this._reconnectRetries,
             });
         }
@@ -178,6 +177,8 @@ export class TelegramClient extends TelegramBaseClient {
         this.session.setAuthKey(undefined);
         this.session.save();
         this._isSwitchingDc = true;
+        await this._filePool.purge();
+        await this._apiSenderPool.purge();
         await this._disconnect();
         this._sender = undefined;
         return await this.connect();
@@ -266,10 +267,6 @@ export class TelegramClient extends TelegramBaseClient {
         const smallLimit = this._appConfig?.small_queue_max_active_operations_count ?? 4;
         const largeLimit = this._appConfig?.large_queue_max_active_operations_count ?? 8;
         return fileSize > 20 * 1024 * 1024 ? largeLimit : smallLimit;
-    }
-
-    _removeSender(dcId: number) {
-        delete this._borrowedSenderPromises[dcId];
     }
 
     _getResponseMessage(req: any, result: any, inputChat: any) {

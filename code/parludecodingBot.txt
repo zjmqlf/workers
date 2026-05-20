@@ -1,3 +1,4 @@
 [
-  "ParludecodingBot_1p0v0d_YsnCjgA9mbfPHlCw"
+  "ParludecodingBot_1p0v0d_YsnCjgA9mbfPHlCw",
+  "ParludecodingBot_4p27v0d_1enyFy7oE6UlJHKQ"
 ]
