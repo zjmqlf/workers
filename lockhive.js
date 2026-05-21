@@ -11,7 +11,7 @@ export class WebSocketServer extends DurableObject {
   currentStep = 0;
   compress = false;
   batch = false;
-  codeIndex = 0;
+  codeIndex = -1;
   codes = codeString.slice();
   codeLength = 0;
   client = null;
@@ -91,7 +91,7 @@ export class WebSocketServer extends DurableObject {
       } else {
         this.compress = false;
         this.batch = false;
-        this.codeIndex = await this.ctx.storage.get("codeIndex") || 0;
+        this.codeIndex = await this.ctx.storage.get("codeIndex") || -1;
         this.endCode = 0;
         this.limit = 100;
         this.offsetId = await this.ctx.storage.get("offsetId") || 0;
@@ -127,6 +127,12 @@ export class WebSocketServer extends DurableObject {
         this.fileIdArray = [];
       } else {
         this.fileIdArray = JSON.parse(temp);
+        const length = this.fileIdArray.length;
+        for (let i = 0; i < length; i++) {
+          if (this.fileIdArray[i]) {
+            this.fileIdArray[i] = bigInt(this.fileIdArray[i]);
+          }
+        }
       }
     }
   }
@@ -292,7 +298,7 @@ export class WebSocketServer extends DurableObject {
   async open(tryCount) {
     const apiId = 1334621;
     const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7gn5wG+YL7sXsWHDBKraoOeFFd/txTBSsgrT6pJkiV5hJNxPQqxHdflP31Xs4IsnpDmF0ipInV0LGpQo9hbV3sObZWxSVRURzDHOpf58pFn4N73s+10De8RgjA8xcCbqIABbgbD5CvHtU5VKTcaDM/FvJxJHD6lf89/2nTnHvb5UK8MdHd2FlznhfMdo3WHyyhk6PKzk13eBE51w+3DXys06WC8l9DqriJBNY3WyjNTKb7fShTlnOjufcnoST20Lt4kwpWieIeJrwwMF/iXOcYLHuraSidyC+nF/Js9UfBG271+Zd9+KLkpNfT2nUwAwScWAKtq1x1nfjLbSOiK4/yA==";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE4MwG7oligS1notwPmRnfOEP0gE0Ur5OVkjxgX/Q4AVtEBkMGMWLBngvxdLAUYTuhkKUMOzFXfUxvJTswDZ5WijFmtwvimz1y89fXw23vJpQgtPwWyTd0pDFskjfQlWczvxFsbwDBZQxLGgtEwUOQLsHOU+7Br7gutxJNjJRi228Kn7I6G5BAUG7IuR9enbJUF/YSlvpgnOVxd4Isb0a2b5C+ky09XPADmTnQDJeEEjo2+kHCVttaLs9ajphPS1XXO1pXuYB3zIsXSSPBqP3IZJEigCe4Vi4DDQgtJ6+HrPFxNtOWIztu2C5DFI0QgXt5oXTsDGIqdoLv8TJvtOW9IzP/o8A==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
         timeout: 5,
@@ -1251,8 +1257,8 @@ export class WebSocketServer extends DurableObject {
         "date": new Date().getTime(),
       });
     } else if (command === "code") {
-      this.codeIndex = 0;
-      await this.ctx.storage.put("codeIndex", 0);
+      this.codeIndex = -1;
+      await this.ctx.storage.put("codeIndex", -1);
       //console.log("重置code序号成功");
       this.broadcast({
         "operate": "resetCode",

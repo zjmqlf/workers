@@ -11,7 +11,7 @@ export class WebSocketServer extends DurableObject {
   currentStep = 0;
   compress = false;
   batch = false;
-  codeIndex = 0;
+  codeIndex = -1;
   codes = codeString.slice();
   codeLength = 0;
   client = null;
@@ -91,7 +91,7 @@ export class WebSocketServer extends DurableObject {
       } else {
         this.compress = false;
         this.batch = false;
-        this.codeIndex = await this.ctx.storage.get("codeIndex") || 0;
+        this.codeIndex = await this.ctx.storage.get("codeIndex") || -1;
         this.endCode = 0;
         this.limit = 100;
         this.offsetId = await this.ctx.storage.get("offsetId") || 0;
@@ -129,6 +129,12 @@ export class WebSocketServer extends DurableObject {
         this.fileIdArray = [];
       } else {
         this.fileIdArray = JSON.parse(temp);
+        const length = this.fileIdArray.length;
+        for (let i = 0; i < length; i++) {
+          if (this.fileIdArray[i]) {
+            this.fileIdArray[i] = bigInt(this.fileIdArray[i]);
+          }
+        }
       }
     }
   }
@@ -1258,8 +1264,8 @@ export class WebSocketServer extends DurableObject {
         "date": new Date().getTime(),
       });
     } else if (command === "code") {
-      this.codeIndex = 0;
-      await this.ctx.storage.put("codeIndex", 0);
+      this.codeIndex = -1;
+      await this.ctx.storage.put("codeIndex", -1);
       //console.log("重置code序号成功");
       this.broadcast({
         "operate": "resetCode",

@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "qqfilek",
-  "main": "qqfilek.js",
+  "name": "qqfile10",
+  "main": "qqfile10.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,7 +13,7 @@
   },
   "routes": [
     {
-      "pattern": "qqfilek.19422.xyz/*",
+      "pattern": "qqfile10.19422.xyz/*",
       "zone_name": "19422.xyz"
     }
   ],

@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./qqfilekString";
+import { codeString } from "./qqfile10String";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -11,7 +11,7 @@ export class WebSocketServer extends DurableObject {
   currentStep = 0;
   compress = false;
   batch = false;
-  codeIndex = 0;
+  codeIndex = -1;
   codes = codeString.slice();
   codeLength = 0;
   client = null;
@@ -91,7 +91,7 @@ export class WebSocketServer extends DurableObject {
       } else {
         this.compress = false;
         this.batch = false;
-        this.codeIndex = await this.ctx.storage.get("codeIndex") || 0;
+        this.codeIndex = await this.ctx.storage.get("codeIndex") || -1;
         this.endCode = 0;
         this.limit = 100;
         this.offsetId = await this.ctx.storage.get("offsetId") || 0;
@@ -129,6 +129,12 @@ export class WebSocketServer extends DurableObject {
         this.fileIdArray = [];
       } else {
         this.fileIdArray = JSON.parse(temp);
+        const length = this.fileIdArray.length;
+        for (let i = 0; i < length; i++) {
+          if (this.fileIdArray[i]) {
+            this.fileIdArray[i] = bigInt(this.fileIdArray[i]);
+          }
+        }
       }
     }
   }
@@ -832,7 +838,7 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
-                  if (message.split(":")[0] === "QQfilek_bot") {
+                  if (message.split(":")[0] === "QQfile10_bot") {
                     // await this.ctx.storage.put(message.split("_")[0], 1);
                     await this.ctx.storage.put(message, 1);
                     this.getCount(message, 2);
@@ -981,8 +987,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8466548874"),
-              accessHash: bigInt("6430572177113500135"),
+              userId: bigInt("7675898870"),
+              accessHash: bigInt("-2908327700887169719"),
             }),
           ],
         })
@@ -1161,7 +1167,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
-                    if (message.split(":")[0] === "QQfilek_bot") {
+                    if (message.split(":")[0] === "QQfile10_bot") {
                       // await this.ctx.storage.put(message.split("_")[0], 1);
                       await this.ctx.storage.put(message, 1);
                       this.getCount(message, 2);
@@ -1370,8 +1376,8 @@ export class WebSocketServer extends DurableObject {
         "date": new Date().getTime(),
       });
     } else if (command === "code") {
-      this.codeIndex = 0;
-      await this.ctx.storage.put("codeIndex", 0);
+      this.codeIndex = -1;
+      await this.ctx.storage.put("codeIndex", -1);
       //console.log("重置code序号成功");
       this.broadcast({
         "operate": "resetCode",
@@ -1423,7 +1429,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("qqfilek");
+      const id = env.WEBSOCKET_SERVER.idFromName("qqfile10");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }
