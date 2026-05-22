@@ -55,7 +55,7 @@ const App = () => {
   const errorCount = useRef(0);
   const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
-  const gridStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
+  const gridStyle = useMemo(() => ({ width: "100%", height: "80%" }), []);
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
@@ -1022,7 +1022,7 @@ const App = () => {
             paginationPageSizeSelector={paginationPageSizeSelector}
           />
         </div>
-        <div style={{ width: "100%" }}>
+        <div style={{ width: "100%", height: "5%" }}>
           <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
           <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>
           <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
@@ -1044,7 +1044,7 @@ const App = () => {
           <button onClick={handlerSendBtnClick} disabled={isSendBtnDisabled}>发送</button>
         </div>
         <div style={{ width: "100%", height: "20%", minHeight: 0, flexGrow: 1, overflow: "auto" }}>
-          <h4>日志</h4>
+          {/* <h4>日志</h4> */}
             <ul>
               {logData.map((item) => (
                 item.error ? 

@@ -234,5 +234,7 @@
   "paniang_bot_v:dfgWRrYdabT7JVxK6HV43SDLiIIX4NvN",
   "paniang_bot_v:ORb3RUmo1xoBF3sYtKPbNwJDLzGymwYX",
   "paniang_bot_v:dOMa5u2HYSKRXyoKIytiJKIbrwi0zeNN",
-  "paniang_bot_v:CLNxNVzYysTOtn0HL4Ehiw4MMm83xgWI"
+  "paniang_bot_v:CLNxNVzYysTOtn0HL4Ehiw4MMm83xgWI",
+  "paniang_bot_col:UxnDalRBda98oo49j0ppWgiMCNKPYGSS",
+  "paniang_bot_col:bWGawPHmEqwzJy9f62StAgTai8IHi3rU"
 ]

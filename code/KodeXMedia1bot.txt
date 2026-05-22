@@ -363,5 +363,6 @@
   "KodeXMedia1bot_v:739qKHcRTZ0IPisdud34zsqCRgqqyGFU",
   "KodeXMedia1bot_v:fx1CwtOoaTkQ8rOf7PyxpJxidZtX7DBY",
   "KodeXMedia1bot_v:ZJbSWTBuWkiN6Ydzr5tb8Mk5CBfas8ol",
-  "KodeXMedia1bot_col:2RGU6xhFSOqZiwQFBuE8fcTLxi7HzrjQ"
+  "KodeXMedia1bot_col:2RGU6xhFSOqZiwQFBuE8fcTLxi7HzrjQ",
+  "KodeXMedia1bot_p:hgG4FYUUm8Vf0VNJygvVhiCqIm7ieQCA"
 ]

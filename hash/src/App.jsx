@@ -55,7 +55,7 @@ const App = () => {
   const errorCount = useRef(0);
   const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
-  const gridStyle = useMemo(() => ({ width: "100%", height: "70%" }), []);
+  const gridStyle = useMemo(() => ({ width: "100%", height: "80%" }), []);
   const [documentValue, setDocumentValue] = useState(2);
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
@@ -1389,7 +1389,7 @@ const App = () => {
           <input type="text" value={inputValue} onChange={inputHandleChange} />
           <button onClick={handlerSendBtnClick} disabled={isSendBtnDisabled}>发送</button>
         </div>
-        <div style={{ width: "100%", height: "30%", minHeight: 0, flexGrow: 1, overflow: "auto" }}>
+        <div style={{ width: "100%", height: "20%", minHeight: 0, flexGrow: 1, overflow: "auto" }}>
           {/* <h4>日志</h4> */}
             <ul>
               {logData.map((item) => (

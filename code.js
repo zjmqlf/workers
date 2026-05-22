@@ -24,6 +24,7 @@ const LunindiaCipokSuprettobot = [];
 const PaijoKontolBurikbot = [];
 const QQfilebot = [];
 const QQfilefbot = [];
+const QQfile10bot = [];
 const REDDFILEBOT = [];
 const parludecodingBot = [];
 const teestpanbot = [];
@@ -1539,7 +1540,7 @@ try {
         //   if (QQfile10botMatchesLength > 0) {
         //     for (let j = 0; j < QQfile10botMatchesLength; j++) {
         //       if (QQfile10botMatches[j]) {
-        //         QQfilebot.push(QQfile10botMatches[j]);
+        //         QQfile10bot.push(QQfile10botMatches[j]);
         //       }
         //     }
         //   }
@@ -1553,7 +1554,7 @@ try {
           if (QQfile10bot1MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot1MatchesLength; j++) {
               if (QQfile10bot1Matches[j]) {
-                QQfilebot.push(QQfile10bot1Matches[j]);
+                QQfile10bot.push(QQfile10bot1Matches[j]);
               }
             }
           }
@@ -1567,7 +1568,7 @@ try {
           if (QQfile10bot2MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot2MatchesLength; j++) {
               if (QQfile10bot2Matches[j]) {
-                QQfilebot.push(QQfile10bot2Matches[j]);
+                QQfile10bot.push(QQfile10bot2Matches[j]);
               }
             }
           }
@@ -1581,7 +1582,7 @@ try {
           if (QQfile10bot3MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot3MatchesLength; j++) {
               if (QQfile10bot3Matches[j]) {
-                QQfilebot.push(QQfile10bot3Matches[j]);
+                QQfile10bot.push(QQfile10bot3Matches[j]);
               }
             }
           }
@@ -1595,7 +1596,7 @@ try {
           if (QQfile10bot4MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot4MatchesLength; j++) {
               if (QQfile10bot4Matches[j]) {
-                QQfilebot.push(QQfile10bot4Matches[j]);
+                QQfile10bot.push(QQfile10bot4Matches[j]);
               }
             }
           }
@@ -1609,7 +1610,7 @@ try {
           if (QQfile10bot5MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot5MatchesLength; j++) {
               if (QQfile10bot5Matches[j]) {
-                QQfilebot.push(QQfile10bot5Matches[j]);
+                QQfile10bot.push(QQfile10bot5Matches[j]);
               }
             }
           }
@@ -1623,7 +1624,7 @@ try {
           if (QQfile10bot6MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot6MatchesLength; j++) {
               if (QQfile10bot6Matches[j]) {
-                QQfilebot.push(QQfile10bot6Matches[j]);
+                QQfile10bot.push(QQfile10bot6Matches[j]);
               }
             }
           }
@@ -1637,7 +1638,7 @@ try {
           if (QQfile10bot7MatchesLength > 0) {
             for (let j = 0; j < QQfile10bot7MatchesLength; j++) {
               if (QQfile10bot7Matches[j]) {
-                QQfilebot.push(QQfile10bot7Matches[j]);
+                QQfile10bot.push(QQfile10bot7Matches[j]);
               }
             }
           }
@@ -1651,7 +1652,7 @@ try {
         //   if (QQfilefbotMatchesLength > 0) {
         //     for (let j = 0; j < QQfilefbotMatchesLength; j++) {
         //       if (QQfilefbotMatches[j]) {
-        //         QQfilebot.push(QQfilefbotMatches[j]);
+        //         QQfilefbot.push(QQfilefbotMatches[j]);
         //       }
         //     }
         //   }
@@ -2657,6 +2658,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/QQfilefbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += QQfile10bot.length;
+  console.log("QQfile10bot : " + QQfile10bot.length);  //测试
+  if (QQfile10bot.length > 0) {
+    const data = fs.readFileSync("./code/QQfile10bot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...QQfile10bot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/QQfile10bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }

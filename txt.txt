@@ -17,8 +17,8 @@ npm run deploy-forward
 npm run build-forward1
 npm run deploy-forward1
 
-npm run build-qqfile
-npm run deploy-qqfile
+npm run build-qqfile10
+npm run deploy-qqfile10
 
 npm run build-test
 npm run deploy-test
@@ -52,6 +52,9 @@ npm run deploy-zyxfiles
 
 npm run build-lockhive
 npm run deploy-lockhive
+
+npm run build-qqfile
+npm run deploy-qqfile
 
 npm run build-qqfilef
 npm run deploy-qqfilef
