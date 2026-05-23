@@ -341,5 +341,6 @@
   "DEANIgniteNations_bot_v:YBvb0rb2LVLeoDtBJle9VgcEdGT1EGWX",
   "DEANIgniteNations_bot_v:G3WpNaWX4ZbeZDQBEUDGhpqBOngKFmW3",
   "DEANIgniteNations_bot_v:GryGT8QjQhaoh9NgA4PsQgFLQ1gCoNfx",
-  "DEANIgniteNations_bot_v:dfXnxHCLSbEjmXsJek2WpOMVUBT8CfWq"
+  "DEANIgniteNations_bot_v:dfXnxHCLSbEjmXsJek2WpOMVUBT8CfWq",
+  "DEANIgniteNations_bot_p:APitKfNhT326nBIYKsgzw6TmFN8PZP5S"
 ]

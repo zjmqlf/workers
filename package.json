@@ -29,6 +29,8 @@
     "deploy-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc",
     "build-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc --dry-run --outdir=./bot/dist",
     "deploy-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc",
+    "build-qqfile10": "wrangler deploy -c ./wrangler-qqfile10.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-qqfile10": "wrangler deploy -c ./wrangler-qqfile10.jsonc",
     "build-qqfilef": "wrangler deploy -c ./wrangler-qqfilef.jsonc --dry-run --outdir=./bot/dist",
     "deploy-qqfilef": "wrangler deploy -c ./wrangler-qqfilef.jsonc",
     "build-pansou": "wrangler deploy -c ./wrangler-pansou.jsonc --dry-run --outdir=./pansou/dist",

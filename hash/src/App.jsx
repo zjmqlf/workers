@@ -98,7 +98,7 @@ const App = () => {
     }
   }, []);
 
-  const renderTime = useCallback((timestamp ) => {
+  const renderTime = useCallback((timestamp) => {
     if (timestamp && timestamp > 0) {
       const dateTime = new Date(timestamp);
       let hour = dateTime.getHours();

@@ -102,5 +102,8 @@
   "wSiBg8l2AyCPjj3j7qVq97mZp2QntNmCfrnaLxyX",
   "no2HALTXvoZN9SKDVluQFRxfPavaMEZQ4ASv7Spo",
   "P7mQyfqTo5N0dZBPP91yFBNZXcTLn13XPWMFmTkG",
-  "4wBfWLcCDk0DyD1GPrBBRh5PxkMye9lFDE1QbjuG"
+  "4wBfWLcCDk0DyD1GPrBBRh5PxkMye9lFDE1QbjuG",
+  "jgMsBsjbRIud9ZcgIaC35djLiSvBiTrQMvq56xtk",
+  "eYkxyh35Z7zKie3YEqgTusEJb9fZcdV6Ni1Xtjiv",
+  "ShXIp5S8VtE1GraPtMi2VA7stbOUzkSPDKrclR4T"
 ]
