@@ -13,8 +13,8 @@
   },
   "routes": [
     {
-      "pattern": "qqfile10.19422.xyz/*",
-      "zone_name": "19422.xyz"
+      "pattern": "qqfile10.19421.xyz/*",
+      "zone_name": "19421.xyz"
     }
   ],
   "preview_urls": false,
