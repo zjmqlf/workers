@@ -38,6 +38,7 @@ ModuleRegistry.registerModules([
   HighlightChangesModule,
   ValidationModule,
 ]);
+import { botString } from "./botString";
 
 const App = () => {
   let key = 0;
@@ -45,17 +46,6 @@ const App = () => {
   const pagination = true;
   const paginationPageSize = 50;
   const paginationPageSizeSelector = [50, 150, 200];
-  const options = {
-    "1": "qqfile10",
-    "2": "lockhive",
-    "3": "paniang",
-    "4": "zyxfiles",
-    "5": "kodexfiles2",
-    "6": "kodexmedia1",
-    "7": "deanignitenations",
-    "8": "ryumasepongmilku",
-    "9": "lunindiacipoksupretto",
-  };
   const lastId = useRef(-1);
   const lastRow = useRef(null);
   const ws = useRef(null);
@@ -67,7 +57,7 @@ const App = () => {
   const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ width: "65%", height: "95%" }), []);
-  const [selectedValue, setSelectedValue] = useState(0);
+  const [selectedValue, setSelectedValue] = useState("");
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
@@ -513,112 +503,121 @@ const App = () => {
  }, [addNewEvent, renderTime]);
 
   const collectWS = useCallback((command) => {
-    if (selectedValue > 0) {
-      const url = new URL(window.location);
-      url.protocol = "wss";
-      url.pathname = "/" + options[selectedValue];
-      ws.current = new WebSocket(url);
-      if (!ws.current) {
-        errorCount.current += 1;
-        if (errorCount.current === 10) {
-          waitTime.current = 300000;
+    if (selectedValue) {
+      if (botString[selectedValue]) {
+        const url = new URL(window.location);
+        url.protocol = "wss";
+        // url.pathname = "/ws?bot=" + botString[selectedValue];
+        url.pathname = "/ws?bot=" + selectedValue;
+        ws.current = new WebSocket(url);
+        if (!ws.current) {
+          errorCount.current += 1;
+          if (errorCount.current === 10) {
+            waitTime.current = 300000;
+          }
+          throw new Error("  >>> 连续" + errorCount.current + "次连接远程websocket失败");
         }
-        throw new Error("  >>> 连续" + errorCount.current + "次连接远程websocket失败");
-      }
 
-      ws.current.addEventListener("open", () => {
-        stop.current = false;
-        //console.log("连接远程websocket成功，准备send");  //测试
-        addNewEvent({
-          "message": renderTime(Date.now()) + "  >>> 连接远程websocket成功，准备send",
-        });
-        if (errorCount.current > 0) {
-          errorCount.current = 0;
-          if (waitTime.current !== 30000) {
-            waitTime.current = 30000;
-          }
-        }
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        window.addEventListener('popstate', handleBeforeUnload);
-        if (lastRow.current) {
-          gridRef.current.api.redrawRows({
-            rowNodes: [lastRow.current],
-          });
-        }
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-          try {
-            ws.current.send(command);
-            setTime();
-          } catch (e) {
-            console.log(e);  //测试
-            addNewEvent({
-              "error": true,
-              "message": renderTime(Date.now()) + "  >>> send失败",
-            });
-            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-              ws.current.close();
-              // handlerClose();
-            }
-            // waitReconnect(JSON.stringify({
-            //   "command": "start",
-            // }), waitTime.current);
-          }
-        } else {
-          //console.log(command + "失败");  //测试
+        ws.current.addEventListener("open", () => {
+          stop.current = false;
+          //console.log("连接远程websocket成功，准备send");  //测试
           addNewEvent({
-            "error": true,
-            "message": renderTime(Date.now()) + "  >>> " + command + "失败",
+            "message": renderTime(Date.now()) + "  >>> 连接远程websocket成功，准备send",
           });
-        }
-      })
-
-      ws.current.addEventListener("message", ({ data }) => {
-        if (data) {
-          let message = null;
-          try {
-            message = JSON.parse(data);
-          } catch (e) {
-            //console.log("解析JSON失败");  //测试
-            addNewEvent({
-              "error": true,
-              "message": renderTime(Date.now()) + "  >>> 解析JSON失败",
+          if (errorCount.current > 0) {
+            errorCount.current = 0;
+            if (waitTime.current !== 30000) {
+              waitTime.current = 30000;
+            }
+          }
+          window.addEventListener('beforeunload', handleBeforeUnload);
+          window.addEventListener('popstate', handleBeforeUnload);
+          if (lastRow.current) {
+            gridRef.current.api.redrawRows({
+              rowNodes: [lastRow.current],
             });
           }
-          if (message) {
-            const length = message.length;
-            if (length && length > 0) {
-              for (let index = 0; index < length; index++) {
-                parseMessage(message[index]);
+          if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            try {
+              ws.current.send(command);
+              setTime();
+            } catch (e) {
+              console.log(e);  //测试
+              addNewEvent({
+                "error": true,
+                "message": renderTime(Date.now()) + "  >>> send失败",
+              });
+              if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                ws.current.close();
+                // handlerClose();
               }
-            } else {
-              parseMessage(message);
+              // waitReconnect(JSON.stringify({
+              //   "command": "start",
+              // }), waitTime.current);
             }
           } else {
-            //console.log("message错误");  //测试
+            //console.log(command + "失败");  //测试
             addNewEvent({
               "error": true,
-              "message": renderTime(Date.now()) + "  >>> message错误",
+              "message": renderTime(Date.now()) + "  >>> " + command + "失败",
             });
           }
-        } else {
-          console.log("消息为空");
-          addNewEvent({
-            "error": true,
-            "message": renderTime(Date.now()) + "  >>> 消息为空",
-          });
-        }
-        setTime();
-      })
+        })
 
-      ws.current.addEventListener("close", () => {
-        handlerClose();
-        if (over.current === false) {
-          waitReconnect(JSON.stringify({
-            "command": "start",
-          }), waitTime.current);
-        }
-      })
+        ws.current.addEventListener("message", ({ data }) => {
+          if (data) {
+            let message = null;
+            try {
+              message = JSON.parse(data);
+            } catch (e) {
+              //console.log("解析JSON失败");  //测试
+              addNewEvent({
+                "error": true,
+                "message": renderTime(Date.now()) + "  >>> 解析JSON失败",
+              });
+            }
+            if (message) {
+              const length = message.length;
+              if (length && length > 0) {
+                for (let index = 0; index < length; index++) {
+                  parseMessage(message[index]);
+                }
+              } else {
+                parseMessage(message);
+              }
+            } else {
+              //console.log("message错误");  //测试
+              addNewEvent({
+                "error": true,
+                "message": renderTime(Date.now()) + "  >>> message错误",
+              });
+            }
+          } else {
+            console.log("消息为空");
+            addNewEvent({
+              "error": true,
+              "message": renderTime(Date.now()) + "  >>> 消息为空",
+            });
+          }
+          setTime();
+        })
 
+        ws.current.addEventListener("close", () => {
+          handlerClose();
+          if (over.current === false) {
+            waitReconnect(JSON.stringify({
+              "command": "start",
+            }), waitTime.current);
+          }
+        })
+
+      } else {
+        //console.log("找不到该bot");  //测试
+        addNewEvent({
+          "error": true,
+          "message": renderTime(Date.now()) + "  >>> 找不到该bot",
+        });
+      }
     } else {
       //console.log("没有选择bot");  //测试
       addNewEvent({
@@ -981,7 +980,7 @@ const App = () => {
           />
           <div style={{ width: "100%", height: "5%" }}>
             <select onChange={handlerSelectChange} value={selectedValue}>
-              {Object.entries(options).map((item) => <option value={item[0]}>{item[1]}</option>)}
+              {Object.entries(botString).map((item) => <option value={item[0]}>{item[1]}</option>)}
             </select>
             <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
             <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>

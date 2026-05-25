@@ -6,8 +6,48 @@
   "durable_objects": {
     "bindings": [
       {
-        "name": "WEBSOCKET_SERVER",
+        "name": "qqfile10_WebSocketServer",
+        "script_name": "qqfile10",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "lockhive_WebSocketServer",
+        "script_name": "lockhive",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "paniang_WebSocketServer",
         "script_name": "paniang",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "zyxfiles_WebSocketServer",
+        "script_name": "zyxfiles",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "kodexfiles2_WebSocketServer",
+        "script_name": "kodexfiles2",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "kodexmedia1_WebSocketServer",
+        "script_name": "kodexmedia1",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "deanignitenations_WebSocketServer",
+        "script_name": "deanignitenations",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "ryumasepongmilku_WebSocketServer",
+        "script_name": "ryumasepongmilku",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "lunindiacipoksupretto_WebSocketServer",
+        "script_name": "lunindiacipoksupretto",
         "class_name": "WebSocketServer"
       }
     ]
