@@ -53,12 +53,6 @@ npm run deploy-zyxfiles
 npm run build-lockhive
 npm run deploy-lockhive
 
-npm run build-qqfile
-npm run deploy-qqfile
-
-npm run build-qqfilef
-npm run deploy-qqfilef
-
 npm run build-kodexfile
 npm run deploy-kodexfile
 

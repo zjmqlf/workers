@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "page",
+  "compatibility_date": "2026-04-21",
+  "pages_build_output_dir": "./build",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WEBSOCKET_SERVER",
+        "script_name": "paniang",
+        "class_name": "WebSocketServer"
+      }
+    ]
+  }
+}
