@@ -57,7 +57,7 @@ export class SenderSlot {
             return this._connectPromise;
         }
         this.state = "connecting";
-        this._clearIdle();
+        // this._clearIdle();
         this._connectPromise = (async () => {
             try {
                 const sender = await this._opts.connect(this);
@@ -67,7 +67,7 @@ export class SenderSlot {
                 }
                 this._sender = sender;
                 this.state = "ready";
-                if (this._active === 0) this._armIdle();
+                // if (this._active === 0) this._armIdle();
                 return sender;
             } catch (err) {
                 if ((this.state as SenderSlotState) !== "dead") this.state = "idle";
@@ -81,12 +81,12 @@ export class SenderSlot {
 
     enter(): void {
         this._active++;
-        this._clearIdle();
+        // this._clearIdle();
     }
 
     leave(): void {
         if (this._active > 0) this._active--;
-        if (this._active === 0 && this.state === "ready") this._armIdle();
+        // if (this._active === 0 && this.state === "ready") this._armIdle();
     }
 
     onDeath(listener: (reason: SenderSlotDeathReason) => void): () => void {
@@ -101,7 +101,7 @@ export class SenderSlot {
     async markDead(reason: SenderSlotDeathReason): Promise<void> {
         if (this.state === "dead") return;
         this.state = "dead";
-        this._clearIdle();
+        // this._clearIdle();
         for (const listener of this._deathListeners) {
             try { listener(reason); } catch {}
         }
@@ -113,22 +113,22 @@ export class SenderSlot {
         }
     }
 
-    private _clearIdle(): void {
-        if (this._idleTimer) {
-            clearTimeout(this._idleTimer);
-            this._idleTimer = undefined;
-        }
-    }
+    // private _clearIdle(): void {
+    //     if (this._idleTimer) {
+    //         clearTimeout(this._idleTimer);
+    //         this._idleTimer = undefined;
+    //     }
+    // }
 
-    private _armIdle(): void {
-        if (this.state !== "ready") return;
-        this._clearIdle();
-        if (this._opts.idleTimeoutMs <= 0) return;
-        this._idleTimer = setTimeout(() => {
-            this._idleTimer = undefined;
-            this._idleTick();
-        }, this._opts.idleTimeoutMs);
-    }
+    // private _armIdle(): void {
+    //     if (this.state !== "ready") return;
+    //     this._clearIdle();
+    //     if (this._opts.idleTimeoutMs <= 0) return;
+    //     this._idleTimer = setTimeout(() => {
+    //         this._idleTimer = undefined;
+    //         this._idleTick();
+    //     }, this._opts.idleTimeoutMs);
+    // }
 
     private _idleTick(): void {
         if (this.state !== "ready" || this._active > 0) return;

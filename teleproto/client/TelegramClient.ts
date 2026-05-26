@@ -228,7 +228,7 @@ export class TelegramClient extends TelegramBaseClient {
         if (mediaCluster && candidates.some((DC) => DC.mediaOnly)) {
             candidates = candidates.filter((DC) => DC.mediaOnly);
         }
-        if (this._proxy && candidates.some((DC) => DC.static)) {
+        if (candidates.some((DC) => DC.static)) {
             candidates = candidates.filter((DC) => DC.static);
         }
         const chosen = candidates[0];

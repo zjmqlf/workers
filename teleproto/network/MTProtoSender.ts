@@ -261,7 +261,6 @@ export class MTProtoSender {
                 langCode: this._client._initRequest.langCode,
                 langPack: this._client._initRequest.langPack,
                 systemLangCode: this._client._initRequest.systemLangCode,
-                proxy: this._client._initRequest.proxy,
                 query: request,
             });
             request = new Api.InvokeWithLayer({

@@ -401,7 +401,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  getCount(text, type) {
+  getCount1(text, type) {
     if (type === 1) {
       let string = text.split("-");
       if (string.length === 2) {
@@ -444,6 +444,31 @@ export class WebSocketServer extends DurableObject {
           this.fileCount = parseInt(temp[0]);
           continue;
         }
+      }
+    }
+  }
+
+  getCount2(text) {
+    let string = text.slice(10);
+    string = string.split("_");
+    if (string.length === 4) {
+      let temp = string[0].split("p");
+      if (temp.length === 2) {
+        this.photoCount = parseInt(temp[0]);
+      } else {
+        this.photoCount = 0;
+      }
+      temp = string[1].split("v");
+      if (temp.length === 2) {
+        this.videoCount = parseInt(temp[0]);
+      } else {
+        this.videoCount = 0;
+      }
+      temp = string[2].split("d");
+      if (temp.length === 2) {
+        this.fileCount = parseInt(temp[0]);
+      } else {
+        this.fileCount = 0;
       }
     }
   }
@@ -709,7 +734,7 @@ export class WebSocketServer extends DurableObject {
       await this.close()
     } else {
       if (this.queue === true) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 8; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -791,7 +816,7 @@ export class WebSocketServer extends DurableObject {
                             );
                             //console.log("(" + this.currentStep + ") 继续推送");
                             this.sendLog("nextStep", "继续推送", null, false);
-                            await scheduler.wait(15000);
+                            await scheduler.wait(10000);
                             if (result && result.message) {
                               this.sendLog("nextStep", result.message , null, false);
                             }
@@ -842,13 +867,18 @@ export class WebSocketServer extends DurableObject {
                   if (string[0] === "QQfile_bot") {
                     // await this.ctx.storage.put(message.split("-")[0], 1);
                     await this.ctx.storage.put(message, 1);
-                    // this.getCount(message, 1);
+                    // this.getCount1(message, 1);
                     //console.log("(" + this.currentStep + ") 代码入库完毕");
                     this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                   } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot") {
                     // await this.ctx.storage.put(message.split("_")[0], 1);
                     await this.ctx.storage.put(message, 1);
-                    this.getCount(message, 2);
+                    this.getCount1(message, 2);
+                    //console.log("(" + this.currentStep + ") 代码入库完毕");
+                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                  } else if (message.substr(0, 10) === "newjmqbot_") {
+                    await this.ctx.storage.put(message, 1);
+                    this.getCount2(message);
                     //console.log("(" + this.currentStep + ") 代码入库完毕");
                     this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                   } else if (message.includes("您已被限制使用,限制期限为：") === true) {
@@ -994,8 +1024,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8694790746"),
-              accessHash: bigInt("6547503540036712460"),
+              userId: bigInt("8730325489"),
+              accessHash: bigInt("5466912263987380362"),
             }),
           ],
         })
@@ -1127,7 +1157,7 @@ export class WebSocketServer extends DurableObject {
                               );
                               //console.log("(" + this.currentStep + ") 继续推送");
                               this.sendLog("start", "继续推送", null, false);
-                              await scheduler.wait(15000);
+                              await scheduler.wait(10000);
                               if (result && result.message) {
                                 this.sendLog("start", result.message , null, false);
                               }
@@ -1178,13 +1208,18 @@ export class WebSocketServer extends DurableObject {
                     if (string[0] === "QQfile_bot") {
                       // await this.ctx.storage.put(message.split("-")[0], 1);
                       await this.ctx.storage.put(message, 1);
-                      // this.getCount(message, 1);
+                      // this.getCount1(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("start", "代码入库完毕", "", "add", false);
                     } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot") {
                       // await this.ctx.storage.put(message.split("_")[0], 1);
                       await this.ctx.storage.put(message, 1);
-                      this.getCount(message, 2);
+                      this.getCount1(message, 2);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("start", "代码入库完毕", "", "add", false);
+                    } else if (message.substr(0, 10) === "newjmqbot_") {
+                      await this.ctx.storage.put(message, 1);
+                      this.getCount2(message);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("start", "代码入库完毕", "", "add", false);
                     } else if (message.includes("您已被限制使用,限制期限为：") === true) {

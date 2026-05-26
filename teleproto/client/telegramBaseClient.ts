@@ -329,7 +329,6 @@ export abstract class TelegramBaseClient {
                     langCode: this._initRequest.langCode,
                     langPack: this._initRequest.langPack,
                     systemLangCode: this._initRequest.systemLangCode,
-                    proxy: this._initRequest.proxy,
                     query: innerQuery,
                 });
                 await sender.send(

@@ -35,5 +35,9 @@
   "@Teestpanbot:_1P_SXIKu7jmmKU3",
   "@Teestpanbot:_16P_w2ssfcz9x8B8",
   "@Teestpanbot:_1V_VEJUNBqeUtPp",
-  "@Teestpanbot:_4P_n1acz7nXU0qr"
+  "@Teestpanbot:_4P_n1acz7nXU0qr",
+  "@Teestpanbot:_7V_gJYSrgX84HAQ",
+  "@Teestpanbot:_1P_Z6XPsKQw8EVl",
+  "@Teestpanbot:_1V_MAbVaoJ1v6VF",
+  "@Teestpanbot:_1V_5RJPoAVQ9eAT"
 ]

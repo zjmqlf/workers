@@ -477,20 +477,22 @@ export class WebSocketServer extends DurableObject {
             // if (parseInt(indexCount) === 0) {
               const messageCount = await this.selectMessage(1, messageId);
               if (parseInt(messageCount) === 0) {
-                let webpage = "";
-                let url = "";
-                if (message.media) {
-                  if (message.media.webpage) {
-                    this.sendGrid("nextMessage", "", "webpage", false);
-                    if (message.media.webpage.id) {
-                      webpage = message.media.webpage.id.toString();
-                    }
-                    if (message.media.webpage.url) {
-                      url = message.media.webpage.url;
+                const codeArray = [];
+                const regexp = /🔑密钥：(LH_[A-Za-z0-9]{16})\n📁描述： (.*?)\n📦文件个数：(\d+)/gi;
+                const matches = txt.match(regexp);
+                // console.log(matches);  //测试
+                if (matches) {
+                  const matchesLength = matches.length;
+                  // console.log("matchesLength : " + matchesLength);  //测试
+                  if (matchesLength > 0) {
+                    for (let j = 0; j < matchesLength; j++) {
+                      if (matches[j]) {
+                        codeArray.push(matches[j]);
+                      }
                     }
                   }
                 }
-                await this.insertMessage(1, messageId, txt, webpage, url);
+                await this.insertMessage(1, messageId, codeArray);
                 // await this.insertMessageIndex(1, messageId);
               } else {
                 //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");

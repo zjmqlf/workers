@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "qqfile10",
-  "main": "qqfile10.js",
+  "name": "hikkitusbolpaijo",
+  "main": "hikkitusbolpaijo.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,8 +13,8 @@
   },
   "routes": [
     {
-      "pattern": "qqfile10.19421.xyz/*",
-      "zone_name": "19421.xyz"
+      "pattern": "hikkitusbolpaijo.19422.xyz/*",
+      "zone_name": "19422.xyz"
     }
   ],
   "preview_urls": false,

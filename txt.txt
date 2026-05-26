@@ -17,8 +17,8 @@ npm run deploy-forward
 npm run build-forward1
 npm run deploy-forward1
 
-npm run build-qqfile10
-npm run deploy-qqfile10
+npm run build-qqfile
+npm run deploy-qqfile
 
 npm run build-test
 npm run deploy-test
@@ -67,6 +67,9 @@ npm run deploy-deanignitenations
 
 npm run build-ryumasepongmilku
 npm run deploy-ryumasepongmilku
+
+npm run build-hikkitusbolpaijo
+npm run deploy-hikkitusbolpaijo
 
 npm run build-lunindiacipoksupretto
 npm run deploy-lunindiacipoksupretto

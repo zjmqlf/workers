@@ -20,6 +20,7 @@ const AllXFilesbot = [];
 const KodeXFiles2bot = [];
 const DEANIgniteNationsbot = [];
 const RyumaSepongMilkubot = [];
+const HikkiTusbolPaijobot = [];
 const LunindiaCipokSuprettobot = [];
 const PaijoKontolBurikbot = [];
 const QQfilebot = [];
@@ -100,6 +101,10 @@ const RyumaSepongMilkubot1Regexp = /(RyumaSepongMilku_bot_v:[A-Za-z0-9]{32})/gi;
 const RyumaSepongMilkubot2Regexp = /(RyumaSepongMilku_bot_p:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
 const RyumaSepongMilkubot3Regexp = /(RyumaSepongMilku_bot_d:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
 const RyumaSepongMilkubot4Regexp = /(RyumaSepongMilku_bot_col:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
+const HikkiTusbolPaijobot1Regexp = /(HikkiTusbolPaijo_bot_v:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
+const HikkiTusbolPaijobot2Regexp = /(HikkiTusbolPaijo_bot_p:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
+const HikkiTusbolPaijobot3Regexp = /(HikkiTusbolPaijo_bot_d:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
+const HikkiTusbolPaijobot4Regexp = /(HikkiTusbolPaijo_bot_col:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
 const LunindiaCipokSuprettobot1Regexp = /(LunindiaCipokSupretto_bot_v:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
 const LunindiaCipokSuprettobot2Regexp = /(LunindiaCipokSupretto_bot_p:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
 const LunindiaCipokSuprettobot3Regexp = /(LunindiaCipokSupretto_bot_d:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
@@ -1079,6 +1084,62 @@ try {
             for (let j = 0; j < RyumaSepongMilkubot4MatchesLength; j++) {
               if (RyumaSepongMilkubot4Matches[j]) {
                 RyumaSepongMilkubot.push(RyumaSepongMilkubot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const HikkiTusbolPaijobot1Matches = str.match(HikkiTusbolPaijobot1Regexp);
+        // console.log(HikkiTusbolPaijobot1Matches);  //测试
+        if (HikkiTusbolPaijobot1Matches) {
+          const HikkiTusbolPaijobot1MatchesLength = HikkiTusbolPaijobot1Matches.length;
+          // console.log("HikkiTusbolPaijobot1MatchesLength : " + HikkiTusbolPaijobot1MatchesLength);  //测试
+          if (HikkiTusbolPaijobot1MatchesLength > 0) {
+            for (let j = 0; j < HikkiTusbolPaijobot1MatchesLength; j++) {
+              if (HikkiTusbolPaijobot1Matches[j]) {
+                HikkiTusbolPaijobot.push(HikkiTusbolPaijobot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const HikkiTusbolPaijobot2Matches = str.match(HikkiTusbolPaijobot2Regexp);
+        // console.log(HikkiTusbolPaijobot2Matches);  //测试
+        if (HikkiTusbolPaijobot2Matches) {
+          const HikkiTusbolPaijobot2MatchesLength = HikkiTusbolPaijobot2Matches.length;
+          // console.log("HikkiTusbolPaijobot2MatchesLength : " + HikkiTusbolPaijobot2MatchesLength);  //测试
+          if (HikkiTusbolPaijobot2MatchesLength > 0) {
+            for (let j = 0; j < HikkiTusbolPaijobot2MatchesLength; j++) {
+              if (HikkiTusbolPaijobot2Matches[j]) {
+                HikkiTusbolPaijobot.push(HikkiTusbolPaijobot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const HikkiTusbolPaijobot3Matches = str.match(HikkiTusbolPaijobot3Regexp);
+        // console.log(HikkiTusbolPaijobot3Matches);  //测试
+        if (HikkiTusbolPaijobot3Matches) {
+          const HikkiTusbolPaijobot3MatchesLength = HikkiTusbolPaijobot3Matches.length;
+          // console.log("HikkiTusbolPaijobot3MatchesLength : " + HikkiTusbolPaijobot3MatchesLength);  //测试
+          if (HikkiTusbolPaijobot3MatchesLength > 0) {
+            for (let j = 0; j < HikkiTusbolPaijobot3MatchesLength; j++) {
+              if (HikkiTusbolPaijobot3Matches[j]) {
+                HikkiTusbolPaijobot.push(HikkiTusbolPaijobot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const HikkiTusbolPaijobot4Matches = str.match(HikkiTusbolPaijobot4Regexp);
+        // console.log(HikkiTusbolPaijobot4Matches);  //测试
+        if (HikkiTusbolPaijobot4Matches) {
+          const HikkiTusbolPaijobot4MatchesLength = HikkiTusbolPaijobot4Matches.length;
+          // console.log("HikkiTusbolPaijobot4MatchesLength : " + HikkiTusbolPaijobot4MatchesLength);  //测试
+          if (HikkiTusbolPaijobot4MatchesLength > 0) {
+            for (let j = 0; j < HikkiTusbolPaijobot4MatchesLength; j++) {
+              if (HikkiTusbolPaijobot4Matches[j]) {
+                HikkiTusbolPaijobot.push(HikkiTusbolPaijobot4Matches[j]);
               }
             }
           }
@@ -2566,6 +2627,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/RyumaSepongMilkubot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += HikkiTusbolPaijobot.length;
+  console.log("HikkiTusbolPaijobot : " + HikkiTusbolPaijobot.length);  //测试
+  if (HikkiTusbolPaijobot.length > 0) {
+    const data = fs.readFileSync("./code/HikkiTusbolPaijobot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...HikkiTusbolPaijobot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/HikkiTusbolPaijobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }
