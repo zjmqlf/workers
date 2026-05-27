@@ -44,6 +44,9 @@ npm run deploy-favorites
 npm run build-tgjmq
 npm run deploy-tgjmq
 
+npm run build-qqfilen
+npm run deploy-qqfilen
+
 npm run build-paniang
 npm run deploy-paniang
 
@@ -58,9 +61,6 @@ npm run deploy-kodexfile
 
 npm run build-kodexfiles2
 npm run deploy-kodexfiles2
-
-npm run build-kodexmedia1
-npm run deploy-kodexmedia1
 
 npm run build-deanignitenations
 npm run deploy-deanignitenations

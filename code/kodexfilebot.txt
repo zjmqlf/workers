@@ -171,5 +171,7 @@
   "kodexfilebot_v:GHmg97cpdxwoGV571gSTfQhgykeXwR3s",
   "kodexfilebot_v:if6ljQYm3DxpYZINMQsgApShgopfjLVP",
   "kodexfilebot_v:2pplI6RJJrIVTdk4QtyXEDbHcCfSkLxA",
-  "kodexfilebot_v:2WRRZfPpkt3nv4cMPRg0cEtdsMkTI8GW"
+  "kodexfilebot_v:2WRRZfPpkt3nv4cMPRg0cEtdsMkTI8GW",
+  "kodexfilebot_v:SRSExbmgXv60b3cdIE6xTkUJ59TMGQIn",
+  "kodexfilebot_v:lsoF1FvgxF4fmeqUWp2cXS5EsQJo8ojS"
 ]

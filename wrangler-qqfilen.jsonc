@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "kodexmedia1",
-  "main": "kodexmedia1.js",
+  "name": "qqfilen",
+  "main": "qqfilen.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,7 +13,7 @@
   },
   "routes": [
     {
-      "pattern": "kodexmedia1.19422.xyz/*",
+      "pattern": "qqfilen.19422.xyz/*",
       "zone_name": "19422.xyz"
     }
   ],

@@ -89,7 +89,24 @@ const App = () => {
     }
   }, []);
 
-  const getColumnDefs = () => {
+  const columnTypes = useMemo(() => { 
+    return {
+      step: {
+        width: 50,
+      },
+      codeLength: {
+        width: 150,
+      },
+      codeIndex: {
+        width: 150,
+      },
+      offsetId: {
+        width: 150,
+      },
+    };
+  }, []);
+
+  const getColumnDefs = useCallback(() => {
     return [
       {
         headerName: "data",
@@ -99,21 +116,25 @@ const App = () => {
           {
             field: "step",
             headerName: "step",
+            type: "step",
             columnGroupShow: "open",
           },
           {
             field: "codeLength",
             headerName:"codeLength",
+            type: "codeLength",
             columnGroupShow: "open",
           },
           {
             field: "codeIndex",
             headerName:"codeIndex",
+            type: "codeIndex",
             columnGroupShow: "open",
           },
           {
             field: "offsetId",
             headerName:"offsetId",
+            type: "offsetId",
             columnGroupShow: "open",
           },
           {
@@ -173,9 +194,9 @@ const App = () => {
         ],
       },
     ]
-  };
+  }, []);
 
-  const [colDefs] = useState(getColumnDefs);
+  const [columnDefs, setColumnDefs] = useState(getColumnDefs);
 
   const defaultColDef = useMemo(() => {
     return {
@@ -968,7 +989,8 @@ const App = () => {
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
-            columnDefs={colDefs}
+            columnDefs={columnDefs}
+            columnTypes={columnTypes}
             defaultColDef={defaultColDef}
             getRowId={getRowId}
             rowClassRules={rowClassRules}
