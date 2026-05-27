@@ -7,22 +7,23 @@
     "nodejs_compat",
     "nodejs_als"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./bot/build"
-  },
-  "routes": [
-    {
-      "pattern": "qqfile.19421.xyz/*",
-      "zone_name": "19421.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./bot/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "qqfile.19421.xyz/*",
+  //     "zone_name": "19421.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
+        "script_name": "qqfile",
         "class_name": "WebSocketServer"
       }
     ]

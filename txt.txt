@@ -3,10 +3,10 @@
 npx wrangler login
 
 
-npm run build
-
-
 zjmqlf2021:
+
+npm run build-test
+npm run deploy-test
 
 npm run build-hash
 npm run deploy-hash
@@ -16,12 +16,6 @@ npm run deploy-forward
 
 npm run build-forward1
 npm run deploy-forward1
-
-npm run build-qqfile
-npm run deploy-qqfile
-
-npm run build-test
-npm run deploy-test
 
 
 zjmqlf2022:
@@ -41,8 +35,11 @@ zjmqlf2023:
 npm run build-favorites
 npm run deploy-favorites
 
-npm run build-tgjmq
-npm run deploy-tgjmq
+
+zjmqlf2024:
+
+npm run build-qqfile
+npm run deploy-qqfile
 
 npm run build-qqfilen
 npm run deploy-qqfilen
@@ -73,6 +70,10 @@ npm run deploy-hikkitusbolpaijo
 
 npm run build-lunindiacipoksupretto
 npm run deploy-lunindiacipoksupretto
+
+
+
+
 
 
 

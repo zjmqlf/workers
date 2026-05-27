@@ -1,9 +1,10 @@
-import { botString } from "../src/botString";
+import { botString } from "../../src/botString";
 
 interface PagesEnv {
   WS_SERVER: DurableObjectNamespace;
 }
 
+// export const onRequest: PagesFunction<PagesEnv> = async (context) => {
 export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params }) => {
   const upgrade = request.headers.get('Upgrade');
   if (upgrade !== 'websocket') {
@@ -18,12 +19,17 @@ export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params 
         status: 426,
     });
   }
+
+  // const bot:string = context.params.bot;
   const bot:string = params.bot;
+  // console.log(bot);  //测试
+  // console.log(botString[bot]);  //测试
+  // console.log(JSON.stringify(context.params.catchall);
   if (bot) {
     if (botString[bot]) {
       if (bot === "1") {
-        const id = env.qqfile10_WebSocketServer.idFromName(botString[bot]);
-        const stub = env.qqfile10_WebSocketServer.get(id);
+        const id = env.qqfile_WebSocketServer.idFromName(botString[bot]);
+        const stub = env.qqfile_WebSocketServer.get(id);
         return stub.fetch(request);
       } else if (bot === "2") {
         const id = env.lockhive_WebSocketServer.idFromName(botString[bot]);

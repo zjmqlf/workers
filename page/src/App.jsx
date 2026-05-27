@@ -57,7 +57,7 @@ const App = () => {
   const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ width: "65%", height: "95%" }), []);
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValue, setSelectedValue] = useState("0");
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
@@ -524,12 +524,16 @@ const App = () => {
  }, [addNewEvent, renderTime]);
 
   const collectWS = useCallback((command) => {
+    // console.log(selectedValue);  //测试
     if (selectedValue) {
+      // console.log(botString[selectedValue]);  //测试
       if (botString[selectedValue]) {
         const url = new URL(window.location);
         url.protocol = "wss";
-        // url.pathname = "/ws?bot=" + botString[selectedValue];
-        url.pathname = "/ws?bot=" + selectedValue;
+        // url.pathname = "/ws/" + botString[selectedValue];
+        url.pathname = "/ws/" + selectedValue;
+        // url.search = "?bot=" + botString[selectedValue];
+        // url.search = "?bot=" + selectedValue;
         ws.current = new WebSocket(url);
         if (!ws.current) {
           errorCount.current += 1;
@@ -646,7 +650,7 @@ const App = () => {
         "message": renderTime(Date.now()) + "  >>> 没有选择bot",
       });
     }
-  }, [addNewEvent, renderTime, handleBeforeUnload, parseMessage, setTime, handlerClose, waitReconnect]);
+  }, [addNewEvent, renderTime, handleBeforeUnload, parseMessage, setTime, handlerClose, waitReconnect, selectedValue]);
 
   waitReconnect = useCallback((command, time) => {
     setTimeout(function() {
@@ -675,9 +679,10 @@ const App = () => {
         });
       }
     }, time);
-  }, [addNewEvent, renderTime, selectedValue, handlerBtnEnable, collectWS, handlerBtnUnable, waitReconnect]);
+  }, [addNewEvent, renderTime, handlerBtnEnable, collectWS, handlerBtnUnable, waitReconnect]);
 
   const handlerSelectChange = useCallback((e) => {
+    // console.log(e.target.value);  //测试
     setSelectedValue(e.target.value);
   }, [setSelectedValue]);
 
@@ -1002,7 +1007,7 @@ const App = () => {
           />
           <div style={{ width: "100%", height: "5%" }}>
             <select onChange={handlerSelectChange} value={selectedValue}>
-              {Object.entries(botString).map((item) => <option value={item[0]}>{item[1]}</option>)}
+              {Object.entries(botString).map((item) => <option key={item[0]} value={item[0]}>{item[1]}</option>)}
             </select>
             <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
             <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>

@@ -18,6 +18,7 @@ export class WebSocketServer extends DurableObject {
   limit = 20;
   offsetId = 0;
   fromPeer = null;
+  errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
   messageArray = [];
   cacheMessage = null;
   batchMessage = [];
@@ -93,6 +94,7 @@ export class WebSocketServer extends DurableObject {
       this.apiCount = 0;
       this.currentStep = 0;
       this.fromPeer = null;
+      this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
       this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
@@ -372,7 +374,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectMessageError(tryCount, messageId) {
+  async selectMessageError(tryCount, code) {
     if (tryCount === 20) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectMessage超出tryCount限制");
@@ -380,26 +382,26 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectMessage(tryCount + 1, messageId);
+      await this.selectMessage(tryCount + 1, code);
     }
   }
 
-  async selectMessage(tryCount, messageId) {
+  async selectMessage(tryCount, code) {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `CODE` WHERE `chatId` = ? AND  `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
+      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `CODE` WHERE `chatId` = ? AND  `code` = ? LIMIT 1;").bind(this.chatId, code).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage出错 : " + e);
       this.sendGrid("selectMessage", "出错 : " + e.message, "try", true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
         });
         await this.close();
       } else {
-        await this.selectMessageError(tryCount, messageId);
+        await this.selectMessageError(tryCount, code);
       }
       return;
     }
@@ -409,11 +411,11 @@ export class WebSocketServer extends DurableObject {
         return messageResult.results[0]["COUNT(id)"];
       }
     } else {
-      await this.selectMessageError(tryCount, messageId);
+      await this.selectMessageError(tryCount, code);
     }
   }
 
-  async insertMessageError(tryCount, messageId, txt, id, url) {
+  async insertMessageError(tryCount, code, txt, counts) {
     if (tryCount === 20) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")insertMessage超出tryCount限制");
@@ -421,26 +423,26 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertMessage(tryCount + 1, messageId, txt, id, url);
+      await this.insertMessage(tryCount + 1, code, txt, counts);
     }
   }
 
-  async insertMessage(tryCount, messageId, txt, id, url) {
+  async insertMessage(tryCount, code, txt, counts) {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, id, txt, webpage, url) VALUES (?, ?, ?, ?, ?);").bind(this.chatId, messageId, txt, id, url).run();
+      messageResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, txt, counts) VALUES (?, ?, ?, ?);").bind(this.chatId, code, txt, counts).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage出错 : " + e);;
       this.sendGrid("insertMessage", "出错 : " + e.message, "try", true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
         });
         await this.close();
       } else {
-        await this.insertMessageError(tryCount, messageId, txt, id, url);
+        await this.insertMessageError(tryCount, code, txt, counts);
       }
       return;
     }
@@ -451,7 +453,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 插入message数据失败");
       this.sendGrid("insertMessage", "插入message数据失败", "error", true);
-      await this.insertMessageError(tryCount, messageId, txt, id, url);
+      await this.insertMessageError(tryCount, code, txt, counts);
     }
   }
 
@@ -473,35 +475,26 @@ export class WebSocketServer extends DurableObject {
             "date": new Date().getTime(),
           });
           if (txt) {
-            // const indexCount = await this.selectMessageIndex(1, messageId);
-            // if (parseInt(indexCount) === 0) {
-              const messageCount = await this.selectMessage(1, messageId);
-              if (parseInt(messageCount) === 0) {
-                const codeArray = [];
-                const regexp = /🔑密钥：(LH_[A-Za-z0-9]{16})\n📁描述： (.*?)\n📦文件个数：(\d+)/gi;
-                const matches = txt.match(regexp);
-                // console.log(matches);  //测试
-                if (matches) {
-                  const matchesLength = matches.length;
-                  // console.log("matchesLength : " + matchesLength);  //测试
-                  if (matchesLength > 0) {
-                    for (let j = 0; j < matchesLength; j++) {
-                      if (matches[j]) {
-                        codeArray.push(matches[j]);
-                      }
+            const regexp = /🔑密钥：(LH_[A-Za-z0-9]{16})\n📁描述：(.*?)\n📦文件个数：(\d+)/gi;
+            const matches = txt.match(regexp);
+            // console.log(matches);  //测试
+            if (matches) {
+              const matchesLength = matches.length;
+              // console.log("matchesLength : " + matchesLength);  //测试
+              if (matchesLength > 0) {
+                for (let j = 0; j < matchesLength; j++) {
+                  if (matches[j] && matches[j][0] && matches[j][1] && matches[j][2]) {
+                    const messageCount = await this.selectMessage(1, matches[j][0]);
+                    if (parseInt(messageCount) === 0) {
+                      await this.insertMessage(1, matches[j][0], matches[j][1], matches[j][2]);
+                    } else {
+                      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
+                      this.sendGrid("nextMessage", "", "exist", false);
                     }
                   }
                 }
-                await this.insertMessage(1, messageId, codeArray);
-                // await this.insertMessageIndex(1, messageId);
-              } else {
-                //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                this.sendGrid("nextMessage", "", "exist", false);
               }
-            // } else {
-            //   //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : messageIndex已在数据库中");
-            //   this.sendGrid("nextMessage", "", "indexExist", false);
-            // }
+            }
             this.offsetId += 1;
           } else {
             //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");

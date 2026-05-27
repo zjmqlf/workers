@@ -3,16 +3,25 @@
   "name": "page",
   "compatibility_date": "2026-04-21",
   "pages_build_output_dir": "./build",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_als"
+  ],
   "durable_objects": {
     "bindings": [
       {
-        "name": "qqfile10_WebSocketServer",
-        "script_name": "qqfile10",
+        "name": "qqfile_WebSocketServer",
+        "script_name": "qqfile",
         "class_name": "WebSocketServer"
       },
       {
         "name": "lockhive_WebSocketServer",
         "script_name": "lockhive",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "qqfilen_WebSocketServer",
+        "script_name": "qqfilen",
         "class_name": "WebSocketServer"
       },
       {
@@ -31,11 +40,6 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "kodexmedia1_WebSocketServer",
-        "script_name": "kodexmedia1",
-        "class_name": "WebSocketServer"
-      },
-      {
         "name": "deanignitenations_WebSocketServer",
         "script_name": "deanignitenations",
         "class_name": "WebSocketServer"
@@ -43,6 +47,11 @@
       {
         "name": "ryumasepongmilku_WebSocketServer",
         "script_name": "ryumasepongmilku",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "hikkitusbolpaijo_WebSocketServer",
+        "script_name": "hikkitusbolpaijo",
         "class_name": "WebSocketServer"
       },
       {

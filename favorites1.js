@@ -19,6 +19,7 @@ export class WebSocketServer extends DurableObject {
   pingTime = 10000;
   filterType = -1;
   limit = 0;
+  errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
   messageArray = [];
   cacheMessage = null;
   batchMessage = [];
@@ -132,6 +133,7 @@ export class WebSocketServer extends DurableObject {
       this.tg = Array(this.clientCount).fill(null);
       this.waitTime = 240000;
       this.pingTime = 20000;
+      this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
       this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
@@ -615,7 +617,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] insertConfig出错 : " + e);;
       this.sendLog(clientIndex, "insertConfig", "出错 : " + e.message, "try", true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -656,7 +658,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("getConfig出错 : " + e);
       this.sendLog(clientIndex, "getConfig", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -736,7 +738,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("updateConfig出错 : " + e);
       this.sendLog(clientIndex, "updateConfig", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -795,7 +797,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("noExistChat出错 : " + e);
       this.sendLog(clientIndex, "noExistChat", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -836,7 +838,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("noforwardChat出错 : " + e);
       this.sendLog(clientIndex, "noforwardChat", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -991,7 +993,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("(" + this.currentStep + ")出错 : " + e);
       this.sendLog(clientIndex, "nextChat", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1056,7 +1058,7 @@ export class WebSocketServer extends DurableObject {
             tryCount += 1;
             //console.log("(" + this.currentStep + ")getChat出错 : " + e);
             this.sendLog(clientIndex, "getChat", "出错 : " + e.message, null, true);
-            if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+            if (e.message === this.errorMessage) {
               this.stop = 2;
               this.broadcast({
                 "result": "pause",
@@ -1195,7 +1197,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("(" + this.currentStep + ")updateChat出错 : " + e);
       this.sendLog(clientIndex, "updateChat", "出错 : " + e.message, null, true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1979,7 +1981,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("selectChat出错 : " + e);
       this.sendLog(clientIndex, "selectChat", "出错 : " + e.message, "try", true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -2019,7 +2021,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("insertChat出错 : " + e);;
       this.sendLog(clientIndex, "insertChat", "出错 : " + e.message, "try", true);
-      if (e.message === "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits") {
+      if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",

@@ -7,22 +7,23 @@
     "nodejs_compat",
     "nodejs_als"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./bot/build"
-  },
-  "routes": [
-    {
-      "pattern": "zyxfiles.19422.xyz/*",
-      "zone_name": "19422.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./bot/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "zyxfiles.19422.xyz/*",
+  //     "zone_name": "19422.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
+        "script_name": "zyxfiles",
         "class_name": "WebSocketServer"
       }
     ]
