@@ -164,5 +164,14 @@ export const codeString = [
   "kodexfilebot_v:WFALalW4bLsdQJwsOTCm5XYGPS3tEi14",
   "kodexfilebot_v:rVSDW2MjlDfi0Vr9OzLhBO6C8XxqrkPP",
   "kodexfilebot_v:MLRCatRPg8JTGaw1Fw0AMn8hTp7WMUPk",
-  "kodexfilebot_v:8tOUV9WIygWyE59H0tlxH5zj6FLvPpw8"
+  "kodexfilebot_v:8tOUV9WIygWyE59H0tlxH5zj6FLvPpw8",
+  "kodexfilebot_v:VGbmYXCPA6S6YtEubeSKbX2PTo3NrNu7",
+  "kodexfilebot_v:2SwOPV7B9ufILVk54BAW2btExakAE8Nm",
+  "kodexfilebot_v:pusQCZD06uZAy5Ud7cHb4wT7ZSDX8re4",
+  "kodexfilebot_v:GHmg97cpdxwoGV571gSTfQhgykeXwR3s",
+  "kodexfilebot_v:if6ljQYm3DxpYZINMQsgApShgopfjLVP",
+  "kodexfilebot_v:2pplI6RJJrIVTdk4QtyXEDbHcCfSkLxA",
+  "kodexfilebot_v:2WRRZfPpkt3nv4cMPRg0cEtdsMkTI8GW",
+  "kodexfilebot_v:SRSExbmgXv60b3cdIE6xTkUJ59TMGQIn",
+  "kodexfilebot_v:lsoF1FvgxF4fmeqUWp2cXS5EsQJo8ojS"
 ];

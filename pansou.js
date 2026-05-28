@@ -1109,14 +1109,14 @@ export class WebSocketServer extends DurableObject {
             if (this.stop === 1) {
               if (this.apiCount < 900) {
                 await this.nextStep();
-            } else {
-              this.stop = 2;
-              //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-              this.sendLog("nextStep", "超出apiCount限制", "limit", true);
-              await this.updateChat(1);
-              await this.close();
-              // this.ctx.abort("reset");
-            }
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+                await this.updateChat(1);
+                await this.close();
+                // this.ctx.abort("reset");
+              }
             } else if (this.stop === 2) {
               this.broadcast({
                 "result": "pause",

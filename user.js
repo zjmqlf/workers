@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
+import { userString } from "./userString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -34,6 +35,7 @@ export class WebSocketServer extends DurableObject {
   cacheMessage = null;
   batchMessage = [];
   dialogArray = [];
+  chatArray = userString;
 
   constructor(ctx, env) {
     super(ctx, env);
@@ -128,6 +130,8 @@ export class WebSocketServer extends DurableObject {
       this.cacheMessage = null;
       this.batchMessage = [];
       this.dialogArray = [];
+      // this.chatArray = JSON.parse(JSON.stringify(userString));
+      this.chatArray = userString;
     }
   }
 
@@ -353,7 +357,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'favorites' AND `tgId` = 999 LIMIT 1;").run();
+      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'user' AND `tgId` = 999 LIMIT 1;").run();
     } catch (e) {
       //console.log("getClient出错 : " + e);
       this.sendLog("getClient", "出错 : " + e.message, null, true);
@@ -403,7 +407,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'favorites' AND `tgId` = 999;").bind(this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'user' AND `tgId` = 999;").bind(this.chatId).run();
     } catch (e) {
       //console.log("updateClient出错 : " + e);
       this.sendLog("updateClient", "出错 : " + e.message, null, true);
@@ -445,7 +449,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'favorites' AND `tgId` = ? LIMIT 1;").bind(this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'user' AND `tgId` = ? LIMIT 1;").bind(this.chatId).run();
     } catch (e) {
       //console.log("getConfig出错 : " + e);
       this.sendLog("getConfig", "出错 : " + e.message, null, true);
@@ -513,7 +517,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'favorites' AND `tgId` = ?;").bind(this.offsetId, this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'user' AND `tgId` = ?;").bind(this.offsetId, this.chatId).run();
     } catch (e) {
       //console.log("updateConfig出错 : " + e);
       this.sendLog("updateConfig", "出错 : " + e.message, null, true);

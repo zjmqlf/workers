@@ -254,5 +254,6 @@
   "RyumaSepongMilku_bot_p:KCaPWBNSrNgE2XZklFwhejKVFR8BaEMf",
   "RyumaSepongMilku_bot_p:BhgygYR1CGRbEkslaKDf39Yu2UwEv4Lq",
   "RyumaSepongMilku_bot_p:Quw1SpekC5XVJlcp3yeHq4BHyLeSylAt",
-  "RyumaSepongMilku_bot_v:TJekTVCMhYLzgAAqTP9VhD6GkwNwdMDE"
+  "RyumaSepongMilku_bot_v:TJekTVCMhYLzgAAqTP9VhD6GkwNwdMDE",
+  "RyumaSepongMilku_bot_v:Dt7AMJdtQf7mMerzc7IpLGW9cdtwcIOx"
 ]

@@ -32,8 +32,8 @@ npm run deploy-favorites1
 
 zjmqlf2023:
 
-npm run build-favorites
-npm run deploy-favorites
+npm run build-user
+npm run deploy-user
 
 
 zjmqlf2024:
@@ -43,6 +43,9 @@ npm run deploy-qqfile
 
 npm run build-qqfilen
 npm run deploy-qqfilen
+
+npm run build-zhuhaihai
+npm run deploy-zhuhaihai
 
 npm run build-paniang
 npm run deploy-paniang
@@ -70,6 +73,13 @@ npm run deploy-hikkitusbolpaijo
 
 npm run build-lunindiacipoksupretto
 npm run deploy-lunindiacipoksupretto
+
+
+zjmqlf2025:
+
+npm run build-favorites
+npm run deploy-favorites
+
 
 
 

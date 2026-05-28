@@ -1,4 +1,4 @@
-export const codeString = [
+[
   "QQfilen_bot:qq232189ebf1_1P",
   "QQfilen_bot:qq262293f3e1_1D",
   "QQfilen_bot:qq2c232103a0_3D",
@@ -106,4 +106,4 @@ export const codeString = [
   "QQfilen_bot:qq28263e3840_1P_3V",
   "QQfilen_bot:qq28263e3840_1P",
   "QQfilen_bot:qq2629c25750_2P"
-];
+]

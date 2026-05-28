@@ -15,7 +15,7 @@ export class WebSocketServer extends DurableObject {
   client = null;
   chatId = 0;
   reverse = true;
-  limit = 20;
+  limit = 2;
   offsetId = 0;
   fromPeer = null;
   errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
@@ -84,7 +84,7 @@ export class WebSocketServer extends DurableObject {
         this.batch = false;
         this.chatId = 0;
         this.reverse = true;
-        this.limit = 20;
+        this.limit = 2;
         this.offsetId = 0;
       }
       // this.ws = null;
@@ -339,7 +339,7 @@ export class WebSocketServer extends DurableObject {
         //"me",  //测试
         {
           limit: this.limit,
-          //limit: 20,  //测试
+          //limit: 2,  //测试
           reverse: this.reverse,
           //reverse: false,  //测试
           addOffset: -this.offsetId,
@@ -476,30 +476,75 @@ export class WebSocketServer extends DurableObject {
           });
           if (txt) {
             const regexp = /🔑密钥：(LH_[A-Za-z0-9]{16})\n📁描述：(.*?)\n📦文件个数：(\d+)/gi;
-            const matches = txt.match(regexp);
+            const matches = txt.matchAll(regexp);
             // console.log(matches);  //测试
             if (matches) {
               const matchesLength = matches.length;
               // console.log("matchesLength : " + matchesLength);  //测试
               if (matchesLength > 0) {
-                for (let j = 0; j < matchesLength; j++) {
-                  if (matches[j] && matches[j][0] && matches[j][1] && matches[j][2]) {
-                    const messageCount = await this.selectMessage(1, matches[j][0]);
-                    if (parseInt(messageCount) === 0) {
-                      await this.insertMessage(1, matches[j][0], matches[j][1], matches[j][2]);
-                    } else {
-                      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                      this.sendGrid("nextMessage", "", "exist", false);
+                for (let i = 0; i < matchesLength; i++) {
+                  if (matches[i] && matches[i].length === 4) {
+                    if (matches[i][0] && matches[i][1] && matches[i][2]) {
+                      const messageCount = await this.selectMessage(1, matches[i][0]);
+                      if (parseInt(messageCount) === 0) {
+                        await this.insertMessage(1, matches[i][0], matches[i][1], matches[i][2]);
+                      } else {
+                        //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
+                        this.sendGrid("nextMessage", "", "exist", false);
+                      }
                     }
                   }
                 }
               }
             }
-            this.offsetId += 1;
           } else {
             //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
             this.sendGrid("nextMessage", "txt为空", "error", true);
-            this.offsetId += 1;
+          }
+          const regexp = /第\d+页\/共\d+页/i;
+          if (regexp.test(message) === true) {
+            const regexp = / (\d+) /gi;
+            const matches = message.match(regexp);
+            // console.log(matches);  //测试
+            if (matches) {
+              if (matches.length === 2) {
+                if (matches[0] === matches[1]) {
+                  //console.log("(" + this.currentStep + ") 所有分页点击完毕");
+                  this.sendLog("nextStep", "所有分页点击完毕", "update", false);
+                  this.offsetId += 1;
+                } else {
+                  if (message.replyMarkup) {
+                    if (message.replyMarkup.rows) {
+                      for (const row of message.replyMarkup.rows) {
+                        // console.log(row);  //测试
+                        for (const button of row.buttons) {
+                          // console.log(button);  //测试
+                          if (button.text === "下一页 ➡️") {
+                            const result = await this.client.invoke(
+                              new Api.messages.GetBotCallbackAnswer({
+                                peer: this.fromPeer,
+                                msgId: messageId,
+                                data: button.data,
+                              })
+                            );
+                            //console.log("(" + this.currentStep + ") 下一页");
+                            this.sendLog("nextStep", "下一页", null, false);
+                            await scheduler.wait(10000);
+                            if (result && result.message) {
+                              this.sendLog("nextStep", result.message , null, false);
+                            }
+                          // } else {
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
+                //console.log("(" + this.currentStep + ") " + text);
+                this.sendLog("nextStep", "第" + matches[0] + "页", "update", false);
+              }
+            }
           }
         } else {
           //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
@@ -541,13 +586,13 @@ export class WebSocketServer extends DurableObject {
             if (this.stop === 1) {
               if (this.apiCount < 900) {
                 await this.nextStep();
-            } else {
-              this.stop = 2;
-              //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-              this.sendLog("nextStep", "超出apiCount限制", "limit", true);
-              await this.close();
-              // this.ctx.abort("reset");
-            }
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+                await this.close();
+                // this.ctx.abort("reset");
+              }
             } else if (this.stop === 2) {
               this.broadcast({
                 "result": "pause",

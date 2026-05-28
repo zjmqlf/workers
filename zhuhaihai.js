@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./qqfilenString";
+import { codeString } from "./zhuhaihaiString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -840,7 +840,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message.trim();
                   const string = message.split(":");
-                  if (string[0] === "qqfilen_bot") {
+                  if (string[0] === "Zhuahihaibot") {
                     // await this.ctx.storage.put(message, 1);
                     await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                     this.getCount(message, 2);
@@ -989,8 +989,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8697745192"),
-              accessHash: bigInt("6713123108211114349"),
+              userId: bigInt("8833860388"),
+              accessHash: bigInt("7786345880551532211"),
             }),
           ],
         })
@@ -1170,7 +1170,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message.trim();
                     const string = message.split(":");
-                    if (string[0] === "qqfilen_bot") {
+                    if (string[0] === "Zhuahihaibot") {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                       this.getCount(message, 2);
@@ -1432,7 +1432,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("qqfilen");
+      const id = env.WEBSOCKET_SERVER.idFromName("zhuhaihai");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

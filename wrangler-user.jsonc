@@ -1,0 +1,72 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "favorites",
+  "main": "favorites.js",
+  "compatibility_date": "2026-04-21",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_als"
+  ],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./hash/build"
+  },
+  "routes": [
+    {
+      "pattern": "favorites.19422.xyz/*",
+      "zone_name": "19422.xyz"
+    }
+  ],
+  "preview_urls": false,
+  "workers_dev": false,
+  "d1_databases": [
+    {
+      "binding": "MAINDB",
+      "database_name": "maindb",
+      "database_id": "aec6fc9f-94b9-4d8f-8c27-d9e730a0f5c7"
+    },
+    {
+      "binding": "MESSAGEDB",
+      "database_name": "message",
+      "database_id": "2bed0b37-bee4-42a6-a4bb-8cd9cd011050"
+    },
+    {
+      "binding": "MEDIADB",
+      "database_name": "media",
+      "database_id": "6cd82b51-cb8a-49bc-829e-4704d87fea64"
+    },
+    {
+      "binding": "PHOTODB",
+      "database_name": "photo",
+      "database_id": "20a9bdc1-46c0-41ed-8fa5-cc65138c1fd2"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WEBSOCKET_SERVER",
+        "class_name": "WebSocketServer"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "WebSocketServer"
+      ]
+    }
+  ],
+  "observability": {
+    "logs": {
+      "enabled": false,
+      "invocation_logs": false
+    },
+    "traces": {
+      "enabled": false
+    }
+  },
+  "placement": {
+    "mode": "smart"
+  }
+}
