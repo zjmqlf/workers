@@ -829,7 +829,8 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                  if (messageArray[messageIndex].message.includes("文件获取完毕 文件总数：") === true) {
+                  const message = messageArray[messageIndex].message.trim();
+                  if (message && message.includes("文件获取完毕") === true) {
                     if (this.queue === true) {
                       this.queue = false;
                       await this.ctx.storage.put("queue", false);
@@ -839,40 +840,43 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
-                  const string = message.split(":");
-                  if (string[0] === "Zhuahihaibot") {
-                    // await this.ctx.storage.put(message, 1);
-                    await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                    this.getCount(message, 2);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                    const date = message.replace("您已被限制使用,限制期限为：", "");
-                    if (date) {
-                      this.flood = new Date(date).getTime();
-                      await this.ctx.storage.put("client", this.flood);
-                    }
-                    //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                    this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                  } else if (message === "文件码解析失败") {
-                    //console.log("(" + this.currentStep + ") " + message);
-                    this.sendLog("nextStep", message, "error", true);
-                  } else if (message.includes("当前机器人无法解析") === true) {
-                    //console.log("(" + this.currentStep + ") " + message);
-                    this.sendLog("nextStep", message, "error", true);
-                  } else if (message.includes("文件获取完毕 文件总数：") === true) {
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 文件获取完毕");
-                      this.sendForward("nextStep", "文件获取完毕", "", "update", false);
-                    }
-                  } else if (message === "文件码解析失败") {
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 文件码解析失败");
-                      this.sendForward("nextStep", "文件码解析失败", "", "update", true);
+                  if (message) {
+                    const string = message.split(":");
+                    if (string[0] === "Zhuahihaibot") {
+                      // await this.ctx.storage.put(message, 1);
+                      await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
+                      this.getCount(message, 2);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
+                      const date = message.replace("您已被限制使用,限制期限为：", "");
+                      if (date) {
+                        this.flood = new Date(date).getTime();
+                        await this.ctx.storage.put("client", this.flood);
+                      }
+                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
+                    } else if (message === "文件码解析失败") {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") 文件码解析失败");
+                        this.sendForward("nextStep", "文件码解析失败", "", "update", true);
+                      }
+                    } else if (message.includes("当前机器人无法解析") === true) {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("nextStep", message, "error", true);
+                      }
+                    } else if (message.includes("文件获取完毕 文件总数：") === true) {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") 文件获取完毕");
+                        this.sendForward("nextStep", "文件获取完毕", "", "update", false);
+                      }
                     }
                   }
                 }
@@ -1159,7 +1163,8 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                    if (messageArray[messageIndex].message.includes("文件获取完毕 文件总数：") === true) {
+                    const message = messageArray[messageIndex].message.trim();
+                    if (message & message.includes("文件获取完毕") === true) {
                       if (this.queue === true) {
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
@@ -1169,40 +1174,43 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
-                    const string = message.split(":");
-                    if (string[0] === "Zhuahihaibot") {
-                      // await this.ctx.storage.put(message, 1);
-                      await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                      this.getCount(message, 2);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("start", "代码入库完毕", "", "add", false);
-                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                      const date = message.replace("您已被限制使用,限制期限为：", "");
-                      if (date) {
-                        this.flood = new Date(date).getTime();
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                    } else if (message === "文件码解析失败") {
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("start", message, "error", true);
-                    } else if (message.includes("当前机器人无法解析") === true) {
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("start", message, "error", true);
-                    } else if (message.includes("文件获取完毕 文件总数：") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件获取完毕");
-                        this.sendForward("start", "文件获取完毕", "", "update", false);
-                      }
-                    } else if (message === "文件码解析失败") {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件码解析失败");
-                        this.sendForward("start", "文件码解析失败", "", "update", true);
+                    if (message) {
+                      const string = message.split(":");
+                      if (string[0] === "Zhuahihaibot") {
+                        // await this.ctx.storage.put(message, 1);
+                        await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
+                        this.getCount(message, 2);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message.includes("您已被限制使用,限制期限为：") === true) {
+                        const date = message.replace("您已被限制使用,限制期限为：", "");
+                        if (date) {
+                          this.flood = new Date(date).getTime();
+                          await this.ctx.storage.put("client", this.flood);
+                        }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
+                      } else if (message === "文件码解析失败") {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") 文件码解析失败");
+                          this.sendForward("start", "文件码解析失败", "", "update", true);
+                        }
+                      } else if (message.includes("当前机器人无法解析") === true) {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") " + message);
+                          this.sendLog("start", message, "error", true);
+                        }
+                      } else if (message.includes("文件获取完毕") === true) {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") 文件获取完毕");
+                          this.sendForward("start", "文件获取完毕", "", "update", false);
+                        }
                       }
                     }
                   }

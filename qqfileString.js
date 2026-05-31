@@ -1,5 +1,4 @@
 export const codeString = [
-  "newjmqbot_0p_10v_0d_tepmZpNFVolFt",
   "newjmqbot_0p_43v_0d_FY5BceGahR9Sr",
   "newjmqbot_0p_22v_0d_2XGJOMeakts6z",
   "newjmqbot_5p_30v_0d_CgNydwbIX6Y4m",

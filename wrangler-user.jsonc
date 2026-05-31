@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "favorites",
-  "main": "favorites.js",
+  "name": "user",
+  "main": "user.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,7 +13,7 @@
   },
   "routes": [
     {
-      "pattern": "favorites.19422.xyz/*",
+      "pattern": "user.19422.xyz/*",
       "zone_name": "19422.xyz"
     }
   ],

@@ -749,31 +749,33 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const regexp = /[A-Za-z0-9]{40}/i;
                   const message = messageArray[messageIndex].message.trim();
-                  if (message.length === 40 && regexp.test(message) === true) {
-                    if (this.queue === false) {
-                      this.queue = true;
-                      await this.ctx.storage.put("queue", true);
+                  if (message) {
+                    const regexp = /[A-Za-z0-9]{40}/i;
+                    if (message.length === 40 && regexp.test(message) === true) {
+                      if (this.queue === false) {
+                        this.queue = true;
+                        await this.ctx.storage.put("queue", true);
+                      }
+                      await this.ctx.storage.put(message, 1);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message === "✅ 所有文件已发送完成！") {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
+                        this.sendForward("nextStep", "所有文件已发送完成！", "", "update", false);
+                      }
+                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
+                      const date = message.replace("您已被限制使用,限制期限为：", "");
+                      if (date) {
+                        this.flood = new Date(date).getTime();
+                        await this.ctx.storage.put("client", this.flood);
+                      }
+                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
-                    await this.ctx.storage.put(message, 1);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message === "✅ 所有文件已发送完成！") {
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
-                      this.sendForward("nextStep", "所有文件已发送完成！", "", "update", false);
-                    }
-                  } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                    const date = message.replace("您已被限制使用,限制期限为：", "");
-                    if (date) {
-                      this.flood = new Date(date).getTime();
-                      await this.ctx.storage.put("client", this.flood);
-                    }
-                    //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                    this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                   }
                 }
               }
@@ -1001,31 +1003,33 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const regexp = /[A-Za-z0-9]{40}/i;
                     const message = messageArray[messageIndex].message.trim();
-                    if (message.length === 40 && regexp.test(message) === true) {
-                      if (this.queue === false) {
-                        this.queue = true;
-                        await this.ctx.storage.put("queue", true);
+                    if (message) {
+                      const regexp = /[A-Za-z0-9]{40}/i;
+                      if (message.length === 40 && regexp.test(message) === true) {
+                        if (this.queue === false) {
+                          this.queue = true;
+                          await this.ctx.storage.put("queue", true);
+                        }
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message === "✅ 所有文件已发送完成！") {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
+                          this.sendForward("start", "所有文件已发送完成！", "", "update", false);
+                        }
+                      } else if (message.includes("您已被限制使用,限制期限为：") === true) {
+                        const date = message.replace("您已被限制使用,限制期限为：", "");
+                        if (date) {
+                          this.flood = new Date(date).getTime();
+                          await this.ctx.storage.put("client", this.flood);
+                        }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       }
-                      await this.ctx.storage.put(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("start", "代码入库完毕", "", "add", false);
-                    } else if (message === "✅ 所有文件已发送完成！") {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
-                        this.sendForward("start", "所有文件已发送完成！", "", "update", false);
-                      }
-                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                      const date = message.replace("您已被限制使用,限制期限为：", "");
-                      if (date) {
-                        this.flood = new Date(date).getTime();
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }

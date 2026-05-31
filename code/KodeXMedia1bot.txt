@@ -680,5 +680,7 @@
   "KodeXMedia1bot_p:Kpq8zhguR5ANq2nb2cGSPbi5C1VnEND6",
   "KodeXMedia1bot_p:nwoABDOP8TNz4pxDH9kSowFI6ZWPqqkd",
   "KodeXMedia1bot_p:5c7W3Xq58fjBAQiurZv0wkQo3Xbs7uQD",
-  "KodeXMedia1bot_col:suyz4aWm1TBE6uP9bW4JbTunuBZfWkqO"
+  "KodeXMedia1bot_col:suyz4aWm1TBE6uP9bW4JbTunuBZfWkqO",
+  "KodeXMedia1bot_col:P3CNooZja7SZ075nHscybjS1dnPS8Jq5",
+  "KodeXMedia1bot_col:9OCGDONlhlbO28GQvDkLgQz10zpWxQCE"
 ]

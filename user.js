@@ -1708,7 +1708,7 @@ export class WebSocketServer extends DurableObject {
 
   async nextStep() {
     if (this.stop === 1) {
-      if (this.apiCount < 900) {
+      if (this.apiCount < 400) {
         this.currentStep += 1;
         if (this.flood && this.flood > 0) {
           this.count = 0;
@@ -1849,7 +1849,7 @@ export class WebSocketServer extends DurableObject {
             }
             await this.forwardMessage(idArray, fileIdArray);
             if (this.stop === 1) {
-              if (this.apiCount < 900) {
+              if (this.apiCount < 400) {
                 await this.nextStep();
               } else {
                 this.stop = 2;
@@ -1886,7 +1886,7 @@ export class WebSocketServer extends DurableObject {
             this.sendForward("nextStep", "第" + this.errorCount + "轮没有获取到包含有效媒体的消息", 0, "error", true);
           // }
           if (this.stop === 1) {
-            if (this.apiCount < 900) {
+            if (this.apiCount < 400) {
               await this.nextStep();
             } else {
               this.stop = 2;
@@ -1911,7 +1911,7 @@ export class WebSocketServer extends DurableObject {
           await this.getNext();
         }
         if (this.stop === 1) {
-          if (this.apiCount < 900) {
+          if (this.apiCount < 400) {
             await this.nextStep();
           } else {
             this.stop = 2;
@@ -2120,7 +2120,7 @@ export class WebSocketServer extends DurableObject {
           }
           await this.forwardMessage(idArray, fileIdArray);
           if (this.stop === 1) {
-            if (this.apiCount < 900) {
+            if (this.apiCount < 400) {
               await this.nextStep();
             } else {
               this.stop = 2;
@@ -2151,7 +2151,7 @@ export class WebSocketServer extends DurableObject {
             this.sendForward("start", "第" + this.errorCount + "轮没有获取到包含有效媒体的消息", 0, "error", true);
           // }
           if (this.stop === 1) {
-            if (this.apiCount < 900) {
+            if (this.apiCount < 400) {
               await this.nextStep();
             } else {
               this.stop = 2;
@@ -2480,7 +2480,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("favorites");
+      const id = env.WEBSOCKET_SERVER.idFromName("user");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

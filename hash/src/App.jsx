@@ -830,6 +830,7 @@ const App = () => {
               break;
             case "selectMedia":
             case "selectMediaMessage":
+            case "selectPhoto":
             case "selectPhotoMessage":
               updateSelect(message, "selectMessage");
               break;

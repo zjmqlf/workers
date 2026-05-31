@@ -123,10 +123,10 @@ export class WebSocketServer extends DurableObject {
       this.errorCount = 0;
       this.flood = 0;
       this.time = 0;
-      this.messageArray = [];
       this.filter = Api.InputMessagesFilterVideo;
       //this.filterTitle = "媒体";
       this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+      this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
       this.dialogArray = [];
@@ -1790,8 +1790,8 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.deleteAll();
       //console.log("删除cache成功");
       this.broadcast({
-        "operate": "clearCache",
         "step": this.currentStep,
+        "operate": "clearCache",
         "message": "删除cache成功",
         "error": true,
         "date": new Date().getTime(),

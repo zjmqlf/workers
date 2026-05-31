@@ -829,40 +829,42 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  // const regexp = /([a-z0-9]{32})/i;
                   const message = messageArray[messageIndex].message.trim();
-                  if (message.substr(0, 11) === "TangBRebot_") {
-                    await this.ctx.storage.put(message, 1);
-                    this.getCount(message, 11);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  // } else if (message.substr(0, 8) === "decoder_") {
-                  //   await this.ctx.storage.put(message, 1);
-                  //   this.getCount(message, 8);
-                  //   //console.log("(" + this.currentStep + ") 代码入库完毕");
-                  //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  // } else if (regexp.test(message) === true) {
-                  //   await this.ctx.storage.put(message, 1);
-                  //   //console.log("(" + this.currentStep + ") 代码入库完毕");
-                  //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message.includes("✅ 代码输出完成") === true) {
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
+                  if (message) {
+                    // const regexp = /([a-z0-9]{32})/i;
+                    if (message.substr(0, 11) === "TangBRebot_") {
+                      await this.ctx.storage.put(message, 1);
+                      this.getCount(message, 11);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    // } else if (message.substr(0, 8) === "decoder_") {
+                    //   await this.ctx.storage.put(message, 1);
+                    //   this.getCount(message, 8);
+                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                    //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    // } else if (regexp.test(message) === true) {
+                    //   await this.ctx.storage.put(message, 1);
+                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                    //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message.includes("✅ 代码输出完成") === true) {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                      }
+                      //console.log("(" + this.currentStep + ") " + message);
+                      this.sendLog("nextStep", message, null, false);
+                    } else if (message.includes("❌ 提取码无效或已失效") === true) {
+                      //console.log("(" + this.currentStep + ") " + message);
+                      this.sendLog("nextStep", message, "error", true);
+                    } else if (message.includes("操作太频繁，请等待") === true) {
+                      const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
+                      if (time && time > 0) {
+                        this.flood = new Date().getTime() + 60000 + time * 1000;
+                        await this.ctx.storage.put("client", this.flood);
+                      }
+                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
-                    //console.log("(" + this.currentStep + ") " + message);
-                    this.sendLog("nextStep", message, null, false);
-                  } else if (message.includes("❌ 提取码无效或已失效") === true) {
-                    //console.log("(" + this.currentStep + ") " + message);
-                    this.sendLog("nextStep", message, "error", true);
-                  } else if (message.includes("操作太频繁，请等待") === true) {
-                    const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
-                    if (time && time > 0) {
-                      this.flood = new Date().getTime() + 60000 + time * 1000;
-                      await this.ctx.storage.put("client", this.flood);
-                    }
-                    //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                    this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                   }
                 }
               }
@@ -1158,40 +1160,42 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const regexp = /([a-z0-9]{32})/i;
                     const message = messageArray[messageIndex].message.trim();
-                    if (message.substr(0, 11) === "TangBRebot_") {
-                      await this.ctx.storage.put(message, 1);
-                      this.getCount(message, 11);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("start", "代码入库完毕", "", "add", false);
-                    // } else if (message.substr(0, 8) === "decoder_") {
-                    //   await this.ctx.storage.put(message, 1);
-                    //   this.getCount(message, 8);
-                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    //   this.sendForward("start", "代码入库完毕", "", "add", false);
-                    // } else if (regexp.test(message) === true) {
-                    //   await this.ctx.storage.put(message, 1);
-                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    //   this.sendForward("start", "代码入库完毕", "", "add", false);
-                    } else if (message.includes("✅ 代码输出完成") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
+                    if (message) {
+                      const regexp = /([a-z0-9]{32})/i;
+                      if (message.substr(0, 11) === "TangBRebot_") {
+                        await this.ctx.storage.put(message, 1);
+                        this.getCount(message, 11);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      // } else if (message.substr(0, 8) === "decoder_") {
+                      //   await this.ctx.storage.put(message, 1);
+                      //   this.getCount(message, 8);
+                      //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      //   this.sendForward("start", "代码入库完毕", "", "add", false);
+                      // } else if (regexp.test(message) === true) {
+                      //   await this.ctx.storage.put(message, 1);
+                      //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      //   this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message.includes("✅ 代码输出完成") === true) {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                        }
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("start", message, null, false);
+                      } else if (message.includes("❌ 提取码无效或已失效") === true) {
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("start", message, "error", true);
+                      } else if (message.includes("操作太频繁，请等待") === true) {
+                        const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
+                        if (time && time > 0) {
+                          this.flood = new Date().getTime() + 60000 + time * 1000;
+                          await this.ctx.storage.put("client", this.flood);
+                        }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       }
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("start", message, null, false);
-                    } else if (message.includes("❌ 提取码无效或已失效") === true) {
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("start", message, "error", true);
-                    } else if (message.includes("操作太频繁，请等待") === true) {
-                      const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
-                      if (time && time > 0) {
-                        this.flood = new Date().getTime() + 60000 + time * 1000;
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }

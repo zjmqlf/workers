@@ -778,27 +778,29 @@ export class WebSocketServer extends DurableObject {
                             data: button.data,
                           };
                         } else {
-                          const message = messageArray[messageIndex].message;
-                          const regexp = /这是第 \d+ 页 \/ 共 \d+ 页/i;
-                          if (regexp.test(message) === true) {
-                            text = button.text.replace("这是 ", "");
-                            const regexp = / (\d+) /gi;
-                            const matches = message.match(regexp);
-                            // console.log(matches);  //测试
-                            if (matches) {
-                              if (matches.length === 2) {
-                                if (matches[0] === matches[1]) {
-                                  temp = null;
-                                  if (this.queue === true) {
-                                    this.queue = false;
-                                    await this.ctx.storage.put("queue", false);
-                                    //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                                    this.sendForward("nextStep", "所有媒体已发送完毕", text, "update", false);
+                          const message = messageArray[messageIndex].message.trim();
+                          if (message) {
+                            const regexp = /这是第 \d+ 页 \/ 共 \d+ 页/i;
+                            if (regexp.test(message) === true) {
+                              text = button.text.replace("这是 ", "");
+                              const regexp = / (\d+) /gi;
+                              const matches = message.match(regexp);
+                              // console.log(matches);  //测试
+                              if (matches) {
+                                if (matches.length === 2) {
+                                  if (matches[0] === matches[1]) {
+                                    temp = null;
+                                    if (this.queue === true) {
+                                      this.queue = false;
+                                      await this.ctx.storage.put("queue", false);
+                                      //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                                      this.sendForward("nextStep", "所有媒体已发送完毕", text, "update", false);
+                                    }
                                   }
+                                } else {
+                                  //console.log("(" + this.currentStep + ") " + text);
+                                  this.sendForward("nextStep", "", text, "update", false);
                                 }
-                              } else {
-                                //console.log("(" + this.currentStep + ") " + text);
-                                this.sendForward("nextStep", "", text, "update", false);
                               }
                             }
                           }
@@ -833,18 +835,20 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
-                  if (message.substr(0, 10) === "blgjlqbot_") {
-                    await this.ctx.storage.put(message, 1);
-                    this.getCount(message);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message === "所有媒体已发送完毕。") {
-                    temp = null;
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                      this.sendForward("nextStep", "所有媒体已发送完毕", text, "update", false);
+                  if (message) {
+                    if (message.substr(0, 10) === "blgjlqbot_") {
+                      await this.ctx.storage.put(message, 1);
+                      this.getCount(message);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message === "所有媒体已发送完毕。") {
+                      temp = null;
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                        this.sendForward("nextStep", "所有媒体已发送完毕", text, "update", false);
+                      }
                     }
                   }
                 }
@@ -1085,27 +1089,29 @@ export class WebSocketServer extends DurableObject {
                               data: button.data,
                             };
                           } else {
-                            const message = messageArray[messageIndex].message;
-                            const regexp = /这是第 \d+ 页 \/ 共 \d+ 页/i;
-                            if (regexp.test(message) === true) {
-                              text = button.text.replace("这是 ", "");
-                              const regexp = / (\d+) /gi;
-                              const matches = message.match(regexp);
-                              // console.log(matches);  //测试
-                              if (matches) {
-                                if (matches.length === 2) {
-                                  if (matches[0] === matches[1]) {
-                                    temp = null;
-                                    if (this.queue === true) {
-                                      this.queue = false;
-                                      await this.ctx.storage.put("queue", false);
-                                      //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                                      this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                            const message = messageArray[messageIndex].message.trim();
+                            if (message) {
+                              const regexp = /这是第 \d+ 页 \/ 共 \d+ 页/i;
+                              if (regexp.test(message) === true) {
+                                text = button.text.replace("这是 ", "");
+                                const regexp = / (\d+) /gi;
+                                const matches = message.match(regexp);
+                                // console.log(matches);  //测试
+                                if (matches) {
+                                  if (matches.length === 2) {
+                                    if (matches[0] === matches[1]) {
+                                      temp = null;
+                                      if (this.queue === true) {
+                                        this.queue = false;
+                                        await this.ctx.storage.put("queue", false);
+                                        //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                                        this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                                      }
                                     }
+                                  } else {
+                                    //console.log("(" + this.currentStep + ") " + text);
+                                    this.sendForward("start", "", text, "update", false);
                                   }
-                                } else {
-                                  //console.log("(" + this.currentStep + ") " + text);
-                                  this.sendForward("start", "", text, "update", false);
                                 }
                               }
                             }
@@ -1140,18 +1146,20 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
-                    if (message.substr(0, 10) === "blgjlqbot_") {
-                      await this.ctx.storage.put(message, 1);
-                      this.getCount(message);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message === "所有媒体已发送完毕。") {
-                      temp = null;
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                        this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                    if (message) {
+                      if (message.substr(0, 10) === "blgjlqbot_") {
+                        await this.ctx.storage.put(message, 1);
+                        this.getCount(message);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                      } else if (message === "所有媒体已发送完毕。") {
+                        temp = null;
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                          this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                        }
                       }
                     }
                   }

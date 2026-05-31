@@ -854,39 +854,41 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
-                  const str = message.substr(0, 10);
-                  if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
-                    await this.ctx.storage.put(message, 1);
-                    this.getCount(message);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message === "正在取件...") {
-                    this.wait = true;
-                  } else if (message.includes("密钥不存在或无权访问") === true) {
-                    this.wait = false;
-                    //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
-                    this.sendLog("nextStep", "密钥不存在或无权访问", "error", true);
-                  } else if (message.includes("操作太频繁，请等待") === true) {
-                    const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
-                    if (time && time > 0) {
-                      this.flood = new Date().getTime() + 60000 + time * 1000;
-                      await this.ctx.storage.put("client", this.flood);
-                    }
-                    //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                    this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                  } else {
-                    const regexp = /📄 第\d+页\/共\d+页/i;
-                    if (regexp.test(message) === true) {
-                      const regexp = /(\d+)/gi;
-                      const matches = message.match(regexp);
-                      // console.log(matches);  //测试
-                      if (matches && matches.length === 2) {
-                        if (matches[0] === matches[1]) {
-                          if (this.queue === true) {
-                            this.queue = false;
-                            await this.ctx.storage.put("queue", false);
-                            //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                            this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                  if (message) {
+                    const str = message.substr(0, 10);
+                    if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
+                      await this.ctx.storage.put(message, 1);
+                      this.getCount(message);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message === "正在取件...") {
+                      this.wait = true;
+                    } else if (message.includes("密钥不存在或无权访问") === true) {
+                      this.wait = false;
+                      //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
+                      this.sendLog("nextStep", "密钥不存在或无权访问", "error", true);
+                    } else if (message.includes("操作太频繁，请等待") === true) {
+                      const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
+                      if (time && time > 0) {
+                        this.flood = new Date().getTime() + 60000 + time * 1000;
+                        await this.ctx.storage.put("client", this.flood);
+                      }
+                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
+                    } else {
+                      const regexp = /📄 第\d+页\/共\d+页/i;
+                      if (regexp.test(message) === true) {
+                        const regexp = /(\d+)/gi;
+                        const matches = message.match(regexp);
+                        // console.log(matches);  //测试
+                        if (matches && matches.length === 2) {
+                          if (matches[0] === matches[1]) {
+                            if (this.queue === true) {
+                              this.queue = false;
+                              await this.ctx.storage.put("queue", false);
+                              //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                              this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                            }
                           }
                         }
                       }
@@ -1189,39 +1191,41 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
-                    const str = message.substr(0, 10);
-                    if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
-                      await this.ctx.storage.put(message, 1);
-                      this.getCount(message);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("start", "代码入库完毕", "", "add", false);
-                    } else if (message === "正在取件...") {
-                      this.wait = true;
-                    } else if (message.includes("密钥不存在或无权访问") === true) {
-                      this.wait = false;
-                      //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
-                      this.sendLog("start", "密钥不存在或无权访问", "error", true);
-                    } else if (message.includes("操作太频繁，请等待") === true) {
-                      const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
-                      if (time && time > 0) {
-                        this.flood = new Date().getTime() + 60000 + time * 1000;
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                    } else {
-                      const regexp = /📄 第\d+页\/共\d+页/i;
-                      if (regexp.test(message) === true) {
-                        const regexp = /(\d+)/gi;
-                        const matches = message.match(regexp);
-                        // console.log(matches);  //测试
-                        if (matches && matches.length === 2) {
-                          if (matches[0] === matches[1]) {
-                            if (this.queue === true) {
-                              this.queue = false;
-                              await this.ctx.storage.put("queue", false);
-                              // console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                              this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
+                    if (message) {
+                      const str = message.substr(0, 10);
+                      if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
+                        await this.ctx.storage.put(message, 1);
+                        this.getCount(message);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message === "正在取件...") {
+                        this.wait = true;
+                      } else if (message.includes("密钥不存在或无权访问") === true) {
+                        this.wait = false;
+                        //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
+                        this.sendLog("start", "密钥不存在或无权访问", "error", true);
+                      } else if (message.includes("操作太频繁，请等待") === true) {
+                        const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
+                        if (time && time > 0) {
+                          this.flood = new Date().getTime() + 60000 + time * 1000;
+                          await this.ctx.storage.put("client", this.flood);
+                        }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
+                      } else {
+                        const regexp = /📄 第\d+页\/共\d+页/i;
+                        if (regexp.test(message) === true) {
+                          const regexp = /(\d+)/gi;
+                          const matches = message.match(regexp);
+                          // console.log(matches);  //测试
+                          if (matches && matches.length === 2) {
+                            if (matches[0] === matches[1]) {
+                              if (this.queue === true) {
+                                this.queue = false;
+                                await this.ctx.storage.put("queue", false);
+                                // console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                                this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
+                              }
                             }
                           }
                         }

@@ -337,98 +337,6 @@ export class WebSocketServer extends DurableObject {
     //await scheduler.wait(5000);
   }
 
-  async getClientError(tryCount) {
-    if (tryCount === 20) {
-      this.stop = 2;
-      //console.log("(" + this.currentStep + ")getClient超出tryCount限制");
-      this.sendLog("getClient", "超出tryCount限制", null, true);
-      await this.close();
-    } else {
-      await scheduler.wait(10000);
-      await this.getClient(tryCount + 1);
-    }
-  }
-
-  async getClient(tryCount) {
-    this.apiCount += 1;
-    let configResult = {};
-    try {
-      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'favorites' AND `tgId` = 999 LIMIT 1;").run();
-    } catch (e) {
-      //console.log("getClient出错 : " + e);
-      this.sendLog("getClient", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
-        this.stop = 2;
-        this.broadcast({
-          "result": "pause",
-        });
-        await this.close();
-      } else {
-        await this.getClientError(tryCount);
-      }
-      return;
-    }
-    //console.log("configResult : " + configResult);  //测试
-    if (configResult.success === true) {
-      if (configResult.results && configResult.results.length > 0) {
-        const result = configResult.results[0];
-        if (result.chatId && result.chatId > 0) {
-          this.chatId = result.chatId;
-          this.lastChat = this.chatId;
-        }
-      } else {
-        //console.log("没有预设client");
-        this.sendLog("getClient", "没有预设client", null, false);
-      }
-    } else {
-      //console.log("查询client失败");
-      this.sendLog("getClient", "查询client失败", null, true);
-      await this.getClientError(tryCount);
-    }
-  }
-
-  async updateClientError(tryCount) {
-    if (tryCount === 20) {
-      this.stop = 2;
-      //console.log("(" + this.currentStep + ")updateClient超出tryCount限制");
-      this.sendLog("updateClient", "超出tryCount限制", null, true);
-      await this.close();
-    } else {
-      await scheduler.wait(10000);
-      await this.updateClient(tryCount + 1);
-    }
-  }
-
-  async updateClient(tryCount) {
-    this.apiCount += 1;
-    let configResult = {};
-    try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'favorites' AND `tgId` = 999;").bind(this.chatId).run();
-    } catch (e) {
-      //console.log("updateClient出错 : " + e);
-      this.sendLog("updateClient", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
-        this.stop = 2;
-        this.broadcast({
-          "result": "pause",
-        });
-        await this.close();
-      } else {
-        await this.updateClientError(tryCount);
-      }
-      return;
-    }
-    //console.log(configResult);  //测试
-    if (configResult.success === true) {
-      //console.log("更新config数据成功");
-      this.sendLog("updateClient", "更新client数据成功", null, false);
-    } else {
-      //console.log("更新config数据失败");
-      this.sendLog("updateClient", "更新client数据失败", null, true);
-      await this.updateClientError(tryCount);
-    }
-  }
-
   async getConfigError(tryCount, option) {
     if (tryCount === 20) {
       this.stop = 2;
@@ -445,7 +353,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'favorites' AND `tgId` = ? LIMIT 1;").bind(this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'favorites' AND `tgId` = 0 LIMIT 1;").run();
     } catch (e) {
       //console.log("getConfig出错 : " + e);
       this.sendLog("getConfig", "出错 : " + e.message, null, true);
@@ -466,9 +374,8 @@ export class WebSocketServer extends DurableObject {
         const result = configResult.results[0];
         if (!option || !option.chatId) {
           if (result.chatId && result.chatId > 0) {
-            // this.chatId = result.chatId;
-            // this.lastChat = this.chatId;
-            this.offsetId = result.chatId;
+            this.chatId = result.chatId;
+            this.lastChat = this.chatId;
           }
         }
         // if (!option || !option.filterType) {
@@ -497,7 +404,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async updateConfigError(tryCount, messageLength) {
+  async updateConfigError(tryCount) {
     if (tryCount === 20) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")updateConfig超出tryCount限制");
@@ -505,15 +412,15 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.updateConfig(tryCount + 1, messageLength);
+      await this.updateConfig(tryCount + 1);
     }
   }
 
-  async updateConfig(tryCount, messageLength) {
+  async updateConfig(tryCount) {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'favorites' AND `tgId` = ?;").bind(this.offsetId, this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'favorites' AND `tgId` = 0;").bind(this.chatId).run();
     } catch (e) {
       //console.log("updateConfig出错 : " + e);
       this.sendLog("updateConfig", "出错 : " + e.message, null, true);
@@ -524,18 +431,18 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.updateConfigError(tryCount, messageLength);
+        await this.updateConfigError(tryCount);
       }
       return;
     }
     //console.log(configResult);  //测试
     if (configResult.success === true) {
-      //console.log("更新config数据成功 - " + messageLength);
-      this.sendLog("updateConfig", "更新config数据成功 - " + messageLength, null, false);
+      //console.log("更新config数据成功");
+      this.sendLog("updateConfig", "更新config数据成功", null, false);
     } else {
-      //console.log("更新config数据失败 - " + messageLength);
-      this.sendLog("updateConfig", "更新config数据失败 - " + messageLength, null, true);
-      await this.updateConfigError(tryCount, messageLength);
+      //console.log("更新config数据失败");
+      this.sendLog("updateConfig", "更新config数据失败", null, true);
+      await this.updateConfigError(tryCount);
     }
   }
 
@@ -667,6 +574,58 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async updateChatError(tryCount, messageLength) {
+    if (tryCount === 20) {
+      this.stop = 2;
+      //console.log("(" + this.currentStep + ")updateChat超出tryCount限制");
+      this.sendLog("updateChat", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.updateChat(tryCount + 1, messageLength);
+    }
+  }
+
+  async updateChat(tryCount, messageLength) {
+    this.apiCount += 1;
+    let chatResult = {};
+    try {
+      // if (this.filterType === 0) {
+        chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `current` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
+      // } else if (this.filterType === 1) {
+      //   chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `photo` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
+      // } else if (this.filterType === 2) {
+      //   chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `video` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
+      // } else if (this.filterType === 3) {
+      //   chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `document` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
+      // } else if (this.filterType === 4) {
+      //   chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `gif` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
+      // }
+    } catch (e) {
+      //console.log("(" + this.currentStep + ")updateChat出错 : " + e);
+      this.sendLog("updateChat", "出错 : " + e.message, null, true);
+      if (e.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.updateChatError(tryCount, messageLength);
+      }
+      return;
+    }
+    //console.log(chatResult);  //测试
+    if (chatResult.success === true) {
+      //console.log("(" + this.currentStep + ")更新chat数据成功 - " + messageLength);
+      this.sendLog("updateChat", "更新chat数据成功 - " + messageLength, null, false);
+    } else {
+      //console.log("(" + this.currentStep + ")更新chat数据失败 - " + messageLength);
+      this.sendLog("updateChat", "更新chat数据失败 - " + messageLength, null, true);
+      await this.updateChatError(tryCount, messageLength);
+    }
+  }
+
   async getMessage(tryCount) {
     try {
       // let count = 0;
@@ -715,12 +674,9 @@ export class WebSocketServer extends DurableObject {
         this.fromPeer = null;
         this.chatId += 1;
         if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
-          //console.log(this.chatArray[this.chatId].name + " : chat已不存在了");  //测试
-          this.sendLog("getMessage", this.chatArray[this.chatId].name + " : chat已不存在了", null, true);
+          //console.log("chat已不存在了");  //测试
+          this.sendLog("getMessage", "chat已不存在了", null, true);
           await this.getChat(1);
-          await this.updateClient(1);
-          this.offsetId = 0;
-          await this.getConfig(1);
         } else {
           //console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
@@ -965,7 +921,7 @@ export class WebSocketServer extends DurableObject {
       // }
       return index;
     } else if (this.stop === 2) {
-      await this.updateConfig(1, 0);
+      await this.updateChat(1, 0);
       this.broadcast({
         "result": "pause",
       });
@@ -1149,7 +1105,7 @@ export class WebSocketServer extends DurableObject {
       // }
       return index;
     } else if (this.stop === 2) {
-      await this.updateConfig(1, 0);
+      await this.updateChat(1, 0);
       this.broadcast({
         "result": "pause",
       });
@@ -1358,7 +1314,7 @@ export class WebSocketServer extends DurableObject {
                 this.offsetId += 1;
                 return true;
               } else if (this.stop === 2) {
-                await this.updateConfig(1, 0);
+                await this.updateChat(1, 0);
                 this.broadcast({
                   "result": "pause",
                 });
@@ -1451,7 +1407,7 @@ export class WebSocketServer extends DurableObject {
                     const Pindex = await this.endPhotoMessage(id, accessHash, dcId, photoIndex, type, size);
                     await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
                   } else if (this.stop === 2) {
-                    await this.updateConfig(1, 0);
+                    await this.updateChat(1, 0);
                     this.broadcast({
                       "result": "pause",
                     });
@@ -1532,7 +1488,7 @@ export class WebSocketServer extends DurableObject {
                 this.offsetId += 1;
                 return true;
               } else if (this.stop === 2) {
-                await this.updateConfig(1, 0);
+                await this.updateChat(1, 0);
                 this.broadcast({
                   "result": "pause",
                 });
@@ -1579,13 +1535,12 @@ export class WebSocketServer extends DurableObject {
     this.count = 0;
     if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
       await this.getChat(1);
-      await this.updateClient(1);
       this.offsetId = 0;
       await this.getConfig(1);
       if (this.fromPeer) {
         if (this.chatId != this.lastChat) {
           // if (this.lastChat != 48) {
-            await this.updateConfig(1, 0);
+            await this.updateChat(1, 0);
           // }
           this.lastChat = this.chatId;
         }
@@ -1680,13 +1635,13 @@ export class WebSocketServer extends DurableObject {
       }
       // this.offsetId += this.count;
       this.count = 0;
-      await this.updateConfig(1, messageLength);
+      await this.updateChat(1, messageLength);
       //console.log("(" + this.currentStep + ") 成功转发了" + length + "条消息");
       this.sendForward("forwardMessage", "成功转发了" + messageLength + "条消息", messageLength, "update", false);
     } else {
       // this.offsetId += this.count;
       this.count = 0;
-      await this.updateConfig(1, 0);
+      await this.updateChat(1, 0);
       this.errorCount += 1;
       // if (this.errorCount >= 3) {
       //   await this.ctx.storage.put(this.chatId, 0);
@@ -1869,7 +1824,7 @@ export class WebSocketServer extends DurableObject {
         } else if (this.count > 0) {
           // this.offsetId += this.count;
           this.count = 0;
-          await this.updateConfig(1, 0);
+          await this.updateChat(1, 0);
           this.errorCount += 1;
           // if (this.errorCount >= 3) {
           //   await this.ctx.storage.put(this.chatId, 0);
@@ -1898,7 +1853,7 @@ export class WebSocketServer extends DurableObject {
             await this.close();
           }
         } else {
-          await this.updateConfig(1, 0);
+          await this.updateChat(1, 0);
           //console.log("(" + this.currentStep + ")" + this.chatId + " : 当前chat采集完毕");
           this.sendLog("nextStep", "当前chat采集完毕", null, false);
           this.broadcast({
@@ -1930,7 +1885,7 @@ export class WebSocketServer extends DurableObject {
         // this.ctx.abort("reset");
       }
     } else if (this.stop === 2) {
-      await this.updateConfig(1, 0);
+      await this.updateChat(1, 0);
       this.broadcast({
         "result": "pause",
       });
@@ -1965,11 +1920,9 @@ export class WebSocketServer extends DurableObject {
     this.init(option);
     // this.stop = 1;
     await this.open(1);
-    await this.getClient(1);
     await this.getChat(1);
     if (this.fromPeer) {
       if (this.chatId != this.lastChat) {
-        await this.updateClient(1);
         this.lastChat = this.chatId;
       }
       if (this.stop === 1) {
@@ -2134,7 +2087,7 @@ export class WebSocketServer extends DurableObject {
         } else if (this.count > 0) {
           // this.offsetId += this.count;
           this.count = 0;
-          await this.updateConfig(1, 0);
+          await this.updateChat(1, 0);
           this.errorCount += 1;
           // if (this.errorCount >= 3) {
           //   await this.ctx.storage.put(this.chatId, 0);
@@ -2163,7 +2116,7 @@ export class WebSocketServer extends DurableObject {
             await this.close();
           }
         } else {
-          await this.updateConfig(1, 0);
+          await this.updateChat(1, 0);
           //console.log("(" + this.currentStep + ")" + this.chatId + " : 当前chat采集完毕");
           this.sendLog("start", "当前chat采集完毕", null, false);
           this.broadcast({
@@ -2416,8 +2369,8 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.deleteAll();
       //console.log("删除cache成功");
       this.broadcast({
-        "operate": "clearCache",
         "step": this.currentStep,
+        "operate": "clearCache",
         "message": "删除cache成功",
         "error": true,
         "date": new Date().getTime(),
@@ -2456,7 +2409,7 @@ export class WebSocketServer extends DurableObject {
 
   async webSocketClose(ws, code, reason, wasClean) {
     // if (this.stop === 1) {
-    //   await this.updateConfig(1);
+    //   await this.updateChat(1);
     // }
     // this.stop = 0;
     ws.close(code, "Durable Object is closing WebSocket");

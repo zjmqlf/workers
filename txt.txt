@@ -41,9 +41,6 @@ zjmqlf2024:
 npm run build-qqfile
 npm run deploy-qqfile
 
-npm run build-qqfilen
-npm run deploy-qqfilen
-
 npm run build-zhuhaihai
 npm run deploy-zhuhaihai
 

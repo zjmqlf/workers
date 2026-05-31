@@ -1,5 +1,4 @@
 import { botString } from "../../src/botString";
-import { envString } from "../../src/botString";
 
 interface PagesEnv {
   WS_SERVER: DurableObjectNamespace;
@@ -17,6 +16,20 @@ export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params 
         status: 426,
     });
   }
+  const envString = {
+    "0": env,
+    "1": env.qqfile_WebSocketServer,
+    "2": env.lockhive_WebSocketServer,
+    "3": env.zhuhaihai_WebSocketServer,
+    "4": env.paniang_WebSocketServer,
+    "5": env.zyxfiles_WebSocketServer,
+    "6": env.kodexfile_WebSocketServer,
+    "7": env.kodexfiles2_WebSocketServer,
+    "8": env.deanignitenations_WebSocketServer,
+    '9': env.ryumasepongmilku_WebSocketServer,
+    "10": env.hikkitusbolpaijo_WebSocketServer,
+    "11": env.lunindiacipoksupretto_WebSocketServer,
+  };
   // const bot:string = context.params.bot;
   const bot:string = params.bot;
   // console.log(bot);  //测试

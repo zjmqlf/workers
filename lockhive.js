@@ -783,24 +783,26 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
-                  // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
-                  if (message.substr(0, 3) === "LH_") {
-                    await this.ctx.storage.put(message, 1);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                  } else if (message.includes("🚫 操作过于频繁") === true) {
-                    const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
-                    const matches = message.match(regexp);
-                    // console.log(matches);  //测试
-                    if (matches && matches.length === 1) {
-                      const time = matches[0];
-                      if (time && time > 0) {
-                        this.flood = new Date().getTime() + 30000 + time * 1000;
-                        await this.ctx.storage.put("client", this.flood);
+                  if (message) {
+                    // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
+                    if (message.substr(0, 3) === "LH_") {
+                      await this.ctx.storage.put(message, 1);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message.includes("🚫 操作过于频繁") === true) {
+                      const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
+                      const matches = message.match(regexp);
+                      // console.log(matches);  //测试
+                      if (matches && matches.length === 1) {
+                        const time = matches[0];
+                        if (time && time > 0) {
+                          this.flood = new Date().getTime() + 30000 + time * 1000;
+                          await this.ctx.storage.put("client", this.flood);
+                        }
                       }
+                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
-                    //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                    this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                   }
                 }
               }
@@ -1079,24 +1081,26 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
-                    // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
-                    if (message.substr(0, 3) === "LH_") {
-                      await this.ctx.storage.put(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("start", "代码入库完毕", "", "add", false);
-                    } else if (message.includes("🚫 操作过于频繁") === true) {
-                      const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
-                      const matches = message.match(regexp);
-                      // console.log(matches);  //测试
-                      if (matches && matches.length === 1) {
-                        const time = matches[0];
-                        if (time && time > 0) {
-                          this.flood = new Date().getTime() + 30000 + time * 1000;
-                          await this.ctx.storage.put("client", this.flood);
+                    if (message) {
+                      // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
+                      if (message.substr(0, 3) === "LH_") {
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message.includes("🚫 操作过于频繁") === true) {
+                        const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
+                        const matches = message.match(regexp);
+                        // console.log(matches);  //测试
+                        if (matches && matches.length === 1) {
+                          const time = matches[0];
+                          if (time && time > 0) {
+                            this.flood = new Date().getTime() + 30000 + time * 1000;
+                            await this.ctx.storage.put("client", this.flood);
+                          }
                         }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }

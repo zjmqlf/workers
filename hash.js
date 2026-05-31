@@ -2434,9 +2434,9 @@ export class WebSocketServer extends DurableObject {
   async getDialog(tryCount) {
     try {
       for await (const dialog of this.client.iterDialogs({})) {
-        if (dialog.isChannel === true) {
+        // if (dialog.isChannel === true) {
           this.dialogArray.push(dialog);
-        }
+        // }
       }
     } catch (e) {
       this.dialogArray = [];
@@ -2496,7 +2496,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async insertChatError(tryCount, channelId, accessHash, username, title) {
+  async insertChatError(tryCount, channelId, accessHash, chatType, username, title, noforwards) {
     if (tryCount === 20) {
       this.stop = 2;
       //console.log("insertChat超出tryCount限制");
@@ -2504,15 +2504,15 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertChat(tryCount + 1, channelId, accessHash, username, title);
+      await this.insertChat(tryCount + 1, channelId, accessHash, chatType, username, title, noforwards);
     }
   }
 
-  async insertChat(tryCount, channelId, accessHash, username, title) {
+  async insertChat(tryCount, channelId, accessHash, chatType, username, title, noforwards) {
     this.apiCount += 1;
     let chatResult = {};
     try {
-      chatResult = await this.env.MAINDB.prepare("INSERT INTO `CHAT` (channelId, accessHash, username, title, current, photo, video, document, gif, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, username, title, 0, 0, 0, 0, 0, 1).run();
+      chatResult = await this.env.MAINDB.prepare("INSERT INTO `CHAT` (channelId, accessHash,  chatType, username, title, noforwards, current, photo, video, document, gif, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, chatType, username, title, noforwards, 0, 0, 0, 0, 0, 1).run();
     } catch (e) {
       //console.log("insertChat出错 : " + e);;
       this.sendLog("insertChat", "出错 : " + e.message, "try", true);
@@ -2523,7 +2523,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.insertChatError(tryCount, channelId, accessHash, username, title);
+        await this.insertChatError(tryCount, channelId, accessHash, chatType, username, title, noforwards);
       }
       return;
     }
@@ -2534,7 +2534,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       //console.log("插入chat数据失败");
       this.sendLog("insertChat", "插入chat数据失败", "error", true);
-      await this.insertChatError(tryCount, channelId, accessHash, username, title);
+      await this.insertChatError(tryCount, channelId, accessHash, chatType, username, title, noforwards);
     }
   }
 
@@ -2563,32 +2563,47 @@ export class WebSocketServer extends DurableObject {
     for await (const dialog of dialogArray) {
       if (this.stop === 1) {
         if (this.apiCount < 900) {
-          let channelId = "";
-          let accessHash = "";
-          if (dialog.isChannel === true) {
-            channelId = dialog.inputEntity.channelId.toString();
-            accessHash = dialog.inputEntity.accessHash.toString();
+          if (dialog.title === "test110") {
           } else {
-            // channelId = dialog.id.toString();
-            continue;
-          }
-          //console.log(channelId + " : " + accessHash);  //测试
-          if (channelId && accessHash) {
-            const chatCount = await this.selectChat(1, channelId, accessHash);
-            //console.log("chatCount : " + chatCount);  //测试
-            if (parseInt(chatCount) === 0) {
-              count += 1;
-              const username = dialog.entity.username || dialog.draft._entity.username || "";
-              await this.insertChat(1, channelId, accessHash, username, dialog.title);
-              //console.log("chat - 新插入chat了 : " + dialog.title);
-              this.sendLog("chat", "新插入chat了 : " + dialog.title, null, false);
+            let channelId = "";
+            let accessHash = "";
+            let chatType = 0;
+            if (dialog.isChannel === true) {
+              chatType = 1;
+              channelId = dialog.inputEntity.channelId.toString();
+              accessHash = dialog.inputEntity.accessHash.toString();
+            } else if (dialog.isUser === true) {
+              chatType = 2;
+              // if (dialog.draft._entity.bot === true && dialog.draft._entity.deleted === false) {
+              // if (dialog.entity.bot === true && dialog.entity.deleted === false) {
+              // if (dialog.draft._entity.bot === true) {
+              if (dialog.entity.bot === true) {
+                channelId = dialog.inputEntity.userId.toString();
+                accessHash = dialog.inputEntity.accessHash.toString();
+              }
             } else {
-              //console.log("chat - " + count + " : chat已在数据库中 - " + dialog.title);
-              this.sendLog("chat", "chat已在数据库中 - " + dialog.title, null, false);
+              // channelId = dialog.id.toString();
+              continue;
             }
-          } else {
-            //console.log("chat - channelId或accessHash错误 : " + dialog.title);
-            this.sendLog("chat", "channelId或accessHash错误 : " + dialog.title, null, true);
+            //console.log(channelId + " : " + accessHash);  //测试
+            if (channelId && accessHash) {
+              const chatCount = await this.selectChat(1, channelId, accessHash);
+              //console.log("chatCount : " + chatCount);  //测试
+              if (parseInt(chatCount) === 0) {
+                count += 1;
+                const username = dialog.entity.username || dialog.draft._entity.username || "";
+                const noforwards = (dialog.entity.noforwards === true || dialog.draft._entity.noforwards === true) ? 1 : 0;
+                await this.insertChat(1, channelId, accessHash, chatType, username, dialog.title, noforwards);
+                //console.log("chat - 新插入chat了 : " + dialog.title);
+                this.sendLog("chat", "新插入chat了 : " + dialog.title, null, false);
+              } else {
+                //console.log("chat - " + count + " : chat已在数据库中 - " + dialog.title);
+                this.sendLog("chat", "chat已在数据库中 - " + dialog.title, null, false);
+              }
+            } else {
+              //console.log("chat - channelId或accessHash错误 : " + dialog.title);
+              this.sendLog("chat", "channelId或accessHash错误 : " + dialog.title, null, true);
+            }
           }
         } else {
           this.stop = 2;
