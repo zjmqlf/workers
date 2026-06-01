@@ -1369,5 +1369,8 @@
   "mtfxqbot_3V_1P_p1f797k5d2g0x7w6q3y1",
   "mtfxqbot_2V_71V7N7o5k29027B4F4y2",
   "mtfxqbot_4V_A1m7M7V4l7k5l3r3V3w2",
-  "mtfxqbot_1P_11a7g714A7z109A0d0C1"
+  "mtfxqbot_1P_11a7g714A7z109A0d0C1",
+  "mtfxqbot_2V_z1I787S456z9i5W5p1O4",
+  "mtfxqbot_3V_u1D7C7o4Z6Y9m59627c2",
+  "mtfxqbot_1V_T1f7G79426o9Z5C7R685"
 ]

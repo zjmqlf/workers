@@ -9,11 +9,6 @@ KodeXFiles2bot
 8508964084
 8777468622410567541
 
-KodeXMedia1bot
-KodeXMedia1bot
-8281571457
-713613322439788943
-
 DEANIgniteNations
 DEANIgniteNations_bot
 8737186679
@@ -24,10 +19,10 @@ LunindiaCipokSupretto_bot
 8554653830
 -3683149469932305016
 
-4KPartyKodeXChat
-WonkaLopeOnaa_bot
-8673393691
-62958369251494747
+Rumahnya
+semakinkumenyayangimu_bot
+8642264928
+-3391943673701799661
 
 RyumaSepongMilku
 RyumaSepongMilku_bot
@@ -38,6 +33,16 @@ HikkiTusbolPaijo
 HikkiTusbolPaijo_bot
 8718756852
 2206641291710006927
+
+Penuhilah
+paniang_bot
+8750402925
+-7157880297278168937
+
+4KPartyKodeXChat
+WonkaLopeOnaa_bot
+8673393691
+62958369251494747
 
 FileLeakBot - Official
 FileLeak6Bot
@@ -58,21 +63,6 @@ AllXFilesbot
 AllXFilesbot
 8470274095
 5404110966721261343
-
-Penuhilah
-paniang_bot
-8750402925
--7157880297278168937
-
-tebiejie1
-tebiejie1bot
-8695630521
-2693924170044478923
-
-lisafilebot
-lisafilebot
-8604497307
--1502844271026982319
 
 𝖱𝖤𝖣𝖣 𝖥𝖨𝖫𝖤
 REDDFILEBOT
@@ -104,11 +94,6 @@ ddpan5bot
 8782401608
 -8904531925910632640
 
-Tzycode
-Tzy01filebot
-8680521598
-4599185688894237898
-
 koleksi eceran
 Koleksinya1_bot
 7551237130
@@ -119,20 +104,15 @@ FileFileCodeBot
 8241178376
 -3622154428978352761
 
-QQ解码器n8zw
-QQn8zw_bot
-8956114328
--3902777670250974710
+QQ解码器t8a7
+QQt8a7_bot
+8992344112
+5843761111782220187
 
-QQ解码器N
-QQfilen_bot
-8697745192
-6713123108211114349
-
-QQ解码器T
-qqfilet_bot
-8709025117
--2189038987913291823
+QQ解码器lx
+QQkzoh_lxbot
+8932537033
+6998217417694956428
 
 zhuhaihai
 Zhuahihaibot
@@ -145,9 +125,9 @@ nnfilebot
 -1388224743701786177
 
 稚月轩解码机器人
-zyxwj3_bot
-8815061395
-5035671386457398915
+zyxwj4_bot
+8789269626
+122054363589981539
 
 ☁️蜂巢文件加密☁️
 LockHiveFilebot
@@ -223,6 +203,38 @@ HiveSeekbot
 
 
 
+
+
+
+FileSourceBot
+FileLeakBot
+8554859780
+-6753499946272396397
+
+KodeXMedia1bot
+KodeXMedia1bot
+8281571457
+713613322439788943
+
+tebiejie1
+tebiejie1bot
+8695630521
+2693924170044478923
+
+Tzycode
+Tzy01filebot
+8680521598
+4599185688894237898
+
+TGjmq0fyvcbot
+8691080012
+955545826431244642
+
+lisafilebot
+lisafilebot
+8604497307
+-1502844271026982319
+
 临时文件
 Teestpanbot
 8583257773
@@ -232,10 +244,6 @@ Teestpanbot
 tgjmq5bot
 8739054943
 -5019818591313862931
-
-TGjmq0fyvcbot
-8691080012
-955545826431244642
 
 电报解码器
 TGjmqp29esbot
@@ -256,11 +264,6 @@ lockhive_bot
 tg_decoderbot
 8723732232
 7747556831726811342
-
-FileSourceBot
-FileLeakBot
-8554859780
--6753499946272396397
 
 汤不热解码器
 TangBRebot
@@ -292,6 +295,11 @@ QQnsxo_bot
 8730325489
 5466912263987380362
 
+QQ解码器n8zw
+QQn8zw_bot
+8956114328
+-3902777670250974710
+
 QQ解码器F
 QQfilef_bot
 8548683454
@@ -312,6 +320,16 @@ QQfilek_bot
 8466548874
 6430572177113500135
 
+QQ解码器N
+QQfilen_bot
+8697745192
+6713123108211114349
+
+QQ解码器T
+qqfilet_bot
+8709025117
+-2189038987913291823
+
 LH_仓库
 LHDATA_BOT
 8628417627
@@ -331,6 +349,11 @@ zyxwj_bot
 zyxwj2_bot
 8820236134
 -9133178862433181868
+
+稚月轩解码机器人
+zyxwj3_bot
+8815061395
+5035671386457398915
 
 媒体解码机器人正式版
 zyxkc6_bot

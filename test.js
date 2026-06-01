@@ -165,61 +165,61 @@ export default {
       // let channelId = 0;
       // let accessHash = 0;
       // let index = 0;
-      // for await (const dialog of client[clientIndex].iterDialogs({})) {
-      //   // index += 1;
-      //   // if (index === 5) {
-      //   // //   const cache = [];
-      //   // //   const json_str = JSON.stringify(dialog, function(key, value) {
-      //   // //     if (typeof value === 'object' && value !== null) {
-      //   // //       if (cache.indexOf(value) !== -1) {
-      //   // //         return;
-      //   // //       }
-      //   // //       cache.push(value);
-      //   // //     }
-      //   // //     return value;
-      //   // //   });
-      //   // //   console.log(json_str);  //测试
-      //   // //   break;  //测试
-      //   //   if (dialog.isChannel === true) {
-      //   //     console.log(dialog.entity.username);  //测试
-      //   //     console.log(dialog.draft._entity.username);  //测试
-      //   //     break;  //测试
-      //   //   }
-      //   // }
-      //   // if (dialog.isUser === true) {
-      //   if (dialog.draft._entity.bot === true) {
-      //   // if (dialog.entity.deleted === true) {
-      //   // if (dialog.draft._entity.bot === true && dialog.entity.deleted === true) {
-      //     const cache = [];
-      //     const json_str = JSON.stringify(dialog, function(key, value) {
-      //       if (typeof value === 'object' && value !== null) {
-      //         if (cache.indexOf(value) !== -1) {
-      //           return;
-      //         }
-      //         cache.push(value);
-      //       }
-      //       return value;
-      //     });
-      //     console.log(json_str);  //测试
-      //   }
-      //   // console.log(dialog);  //测试
-      //   // console.log(dialog.username);  //测试
-      //   // console.log(JSON.stringify(dialog));  //测试
-      //   //id = dialog.id;
-      //   //console.log(id);  //测试
-      //   // channelId = dialog.inputEntity.channelId;
-      //   // // channelId = dialog.draft._peer.channelId;
-      //   // // channelId = dialog.draft._entity.id;
-      //   // // channelId = dialog.entity.id;
-      //   // accessHash = dialog.inputEntity.accessHash;
-      //   // // accessHash = dialog.draft._entity.accessHash;
-      //   // // accessHash = dialog.entity.accessHash;
-      //   // console.log({"channelId1" : channelId});  //测试
-      //   // console.log({"accessHash2" : accessHash});  //测试
-      //   // break;  //测试
-      // }
-      // await close(clientIndex);  //测试
-      // return;  //测试
+      for await (const dialog of client[clientIndex].iterDialogs({})) {
+        // index += 1;
+        // if (index === 5) {
+        // //   const cache = [];
+        // //   const json_str = JSON.stringify(dialog, function(key, value) {
+        // //     if (typeof value === 'object' && value !== null) {
+        // //       if (cache.indexOf(value) !== -1) {
+        // //         return;
+        // //       }
+        // //       cache.push(value);
+        // //     }
+        // //     return value;
+        // //   });
+        // //   console.log(json_str);  //测试
+        // //   break;  //测试
+        //   if (dialog.isChannel === true) {
+        //     console.log(dialog.entity.username);  //测试
+        //     console.log(dialog.draft._entity.username);  //测试
+        //     break;  //测试
+        //   }
+        // }
+        // if (dialog.isUser === true) {
+        if (dialog.draft._entity.bot === true) {
+        // if (dialog.entity.deleted === true) {
+        // if (dialog.draft._entity.bot === true && dialog.entity.deleted === true) {
+          const cache = [];
+          const json_str = JSON.stringify(dialog, function(key, value) {
+            if (typeof value === 'object' && value !== null) {
+              if (cache.indexOf(value) !== -1) {
+                return;
+              }
+              cache.push(value);
+            }
+            return value;
+          });
+          console.log(json_str);  //测试
+        }
+        // console.log(dialog);  //测试
+        // console.log(dialog.username);  //测试
+        // console.log(JSON.stringify(dialog));  //测试
+        //id = dialog.id;
+        //console.log(id);  //测试
+        // channelId = dialog.inputEntity.channelId;
+        // // channelId = dialog.draft._peer.channelId;
+        // // channelId = dialog.draft._entity.id;
+        // // channelId = dialog.entity.id;
+        // accessHash = dialog.inputEntity.accessHash;
+        // // accessHash = dialog.draft._entity.accessHash;
+        // // accessHash = dialog.entity.accessHash;
+        // console.log({"channelId1" : channelId});  //测试
+        // console.log({"accessHash2" : accessHash});  //测试
+        // break;  //测试
+      }
+      await close(clientIndex);  //测试
+      return;  //测试
 
       // const fromPeer = await client[clientIndex].getInputEntity("me");
       // // console.log(fromPeer);  //测试
