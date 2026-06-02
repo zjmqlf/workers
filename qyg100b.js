@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./qqfilenString";
+import { codeString } from "./qyg100bString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -401,53 +401,6 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  getCount(text, type) {
-    if (type === 1) {
-      let string = text.split("-");
-      if (string.length === 2) {
-        string = string[1].split("_");
-        const length = string.length;
-        for (let i = 0; i < length; i++) {
-          let temp = string[i].split("P");
-          if (temp.length === 2) {
-            this.photoCount = parseInt(temp[0]);
-            continue;
-          }
-          temp = string[i].split("V");
-          if (temp.length === 2) {
-            this.videoCount = parseInt(temp[0]);
-            continue;
-          }
-          temp = string[i].split("D");
-          if (temp.length === 2) {
-            this.fileCount = parseInt(temp[0]);
-            continue;
-          }
-        }
-      }
-    } else if (type === 2) {
-      let string = text.split("_");
-      const length = string.length;
-      for (let i = 1; i < length; i++) {
-        let temp = string[i].split("P");
-        if (temp.length === 2) {
-          this.photoCount = parseInt(temp[0]);
-          continue;
-        }
-        temp = string[i].split("V");
-        if (temp.length === 2) {
-          this.videoCount = parseInt(temp[0]);
-          continue;
-        }
-        temp = string[i].split("D");
-        if (temp.length === 2) {
-          this.fileCount = parseInt(temp[0]);
-          continue;
-        }
-      }
-    }
-  }
-
   async sendQueryError(tryCount) {
     if (tryCount === 20) {
       //console.log("(" + this.currentStep + ")sendQuery超出tryCount限制");
@@ -763,7 +716,7 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
-          let temp = null;
+          // let temp = null;
           let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
@@ -771,35 +724,73 @@ export class WebSocketServer extends DurableObject {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
+                    let next = true;
+                    let found = false;
+                    const regexp1 = /✓\d+/i;
+                    const regexp2 = /●\d+●/i;
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
-                      for (const button of row.buttons) {
-                        // console.log(button);  //测试
-                        if (button.text === "📁推送剩余全部文件") {
-                          temp = {
-                            id: id,
-                            data: button.data,
-                          };
-                        } else if (button.text === "继续推送") {
-                          if (this.queue === true) {
-                            const result = await this.client.invoke(
-                              new Api.messages.GetBotCallbackAnswer({
-                                peer: this.fromPeer,
-                                msgId: id,
-                                data: button.data,
-                              })
-                            );
-                            //console.log("(" + this.currentStep + ") 继续推送");
-                            this.sendLog("nextStep", "继续推送", null, false);
-                            await scheduler.wait(10000);
-                            if (result && result.message) {
-                              this.sendLog("nextStep", result.message , null, false);
+                      if (next === true) {
+                        for (const button of row.buttons) {
+                          if (regexp1.test(button.text) === true) {
+                            if (this.queue === false) {
+                              this.queue = true;
+                              await this.ctx.storage.put("queue", true);
                             }
+                          } else if (regexp2.test(button.text) === true) {
+                            found = true;
+                            if (this.queue === false) {
+                              this.queue = true;
+                              await this.ctx.storage.put("queue", true);
+                            }
+                          } else if (typeof button.text === "number") {
+                            if (this.queue === false) {
+                              this.queue = true;
+                              await this.ctx.storage.put("queue", true);
+                            }
+                            if (found === true) {
+                              // temp = {
+                              //   id: id,
+                              //   data: button.data,
+                              // };
+                              if (this.queue === true) {
+                                // const result = await this.client.invoke(
+                                const result = this.client.invoke(
+                                  new Api.messages.GetBotCallbackAnswer({
+                                    peer: this.fromPeer,
+                                    msgId: id,
+                                    data: button.data,
+                                  })
+                                );
+                                //console.log("(" + this.currentStep + ") " + button.text);
+                                this.sendLog("nextStep", button.text, null, false);
+                                await scheduler.wait(15000);
+                                if (result && result.message) {
+                                  this.sendLog("nextStep", result.message , null, false);
+                                }
+                              }
+                              next = false;
+                              break;
+                            }
+                          // } else {
                           }
-                        // } else if (button.text === "❇️") {
-                        // } else if (button.text === "❎") {
-                        // } else {
+                        }
+                      }
+                    }
+                  }
+                  const message = messageArray[messageIndex].message.trim();
+                  if (message) {
+                    const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
+                    if (regexp.test(message) === true) {
+                      const regexp = / (\d+)\/(\d+) /gi;
+                      const matches = [...message.matchAll(regexp)];
+                      if (matches && matches.length === 3) {
+                        if (matches[1] === matches[2]) {
+                          if (this.queue === true) {
+                            this.queue = false;
+                            await this.ctx.storage.put("queue", false);
+                            //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                            this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                          }
                         }
                       }
                     }
@@ -829,23 +820,12 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                  const message = messageArray[messageIndex].message.trim();
-                  if (message && message.includes("文件获取完毕") === true) {
-                    if (this.queue === true) {
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 文件获取完毕");
-                      this.sendForward("nextStep", "文件获取完毕", "", "update", false);
-                    }
-                  }
                 } else {
                   const message = messageArray[messageIndex].message.trim();
                   if (message) {
                     const string = message.split(":");
-                    if (string[0] === "qqfilen_bot") {
-                      // await this.ctx.storage.put(message, 1);
-                      await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                      this.getCount(message, 2);
+                    if (string[0] === "QYG100B_bot") {
+                      await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                     } else if (message.includes("您已被限制使用,限制期限为：") === true) {
@@ -856,56 +836,35 @@ export class WebSocketServer extends DurableObject {
                       }
                       //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                       this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                    } else if (message === "文件码解析失败") {
-                     if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件码解析失败");
-                        this.sendForward("nextStep", "文件码解析失败", "", "update", true);
-                      }
-                    } else if (message.includes("当前机器人无法解析") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("nextStep", message, "error", true);
-                      }
-                    } else if (message.includes("文件获取完毕 文件总数：") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件获取完毕");
-                        this.sendForward("nextStep", "文件获取完毕", "", "update", false);
-                      }
                     }
                   }
                 }
               }
             }
           }
-          if (this.queue === false) {
-            if (temp) {
-              this.queue = true;
-              await this.ctx.storage.put("queue", true);
-              const result = await this.client.invoke(
-                new Api.messages.GetBotCallbackAnswer({
-                  peer: this.fromPeer,
-                  msgId: temp.id,
-                  data: temp.data,
-                })
-              );
-              //console.log("(" + this.currentStep + ") 自动发送");
-              this.sendLog("nextStep", "自动发送", null, false);
-              await scheduler.wait(5000);
-              if (result && result.message) {
-                this.sendLog("nextStep", result.message , null, false);
-              }
-            // } else {
-            //   if (status === true) {
-            //     await this.sendQuery(1);
-            //   }
-            }
-          }
+          // if (this.queue === false) {
+          //   if (temp) {
+          //     this.queue = true;
+          //     await this.ctx.storage.put("queue", true);
+          //     const result = await this.client.invoke(
+          //       new Api.messages.GetBotCallbackAnswer({
+          //         peer: this.fromPeer,
+          //         msgId: temp.id,
+          //         data: temp.data,
+          //       })
+          //     );
+          //     //console.log("(" + this.currentStep + ") 自动发送");
+          //     this.sendLog("nextStep", "自动发送", null, false);
+          //     await scheduler.wait(5000);
+          //     if (result && result.message) {
+          //       this.sendLog("nextStep", result.message , null, false);
+          //     }
+          //   // } else {
+          //   //   if (status === true) {
+          //   //     await this.sendQuery(1);
+          //   //   }
+          //   }
+          // }
           await this.checkMessage(status);
           if (this.stop === 1) {
             await this.endStep("nextStep");
@@ -993,8 +952,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8697745192"),
-              accessHash: bigInt("6713123108211114349"),
+              userId: bigInt("8147466930"),
+              accessHash: bigInt("-2327320768880226014"),
             }),
           ],
         })
@@ -1097,7 +1056,7 @@ export class WebSocketServer extends DurableObject {
           //   this.sendLog("start", "messageLength比limit大", null, true);
           // }
           if (messageLength && messageLength > 0) {
-            let temp = null;
+            // let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
               if (messageArray[messageIndex]) {
@@ -1105,35 +1064,73 @@ export class WebSocketServer extends DurableObject {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
+                      let next = true;
+                      let found = false;
+                      const regexp1 = /✓\d+/i;
+                      const regexp2 = /●\d+●/i;
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
-                        for (const button of row.buttons) {
-                          // console.log(button);  //测试
-                          if (button.text === "📁推送剩余全部文件") {
-                            temp = {
-                              id: id,
-                              data: button.data,
-                            };
-                          } else if (button.text === "继续推送") {
-                            if (this.queue === true) {
-                              const result = await this.client.invoke(
-                                new Api.messages.GetBotCallbackAnswer({
-                                  peer: this.fromPeer,
-                                  msgId: id,
-                                  data: button.data,
-                                })
-                              );
-                              //console.log("(" + this.currentStep + ") 继续推送");
-                              this.sendLog("start", "继续推送", null, false);
-                              await scheduler.wait(10000);
-                              if (result && result.message) {
-                                this.sendLog("start", result.message , null, false);
+                        if (next === true) {
+                          for (const button of row.buttons) {
+                            if (regexp1.test(button.text) === true) {
+                              if (this.queue === false) {
+                                this.queue = true;
+                                await this.ctx.storage.put("queue", true);
                               }
+                            } else if (regexp2.test(button.text) === true) {
+                              found = true;
+                              if (this.queue === false) {
+                                this.queue = true;
+                                await this.ctx.storage.put("queue", true);
+                              }
+                            } else if (typeof button.text === "number") {
+                              if (this.queue === false) {
+                                this.queue = true;
+                                await this.ctx.storage.put("queue", true);
+                              }
+                              if (found === true) {
+                                // temp = {
+                                //   id: id,
+                                //   data: button.data,
+                                // };
+                                if (this.queue === true) {
+                                  // const result = await this.client.invoke(
+                                  const result = this.client.invoke(
+                                    new Api.messages.GetBotCallbackAnswer({
+                                      peer: this.fromPeer,
+                                      msgId: id,
+                                      data: button.data,
+                                    })
+                                  );
+                                  //console.log("(" + this.currentStep + ") " + button.text);
+                                  this.sendLog("start", button.text, null, false);
+                                  await scheduler.wait(15000);
+                                  if (result && result.message) {
+                                    this.sendLog("start", result.message , null, false);
+                                  }
+                                }
+                                next = false;
+                                break;
+                              }
+                            // } else {
                             }
-                          // } else if (button.text === "❇️") {
-                          // } else if (button.text === "❎") {
-                          // } else {
+                          }
+                        }
+                      }
+                    }
+                    const message = messageArray[messageIndex].message.trim();
+                    if (message) {
+                      const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
+                      if (regexp.test(message) === true) {
+                        const regexp = / (\d+)\/(\d+) /gi;
+                        const matches = [...message.matchAll(regexp)];
+                        if (matches && matches.length === 3) {
+                          if (matches[1] === matches[2]) {
+                            if (this.queue === true) {
+                              this.queue = false;
+                              await this.ctx.storage.put("queue", false);
+                              //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                              this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
+                            }
                           }
                         }
                       }
@@ -1163,23 +1160,12 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                    const message = messageArray[messageIndex].message.trim();
-                    if (message & message.includes("文件获取完毕") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件获取完毕");
-                        this.sendForward("start", "文件获取完毕", "", "update", false);
-                      }
-                    }
                   } else {
                     const message = messageArray[messageIndex].message.trim();
                     if (message) {
                       const string = message.split(":");
-                      if (string[0] === "qqfilen_bot") {
-                        // await this.ctx.storage.put(message, 1);
-                        await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                        this.getCount(message, 2);
+                      if (string[0] === "QYG100B_bot") {
+                        await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
                       } else if (message.includes("您已被限制使用,限制期限为：") === true) {
@@ -1190,56 +1176,35 @@ export class WebSocketServer extends DurableObject {
                         }
                         //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                         this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                      } else if (message === "文件码解析失败") {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 文件码解析失败");
-                          this.sendForward("start", "文件码解析失败", "", "update", true);
-                        }
-                      } else if (message.includes("当前机器人无法解析") === true) {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") " + message);
-                          this.sendLog("start", message, "error", true);
-                        }
-                      } else if (message.includes("文件获取完毕") === true) {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 文件获取完毕");
-                          this.sendForward("start", "文件获取完毕", "", "update", false);
-                        }
                       }
                     }
                   }
                 }
               }
             }
-            if (this.queue === false) {
-              if (temp) {
-                this.queue = true;
-                await this.ctx.storage.put("queue", true);
-                const result = await this.client.invoke(
-                  new Api.messages.GetBotCallbackAnswer({
-                    peer: this.fromPeer,
-                    msgId: temp.id,
-                    data: temp.data,
-                  })
-                );
-                //console.log("(" + this.currentStep + ") 自动发送");
-                this.sendLog("start", "自动发送", null, false);
-                await scheduler.wait(5000);
-                if (result && result.message) {
-                  this.sendLog("start", result.message , null, false);
-                }
-              // } else {
-              //   if (status === true) {
-              //     await this.sendQuery(1);
-              //   }
-              }
-            }
+            // if (this.queue === false) {
+            //   if (temp) {
+            //     this.queue = true;
+            //     await this.ctx.storage.put("queue", true);
+            //     const result = await this.client.invoke(
+            //       new Api.messages.GetBotCallbackAnswer({
+            //         peer: this.fromPeer,
+            //         msgId: temp.id,
+            //         data: temp.data,
+            //       })
+            //     );
+            //     //console.log("(" + this.currentStep + ") 自动发送");
+            //     this.sendLog("start", "自动发送", null, false);
+            //     await scheduler.wait(5000);
+            //     if (result && result.message) {
+            //       this.sendLog("start", result.message , null, false);
+            //     }
+            //   // } else {
+            //   //   if (status === true) {
+            //   //     await this.sendQuery(1);
+            //   //   }
+            //   }
+            // }
             await this.checkMessage(status);
             if (this.stop === 1) {
               await this.endStep("start");
@@ -1440,7 +1405,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("qqfilen");
+      const id = env.WEBSOCKET_SERVER.idFromName("qyg100b");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

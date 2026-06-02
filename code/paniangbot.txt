@@ -291,5 +291,9 @@
   "paniang_bot_v:fzMzVGRJVyiWejQVPZXqbHDpI5iZL6ip",
   "paniang_bot_p:bFTOJOizHAl58k5KhU64fGhCXSui4Etb",
   "paniang_bot_col:VwKKmNITb8H6OMgCY7sB9zRxzXwxiQ97",
-  "paniang_bot_col:8Qgabwxm6zsqctwkoMhEi3wON8ZJnpAV"
+  "paniang_bot_col:8Qgabwxm6zsqctwkoMhEi3wON8ZJnpAV",
+  "paniang_bot_col:wWXhCWPq1LqkzUdqqa9gao8EJqL3nW2u",
+  "paniang_bot_p:P2EACgcL0UUJEOFCXdpJPq5xWUKyTNj5",
+  "paniang_bot_p:PPykWCteGmOSFOfut8JOBD0h9mTcVqrd",
+  "paniang_bot_col:rzGU61CWVKB0oLhz8IFE1clcRMzM3Hqp"
 ]

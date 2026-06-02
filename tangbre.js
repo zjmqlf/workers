@@ -746,15 +746,12 @@ export class WebSocketServer extends DurableObject {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     let next = true;
                     let found = false;
                     let current = false;
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       if (next === true) {
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           const regexp1 = /共 \d+ 页/i;
                           const regexp2 = /\d+ ✅/i;
                           const regexp3 = /^\d+$/i;
@@ -1077,15 +1074,12 @@ export class WebSocketServer extends DurableObject {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       let next = true;
                       let found = false;
                       let current = false;
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         if (next === true) {
                           for (const button of row.buttons) {
-                            // console.log(button);  //测试
                             const regexp1 = /共 \d+ 页/i;
                             const regexp2 = /\d+ ✅/i;
                             const regexp3 = /\d+/i;

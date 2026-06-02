@@ -768,15 +768,12 @@ export class WebSocketServer extends DurableObject {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     let next = true;
                     let found = false;
                     let current = false;
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       if (next === true) {
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           if (button.text === "My Code" || button.text === "🚀 Source") {
                             if (this.queue === false) {
                               this.queue = true;
@@ -925,7 +922,6 @@ export class WebSocketServer extends DurableObject {
                         text = message.replace("✅ Trang ", "");
                         const regexp = /(\d+)/gi;
                         const matches = message.match(regexp);
-                        // console.log(matches);  //测试
                         if (matches && matches.length === 2) {
                           if (matches[0] === matches[1]) {
                             if (this.queue === true) {
@@ -1150,15 +1146,12 @@ export class WebSocketServer extends DurableObject {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       let next = true;
                       let found = false;
                       let current = false;
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         if (next === true) {
                           for (const button of row.buttons) {
-                            // console.log(button);  //测试
                             if (button.text === "My Code" || button.text === "🚀 Source") {
                               if (this.queue === false) {
                                 this.queue = true;
@@ -1303,7 +1296,6 @@ export class WebSocketServer extends DurableObject {
                           text = message.replace("✅ Trang ", "");
                           const regexp = /(\d+)/gi;
                           const matches = message.match(regexp);
-                          // console.log(matches);  //测试
                           if (matches && matches.length === 2) {
                             if (matches[0] === matches[1]) {
                               if (this.queue === true) {

@@ -722,12 +722,9 @@ export class WebSocketServer extends DurableObject {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     // let text = "";
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       for (const button of row.buttons) {
-                        // console.log(button);  //测试
                         if (button.text === "▶️ 自动发送") {
                           temp = {
                             id: id,
@@ -778,7 +775,6 @@ export class WebSocketServer extends DurableObject {
                       const text = message.replace("✅ 自动发送完成！成功 ", "");
                       const regexp = /(\d+)/gi;
                       const matches = message.match(regexp);
-                      // console.log(matches);  //测试
                       if (matches) {
                         if (matches.length === 2) {
                           if (matches[0] === matches[1]) {
@@ -1024,12 +1020,9 @@ export class WebSocketServer extends DurableObject {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       let text = "";
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           if (button.text === "▶️ 自动发送") {
                             temp = {
                               id: id,
@@ -1080,7 +1073,6 @@ export class WebSocketServer extends DurableObject {
                         const text = message.replace("✅ 自动发送完成！成功 ", "");
                         const regexp = /(\d+)/gi;
                         const matches = message.match(regexp);
-                        // console.log(matches);  //测试
                         if (matches) {
                           if (matches.length === 2) {
                             if (matches[0] === matches[1]) {

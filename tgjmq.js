@@ -768,13 +768,10 @@ export class WebSocketServer extends DurableObject {
                 if (messageArray[messageIndex].replyMarkup) {
                   this.wait = false;
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     let both = false;
                     let text = "";
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       for (const button of row.buttons) {
-                        // console.log(button);  //测试
                         if (button.text === "下一页 ➡️") {
                           both = false;
                           if (this.queue === false) {
@@ -802,7 +799,6 @@ export class WebSocketServer extends DurableObject {
                             text = button.text.replace("📄 ", "");
                             const regexp = /(\d+)/gi;
                             const matches = button.text.match(regexp);
-                            // console.log(matches);  //测试
                             if (matches && matches.length === 2) {
                               if (matches[0] === matches[1]) {
                                 if (this.queue === true) {
@@ -1105,13 +1101,10 @@ export class WebSocketServer extends DurableObject {
                   if (messageArray[messageIndex].replyMarkup) {
                     this.wait = false;
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       let both = false;
                       let text = "";
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           if (button.text === "下一页 ➡️") {
                             both = false;
                             if (this.queue === false) {
@@ -1139,7 +1132,6 @@ export class WebSocketServer extends DurableObject {
                               text = button.text.replace("📄 ", "");
                               const regexp = /(\d+)/gi;
                               const matches = button.text.match(regexp);
-                              // console.log(matches);  //测试
                               if (matches && matches.length === 2) {
                                 if (matches[0] === matches[1]) {
                                   if (this.queue === true) {

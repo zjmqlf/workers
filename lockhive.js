@@ -741,11 +741,8 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       for (const button of row.buttons) {
-                        // console.log(button);  //测试
                         if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
                           if (this.queue === false) {
                             this.queue = true;
@@ -784,15 +781,14 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message.trim();
                   if (message) {
-                    // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
-                    if (message.substr(0, 3) === "LH_") {
+                    // if (message.substr(0, 3) === "LH_") {
+                    if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                     } else if (message.includes("🚫 操作过于频繁") === true) {
                       const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
                       const matches = message.match(regexp);
-                      // console.log(matches);  //测试
                       if (matches && matches.length === 1) {
                         const time = matches[0];
                         if (time && time > 0) {
@@ -1039,11 +1035,8 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
                             if (this.queue === false) {
                               this.queue = true;
@@ -1082,15 +1075,14 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message.trim();
                     if (message) {
-                      // if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
-                      if (message.substr(0, 3) === "LH_") {
+                      // if (message.substr(0, 3) === "LH_") {
+                      if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
                       } else if (message.includes("🚫 操作过于频繁") === true) {
                         const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
                         const matches = message.match(regexp);
-                        // console.log(matches);  //测试
                         if (matches && matches.length === 1) {
                           const time = matches[0];
                           if (time && time > 0) {

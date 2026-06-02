@@ -41,11 +41,8 @@ zjmqlf2024:
 npm run build-qqfile
 npm run deploy-qqfile
 
-npm run build-zhuhaihai
-npm run deploy-zhuhaihai
-
-npm run build-paniang
-npm run deploy-paniang
+npm run build-qyg100b
+npm run deploy-qyg100b
 
 npm run build-zyxfiles
 npm run deploy-zyxfiles
@@ -53,20 +50,20 @@ npm run deploy-zyxfiles
 npm run build-lockhive
 npm run deploy-lockhive
 
-npm run build-kodexfile
-npm run deploy-kodexfile
+npm run build-paniang
+npm run deploy-paniang
 
 npm run build-kodexfiles2
 npm run deploy-kodexfiles2
+
+npm run build-hikkitusbolpaijo
+npm run deploy-hikkitusbolpaijo
 
 npm run build-deanignitenations
 npm run deploy-deanignitenations
 
 npm run build-ryumasepongmilku
 npm run deploy-ryumasepongmilku
-
-npm run build-hikkitusbolpaijo
-npm run deploy-hikkitusbolpaijo
 
 npm run build-lunindiacipoksupretto
 npm run deploy-lunindiacipoksupretto

@@ -771,11 +771,8 @@ export class WebSocketServer extends DurableObject {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    // console.log(message);  //测试
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(row);  //测试
                       for (const button of row.buttons) {
-                        // console.log(button);  //测试
                         if (button.text === "📁推送剩余全部文件") {
                           temp = {
                             id: id,
@@ -1105,11 +1102,8 @@ export class WebSocketServer extends DurableObject {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      // console.log(message);  //测试
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        // console.log(row);  //测试
                         for (const button of row.buttons) {
-                          // console.log(button);  //测试
                           if (button.text === "📁推送剩余全部文件") {
                             temp = {
                               id: id,
