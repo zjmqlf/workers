@@ -848,8 +848,8 @@ export class WebSocketServer extends DurableObject {
         if (this.stop === 1) {
           if (this.queue === false) {
             await this.sendQuery(1);
-          } else if (this.queue === true) {
-            this.offsetId -= 1;
+          // } else if (this.queue === true) {
+          //   this.offsetId -= 1;
           }
           await scheduler.wait(5000);
           await this.endStep("nextStep");
@@ -1136,8 +1136,8 @@ export class WebSocketServer extends DurableObject {
             if (this.stop === 1) {
               if (this.queue === false) {
                 await this.sendQuery(1);
-              } else if (this.queue === true) {
-                this.offsetId -= 1;
+              // } else if (this.queue === true) {
+              //   this.offsetId -= 1;
               }
               await scheduler.wait(5000);
               await this.endStep("start");

@@ -25,13 +25,13 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "paniang_WebSocketServer",
-        "script_name": "paniang",
+        "name": "zyxfiles_WebSocketServer",
+        "script_name": "zyxfiles",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "zyxfiles_WebSocketServer",
-        "script_name": "zyxfiles",
+        "name": "paniang_WebSocketServer",
+        "script_name": "paniang",
         "class_name": "WebSocketServer"
       },
       {
@@ -45,13 +45,13 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "ryumasepongmilku_WebSocketServer",
-        "script_name": "ryumasepongmilku",
+        "name": "hikkitusbolpaijo_WebSocketServer",
+        "script_name": "hikkitusbolpaijo",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "hikkitusbolpaijo_WebSocketServer",
-        "script_name": "hikkitusbolpaijo",
+        "name": "ryumasepongmilku_WebSocketServer",
+        "script_name": "ryumasepongmilku",
         "class_name": "WebSocketServer"
       },
       {

@@ -481,5 +481,8 @@
   "tgjmq5bot_3V_Nx7wFGkFjxX01zKv",
   "tgjmq3bot_1V_aVTuAoYoQocjUDOn",
   "tgjmq01bot_31V_lMZV6itsc8fGaEfj",
-  "tgjmq5bot_50V_W4bPfCUg9WZgVSIY"
+  "tgjmq5bot_50V_W4bPfCUg9WZgVSIY",
+  "tgjmq5bot_10P_tPSZGT5fZo68iKPt",
+  "tgjmq5bot_10P_BDlEAYqCv3EvB21Z",
+  "tgjmq5bot_6P_o7B0QfwLOifeZwnq"
 ]
