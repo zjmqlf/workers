@@ -296,5 +296,12 @@
   "paniang_bot_p:P2EACgcL0UUJEOFCXdpJPq5xWUKyTNj5",
   "paniang_bot_p:PPykWCteGmOSFOfut8JOBD0h9mTcVqrd",
   "paniang_bot_col:rzGU61CWVKB0oLhz8IFE1clcRMzM3Hqp",
-  "paniang_bot_p:772ZDDLWO5vBBoNaAqJN6PcOPOsNaApk"
+  "paniang_bot_p:772ZDDLWO5vBBoNaAqJN6PcOPOsNaApk",
+  "paniang_bot_col:yH2CkDR9htOcGeta9PZS30l9Qbb0rus3",
+  "paniang_bot_col:9tcHdO9ciL7BsRMIBx0kw4VsPKCodwiX",
+  "paniang_bot_v:PklqXHvIk19Ys7gUpFPiO3lycJJ4cM6V",
+  "paniang_bot_v:R74vyudX24Caz8h8BJfdnem8ILNSa7iX",
+  "paniang_bot_col:OHy5eLjFyrXMvXbq8BCHj7BldozoNbHo",
+  "paniang_bot_col:mJyiNzFXEE1yfteXyb3u426LwBJR8qQG",
+  "paniang_bot_col:944gNMPYfd7R3pidqTFBNkGKxLqUJJa7"
 ]

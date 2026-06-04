@@ -921,7 +921,7 @@ export class WebSocketServer extends DurableObject {
                       // this.getCount1(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot") {
+                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot") {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                       this.getCount1(message, 2);
@@ -1082,8 +1082,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8956114328"),
-              accessHash: bigInt("-3902777670250974710"),
+              userId: bigInt("7675898870"),
+              accessHash: bigInt("-2908327700887169719"),
             }),
           ],
         })
@@ -1306,7 +1306,7 @@ export class WebSocketServer extends DurableObject {
                         // this.getCount1(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot") {
+                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot") {
                         // await this.ctx.storage.put(message, 1);
                         await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                         this.getCount1(message, 2);
