@@ -382,5 +382,6 @@
   "DEANIgniteNations_bot_col:Ovm5aNYInr6SBibh0PW92mvqP8qP5RDW",
   "DEANIgniteNations_bot_col:DBicJC42d40nAu3lm3nH96CURoTZFYcY",
   "DEANIgniteNations_bot_col:HUcDPrmw125zL3KPOY451FkRTUDhOSJs",
-  "DEANIgniteNations_bot_col:NIkMhjGPo0cmwaeruNZVRdsBC9AAUrKp"
+  "DEANIgniteNations_bot_col:NIkMhjGPo0cmwaeruNZVRdsBC9AAUrKp",
+  "DEANIgniteNations_bot_v:MgNWuwse9hqINS2EcO8MKKLmBSqzVD4L"
 ]
