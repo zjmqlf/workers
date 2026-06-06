@@ -569,7 +569,7 @@ export class WebSocketServer extends DurableObject {
       if (this.flood > new Date().getTime()) {
         //console.log("(" + this.currentStep + ") 还需等待" + ((this.flood - new Date().getTime()) / 1000) + "秒的洪水警告时间");
         this.sendLog("forwardMessage", "还需等待" + Math.ceil((this.flood - new Date().getTime()) / 1000) + "秒的洪水警告时间", "flood", true);
-        return;
+        return false;
       } else {
         this.flood = 0;
         await this.ctx.storage.put("client", 0);
@@ -600,6 +600,8 @@ export class WebSocketServer extends DurableObject {
         if (e.errorMessage === "RANDOM_ID_DUPLICATE" || e.code === 500) {
           //console.log("(" + this.currentStep + ") " + e);
           this.sendLog("forwardMessage", JSON.stringify(e), "error", true);
+          this.time = new Date().getTime();
+          return true;
         } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
           //console.log("(" + this.currentStep + ") 用户已注销" + e);
           this.sendLog("forwardMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
@@ -608,14 +610,14 @@ export class WebSocketServer extends DurableObject {
             "result": "pause",
           });
           await this.close();
-          return;
+          return false;
         } else if (e.errorMessage === "CHAT_FORWARDS_RESTRICTED" || e.code === 400) {
           // this.offsetId += this.count;
           // this.count = 0;
           // await this.ctx.storage.put("offsetId", this.offsetId);
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
-          return;
+          return false;
         } else if (e.errorMessage === "FLOOD" || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
@@ -625,12 +627,12 @@ export class WebSocketServer extends DurableObject {
           }
           //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
           this.sendLog("forwardMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
-          return;
+          return false;
         } else {
           this.count = 0;
           //console.log("(" + this.currentStep + ") 转发消息时发生错误" + e);
           this.sendLog("forwardMessage", "转发消息时发生错误 : " + JSON.stringify(e), "error", true);
-          return;
+          return false;
         }
       }
       // this.offsetId += this.count;
@@ -638,14 +640,16 @@ export class WebSocketServer extends DurableObject {
       // await this.ctx.storage.put("offsetId", this.offsetId);
       //console.log("(" + this.currentStep + ") 成功转发了" + length + "条消息");
       this.sendLog("forwardMessage", "成功转发了" + messageLength + "条消息", null, false);
+      this.time = new Date().getTime();
+      return true;
     } else {
       // this.offsetId += this.count;
       // this.count = 0;
       // await this.ctx.storage.put("offsetId", this.offsetId);
       //console.log("(" + this.currentStep + ") 消息无需转发");
       this.sendLog("forwardMessage", "消息无需转发", "error", true);
+      return false;
     }
-    this.time = new Date().getTime();
   }
 
   async checkMessage(status) {
@@ -654,19 +658,27 @@ export class WebSocketServer extends DurableObject {
       if (idLength === 100) {
         const idArray = this.idArray.slice();
         const fileIdArray = this.fileIdArray.slice();
-        this.idArray = [];
-        this.fileIdArray = [];
-        await this.ctx.storage.put("idArray", "[]");
-        await this.ctx.storage.put("fileIdArray", "[]");
-        await this.forwardMessage(idArray, fileIdArray);
+        const result = await this.forwardMessage(idArray, fileIdArray);
+        if (result === true) {
+          this.idArray = [];
+          this.fileIdArray = [];
+          await this.ctx.storage.put("idArray", "[]");
+          await this.ctx.storage.put("fileIdArray", "[]");
+          //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+          this.sendLog("checkMessage", "清空idArray成功", null, false);  //测试
+        }
       } else if (idLength > 100) {
         const idArray = this.idArray.slice(0, 100);
         const fileIdArray = this.fileIdArray.slice(0, 100);
-        this.idArray = this.idArray.slice(100, idLength);
-        this.fileIdArray = this.fileIdArray.slice(100, idLength);
-        await this.ctx.storage.put("idArray", JSON.stringify(this.idArray));
-        await this.ctx.storage.put("fileIdArray", JSON.stringify(this.fileIdArray));
-        await this.forwardMessage(idArray, fileIdArray);
+        const result = await this.forwardMessage(idArray, fileIdArray);
+        if (result === true) {
+          this.idArray = this.idArray.slice(100, idLength);
+          this.fileIdArray = this.fileIdArray.slice(100, idLength);
+          await this.ctx.storage.put("idArray", JSON.stringify(this.idArray));
+          await this.ctx.storage.put("fileIdArray", JSON.stringify(this.fileIdArray));
+          //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+          this.sendLog("checkMessage", "清空idArray成功", null, false);  //测试
+        }
       } else {
         await this.ctx.storage.put("idArray", JSON.stringify(this.idArray));
         await this.ctx.storage.put("fileIdArray", JSON.stringify(this.fileIdArray));

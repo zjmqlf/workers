@@ -35,6 +35,9 @@ zjmqlf2023:
 npm run build-user
 npm run deploy-user
 
+npm run build-lockhive
+npm run deploy-lockhive
+
 
 zjmqlf2024:
 
@@ -46,9 +49,6 @@ npm run deploy-qyg100b
 
 npm run build-zyxfiles
 npm run deploy-zyxfiles
-
-npm run build-lockhive
-npm run deploy-lockhive
 
 npm run build-paniang
 npm run deploy-paniang
