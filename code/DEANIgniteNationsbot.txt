@@ -383,5 +383,10 @@
   "DEANIgniteNations_bot_col:DBicJC42d40nAu3lm3nH96CURoTZFYcY",
   "DEANIgniteNations_bot_col:HUcDPrmw125zL3KPOY451FkRTUDhOSJs",
   "DEANIgniteNations_bot_col:NIkMhjGPo0cmwaeruNZVRdsBC9AAUrKp",
-  "DEANIgniteNations_bot_v:MgNWuwse9hqINS2EcO8MKKLmBSqzVD4L"
+  "DEANIgniteNations_bot_v:MgNWuwse9hqINS2EcO8MKKLmBSqzVD4L",
+  "DEANIgniteNations_bot_v:yBysZw38HSoNMeb3bAI5uw2EacHYxxqI",
+  "DEANIgniteNations_bot_v:G0AFbr5DGe9oNNkfyim06FgJLwTCfFZA",
+  "DEANIgniteNations_bot_col:gbi8gD1fAs3g0cQcPirLjD8S7yeXs4Cf",
+  "DEANIgniteNations_bot_v:JcvM7BziICkRn1XEci3i6nVSGhpTIPve",
+  "DEANIgniteNations_bot_col:mD3YjUftID3tTOx2PrHl96JPvZgl1fvz"
 ]

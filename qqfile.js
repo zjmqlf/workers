@@ -339,6 +339,23 @@ export class WebSocketServer extends DurableObject {
     //await scheduler.wait(5000);
   }
 
+  async overStep() {
+    if (this.idArray.length > 100) {
+      await this.checkMessage(true);
+    }
+    if (this.idArray.length > 0) {
+      const result = await this.forwardMessage(this.idArray, this.fileIdArray);
+      if (result === true) {
+        this.idArray = [];
+        this.fileIdArray = [];
+        await this.ctx.storage.put("idArray", "[]");
+        await this.ctx.storage.put("fileIdArray", "[]");
+        //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+        this.sendLog("overStep", "清空idArray成功", null, false);  //测试
+      }
+    }
+  }
+
   async getMessage(tryCount) {
     try {
       // let count = 0;
@@ -379,6 +396,7 @@ export class WebSocketServer extends DurableObject {
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
       } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+        await this.overStep();
         //console.log("(" + this.currentStep + ") 用户已注销" + e);
         this.sendLog("getMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
         this.stop = 2;
@@ -505,7 +523,7 @@ export class WebSocketServer extends DurableObject {
         const string = code.split(":");
         if (string[0] === "QQfile_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("-")[0]);
-        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot") {
+        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
         }
         if (status) {
@@ -539,6 +557,7 @@ export class WebSocketServer extends DurableObject {
               //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
               this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
             } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+              await this.overStep();
               //console.log("(" + this.currentStep + ") 用户已注销" + e);
               this.sendLog("sendQuery", "用户已注销 : " + JSON.stringify(e), "error", true);
               this.stop = 2;
@@ -561,14 +580,7 @@ export class WebSocketServer extends DurableObject {
         this.sendLog("sendQuery", "code为空", "error", true);
       }
     } else {
-      if (this.idArray.length > 100) {
-        await this.checkMessage(true);
-      }
-      if (this.idArray.length > 0) {
-        await this.forwardMessage(this.idArray, this.fileIdArray);
-        await this.ctx.storage.put("idArray", "[]");
-        await this.ctx.storage.put("fileIdArray", "[]");
-      }
+      await this.overStep();
       //console.log("(" + this.currentStep + ") 超过codeLength，已经没有code了");
       this.sendLog("sendQuery", "超过codeLength，已经没有code了", "error", true);
     }
@@ -661,6 +673,7 @@ export class WebSocketServer extends DurableObject {
           this.time = new Date().getTime();
           return true;
         } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+          await this.overStep();
           //console.log("(" + this.currentStep + ") 用户已注销" + e);
           this.sendLog("forwardMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
           this.stop = 2;
@@ -933,7 +946,7 @@ export class WebSocketServer extends DurableObject {
                       // this.getCount1(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot") {
+                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                       this.getCount1(message, 2);
@@ -1318,7 +1331,7 @@ export class WebSocketServer extends DurableObject {
                         // this.getCount1(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot") {
+                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
                         // await this.ctx.storage.put(message, 1);
                         await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                         this.getCount1(message, 2);

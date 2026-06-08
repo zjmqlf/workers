@@ -337,6 +337,23 @@ export class WebSocketServer extends DurableObject {
     //await scheduler.wait(5000);
   }
 
+  async overStep() {
+    if (this.idArray.length > 100) {
+      await this.checkMessage(true);
+    }
+    if (this.idArray.length > 0) {
+      const result = await this.forwardMessage(this.idArray, this.fileIdArray);
+      if (result === true) {
+        this.idArray = [];
+        this.fileIdArray = [];
+        await this.ctx.storage.put("idArray", "[]");
+        await this.ctx.storage.put("fileIdArray", "[]");
+        //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+        this.sendLog("overStep", "清空idArray成功", null, false);  //测试
+      }
+    }
+  }
+
   async getMessage(tryCount) {
     try {
       // let count = 0;
@@ -368,19 +385,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage === "RANDOM_ID_DUPLICATE" || e.code === 500) {
-        //console.log("(" + this.currentStep + ") " + e);
-        this.sendLog("forwardMessage", JSON.stringify(e), "error", true);
-      } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
-        //console.log("(" + this.currentStep + ") 用户已注销" + e);
-        this.sendLog("forwardMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
-        this.stop = 2;
-        this.broadcast({
-          "result": "pause",
-        });
-        await this.close();
-        return;
-      } else if (e.errorMessage === "FLOOD" || e.code === 420) {
+      if (e.errorMessage === "FLOOD" || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -388,6 +393,15 @@ export class WebSocketServer extends DurableObject {
         }
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+      } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+        await this.overStep();
+        //console.log("(" + this.currentStep + ") 用户已注销" + e);
+        this.sendLog("getMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
       } else {
         //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
         this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
@@ -457,6 +471,7 @@ export class WebSocketServer extends DurableObject {
               //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
               this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
             } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+              await this.overStep();
               //console.log("(" + this.currentStep + ") 用户已注销" + e);
               this.sendLog("sendQuery", "用户已注销 : " + JSON.stringify(e), "error", true);
               this.stop = 2;
@@ -479,14 +494,7 @@ export class WebSocketServer extends DurableObject {
         this.sendLog("sendQuery", "code为空", "error", true);
       }
     } else {
-      if (this.idArray.length > 100) {
-        await this.checkMessage(true);
-      }
-      if (this.idArray.length > 0) {
-        await this.forwardMessage(this.idArray, this.fileIdArray);
-        await this.ctx.storage.put("idArray", "[]");
-        await this.ctx.storage.put("fileIdArray", "[]");
-      }
+      await this.overStep();
       //console.log("(" + this.currentStep + ") 超过codeLength，已经没有code了");
       this.sendLog("sendQuery", "超过codeLength，已经没有code了", "error", true);
     }
@@ -579,6 +587,7 @@ export class WebSocketServer extends DurableObject {
           this.time = new Date().getTime();
           return true;
         } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+          await this.overStep();
           //console.log("(" + this.currentStep + ") 用户已注销" + e);
           this.sendLog("forwardMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
           this.stop = 2;
