@@ -194,5 +194,7 @@
   "bnEe7zn5M37vsMeGkpGXWcferFqAzfrlJBczWFGO",
   "wsLB2T7hqwhVjtZ1s48QAnkAd5ggtjlPDDL7VcLS",
   "kklUNBQwmunaMGlvzH0pevuLfzBX9FnTp5R5bhaQ",
-  "EgxfvZAsCAeEFNS1WqjXgVjJ33yWfFBEh668UU4p"
+  "EgxfvZAsCAeEFNS1WqjXgVjJ33yWfFBEh668UU4p",
+  "kc8t7VuN6ehTGQlha4SVPTWIVMa5QtByA8cLgv4e",
+  "5kIAycfyN7vET1PZE2C6RrdTdv6KPUN9kXeuKkuh"
 ]
