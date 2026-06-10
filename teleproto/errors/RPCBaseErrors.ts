@@ -63,11 +63,6 @@ export class FloodError extends RPCError {
     errorMessage = "FLOOD";
 }
 
-export class FrozenError extends RPCError {
-    code = 420;
-    errorMessage = "FROZEN";
-}
-
 export class ServerError extends RPCError {
     code = 500;
     errorMessage = "INTERNAL";
