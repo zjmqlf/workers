@@ -387,7 +387,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage === "FLOOD" || e.code === 420) {
+      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -523,7 +523,7 @@ export class WebSocketServer extends DurableObject {
         const string = code.split(":");
         if (string[0] === "QQfile_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("-")[0]);
-        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
+        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
         }
         if (status) {
@@ -546,7 +546,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (e) {
-            if (e.errorMessage === "FLOOD" || e.code === 420) {
+            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -689,7 +689,7 @@ export class WebSocketServer extends DurableObject {
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
           return false;
-        } else if (e.errorMessage === "FLOOD" || e.code === 420) {
+        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {
@@ -946,7 +946,7 @@ export class WebSocketServer extends DurableObject {
                       // this.getCount1(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
+                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot")) {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                       this.getCount1(message, 2);
@@ -1107,8 +1107,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8773044827"),
-              accessHash: bigInt("-7140144570295495626"),
+              userId: bigInt("8874145103"),
+              accessHash: bigInt("-3306849114195849625"),
             }),
           ],
         })
@@ -1331,7 +1331,7 @@ export class WebSocketServer extends DurableObject {
                         // this.getCount1(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot") {
+                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot")) {
                         // await this.ctx.storage.put(message, 1);
                         await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                         this.getCount1(message, 2);

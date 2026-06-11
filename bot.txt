@@ -34,6 +34,16 @@ paniang_bot
 8750402925
 -7157880297278168937
 
+betapahatitakbahagia
+betapahatitakbahagia_bot
+8643806212
+7753305124153421674
+
+KodeXChatsMedia
+KodeXChatsINDbot
+8983376881
+2798403794734196826
+
 Tzycodebot
 Tzycodebot
 8874726390
@@ -104,10 +114,10 @@ Steviarchiverbot
 8677507049
 -6730790620800713280
 
-QQ解码器dvbk
-QQdvbk_bot
-8874145103
--3306849114195849625
+QQ解码器er16
+QQer16_bot
+8782459743
+-8942353408243178246
 
 QQfile5_bot
 QQfiles5_bot
@@ -374,6 +384,11 @@ QQ解码器z32o
 QQz32o_bot
 8730652664
 6457003930848873559
+
+QQ解码器dvbk
+QQdvbk_bot
+8874145103
+-3306849114195849625
 
 QQ解码器F
 QQfilef_bot

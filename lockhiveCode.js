@@ -356,7 +356,7 @@ export class WebSocketServer extends DurableObject {
       this.messageArray = [];
       //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
       this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
-      if (e.errorMessage === "FLOOD" || e.code === 420) {
+      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
       } else {

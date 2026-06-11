@@ -185,6 +185,14 @@ const QQdvbkbot4Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQdvbkbot
 const QQdvbkbot5Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P)/gi;   //QQdvbkbot
 const QQdvbkbot6Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*V)/gi;   //QQdvbkbot
 const QQdvbkbot7Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*D)/gi;   //QQdvbkbot
+// const QQer16botRegexp = /(QQer16_bot:[a-z0-9]{12})/gi;   //QQer16bot
+const QQer16bot1Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQer16bot
+const QQer16bot2Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQer16bot
+const QQer16bot3Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQer16bot
+const QQer16bot4Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQer16bot
+const QQer16bot5Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P)/gi;   //QQer16bot
+const QQer16bot6Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V)/gi;   //QQer16bot
+const QQer16bot7Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*D)/gi;   //QQer16bot
 // const ZhuahihaibotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/gi;   //Zhuahihaibot
 const Zhuahihaibot1Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/gi;   //Zhuahihaibot
 const Zhuahihaibot2Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/gi;   //Zhuahihaibot
@@ -2301,6 +2309,118 @@ try {
             for (let j = 0; j < QQdvbkbot7MatchesLength; j++) {
               if (QQdvbkbot7Matches[j]) {
                 QQfilebot.push(QQdvbkbot7Matches[j]);
+              }
+            }
+          }
+        }
+
+        // const QQer16botMatches = str.match(QQer16botRegexp);
+        // // console.log(QQer16botMatches);  //测试
+        // if (QQer16botMatches) {
+        //   const QQer16botMatchesLength = QQer16botMatches.length;
+        //   // console.log("QQer16botMatchesLength : " + QQer16botMatchesLength);  //测试
+        //   if (QQer16botMatchesLength > 0) {
+        //     for (let j = 0; j < QQer16botMatchesLength; j++) {
+        //       if (QQer16botMatches[j]) {
+        //         QQfilebot.push(QQer16botMatches[j]);
+        //       }
+        //     }
+        //   }
+        // }
+
+        const QQer16bot1Matches = str.match(QQer16bot1Regexp);
+        // console.log(QQer16bot1Matches);  //测试
+        if (QQer16bot1Matches) {
+          const QQer16bot1MatchesLength = QQer16bot1Matches.length;
+          // console.log("QQer16bot1MatchesLength : " + QQer16bot1MatchesLength);  //测试
+          if (QQer16bot1MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot1MatchesLength; j++) {
+              if (QQer16bot1Matches[j]) {
+                QQfilebot.push(QQer16bot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot2Matches = str.match(QQer16bot2Regexp);
+        // console.log(QQer16bot2Matches);  //测试
+        if (QQer16bot2Matches) {
+          const QQer16bot2MatchesLength = QQer16bot2Matches.length;
+          // console.log("QQer16bot2MatchesLength : " + QQer16bot2MatchesLength);  //测试
+          if (QQer16bot2MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot2MatchesLength; j++) {
+              if (QQer16bot2Matches[j]) {
+                QQfilebot.push(QQer16bot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot3Matches = str.match(QQer16bot3Regexp);
+        // console.log(QQer16bot3Matches);  //测试
+        if (QQer16bot3Matches) {
+          const QQer16bot3MatchesLength = QQer16bot3Matches.length;
+          // console.log("QQer16bot3MatchesLength : " + QQer16bot3MatchesLength);  //测试
+          if (QQer16bot3MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot3MatchesLength; j++) {
+              if (QQer16bot3Matches[j]) {
+                QQfilebot.push(QQer16bot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot4Matches = str.match(QQer16bot4Regexp);
+        // console.log(QQer16bot4Matches);  //测试
+        if (QQer16bot4Matches) {
+          const QQer16bot4MatchesLength = QQer16bot4Matches.length;
+          // console.log("QQer16bot4MatchesLength : " + QQer16bot4MatchesLength);  //测试
+          if (QQer16bot4MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot4MatchesLength; j++) {
+              if (QQer16bot4Matches[j]) {
+                QQfilebot.push(QQer16bot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot5Matches = str.match(QQer16bot5Regexp);
+        // console.log(QQer16bot5Matches);  //测试
+        if (QQer16bot5Matches) {
+          const QQer16bot5MatchesLength = QQer16bot5Matches.length;
+          // console.log("QQer16bot5MatchesLength : " + QQer16bot5MatchesLength);  //测试
+          if (QQer16bot5MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot5MatchesLength; j++) {
+              if (QQer16bot5Matches[j]) {
+                QQfilebot.push(QQer16bot5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot6Matches = str.match(QQer16bot6Regexp);
+        // console.log(QQer16bot6Matches);  //测试
+        if (QQer16bot6Matches) {
+          const QQer16bot6MatchesLength = QQer16bot6Matches.length;
+          // console.log("QQer16bot6MatchesLength : " + QQer16bot6MatchesLength);  //测试
+          if (QQer16bot6MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot6MatchesLength; j++) {
+              if (QQer16bot6Matches[j]) {
+                QQfilebot.push(QQer16bot6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const QQer16bot7Matches = str.match(QQer16bot7Regexp);
+        // console.log(QQer16bot7Matches);  //测试
+        if (QQer16bot7Matches) {
+          const QQer16bot7MatchesLength = QQer16bot7Matches.length;
+          // console.log("QQer16bot7MatchesLength : " + QQer16bot7MatchesLength);  //测试
+          if (QQer16bot7MatchesLength > 0) {
+            for (let j = 0; j < QQer16bot7MatchesLength; j++) {
+              if (QQer16bot7Matches[j]) {
+                QQfilebot.push(QQer16bot7Matches[j]);
               }
             }
           }

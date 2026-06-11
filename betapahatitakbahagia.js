@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./kodexfileString";
+import { codeString } from "./betapahatitakbahagiaString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -385,7 +385,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage === "FLOOD" || e.code === 420) {
+      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -460,7 +460,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (e) {
-            if (e.errorMessage === "FLOOD" || e.code === 420) {
+            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -603,7 +603,7 @@ export class WebSocketServer extends DurableObject {
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
           return false;
-        } else if (e.errorMessage === "FLOOD" || e.code === 420) {
+        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {
@@ -745,23 +745,7 @@ export class WebSocketServer extends DurableObject {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                 const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    // let text = "";
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      for (const button of row.buttons) {
-                        if (button.text === "▶️ 自动发送") {
-                          temp = {
-                            id: id,
-                            data: button.data,
-                          };
-                        // } else if (button.text === "⬇️ 全部发送") {
-                        // } else {
-                        }
-                      }
-                    }
-                  }
-                } else if (messageArray[messageIndex].media) {
+                if (messageArray[messageIndex].media) {
                   let fileId = null;
                   if (messageArray[messageIndex].media.document) {
                     // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -786,63 +770,8 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                } else {
-                  const message = messageArray[messageIndex].message.trim();
-                  if (message) {
-                    const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                    const string = message.split(":");
-                    if (string[0] === "kodexfilebot_v" || string[0] === "kodexfilebot_p" || string[0] === "kodexfilebot_d" || string[0] === "kodexfilebot_col") {
-                      await this.ctx.storage.put(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (regexp.test(message) === true) {
-                      temp = null;
-                      const text = message.replace("✅ 自动发送完成！成功 ", "");
-                      const regexp = /(\d+)/gi;
-                      const matches = message.match(regexp);
-                      if (matches) {
-                        if (matches.length === 2) {
-                          if (matches[0] === matches[1]) {
-                            temp = null;
-                            if (this.queue === true) {
-                              this.queue = false;
-                              await this.ctx.storage.put("queue", false);
-                              //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                              this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                            }
-                          }
-                        } else {
-                          //console.log("(" + this.currentStep + ") " + text);
-                          this.sendForward("start", "", text, "update", false);
-                        }
-                      }
-                    }
-                  }
                 }
               }
-            }
-          }
-          if (this.queue === false) {
-            if (temp) {
-              this.queue = true;
-              await this.ctx.storage.put("queue", true);
-              const result = await this.client.invoke(
-                new Api.messages.GetBotCallbackAnswer({
-                  peer: this.fromPeer,
-                  msgId: temp.id,
-                  data: temp.data,
-                })
-              );
-              //console.log("(" + this.currentStep + ") 自动发送");
-              this.sendLog("nextStep", "自动发送", null, false);
-              await scheduler.wait(5000);
-              if (result && result.message) {
-                this.sendLog("nextStep", result.message , null, false);
-              }
-            // } else {
-            //   if (status === true) {
-            //     await this.sendQuery(1);
-            //   }
             }
           }
           await this.checkMessage(status);
@@ -932,8 +861,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8784482045"),
-              accessHash: bigInt("4477441047772791150"),
+              userId: bigInt("8643806212"),
+              accessHash: bigInt("7753305124153421674"),
             }),
           ],
         })
@@ -1042,23 +971,7 @@ export class WebSocketServer extends DurableObject {
               if (messageArray[messageIndex]) {
                 if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                   const id = messageArray[messageIndex].id;
-                  if (messageArray[messageIndex].replyMarkup) {
-                    if (messageArray[messageIndex].replyMarkup.rows) {
-                      let text = "";
-                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        for (const button of row.buttons) {
-                          if (button.text === "▶️ 自动发送") {
-                            temp = {
-                              id: id,
-                              data: button.data,
-                            };
-                          // } else if (button.text === "⬇️ 全部发送") {
-                          // } else {
-                          }
-                        }
-                      }
-                    }
-                  } else if (messageArray[messageIndex].media) {
+                  if (messageArray[messageIndex].media) {
                     let fileId = null;
                     if (messageArray[messageIndex].media.document) {
                       // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -1083,63 +996,8 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                  } else {
-                    const message = messageArray[messageIndex].message.trim();
-                    if (message) {
-                      const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                      const string = message.split(":");
-                      if (string[0] === "kodexfilebot_v" || string[0] === "kodexfilebot_p" || string[0] === "kodexfilebot_d" || string[0] === "kodexfilebot_col") {
-                        await this.ctx.storage.put(message, 1);
-                        //console.log("(" + this.currentStep + ") 代码入库完毕");
-                        this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (regexp.test(message) === true) {
-                        temp = null;
-                        const text = message.replace("✅ 自动发送完成！成功 ", "");
-                        const regexp = /(\d+)/gi;
-                        const matches = message.match(regexp);
-                        if (matches) {
-                          if (matches.length === 2) {
-                            if (matches[0] === matches[1]) {
-                              temp = null;
-                              if (this.queue === true) {
-                                this.queue = false;
-                                await this.ctx.storage.put("queue", false);
-                                //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                                this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                              }
-                            }
-                          } else {
-                            //console.log("(" + this.currentStep + ") " + text);
-                            this.sendForward("start", "", text, "update", false);
-                          }
-                        }
-                      }
-                    }
                   }
                 }
-              }
-            }
-            if (this.queue === false) {
-              if (temp) {
-                this.queue = true;
-                await this.ctx.storage.put("queue", true);
-                const result = await this.client.invoke(
-                  new Api.messages.GetBotCallbackAnswer({
-                    peer: this.fromPeer,
-                    msgId: temp.id,
-                    data: temp.data,
-                  })
-                );
-                //console.log("(" + this.currentStep + ") 自动发送");
-                this.sendLog("start", "自动发送", null, false);
-                await scheduler.wait(5000);
-                if (result && result.message) {
-                  this.sendLog("start", result.message , null, false);
-                }
-              // } else {
-              //   if (status === true) {
-              //     await this.sendQuery(1);
-              //   }
               }
             }
             await this.checkMessage(status);
@@ -1342,7 +1200,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("kodexfile");
+      const id = env.WEBSOCKET_SERVER.idFromName("betapahatitakbahagia");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

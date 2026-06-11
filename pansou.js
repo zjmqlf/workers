@@ -799,7 +799,7 @@ export class WebSocketServer extends DurableObject {
           //console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
-      } else if (e.errorMessage === "FLOOD" || e.code === 420) {
+      } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
       } else {

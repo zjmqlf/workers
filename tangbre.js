@@ -388,7 +388,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage === "FLOOD" || e.code === 420) {
+      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -488,7 +488,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (e) {
-            if (e.errorMessage === "FLOOD" || e.code === 420) {
+            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -631,7 +631,7 @@ export class WebSocketServer extends DurableObject {
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
           return false;
-        } else if (e.errorMessage === "FLOOD" || e.code === 420) {
+        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {

@@ -30,35 +30,15 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "paniang_WebSocketServer",
-        "script_name": "paniang",
+        "name": "kodexchatsind_WebSocketServer",
+        "script_name": "kodexchatsind",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "kodexfiles2_WebSocketServer",
-        "script_name": "kodexfiles2",
+        "name": "betapahatitakbahagia_WebSocketServer",
+        "script_name": "betapahatitakbahagia",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "deanignitenations_WebSocketServer",
-        "script_name": "deanignitenations",
-        "class_name": "WebSocketServer"
-      },
-      {
-        "name": "hikkitusbolpaijo_WebSocketServer",
-        "script_name": "hikkitusbolpaijo",
-        "class_name": "WebSocketServer"
-      },
-      {
-        "name": "ryumasepongmilku_WebSocketServer",
-        "script_name": "ryumasepongmilku",
-        "class_name": "WebSocketServer"
-      },
-      {
-        "name": "lunindiacipoksupretto_WebSocketServer",
-        "script_name": "lunindiacipoksupretto",
-        "class_name": "WebSocketServer"
-      }
     ]
   }
 }
