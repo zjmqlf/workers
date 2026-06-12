@@ -14,11 +14,11 @@
         "script_name": "qqfile",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "lockhive_WebSocketServer",
-        "script_name": "lockhive",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "lockhive_WebSocketServer",
+      //   "script_name": "lockhive",
+      //   "class_name": "WebSocketServer"
+      // },
       {
         "name": "qyg100b_WebSocketServer",
         "script_name": "qyg100b",
@@ -27,6 +27,11 @@
       {
         "name": "zyxfiles_WebSocketServer",
         "script_name": "zyxfiles",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "filespanindo_WebSocketServer",
+        "script_name": "filespanindo",
         "class_name": "WebSocketServer"
       },
       {

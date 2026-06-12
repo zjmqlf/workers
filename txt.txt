@@ -47,6 +47,9 @@ npm run deploy-qqfile
 npm run build-zyxfiles
 npm run deploy-zyxfiles
 
+npm run build-filespanindo
+npm run deploy-filespanindo
+
 npm run build-kodexchatsind
 npm run deploy-kodexchatsind
 

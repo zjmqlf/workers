@@ -39,6 +39,11 @@ betapahatitakbahagia_bot
 8643806212
 7753305124153421674
 
+Files Pan Bot
+filespanindobot
+8547046053
+-3684405776559152057
+
 KodeXChatsMedia
 KodeXChatsINDbot
 8983376881
@@ -68,11 +73,6 @@ mlkautobot
 REDDFILEBOT
 7907874608
 6951715818642677681
-
-𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
-Steviarchiver_bot
-8764355350
-7176673485871383600
 
 Xywukai
 Xywukaibot
@@ -104,10 +104,10 @@ tebiejie3bot
 8468014882
 -1717425434517032221
 
-Files Pan Bot
-filespanindobot
-8547046053
--3684405776559152057
+布吉岛网盘
+bujidaobot
+7717423153
+6185691104571234701
 
 𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
 Steviarchiverbot
@@ -144,11 +144,6 @@ Hivelockbot
 8723832104
 -6389057978690310307
 
-稚月轩解码机器人
-zyxfid_bot
-8663840539
-5848852087062202069
-
 青柚解码器B
 QYG101B_bot
 7776921207
@@ -163,6 +158,16 @@ jyypbot
 cnyz001bot
 8749088831
 -325737943809043865
+
+文件中转站
+xiumi1bot
+8622209325
+4492215106351351048
+
+稚月轩解码器
+zyxfiles1bot
+8865179425
+-2356527111685471028
 
 小花朵精品专用
 XHD6688bot
@@ -270,6 +275,11 @@ KodeXMedia1bot
 WonkaLopeOnaa_bot
 8673393691
 62958369251494747
+
+𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
+Steviarchiver_bot
+8764355350
+7176673485871383600
 
 tebiejie1
 tebiejie1bot
@@ -469,6 +479,11 @@ zyxwj4_bot
 zyxkc7_bot
 8563339314
 1468987145988768995
+
+稚月轩解码机器人
+zyxfid_bot
+8663840539
+5848852087062202069
 
 媒体解码机器人正式版
 zyxkc6_bot

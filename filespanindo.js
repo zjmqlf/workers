@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./zyxfilesString";
+import { codeString } from "./filespanindoString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -300,7 +300,7 @@ export class WebSocketServer extends DurableObject {
   async open(tryCount) {
     const apiId = 1334621;
     const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7BOSn4tw5dznEmJS7Z58vPhNf6Oi9oHukQBdWc+bAGh/UKzkp+DAa+OJCDQ2Pt/DYmsPN+xNe6TvnlQFlhGMp1lvMfedMcOWP/ZKU+M7xVizs57ZKk0lGIq0pbdaRwavH7CSdqPyDhLQSLaQs/HRv2ESqxY+SqNB16C0ZBT28vvOEqb3/3MJzbhimVL3ccPiAeEv4vOsc6E0Y+h1d+fM7QuhtwW9wSyD1Jsl5f/kcPK5wahRVV3+ZbCWA6XFaQXZ5pDfDevFKDn/zyOhmwdvqbOKk9rbKU8fqhVnC+5XsVDeZQEqidyOmf6nTF8mJm4P2kR6wrftOXL2Y+nEgOclPNw==";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7gn5wG+YL7sXsWHDBKraoOeFFd/txTBSsgrT6pJkiV5hJNxPQqxHdflP31Xs4IsnpDmF0ipInV0LGpQo9hbV3sObZWxSVRURzDHOpf58pFn4N73s+10De8RgjA8xcCbqIABbgbD5CvHtU5VKTcaDM/FvJxJHD6lf89/2nTnHvb5UK8MdHd2FlznhfMdo3WHyyhk6PKzk13eBE51w+3DXys06WC8l9DqriJBNY3WyjNTKb7fShTlnOjufcnoST20Lt4kwpWieIeJrwwMF/iXOcYLHuraSidyC+nF/Js9UfBG271+Zd9+KLkpNfT2nUwAwScWAKtq1x1nfjLbSOiK4/yA==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
         timeout: 5,
@@ -739,6 +739,7 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
+          let temp = null;
           let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
@@ -767,35 +768,6 @@ export class WebSocketServer extends DurableObject {
                     } else {
                       //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
-                    }
-                  }
-                } else {
-                  const message = messageArray[messageIndex].message.trim();
-                  if (message) {
-                    const regexp = /[A-Za-z0-9]{40}/i;
-                    if (message.length === 40 && regexp.test(message) === true) {
-                      if (this.queue === false) {
-                        this.queue = true;
-                        await this.ctx.storage.put("queue", true);
-                      }
-                      await this.ctx.storage.put(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message === "✅ 所有文件已发送完成！") {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
-                        this.sendForward("nextStep", "所有文件已发送完成！", "", "update", false);
-                      }
-                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                      const date = message.replace("您已被限制使用,限制期限为：", "");
-                      if (date) {
-                        this.flood = new Date(date).getTime();
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }
@@ -889,8 +861,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8865179425"),
-              accessHash: bigInt("-2356527111685471028"),
+              userId: bigInt("8547046053"),
+              accessHash: bigInt("-3684405776559152057"),
             }),
           ],
         })
@@ -993,6 +965,7 @@ export class WebSocketServer extends DurableObject {
           //   this.sendLog("start", "messageLength比limit大", null, true);
           // }
           if (messageLength && messageLength > 0) {
+            let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
               if (messageArray[messageIndex]) {
@@ -1021,35 +994,6 @@ export class WebSocketServer extends DurableObject {
                       } else {
                         //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
-                      }
-                    }
-                  } else {
-                    const message = messageArray[messageIndex].message.trim();
-                    if (message) {
-                      const regexp = /[A-Za-z0-9]{40}/i;
-                      if (message.length === 40 && regexp.test(message) === true) {
-                        if (this.queue === false) {
-                          this.queue = true;
-                          await this.ctx.storage.put("queue", true);
-                        }
-                        await this.ctx.storage.put(message, 1);
-                        //console.log("(" + this.currentStep + ") 代码入库完毕");
-                        this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message === "✅ 所有文件已发送完成！") {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
-                          this.sendForward("start", "所有文件已发送完成！", "", "update", false);
-                        }
-                      } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                        const date = message.replace("您已被限制使用,限制期限为：", "");
-                        if (date) {
-                          this.flood = new Date(date).getTime();
-                          await this.ctx.storage.put("client", this.flood);
-                        }
-                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       }
                     }
                   }
@@ -1256,7 +1200,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("zyxfiles");
+      const id = env.WEBSOCKET_SERVER.idFromName("filespanindo");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }
