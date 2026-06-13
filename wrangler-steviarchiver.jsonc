@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "lunindiacipoksupretto",
-  "main": "lunindiacipoksupretto.js",
+  "name": "steviarchiver",
+  "main": "steviarchiver.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,7 +13,7 @@
   // },
   // "routes": [
   //   {
-  //     "pattern": "lunindiacipoksupretto.19422.xyz/*",
+  //     "pattern": "steviarchiver.19422.xyz/*",
   //     "zone_name": "19422.xyz"
   //   }
   // ],
@@ -23,7 +23,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "lunindiacipoksupretto",
+        "script_name": "steviarchiver",
         "class_name": "WebSocketServer"
       }
     ]

@@ -4,7 +4,8 @@ export const botString = {
   // "2": "lockhive",
   "3": "qyg100b",
   "4": "zyxfiles",
-  "5": "filespanindo",
-  "6": "kodexchatsind",
-  "7": "betapahatitakbahagia",
+  "5": "steviarchiver",
+  "6": "filespanindo",
+  "7": "kodexchatsind",
+  "8": "betapahatitakbahagia",
 };

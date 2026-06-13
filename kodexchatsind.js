@@ -686,7 +686,7 @@ export class WebSocketServer extends DurableObject {
       await this.close()
     } else {
       if (this.queue === true) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -768,6 +768,16 @@ export class WebSocketServer extends DurableObject {
                     } else {
                       //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
+                    }
+                  }
+                } else {
+                  const message = messageArray[messageIndex].message.trim();
+                  if (message) {
+                    const string = message.split(":");
+                    if (string[0] === "KodeXChatsINDbot") {
+                      await this.ctx.storage.put(message, 1);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                     }
                   }
                 }
@@ -994,6 +1004,16 @@ export class WebSocketServer extends DurableObject {
                       } else {
                         //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
+                      }
+                    }
+                  } else {
+                    const message = messageArray[messageIndex].message.trim();
+                    if (message) {
+                      const string = message.split(":");
+                      if (string[0] === "KodeXChatsINDbot") {
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
                       }
                     }
                   }

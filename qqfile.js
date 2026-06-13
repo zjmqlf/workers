@@ -756,6 +756,9 @@ export class WebSocketServer extends DurableObject {
       }
     }
     this.offsetId += this.count;
+    if (this.queue === true) {
+      this.offsetId -= 1;
+    }
     this.count = 0;
     await this.ctx.storage.put("offsetId", this.offsetId);
     //console.log("(" + this.currentStep + ") idArrayLength : " + this.idArray.length);  //测试
@@ -813,7 +816,7 @@ export class WebSocketServer extends DurableObject {
         }
       }
       await this.getMessage(1);
-      await scheduler.wait(5000);
+      await scheduler.wait(10000);
       const messageArray = this.messageArray.slice();
       const messageLength = messageArray.length;
       this.messageArray = [];
@@ -889,8 +892,8 @@ export class WebSocketServer extends DurableObject {
                                 //console.log("(" + this.currentStep + ") " + button.text);
                                 this.sendLog("nextStep", button.text, null, false);
                                 await scheduler.wait(15000);
-                                // this.sendForward("nextStep", "下一页", button.text, "update", false);
                                 if (result && result.message) {
+                                  // this.sendForward("nextStep", "下一页", result.message, "update", false);
                                   this.sendLog("nextStep", result.message , null, false);
                                 }
                               }
@@ -928,7 +931,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                   const message = messageArray[messageIndex].message.trim();
-                  if (message && message.includes("文件获取完毕") === true) {
+                  if (message && message.includes("文件获取完毕 文件总数：") === true) {
                     if (this.queue === true) {
                       this.queue = false;
                       await this.ctx.storage.put("queue", false);
@@ -982,7 +985,7 @@ export class WebSocketServer extends DurableObject {
                     } else if (message.includes("解码间隔需要") === true) {
                       //console.log("(" + this.currentStep + ") " + message);
                       this.sendLog("nextStep", message, "error", true);
-                    } else if (message.includes("文件获取完毕") === true) {
+                    } else if (message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
@@ -1051,8 +1054,8 @@ export class WebSocketServer extends DurableObject {
           this.offsetId += this.count;
           this.count = 0;
           await this.ctx.storage.put("offsetId", this.offsetId);
-        } else {
-          this.offsetId -= 1;
+        // } else {
+        //   this.offsetId -= 1;
         }
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
@@ -1107,8 +1110,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8782459743"),
-              accessHash: bigInt("-8942353408243178246"),
+              userId: bigInt("8895531043"),
+              accessHash: bigInt("-4179187748054768437"),
             }),
           ],
         })
@@ -1200,7 +1203,7 @@ export class WebSocketServer extends DurableObject {
             }
           }
           await this.getMessage(1);
-          await scheduler.wait(5000);
+          await scheduler.wait(10000);
           const messageArray = this.messageArray.slice();
           const messageLength = messageArray.length;
           this.messageArray = [];
@@ -1276,6 +1279,7 @@ export class WebSocketServer extends DurableObject {
                                   this.sendLog("start", button.text, null, false);
                                   await scheduler.wait(15000);
                                   if (result && result.message) {
+                                    // this.sendForward("nextStep", "下一页", result.message, "update", false);
                                     this.sendLog("start", result.message , null, false);
                                   }
                                 }
@@ -1313,7 +1317,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                     const message = messageArray[messageIndex].message.trim();
-                    if (message & message.includes("文件获取完毕") === true) {
+                    if (message & message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
@@ -1363,7 +1367,7 @@ export class WebSocketServer extends DurableObject {
                       } else if (message.includes("解码间隔需要") === true) {
                         //console.log("(" + this.currentStep + ") " + message);
                         this.sendLog("start", message, "error", true);
-                      } else if (message.includes("文件获取完毕") === true) {
+                      } else if (message.includes("文件获取完毕 文件总数：") === true) {
                         if (this.queue === true) {
                           this.queue = false;
                           await this.ctx.storage.put("queue", false);
@@ -1426,8 +1430,8 @@ export class WebSocketServer extends DurableObject {
               this.offsetId += this.count;
               this.count = 0;
               await this.ctx.storage.put("offsetId", this.offsetId);
-            } else {
-              this.offsetId -= 1;
+            // } else {
+            //   this.offsetId -= 1;
             }
             //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
             this.sendLog("start", "没有获取到有效的消息", "error", true);

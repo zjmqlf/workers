@@ -1,4 +1,4 @@
-export const codeString = [
+[
   "filespanindobot:067433df-4f32-499d-9b5f-0033b235a507",
   "filespanindobot:462f5ef9-2a6b-4212-add0-2d8396727a5d",
   "filespanindobot:0a3044c4-d269-4f49-a5cf-4e8d8b7fd41d",
@@ -19,4 +19,4 @@ export const codeString = [
   "filespanindobot:5e9b6b58-422b-4c63-822a-23b45f197250",
   "filespanindobot:c894c5af-8293-4984-a58f-0c198289d7d1",
   "filespanindobot:0110dda4-064d-4326-b86b-c365aa6a011d"
-];
+]

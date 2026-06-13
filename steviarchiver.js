@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./lunindiacipoksuprettoString";
+import { codeString } from "./steviarchiverString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -686,7 +686,7 @@ export class WebSocketServer extends DurableObject {
       await this.close()
     } else {
       if (this.queue === true) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -742,103 +742,46 @@ export class WebSocketServer extends DurableObject {
           let temp = null;
           let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-            if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
-              const id = messageArray[messageIndex].id;
-              if (messageArray[messageIndex].replyMarkup) {
-                if (messageArray[messageIndex].replyMarkup.rows) {
-                  // let text = "";
-                  for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                    for (const button of row.buttons) {
-                      if (button.text === "▶️ 自动发送") {
-                        temp = {
-                          id: id,
-                          data: button.data,
-                        };
-                      // } else if (button.text === "⬇️ 全部发送") {
-                      // } else {
-                      }
-                    }
+            if (messageArray[messageIndex]) {
+              if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
+                const id = messageArray[messageIndex].id;
+                if (messageArray[messageIndex].media) {
+                  let fileId = null;
+                  if (messageArray[messageIndex].media.document) {
+                    // const mimeType = messageArray[messageIndex].media.document.mimeType;
+                    // if (mimeType.startsWith("video/")) {
+                    //   fileId = messageArray[messageIndex].media.document.id;
+                    // } else if (mimeType.startsWith("image/")) {
+                    //   fileId = messageArray[messageIndex].media.document.id;
+                    // // } else if (mimeType.startsWith("application/")) {
+                    // // } else {
+                    // }
+                    fileId = messageArray[messageIndex].media.document.id;
+                  } else if (messageArray[messageIndex].media.photo) {
+                    fileId = messageArray[messageIndex].media.photo.id;
                   }
-                }
-              } else if (messageArray[messageIndex].media) {
-                let fileId = null;
-                if (messageArray[messageIndex].media.document) {
-                  // const mimeType = messageArray[messageIndex].media.document.mimeType;
-                  // if (mimeType.startsWith("video/")) {
-                  //   fileId = messageArray[messageIndex].media.document.id;
-                  // } else if (mimeType.startsWith("image/")) {
-                  //   fileId = messageArray[messageIndex].media.document.id;
-                  // // } else if (mimeType.startsWith("application/")) {
-                  // // } else {
-                  // }
-                  fileId = messageArray[messageIndex].media.document.id;
-                } else if (messageArray[messageIndex].media.photo) {
-                  fileId = messageArray[messageIndex].media.photo.id;
-                }
-                if (id && fileId) {
-                  if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
-                    status = true;
-                    this.idArray.push(id);
-                    this.fileIdArray.push(fileId);
-                  } else {
-                    //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
-                    this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
-                  }
-                }
-              } else {
-                const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                const message = messageArray[messageIndex].message.trim();
-                const string = message.split(":");
-                if (string[0] === "LunindiaCipokSupretto_bot_v" || string[0] === "LunindiaCipokSupretto_bot_p" || string[0] === "LunindiaCipokSupretto_bot_d" || string[0] === "LunindiaCipokSupretto_bot_col") {
-                  await this.ctx.storage.put(message, 1);
-                  //console.log("(" + this.currentStep + ") 代码入库完毕");
-                  this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                } else if (regexp.test(message) === true) {
-                  temp = null;
-                  const text = message.replace("✅ 自动发送完成！成功 ", "");
-                  const regexp = /(\d+)/gi;
-                  const matches = message.match(regexp);
-                  if (matches) {
-                    if (matches.length === 2) {
-                      if (matches[0] === matches[1]) {
-                        temp = null;
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                          this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                        }
-                      }
+                  if (id && fileId) {
+                    if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
+                      status = true;
+                      this.idArray.push(id);
+                      this.fileIdArray.push(fileId);
                     } else {
-                      //console.log("(" + this.currentStep + ") " + text);
-                      this.sendForward("start", "", text, "update", false);
+                      //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
+                      this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
+                    }
+                  }
+                } else {
+                  const message = messageArray[messageIndex].message.trim();
+                  if (message) {
+                    const string = message.substr(0, 4);
+                    if (string === "mov_" || string === "pic_" || string === "grp_") {
+                      await this.ctx.storage.put(message, 1);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                     }
                   }
                 }
               }
-            }
-          }
-          if (this.queue === false) {
-            if (temp) {
-              this.queue = true;
-              await this.ctx.storage.put("queue", true);
-              const result = await this.client.invoke(
-                new Api.messages.GetBotCallbackAnswer({
-                  peer: this.fromPeer,
-                  msgId: temp.id,
-                  data: temp.data,
-                })
-              );
-              //console.log("(" + this.currentStep + ") 自动发送");
-              this.sendLog("nextStep", "自动发送", null, false);
-              await scheduler.wait(5000);
-              if (result && result.message) {
-                this.sendLog("nextStep", result.message , null, false);
-              }
-            // } else {
-            //   if (status === true) {
-            //     await this.sendQuery(1);
-            //   }
             }
           }
           await this.checkMessage(status);
@@ -928,8 +871,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8554653830"),
-              accessHash: bigInt("-3683149469932305016"),
+              userId: bigInt("8677507049"),
+              accessHash: bigInt("-6730790620800713280"),
             }),
           ],
         })
@@ -1035,103 +978,46 @@ export class WebSocketServer extends DurableObject {
             let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-              if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
-                const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    let text = "";
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      for (const button of row.buttons) {
-                        if (button.text === "▶️ 自动发送") {
-                          temp = {
-                            id: id,
-                            data: button.data,
-                          };
-                        // } else if (button.text === "⬇️ 全部发送") {
-                        // } else {
-                        }
-                      }
+              if (messageArray[messageIndex]) {
+                if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
+                  const id = messageArray[messageIndex].id;
+                  if (messageArray[messageIndex].media) {
+                    let fileId = null;
+                    if (messageArray[messageIndex].media.document) {
+                      // const mimeType = messageArray[messageIndex].media.document.mimeType;
+                      // if (mimeType.startsWith("video/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // } else if (mimeType.startsWith("image/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // // } else if (mimeType.startsWith("application/")) {
+                      // // } else {
+                      // }
+                      fileId = messageArray[messageIndex].media.document.id;
+                    } else if (messageArray[messageIndex].media.photo) {
+                      fileId = messageArray[messageIndex].media.photo.id;
                     }
-                  }
-                } else if (messageArray[messageIndex].media) {
-                  let fileId = null;
-                  if (messageArray[messageIndex].media.document) {
-                    // const mimeType = messageArray[messageIndex].media.document.mimeType;
-                    // if (mimeType.startsWith("video/")) {
-                    //   fileId = messageArray[messageIndex].media.document.id;
-                    // } else if (mimeType.startsWith("image/")) {
-                    //   fileId = messageArray[messageIndex].media.document.id;
-                    // // } else if (mimeType.startsWith("application/")) {
-                    // // } else {
-                    // }
-                    fileId = messageArray[messageIndex].media.document.id;
-                  } else if (messageArray[messageIndex].media.photo) {
-                    fileId = messageArray[messageIndex].media.photo.id;
-                  }
-                  if (id && fileId) {
-                    if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
-                      status = true;
-                      this.idArray.push(id);
-                      this.fileIdArray.push(fileId);
-                    } else {
-                      //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
-                      this.sendLog("start", "该媒体已在数据库中", "error", true);
-                    }
-                  }
-                } else {
-                  const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                  const message = messageArray[messageIndex].message.trim();
-                  const string = message.split(":");
-                  if (string[0] === "LunindiaCipokSupretto_bot_v" || string[0] === "LunindiaCipokSupretto_bot_p" || string[0] === "LunindiaCipokSupretto_bot_d" || string[0] === "LunindiaCipokSupretto_bot_col") {
-                    await this.ctx.storage.put(message, 1);
-                    //console.log("(" + this.currentStep + ") 代码入库完毕");
-                    this.sendForward("start", "代码入库完毕", "", "add", false);
-                  } else if (regexp.test(message) === true) {
-                    temp = null;
-                    const text = message.replace("✅ 自动发送完成！成功 ", "");
-                    const regexp = /(\d+)/gi;
-                    const matches = message.match(regexp);
-                    if (matches) {
-                      if (matches.length === 2) {
-                        if (matches[0] === matches[1]) {
-                          temp = null;
-                          if (this.queue === true) {
-                            this.queue = false;
-                            await this.ctx.storage.put("queue", false);
-                            //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                            this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                          }
-                        }
+                    if (id && fileId) {
+                      if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
+                        status = true;
+                        this.idArray.push(id);
+                        this.fileIdArray.push(fileId);
                       } else {
-                        //console.log("(" + this.currentStep + ") " + text);
-                        this.sendForward("start", "", text, "update", false);
+                        //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
+                        this.sendLog("start", "该媒体已在数据库中", "error", true);
+                      }
+                    }
+                  } else {
+                    const message = messageArray[messageIndex].message.trim();
+                    if (message) {
+                      const string = message.substr(0, 4);
+                      if (string === "mov_" || string === "pic_" || string === "grp_") {
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
                       }
                     }
                   }
                 }
-              }
-            }
-            if (this.queue === false) {
-              if (temp) {
-                this.queue = true;
-                await this.ctx.storage.put("queue", true);
-                const result = await this.client.invoke(
-                  new Api.messages.GetBotCallbackAnswer({
-                    peer: this.fromPeer,
-                    msgId: temp.id,
-                    data: temp.data,
-                  })
-                );
-                //console.log("(" + this.currentStep + ") 自动发送");
-                this.sendLog("start", "自动发送", null, false);
-                await scheduler.wait(5000);
-                if (result && result.message) {
-                  this.sendLog("start", result.message , null, false);
-                }
-              // } else {
-              //   if (status === true) {
-              //     await this.sendQuery(1);
-              //   }
               }
             }
             await this.checkMessage(status);
@@ -1334,7 +1220,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("lunindiacipoksupretto");
+      const id = env.WEBSOCKET_SERVER.idFromName("steviarchiver");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

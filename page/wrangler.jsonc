@@ -30,6 +30,11 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "steviarchiver_WebSocketServer",
+        "script_name": "steviarchiver",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "filespanindo_WebSocketServer",
         "script_name": "filespanindo",
         "class_name": "WebSocketServer"

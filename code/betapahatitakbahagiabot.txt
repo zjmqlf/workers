@@ -1,4 +1,4 @@
-export const codeString = [
+[
   "betapahatitakbahagia_bot:85942fe6-178a-4b3b-9a69-56ba26c3f1cd",
   "betapahatitakbahagia_bot:4b4795c9-31c3-4f2e-b162-c4eea82b85b8",
   "betapahatitakbahagia_bot:3c9953d2-f551-4787-90de-89529f5de6b2",
@@ -41,4 +41,4 @@ export const codeString = [
   "betapahatitakbahagia_bot:5f574ac5-5496-44a9-8eb2-5f626a958939",
   "betapahatitakbahagia_bot:5bbe4d6c-7dfa-49ce-a5bd-e6fb0fb054b0",
   "betapahatitakbahagia_bot:47755892-e1a7-4f46-bf65-f5c5bc85ec4b"
-];
+]
