@@ -40,5 +40,22 @@
   "betapahatitakbahagia_bot:ff3aceb9-4bcf-4c92-a09d-433e6d4756aa",
   "betapahatitakbahagia_bot:5f574ac5-5496-44a9-8eb2-5f626a958939",
   "betapahatitakbahagia_bot:5bbe4d6c-7dfa-49ce-a5bd-e6fb0fb054b0",
-  "betapahatitakbahagia_bot:47755892-e1a7-4f46-bf65-f5c5bc85ec4b"
+  "betapahatitakbahagia_bot:47755892-e1a7-4f46-bf65-f5c5bc85ec4b",
+  "betapahatitakbahagia_bot:b0bd5f19-13c7-4465-9aad-7f5b060315cd",
+  "betapahatitakbahagia_bot:4de6661e-7972-4af8-8155-34b4a1fbfe76",
+  "betapahatitakbahagia_bot:d4672a15-dfa9-4e40-902c-86b8e355b47c",
+  "betapahatitakbahagia_bot:80a9a5f7-ff9f-439c-a623-4dc7f5082e6f",
+  "betapahatitakbahagia_bot:e2cff84e-0294-474f-ac04-b4168d4c47e8",
+  "betapahatitakbahagia_bot:399dca6a-200e-41ce-aa05-6ef6d760049c",
+  "betapahatitakbahagia_bot:b5e889c1-44d2-4538-90a5-1cfb257e8a43",
+  "betapahatitakbahagia_bot:072b59c9-cdb8-42a3-afa0-955f2c379a2e",
+  "betapahatitakbahagia_bot:d927664d-8429-4571-9402-e838f10e8fcb",
+  "betapahatitakbahagia_bot:19d8b0e5-0602-490f-a547-16d94b38b14a",
+  "betapahatitakbahagia_bot:c54004f2-7d33-4e50-93ce-cb558f7438a4",
+  "betapahatitakbahagia_bot:bc37ef1b-8987-4831-b89b-0c76e1fdd7bb",
+  "betapahatitakbahagia_bot:e7f2764e-6bdc-4e6b-b477-ed6414d9a99c",
+  "betapahatitakbahagia_bot:885265df-642d-4950-a541-d21dfb884997",
+  "betapahatitakbahagia_bot:492d901a-180f-4f6d-9dfd-018a65fc0690",
+  "betapahatitakbahagia_bot:9c85267b-d57d-4b5e-84f0-8d75818d964f",
+  "betapahatitakbahagia_bot:360bf849-5628-49c1-924b-8a7a729eafd0"
 ]
