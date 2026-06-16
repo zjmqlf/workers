@@ -734,6 +734,7 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
+          let temp = null;
           let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
@@ -769,30 +770,36 @@ export class WebSocketServer extends DurableObject {
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
                       for (const button of row.buttons) {
                         if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
-                          if (this.queue === false) {
-                            this.queue = true;
-                            await this.ctx.storage.put("queue", true);
-                          }
-                          const result = await this.client.invoke(
-                            new Api.messages.GetBotCallbackAnswer({
-                              peer: this.fromPeer,
-                              msgId: id,
-                              data: button.data,
-                            })
-                          );
-                          await scheduler.wait(5000);
-                          if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
-                            this.sendLog("nextStep", result.message , "error", true);
-                            await scheduler.wait(5000);
-                          }
-                          if (button.text === "📦 全部获取") {
-                            // console.log("(" + this.currentStep + ")" + button.text);
-                            this.sendLog("nextStep", button.text, null, false);
-                          } else {
-                            // console.log("(" + this.currentStep + ")" + button.text);
-                            this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
-                          }
+                          // if (this.queue === false) {
+                          //   this.queue = true;
+                          //   await this.ctx.storage.put("queue", true);
+                          // }
+                          // const result = await this.client.invoke(
+                          //   new Api.messages.GetBotCallbackAnswer({
+                          //     peer: this.fromPeer,
+                          //     msgId: id,
+                          //     data: button.data,
+                          //   })
+                          // );
+                          // await scheduler.wait(5000);
+                          // if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+                          //   this.sendLog("nextStep", result.message , "error", true);
+                          //   await scheduler.wait(5000);
+                          // }
+                          // if (button.text === "📦 全部获取") {
+                          //   // console.log("(" + this.currentStep + ")" + button.text);
+                          //   this.sendLog("nextStep", button.text, null, false);
+                          // } else {
+                          //   // console.log("(" + this.currentStep + ")" + button.text);
+                          //   this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+                          // }
+                          temp = {
+                            id: id,
+                            data: button.data,
+                            text: button.text,
+                          };
                         } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
+                          temp = null;
                           if (this.queue === true) {
                             this.queue = false;
                             await this.ctx.storage.put("queue", false);
@@ -834,6 +841,31 @@ export class WebSocketServer extends DurableObject {
           //     await this.sendQuery(1);
           //   }
           // }
+          if (temp) {
+            if (this.queue === false) {
+              this.queue = true;
+              await this.ctx.storage.put("queue", true);
+            }
+            const result = await this.client.invoke(
+              new Api.messages.GetBotCallbackAnswer({
+                peer: this.fromPeer,
+                msgId: temp.id,
+                data: temp.data,
+              })
+            );
+            await scheduler.wait(5000);
+            if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+              this.sendLog("nextStep", result.message , "error", true);
+              await scheduler.wait(5000);
+            }
+            if (temp.text === "📦 全部获取") {
+              // console.log("(" + this.currentStep + ")" + temp.text);
+              this.sendLog("nextStep", temp.text, null, false);
+            } else {
+              // console.log("(" + this.currentStep + ")" + temp.text);
+              this.sendForward("nextStep", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+            }
+          }
           await this.checkMessage(status);
           if (this.stop === 1) {
             await this.endStep("nextStep");
@@ -1028,6 +1060,7 @@ export class WebSocketServer extends DurableObject {
           //   this.sendLog("start", "messageLength比limit大", null, true);
           // }
           if (messageLength && messageLength > 0) {
+            let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
               if (messageArray[messageIndex]) {
@@ -1063,30 +1096,36 @@ export class WebSocketServer extends DurableObject {
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
                         for (const button of row.buttons) {
                           if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                            const result = await this.client.invoke(
-                              new Api.messages.GetBotCallbackAnswer({
-                                peer: this.fromPeer,
-                                msgId: id,
-                                data: button.data,
-                              })
-                            );
-                            await scheduler.wait(5000);
-                            if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
-                              this.sendLog("start", result.message , "error", true);
-                              await scheduler.wait(5000);
-                            }
-                            if (button.text === "📦 全部获取") {
-                              // console.log("(" + this.currentStep + ")" + button.text);
-                              this.sendLog("nextStep", button.text, null, false);
-                            } else {
-                              // console.log("(" + this.currentStep + ")" + button.text);
-                              this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
-                            }
+                            // if (this.queue === false) {
+                            //   this.queue = true;
+                            //   await this.ctx.storage.put("queue", true);
+                            // }
+                            // const result = await this.client.invoke(
+                            //   new Api.messages.GetBotCallbackAnswer({
+                            //     peer: this.fromPeer,
+                            //     msgId: id,
+                            //     data: button.data,
+                            //   })
+                            // );
+                            // await scheduler.wait(5000);
+                            // if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+                            //   this.sendLog("start", result.message , "error", true);
+                            //   await scheduler.wait(5000);
+                            // }
+                            // if (button.text === "📦 全部获取") {
+                            //   // console.log("(" + this.currentStep + ")" + button.text);
+                            //   this.sendLog("nextStep", button.text, null, false);
+                            // } else {
+                            //   // console.log("(" + this.currentStep + ")" + button.text);
+                            //   this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+                            // }
+                            temp = {
+                              id: id,
+                              data: button.data,
+                              text: button.text,
+                            };
                           } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
+                            temp = null;
                             if (this.queue === true) {
                               this.queue = false;
                               await this.ctx.storage.put("queue", false);
@@ -1128,6 +1167,31 @@ export class WebSocketServer extends DurableObject {
             //     await this.sendQuery(1);
             //   }
             // }
+            if (temp) {
+              if (this.queue === false) {
+                this.queue = true;
+                await this.ctx.storage.put("queue", true);
+              }
+              const result = await this.client.invoke(
+                new Api.messages.GetBotCallbackAnswer({
+                  peer: this.fromPeer,
+                  msgId: temp.id,
+                  data: temp.data,
+                })
+              );
+              await scheduler.wait(5000);
+              if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+                this.sendLog("start", result.message , "error", true);
+                await scheduler.wait(5000);
+              }
+              if (temp.text === "📦 全部获取") {
+                // console.log("(" + this.currentStep + ")" + temp.text);
+                this.sendLog("nextStep", temp.text, null, false);
+              } else {
+                // console.log("(" + this.currentStep + ")" + temp.text);
+                this.sendForward("nextStep", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+              }
+            }
             await this.checkMessage(status);
             if (this.stop === 1) {
               await this.endStep("start");

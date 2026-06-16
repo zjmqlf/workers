@@ -56,9 +56,6 @@ npm run deploy-filespanindo
 npm run build-kodexchatsind
 npm run deploy-kodexchatsind
 
-npm run build-betapahatitakbahagia
-npm run deploy-betapahatitakbahagia
-
 
 zjmqlf2025:
 

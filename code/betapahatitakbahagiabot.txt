@@ -57,5 +57,8 @@
   "betapahatitakbahagia_bot:885265df-642d-4950-a541-d21dfb884997",
   "betapahatitakbahagia_bot:492d901a-180f-4f6d-9dfd-018a65fc0690",
   "betapahatitakbahagia_bot:9c85267b-d57d-4b5e-84f0-8d75818d964f",
-  "betapahatitakbahagia_bot:360bf849-5628-49c1-924b-8a7a729eafd0"
+  "betapahatitakbahagia_bot:360bf849-5628-49c1-924b-8a7a729eafd0",
+  "betapahatitakbahagia_bot:aa890d35-50a3-45e3-a834-1bf415d33f56",
+  "betapahatitakbahagia_bot:5cf21232-b2bf-4160-8648-ca91ad2db861",
+  "betapahatitakbahagia_bot:d8d66877-d358-46b0-98e7-6c3a791e3f19"
 ]

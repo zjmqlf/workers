@@ -6,5 +6,6 @@
   "KodeXChatsINDbot:683f3769-e68c-4a97-9346-d0eede1d2a28",
   "KodeXChatsINDbot:80c06f9a-42ce-44ed-ae71-4981e4266c53",
   "KodeXChatsINDbot:792a60cc-e209-4d55-91c1-e0f9221a49ae",
-  "KodeXChatsINDbot:1bf91f5d-ab91-4db7-81d8-685f50169fe8"
+  "KodeXChatsINDbot:1bf91f5d-ab91-4db7-81d8-685f50169fe8",
+  "KodeXChatsINDbot:9c4fd06f-4ace-480a-870b-66716342aa90"
 ]

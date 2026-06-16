@@ -34,25 +34,25 @@ paniang_bot
 8750402925
 -7157880297278168937
 
-betapahatitakbahagia
-betapahatitakbahagia_bot
-8643806212
-7753305124153421674
-
 Files Pan Bot
 filespanindobot
 8547046053
 -3684405776559152057
 
-𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
-Steviarchiverbot
-8677507049
--6730790620800713280
+𝚂𝚝𝚎𝚟𝚒𝚊 𝙳𝚎𝚌𝚘𝚍𝚎𝚛 ☬
+Steviadecoderbot
+7976723565
+7150432689627043683
 
 KodeXChatsMedia
 KodeXChatsINDbot
 8983376881
 2798403794734196826
+
+File
+FileDecoderBot
+8876512009
+7859995171307950882
 
 Tzycodebot
 Tzycodebot
@@ -280,6 +280,16 @@ KodeXMedia1bot
 WonkaLopeOnaa_bot
 8673393691
 62958369251494747
+
+betapahatitakbahagia
+betapahatitakbahagia_bot
+8643806212
+7753305124153421674
+
+𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
+Steviarchiverbot
+8677507049
+-6730790620800713280
 
 𝚂𝚝𝚎𝚟𝚒𝚊 𝙰𝚛𝚌𝚑𝚒𝚟𝚎𝚛 ☬
 Steviarchiver_bot
