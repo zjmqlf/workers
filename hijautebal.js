@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./kodexfiles2String";
+import { codeString } from "./hijautebalString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -686,7 +686,7 @@ export class WebSocketServer extends DurableObject {
       await this.close()
     } else {
       if (this.queue === true) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -745,23 +745,7 @@ export class WebSocketServer extends DurableObject {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                 const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    // let text = "";
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      for (const button of row.buttons) {
-                        if (button.text === "▶️ 自动发送") {
-                          temp = {
-                            id: id,
-                            data: button.data,
-                          };
-                        // } else if (button.text === "⬇️ 全部发送") {
-                        // } else {
-                        }
-                      }
-                    }
-                  }
-                } else if (messageArray[messageIndex].media) {
+                if (messageArray[messageIndex].media) {
                   let fileId = null;
                   if (messageArray[messageIndex].media.document) {
                     // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -789,60 +773,15 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message.trim();
                   if (message) {
-                    const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
                     const string = message.split(":");
-                    if (string[0] === "KodeXFiles2bot_v" || string[0] === "KodeXFiles2bot_p" || string[0] === "KodeXFiles2bot_d" || string[0] === "KodeXFiles2bot_col") {
+                    if (string[0] === "Hijautebal_bot") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (regexp.test(message) === true) {
-                      temp = null;
-                      const text = message.replace("✅ 自动发送完成！成功 ", "");
-                      const regexp = /(\d+)/gi;
-                      const matches = message.match(regexp);
-                      if (matches) {
-                        if (matches.length === 2) {
-                          if (matches[0] === matches[1]) {
-                            temp = null;
-                            if (this.queue === true) {
-                              this.queue = false;
-                              await this.ctx.storage.put("queue", false);
-                              //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                              this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                            }
-                          }
-                        } else {
-                          //console.log("(" + this.currentStep + ") " + text);
-                          this.sendForward("start", "", text, "update", false);
-                        }
-                      }
                     }
                   }
                 }
               }
-            }
-          }
-          if (this.queue === false) {
-            if (temp) {
-              this.queue = true;
-              await this.ctx.storage.put("queue", true);
-              const result = await this.client.invoke(
-                new Api.messages.GetBotCallbackAnswer({
-                  peer: this.fromPeer,
-                  msgId: temp.id,
-                  data: temp.data,
-                })
-              );
-              //console.log("(" + this.currentStep + ") 自动发送");
-              this.sendLog("nextStep", "自动发送", null, false);
-              await scheduler.wait(5000);
-              if (result && result.message) {
-                this.sendLog("nextStep", result.message , null, false);
-              }
-            // } else {
-            //   if (status === true) {
-            //     await this.sendQuery(1);
-            //   }
             }
           }
           await this.checkMessage(status);
@@ -932,8 +871,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8508964084"),
-              accessHash: bigInt("8777468622410567541"),
+              userId: bigInt("8632371588"),
+              accessHash: bigInt("-8571086684013652876"),
             }),
           ],
         })
@@ -1042,23 +981,7 @@ export class WebSocketServer extends DurableObject {
               if (messageArray[messageIndex]) {
                 if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                   const id = messageArray[messageIndex].id;
-                  if (messageArray[messageIndex].replyMarkup) {
-                    if (messageArray[messageIndex].replyMarkup.rows) {
-                      let text = "";
-                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        for (const button of row.buttons) {
-                          if (button.text === "▶️ 自动发送") {
-                            temp = {
-                              id: id,
-                              data: button.data,
-                            };
-                          // } else if (button.text === "⬇️ 全部发送") {
-                          // } else {
-                          }
-                        }
-                      }
-                    }
-                  } else if (messageArray[messageIndex].media) {
+                  if (messageArray[messageIndex].media) {
                     let fileId = null;
                     if (messageArray[messageIndex].media.document) {
                       // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -1086,60 +1009,15 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message.trim();
                     if (message) {
-                      const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
                       const string = message.split(":");
-                      if (string[0] === "KodeXFiles2bot_v" || string[0] === "KodeXFiles2bot_p" || string[0] === "KodeXFiles2bot_d" || string[0] === "KodeXFiles2bot_col") {
+                      if (string[0] === "Hijautebal_bot") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (regexp.test(message) === true) {
-                        temp = null;
-                        const text = message.replace("✅ 自动发送完成！成功 ", "");
-                        const regexp = /(\d+)/gi;
-                        const matches = message.match(regexp);
-                        if (matches) {
-                          if (matches.length === 2) {
-                            if (matches[0] === matches[1]) {
-                              temp = null;
-                              if (this.queue === true) {
-                                this.queue = false;
-                                await this.ctx.storage.put("queue", false);
-                                //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
-                                this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
-                              }
-                            }
-                          } else {
-                            //console.log("(" + this.currentStep + ") " + text);
-                            this.sendForward("start", "", text, "update", false);
-                          }
-                        }
                       }
                     }
                   }
                 }
-              }
-            }
-            if (this.queue === false) {
-              if (temp) {
-                this.queue = true;
-                await this.ctx.storage.put("queue", true);
-                const result = await this.client.invoke(
-                  new Api.messages.GetBotCallbackAnswer({
-                    peer: this.fromPeer,
-                    msgId: temp.id,
-                    data: temp.data,
-                  })
-                );
-                //console.log("(" + this.currentStep + ") 自动发送");
-                this.sendLog("start", "自动发送", null, false);
-                await scheduler.wait(5000);
-                if (result && result.message) {
-                  this.sendLog("start", result.message , null, false);
-                }
-              // } else {
-              //   if (status === true) {
-              //     await this.sendQuery(1);
-              //   }
               }
             }
             await this.checkMessage(status);
@@ -1342,7 +1220,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("kodexfiles2");
+      const id = env.WEBSOCKET_SERVER.idFromName("hijautebal");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

@@ -25,6 +25,7 @@ const mmyzybot = [];
 // const PaijoKontolBurikbot = [];
 const Steviarchiverbot = [];
 const DghuddvhiBOT = [];
+const Hijautebalbot = [];
 const filespanindobot = [];
 const KodeXChatsINDbot = [];
 const MassFilesStoreBot = [];
@@ -123,6 +124,7 @@ const Steviarchiverbot1Regexp = /(mov_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverb
 const Steviarchiverbot2Regexp = /(pic_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
 const Steviarchiverbot3Regexp = /(grp_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
 const DghuddvhiBOTRegexp = /(DghuddvhiBOT:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //DghuddvhiBOT
+const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //Hijautebalbot
 const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //filespanindobot
 const KodeXChatsINDbotRegexp = /(KodeXChatsINDbot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //KodeXChatsINDbot
 const MassFilesStoreBotRegexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/gi;   //MassFilesStoreBot
@@ -1379,6 +1381,20 @@ try {
             for (let j = 0; j < DghuddvhiBOTMatchesLength; j++) {
               if (DghuddvhiBOTMatches[j]) {
                 DghuddvhiBOT.push(DghuddvhiBOTMatches[j]);
+              }
+            }
+          }
+        }
+
+        const HijautebalbotMatches = str.match(HijautebalbotRegexp);
+        // console.log(HijautebalbotMatches);  //测试
+        if (HijautebalbotMatches) {
+          const HijautebalbotMatchesLength = HijautebalbotMatches.length;
+          // console.log("HijautebalbotMatchesLength : " + HijautebalbotMatchesLength);  //测试
+          if (HijautebalbotMatchesLength > 0) {
+            for (let j = 0; j < HijautebalbotMatchesLength; j++) {
+              if (HijautebalbotMatches[j]) {
+                Hijautebalbot.push(HijautebalbotMatches[j]);
               }
             }
           }
@@ -3709,6 +3725,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/DghuddvhiBOT.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += Hijautebalbot.length;
+  console.log("Hijautebalbot : " + Hijautebalbot.length);  //测试
+  if (Hijautebalbot.length > 0) {
+    const data = fs.readFileSync("./code/Hijautebalbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...Hijautebalbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/Hijautebalbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }

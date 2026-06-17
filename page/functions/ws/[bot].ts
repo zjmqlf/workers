@@ -21,9 +21,12 @@ export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params 
     "1": env.qqfile_WebSocketServer,
     // "2": env.lockhive_WebSocketServer,
     "2": env.zyxfiles_WebSocketServer,
-    "3": env.steviarchiver_WebSocketServer,
-    "4": env.filespanindo_WebSocketServer,
-    "5": env.kodexchatsind_WebSocketServer,
+    "3": env.dghuddvhi_WebSocketServer,
+    "4": env.hijautebal_WebSocketServer,
+    "5": env.filespanindo_WebSocketServer,
+    "6": env.kodexchatsind_WebSocketServer,
+    "7": env.massfilesstore_WebSocketServer,
+    "8": env.steviarchiver_WebSocketServer,
   };
   // const bot:string = context.params.bot;
   const bot:string = params.bot;

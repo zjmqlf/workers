@@ -1,0 +1,5 @@
+[
+  "DghuddvhiBOT:35a9cd00-d781-4454-96b1-68a51441fd2d",
+  "DghuddvhiBOT:3f08dfd0-ff44-413e-a997-ee3876cf8703",
+  "DghuddvhiBOT:0290a214-d977-4f5c-a98f-1257a3d6ae4c"
+]

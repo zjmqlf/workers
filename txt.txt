@@ -47,14 +47,23 @@ npm run deploy-qqfile
 npm run build-zyxfiles
 npm run deploy-zyxfiles
 
-npm run build-steviarchiver
-npm run deploy-steviarchiver
+npm run build-dghuddvhi
+npm run deploy-dghuddvhi
+
+npm run build-hijautebal
+npm run deploy-hijautebal
 
 npm run build-filespanindo
 npm run deploy-filespanindo
 
 npm run build-kodexchatsind
 npm run deploy-kodexchatsind
+
+npm run build-massfilesstore
+npm run deploy-massfilesstore
+
+npm run build-steviarchiver
+npm run deploy-steviarchiver
 
 
 zjmqlf2025:

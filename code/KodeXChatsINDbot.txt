@@ -7,5 +7,22 @@
   "KodeXChatsINDbot:80c06f9a-42ce-44ed-ae71-4981e4266c53",
   "KodeXChatsINDbot:792a60cc-e209-4d55-91c1-e0f9221a49ae",
   "KodeXChatsINDbot:1bf91f5d-ab91-4db7-81d8-685f50169fe8",
-  "KodeXChatsINDbot:9c4fd06f-4ace-480a-870b-66716342aa90"
+  "KodeXChatsINDbot:9c4fd06f-4ace-480a-870b-66716342aa90",
+  "KodeXChatsINDbot:2aff0c3f-08ee-4853-86df-98fd2d453bf5",
+  "KodeXChatsINDbot:ab45c4b0-cc30-4f1b-a811-5a468dbd8c2b",
+  "KodeXChatsINDbot:72595b18-65bf-4e84-9dc0-1cc46a85edb7",
+  "KodeXChatsINDbot:675a6470-1b5d-4a63-a1ec-8b89af02086a",
+  "KodeXChatsINDbot:d25d89a0-9e9a-4982-8b2e-ff34d03f46b3",
+  "KodeXChatsINDbot:0c950145-f3d6-47d2-8d7d-cee31c9377e2",
+  "KodeXChatsINDbot:6133e288-cb3c-4ca5-8620-5900231cb6bf",
+  "KodeXChatsINDbot:7c66e4c1-b275-4d1a-be17-7443ebceeaab",
+  "KodeXChatsINDbot:f4c038b2-8cca-4c68-912f-2cc4b553672c",
+  "KodeXChatsINDbot:fd85104e-9a93-4787-b04a-ed47d6269f34",
+  "KodeXChatsINDbot:8638010b-0738-4e61-8442-a1a720f8f820",
+  "KodeXChatsINDbot:d080c2be-baa0-4685-99fb-b9b44783c3c8",
+  "KodeXChatsINDbot:6f25b899-4221-455b-b814-00c7fa10fe58",
+  "KodeXChatsINDbot:ddfec4fd-08f8-4887-98f3-bc5b432b4217",
+  "KodeXChatsINDbot:0577fab0-1601-4631-b5c5-cadc3a45adf9",
+  "KodeXChatsINDbot:b834b4ca-accb-439c-9eba-613f7d1aeded",
+  "KodeXChatsINDbot:6c8254f7-f121-41a7-b354-bb2d49b65de4"
 ]
