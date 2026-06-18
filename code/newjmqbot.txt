@@ -3445,5 +3445,8 @@
   "newjmqbot_0p_1v_0d_DoiV87gR8LTsS",
   "newjmqbot_0p_1v_0d_F2q94d4GvrT1L",
   "newjmqbot_0p_0v_1d_3BVzJL7NVpkd9",
-  "newjmqbot_1p_0v_0d_VuGOvxsNlLqmV"
+  "newjmqbot_1p_0v_0d_VuGOvxsNlLqmV",
+  "newjmqbot_0p_1v_0d_Sjur4TWplkwPh",
+  "newjmqbot_0p_0v_1d_jqThrjkCovRX5",
+  "newjmqbot_0p_49v_0d_JM04OKXbL2TRi"
 ]

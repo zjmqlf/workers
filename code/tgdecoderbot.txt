@@ -210,5 +210,6 @@
   "decoder_1p_0v_0d_RFBV9XRTI7YN",
   "decoder_0p_6v_0d_A9FGV4DBXD0Z",
   "decoder_0p_11v_0d_UDQ6EYAAIL26",
-  "decoder_56p_30v_0d_TZEEGJMUH93Z"
+  "decoder_56p_30v_0d_TZEEGJMUH93Z",
+  "decoder_0p_1v_0d_ZS4ZQIWJAH3C"
 ]

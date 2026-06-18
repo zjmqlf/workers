@@ -1,3 +1,4 @@
 [
-  "Hijautebal_bot:19813b56-d333-4a97-b320-ec31f60ccd0e"
+  "Hijautebal_bot:19813b56-d333-4a97-b320-ec31f60ccd0e",
+  "Hijautebal_bot:282d0904-f689-43ac-9ef6-18e726ba5cf9"
 ]
