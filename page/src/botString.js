@@ -5,8 +5,9 @@ export const botString = {
   "2": "zyxfiles",
   "3": "dghuddvhi",
   "4": "hijautebal",
-  "5": "filespanindo",
-  "6": "kodexchatsind",
-  "7": "massfilesstore",
-  "8": "steviarchiver",
+  "5": "fileshubro",
+  "6": "filespanindo",
+  "7": "kodexchatsind",
+  "8": "massfilesstore",
+  "9": "steviarchiver",
 };

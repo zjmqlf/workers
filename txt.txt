@@ -53,6 +53,9 @@ npm run deploy-dghuddvhi
 npm run build-hijautebal
 npm run deploy-hijautebal
 
+npm run build-fileshubro
+npm run deploy-fileshubro
+
 npm run build-filespanindo
 npm run deploy-filespanindo
 

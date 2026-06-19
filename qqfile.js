@@ -960,6 +960,18 @@ export class WebSocketServer extends DurableObject {
                       this.getCount2(message);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
+                      this.flood = new Date().getTime() + 600000;
+                      await this.ctx.storage.put("client", this.flood);
+                      //console.log("(" + this.currentStep + ") " + message);
+                      this.sendLog("nextStep", message, "flood", true);
+                    } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要") === true || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("nextStep", message, "error", true);
+                      }
                     } else if (message.includes("您已被限制使用,限制期限为：") === true) {
                       const date = message.replace("您已被限制使用,限制期限为：", "");
                       if (date) {
@@ -968,28 +980,6 @@ export class WebSocketServer extends DurableObject {
                       }
                       //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                       this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                    } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
-                      this.flood = new Date().getTime() + 600000;
-                      await this.ctx.storage.put("client", this.flood);
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("nextStep", message, "flood", true);
-                    } else if (message === "文件码解析失败") {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("nextStep", message, "error", true);
-                      }
-                    } else if (message.includes("当前机器人无法解析") === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("nextStep", message, "error", true);
-                      }
-                    } else if (message.includes("解码间隔需要") === true) {
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("nextStep", message, "error", true);
                     } else if (message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
                         this.queue = false;
@@ -1351,6 +1341,18 @@ export class WebSocketServer extends DurableObject {
                         this.getCount2(message);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
+                        this.flood = new Date().getTime() + 600000;
+                        await this.ctx.storage.put("client", this.flood);
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("start", message, "flood", true);
+                      } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要" || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) === true) {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                          //console.log("(" + this.currentStep + ") " + message);
+                          this.sendLog("start", message, "error", true);
+                        }
                       } else if (message.includes("您已被限制使用,限制期限为：") === true) {
                         const date = message.replace("您已被限制使用,限制期限为：", "");
                         if (date) {
@@ -1359,24 +1361,6 @@ export class WebSocketServer extends DurableObject {
                         }
                         //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                         this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                      } else if (message === "文件码解析失败") {
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("start", message, "error", true);
-                      } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
-                        this.flood = new Date().getTime() + 600000;
-                        await this.ctx.storage.put("client", this.flood);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("start", message, "flood", true);
-                      } else if (message.includes("当前机器人无法解析") === true) {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") " + message);
-                          this.sendLog("start", message, "error", true);
-                        }
-                      } else if (message.includes("解码间隔需要") === true) {
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("start", message, "error", true);
                       } else if (message.includes("文件获取完毕 文件总数：") === true) {
                         if (this.queue === true) {
                           this.queue = false;

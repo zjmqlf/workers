@@ -26,6 +26,7 @@ const mmyzybot = [];
 const Steviarchiverbot = [];
 const DghuddvhiBOT = [];
 const Hijautebalbot = [];
+const FilesHubRobot = [];
 const filespanindobot = [];
 const KodeXChatsINDbot = [];
 const MassFilesStoreBot = [];
@@ -127,6 +128,7 @@ const DghuddvhiBOTRegexp = /(DghuddvhiBOT:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a
 const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //Hijautebalbot
 const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //filespanindobot
 const KodeXChatsINDbotRegexp = /(KodeXChatsINDbot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //KodeXChatsINDbot
+const FilesHubRobotRegexp = /(FilesHub_Robot_[a-z0-9]{20})/gi;   //FilesHubRobot
 const MassFilesStoreBotRegexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/gi;   //MassFilesStoreBot
 const betapahatitakbahagiabotRegexp = /(betapahatitakbahagia_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //betapahatitakbahagiabot
 const QQfilebotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/gi;   //QQfilebot
@@ -1395,6 +1397,20 @@ try {
             for (let j = 0; j < HijautebalbotMatchesLength; j++) {
               if (HijautebalbotMatches[j]) {
                 Hijautebalbot.push(HijautebalbotMatches[j]);
+              }
+            }
+          }
+        }
+
+        const FilesHubRobotMatches = str.match(FilesHubRobotRegexp);
+        // console.log(FilesHubRobotMatches);  //测试
+        if (FilesHubRobotMatches) {
+          const FilesHubRobotMatchesLength = FilesHubRobotMatches.length;
+          // console.log("FilesHubRobotMatchesLength : " + FilesHubRobotMatchesLength);  //测试
+          if (FilesHubRobotMatchesLength > 0) {
+            for (let j = 0; j < FilesHubRobotMatchesLength; j++) {
+              if (FilesHubRobotMatches[j]) {
+                FilesHubRobot.push(FilesHubRobotMatches[j]);
               }
             }
           }
@@ -3748,6 +3764,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/Hijautebalbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += FilesHubRobot.length;
+  console.log("FilesHubRobot : " + FilesHubRobot.length);  //测试
+  if (FilesHubRobot.length > 0) {
+    const data = fs.readFileSync("./code/FilesHubRobot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...FilesHubRobot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/FilesHubRobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }

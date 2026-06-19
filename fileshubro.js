@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./ryumasepongmilkuString";
+import { codeString } from "./fileshubroString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -790,8 +790,7 @@ export class WebSocketServer extends DurableObject {
                   const message = messageArray[messageIndex].message.trim();
                   if (message) {
                     const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                    const string = message.split(":");
-                    if (string[0] === "RyumaSepongMilku_bot_v" || string[0] === "RyumaSepongMilku_bot_p" || string[0] === "RyumaSepongMilku_bot_d" || string[0] === "RyumaSepongMilku_bot_col") {
+                    if (message.substr(0, 15) === "FilesHub_Robot_") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
@@ -932,8 +931,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8613570788"),
-              accessHash: bigInt("7003533048444817742"),
+              userId: bigInt("8616465213"),
+              accessHash: bigInt("4032707820616795457"),
             }),
           ],
         })
@@ -1087,8 +1086,7 @@ export class WebSocketServer extends DurableObject {
                     const message = messageArray[messageIndex].message.trim();
                     if (message) {
                       const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                      const string = message.split(":");
-                      if (string[0] === "RyumaSepongMilku_bot_v" || string[0] === "RyumaSepongMilku_bot_p" || string[0] === "RyumaSepongMilku_bot_d" || string[0] === "RyumaSepongMilku_bot_col") {
+                      if (message.substr(0, 15) === "FilesHub_Robot_") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
@@ -1342,7 +1340,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("ryumasepongmilku");
+      const id = env.WEBSOCKET_SERVER.idFromName("fileshubro");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

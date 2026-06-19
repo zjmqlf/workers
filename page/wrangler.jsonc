@@ -35,6 +35,11 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "fileshubro_WebSocketServer",
+        "script_name": "fileshubro",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "filespanindo_WebSocketServer",
         "script_name": "filespanindo",
         "class_name": "WebSocketServer"
