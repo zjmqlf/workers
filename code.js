@@ -124,6 +124,8 @@ const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/gi;   //mmyzybot
 const Steviarchiverbot1Regexp = /(mov_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
 const Steviarchiverbot2Regexp = /(pic_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
 const Steviarchiverbot3Regexp = /(grp_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
+const Steviarchiverbot4Regexp = /(gif_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
+const Steviarchiverbot5Regexp = /(doc_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
 const DghuddvhiBOTRegexp = /(DghuddvhiBOT:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //DghuddvhiBOT
 const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //Hijautebalbot
 const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //filespanindobot
@@ -1369,6 +1371,34 @@ try {
             for (let j = 0; j < Steviarchiverbot3MatchesLength; j++) {
               if (Steviarchiverbot3Matches[j]) {
                 Steviarchiverbot.push(Steviarchiverbot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const Steviarchiverbot4Matches = str.match(Steviarchiverbot4Regexp);
+        // console.log(Steviarchiverbot4Matches);  //测试
+        if (Steviarchiverbot4Matches) {
+          const Steviarchiverbot4MatchesLength = Steviarchiverbot4Matches.length;
+          // console.log("Steviarchiverbot4MatchesLength : " + Steviarchiverbot4MatchesLength);  //测试
+          if (Steviarchiverbot4MatchesLength > 0) {
+            for (let j = 0; j < Steviarchiverbot4MatchesLength; j++) {
+              if (Steviarchiverbot4Matches[j]) {
+                Steviarchiverbot.push(Steviarchiverbot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const Steviarchiverbot5Matches = str.match(Steviarchiverbot5Regexp);
+        // console.log(Steviarchiverbot5Matches);  //测试
+        if (Steviarchiverbot5Matches) {
+          const Steviarchiverbot5MatchesLength = Steviarchiverbot5Matches.length;
+          // console.log("Steviarchiverbot5MatchesLength : " + Steviarchiverbot5MatchesLength);  //测试
+          if (Steviarchiverbot5MatchesLength > 0) {
+            for (let j = 0; j < Steviarchiverbot5MatchesLength; j++) {
+              if (Steviarchiverbot5Matches[j]) {
+                Steviarchiverbot.push(Steviarchiverbot5Matches[j]);
               }
             }
           }

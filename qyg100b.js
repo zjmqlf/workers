@@ -802,7 +802,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   }
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
                     if (regexp.test(message) === true) {
@@ -846,7 +846,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const string = message.split(":");
                     if (string[0] === "QYG100B_bot") {
@@ -1069,6 +1069,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1142,7 +1143,7 @@ export class WebSocketServer extends DurableObject {
                         }
                       }
                     }
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
                       if (regexp.test(message) === true) {
@@ -1186,7 +1187,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const string = message.split(":");
                       if (string[0] === "QYG100B_bot") {

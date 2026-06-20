@@ -788,7 +788,7 @@ export class WebSocketServer extends DurableObject {
                   }
                 } else {
                   const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const string = message.split(":");
                     if (string[0] === "HikkiTusbolPaijo_bot_v" || string[0] === "HikkiTusbolPaijo_bot_p" || string[0] === "HikkiTusbolPaijo_bot_d" || string[0] === "HikkiTusbolPaijo_bot_col") {
@@ -1024,6 +1024,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1085,7 +1086,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   } else {
                     const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const string = message.split(":");
                       if (string[0] === "HikkiTusbolPaijo_bot_v" || string[0] === "HikkiTusbolPaijo_bot_p" || string[0] === "HikkiTusbolPaijo_bot_d" || string[0] === "HikkiTusbolPaijo_bot_col") {

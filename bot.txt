@@ -159,10 +159,10 @@ nnfilebot
 8644136882
 -1388224743701786177
 
-蜂巢文件-lockhive
-Hivelockbot
-8723832104
--6389057978690310307
+蜂巢文件-LockHive
+HiveLockfilebot
+8971565760
+-5452475782277061610
 
 木木解码
 amumujiemabot
@@ -367,6 +367,11 @@ blgjlqbot
 lockhive_bot
 7964900739
 -5856254949516087696
+
+蜂巢文件-lockhive
+Hivelockbot
+8723832104
+-6389057978690310307
 
 汤不热解码器
 tg_decoderbot

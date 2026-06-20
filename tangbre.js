@@ -851,7 +851,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     // const regexp = /([a-z0-9]{32})/i;
                     if (message.substr(0, 11) === "TangBRebot_") {
@@ -1079,7 +1079,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
-          // this.offsetId -= 1;  //测试
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1179,7 +1179,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const regexp = /([a-z0-9]{32})/i;
                       if (message.substr(0, 11) === "TangBRebot_") {

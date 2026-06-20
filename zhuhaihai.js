@@ -818,6 +818,7 @@ export class WebSocketServer extends DurableObject {
                             if (result && result.message) {
                               this.sendLog("nextStep", result.message , null, false);
                             }
+                            this.offsetId -= 1;
                           }
                         // } else if (button.text === "❇️") {
                         // } else if (button.text === "❎") {
@@ -851,8 +852,8 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                  const message = messageArray[messageIndex].message.trim();
-                  if (message && message.includes("文件获取完毕") === true) {
+                  const message = messageArray[messageIndex].message?.trim();
+                  if (message && message.includes("文件获取完毕 文件总数：") === true) {
                     if (this.queue === true) {
                       this.queue = false;
                       await this.ctx.storage.put("queue", false);
@@ -861,7 +862,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const string = message.split(":");
                     if (string[0] === "Zhuahihaibot") {
@@ -1107,6 +1108,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1149,6 +1151,7 @@ export class WebSocketServer extends DurableObject {
                               if (result && result.message) {
                                 this.sendLog("start", result.message , null, false);
                               }
+                              this.offsetId -= 1;
                             }
                           // } else if (button.text === "❇️") {
                           // } else if (button.text === "❎") {
@@ -1182,8 +1185,8 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                    const message = messageArray[messageIndex].message.trim();
-                    if (message & message.includes("文件获取完毕") === true) {
+                    const message = messageArray[messageIndex].message?.trim();
+                    if (message & message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
@@ -1192,7 +1195,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const string = message.split(":");
                       if (string[0] === "Zhuahihaibot") {
@@ -1223,7 +1226,7 @@ export class WebSocketServer extends DurableObject {
                           //console.log("(" + this.currentStep + ") " + message);
                           this.sendLog("start", message, "error", true);
                         }
-                      } else if (message.includes("文件获取完毕") === true) {
+                      } else if (message.includes("文件获取完毕 文件总数：") === true) {
                         if (this.queue === true) {
                           this.queue = false;
                           await this.ctx.storage.put("queue", false);

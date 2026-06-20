@@ -919,7 +919,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     if (message.substr(0, 12) === "FileLeakBot_") {
                       await this.ctx.storage.put(message, 1);
@@ -1151,6 +1151,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1292,7 +1293,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       if (message.substr(0, 12) === "FileLeakBot_") {
                         await this.ctx.storage.put(message, 1);

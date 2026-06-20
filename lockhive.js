@@ -24,6 +24,7 @@ export class WebSocketServer extends DurableObject {
   queue = false;
   waitTime = 60000;
   pingTime = 5000;
+  lastPage = "";
   count = 0;
   flood = 0;
   time = 0;
@@ -109,6 +110,7 @@ export class WebSocketServer extends DurableObject {
       this.queue = await this.ctx.storage.get("queue") || false;
       this.waitTime = 60000;
       this.pingTime = 5000;
+      this.lastPage = "";
       this.fileCount = 0;
       this.count = 0;
       this.flood = 0;
@@ -446,6 +448,7 @@ export class WebSocketServer extends DurableObject {
           await this.sendQuery(1);
           return;
         } else {
+          this.lastPage = "";
           try {
             await this.client.invoke(
               new Api.messages.SendMessage({
@@ -774,6 +777,12 @@ export class WebSocketServer extends DurableObject {
                           //   this.queue = true;
                           //   await this.ctx.storage.put("queue", true);
                           // }
+                          // if (this.lastPage && this.lastPage === button.text) {
+                          //   //console.log("(" + this.currentStep + ") 同一页码");
+                          //   this.sendLog("nextStep", "同一页码", null, true);
+                          // } else {
+                          //   this.lastPage = button.text;
+                          // }
                           // const result = await this.client.invoke(
                           //   new Api.messages.GetBotCallbackAnswer({
                           //     peer: this.fromPeer,
@@ -800,6 +809,7 @@ export class WebSocketServer extends DurableObject {
                           };
                         } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
                           temp = null;
+                          this.lastPage = "";
                           if (this.queue === true) {
                             this.queue = false;
                             await this.ctx.storage.put("queue", false);
@@ -811,7 +821,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     // if (message.substr(0, 3) === "LH_") {
                     if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
@@ -845,6 +855,12 @@ export class WebSocketServer extends DurableObject {
             if (this.queue === false) {
               this.queue = true;
               await this.ctx.storage.put("queue", true);
+            }
+            if (this.lastPage && this.lastPage === temp.text) {
+              //console.log("(" + this.currentStep + ") 同一页码");
+              this.sendLog("nextStep", "同一页码", null, true);
+            } else {
+              this.lastPage = temp.text;
             }
             const result = await this.client.invoke(
               new Api.messages.GetBotCallbackAnswer({
@@ -956,8 +972,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8723832104"),
-              accessHash: bigInt("-6389057978690310307"),
+              userId: bigInt("8971565760"),
+              accessHash: bigInt("-5452475782277061610"),
             }),
           ],
         })
@@ -1048,6 +1064,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1100,6 +1117,12 @@ export class WebSocketServer extends DurableObject {
                             //   this.queue = true;
                             //   await this.ctx.storage.put("queue", true);
                             // }
+                            // if (this.lastPage && this.lastPage === button.text) {
+                            //   //console.log("(" + this.currentStep + ") 同一页码");
+                            //   this.sendLog("start", "同一页码", null, true);
+                            // } else {
+                            //   this.lastPage = button.text;
+                            // }
                             // const result = await this.client.invoke(
                             //   new Api.messages.GetBotCallbackAnswer({
                             //     peer: this.fromPeer,
@@ -1114,10 +1137,10 @@ export class WebSocketServer extends DurableObject {
                             // }
                             // if (button.text === "📦 全部获取") {
                             //   // console.log("(" + this.currentStep + ")" + button.text);
-                            //   this.sendLog("nextStep", button.text, null, false);
+                            //   this.sendLog("start", button.text, null, false);
                             // } else {
                             //   // console.log("(" + this.currentStep + ")" + button.text);
-                            //   this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+                            //   this.sendForward("start", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
                             // }
                             temp = {
                               id: id,
@@ -1126,6 +1149,7 @@ export class WebSocketServer extends DurableObject {
                             };
                           } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
                             temp = null;
+                            this.lastPage = "";
                             if (this.queue === true) {
                               this.queue = false;
                               await this.ctx.storage.put("queue", false);
@@ -1137,7 +1161,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       // if (message.substr(0, 3) === "LH_") {
                       if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
@@ -1172,6 +1196,12 @@ export class WebSocketServer extends DurableObject {
                 this.queue = true;
                 await this.ctx.storage.put("queue", true);
               }
+              if (this.lastPage && this.lastPage === temp.text) {
+                //console.log("(" + this.currentStep + ") 同一页码");
+                this.sendLog("start", "同一页码", null, true);
+              } else {
+                this.lastPage = temp.text;
+              }
               const result = await this.client.invoke(
                 new Api.messages.GetBotCallbackAnswer({
                   peer: this.fromPeer,
@@ -1186,10 +1216,10 @@ export class WebSocketServer extends DurableObject {
               }
               if (temp.text === "📦 全部获取") {
                 // console.log("(" + this.currentStep + ")" + temp.text);
-                this.sendLog("nextStep", temp.text, null, false);
+                this.sendLog("start", temp.text, null, false);
               } else {
                 // console.log("(" + this.currentStep + ")" + temp.text);
-                this.sendForward("nextStep", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+                this.sendForward("start", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
               }
             }
             await this.checkMessage(status);

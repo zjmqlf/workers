@@ -874,7 +874,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const str = message.substr(0, 10);
                     if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
@@ -1106,6 +1106,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
@@ -1207,7 +1208,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const str = message.substr(0, 10);
                       if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {

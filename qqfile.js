@@ -25,6 +25,7 @@ export class WebSocketServer extends DurableObject {
   waitTime = 60000;
   pingTime = 5000;
   startTime = 0;
+  lastPage = "";
   count = 0;
   flood = 0;
   time = 0;
@@ -111,6 +112,7 @@ export class WebSocketServer extends DurableObject {
       this.waitTime = 60000;
       this.pingTime = 5000;
       this.startTime = 0;
+      this.lastPage = "";
       this.photoCount = 0;
       this.videoCount = 0;
       this.fileCount = 0;
@@ -532,6 +534,7 @@ export class WebSocketServer extends DurableObject {
           await this.sendQuery(1);
           return;
         } else {
+          this.lastPage = "";
           if (this.startTime > 0) {
             const time = 200000 - (new Date().getTime() - this.startTime);
             await this.waitNext(time, false);
@@ -864,6 +867,7 @@ export class WebSocketServer extends DurableObject {
                           //       this.sendLog("nextStep", result.message , null, false);
                           //     }
                           //   }
+                          //   this.offsetId -= 1;
                           if (regexp1.test(button.text) === true) {
                             found = true;
                             if (this.queue === false) {
@@ -881,6 +885,12 @@ export class WebSocketServer extends DurableObject {
                               //   data: button.data,
                               // };
                               if (this.queue === true) {
+                                if (this.lastPage && this.lastPage === button.text) {
+                                  //console.log("(" + this.currentStep + ") 同一页码");
+                                  this.sendLog("nextStep", "同一页码", null, true);
+                                } else {
+                                  this.lastPage = button.text;
+                                }
                                 // const result = await this.client.invoke(
                                 const result = this.client.invoke(
                                   new Api.messages.GetBotCallbackAnswer({
@@ -930,9 +940,10 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message && message.includes("文件获取完毕 文件总数：") === true) {
                     if (this.queue === true) {
+                      this.lastPage = "";
                       this.queue = false;
                       await this.ctx.storage.put("queue", false);
                       //console.log("(" + this.currentStep + ") 文件获取完毕");
@@ -940,7 +951,7 @@ export class WebSocketServer extends DurableObject {
                     }
                   }
                 } else {
-                  const message = messageArray[messageIndex].message.trim();
+                  const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const string = message.split(":");
                     if (string[0] === "QQfile_bot") {
@@ -967,6 +978,7 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", message, "flood", true);
                     } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要") === true || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) {
                       if (this.queue === true) {
+                        this.lastPage = "";
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
                         //console.log("(" + this.currentStep + ") " + message);
@@ -982,6 +994,7 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     } else if (message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
+                        this.lastPage = "";
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
                         //console.log("(" + this.currentStep + ") 文件获取完毕");
@@ -1049,8 +1062,6 @@ export class WebSocketServer extends DurableObject {
           this.offsetId += this.count;
           this.count = 0;
           await this.ctx.storage.put("offsetId", this.offsetId);
-        // } else {
-        //   this.offsetId -= 1;
         }
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
@@ -1197,6 +1208,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(10000);
           const messageArray = this.messageArray.slice();
@@ -1245,6 +1257,7 @@ export class WebSocketServer extends DurableObject {
                             //       this.sendLog("start", result.message , null, false);
                             //     }
                             //   }
+                            //   this.offsetId -= 1;
                             if (regexp1.test(button.text) === true) {
                               found = true;
                               if (this.queue === false) {
@@ -1262,6 +1275,12 @@ export class WebSocketServer extends DurableObject {
                                 //   data: button.data,
                                 // };
                                 if (this.queue === true) {
+                                  if (this.lastPage && this.lastPage === button.text) {
+                                    //console.log("(" + this.currentStep + ") 同一页码");
+                                    this.sendLog("start", "同一页码", null, true);
+                                  } else {
+                                    this.lastPage = button.text;
+                                  }
                                   // const result = await this.client.invoke(
                                   const result = this.client.invoke(
                                     new Api.messages.GetBotCallbackAnswer({
@@ -1274,7 +1293,7 @@ export class WebSocketServer extends DurableObject {
                                   this.sendLog("start", button.text, null, false);
                                   await scheduler.wait(15000);
                                   if (result && result.message) {
-                                    // this.sendForward("nextStep", "下一页", result.message, "update", false);
+                                    // this.sendForward("start", "下一页", result.message, "update", false);
                                     this.sendLog("start", result.message , null, false);
                                   }
                                 }
@@ -1311,9 +1330,10 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message & message.includes("文件获取完毕 文件总数：") === true) {
                       if (this.queue === true) {
+                        this.lastPage = "";
                         this.queue = false;
                         await this.ctx.storage.put("queue", false);
                         //console.log("(" + this.currentStep + ") 文件获取完毕");
@@ -1321,7 +1341,7 @@ export class WebSocketServer extends DurableObject {
                       }
                     }
                   } else {
-                    const message = messageArray[messageIndex].message.trim();
+                    const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const string = message.split(":");
                       if (string[0] === "QQfile_bot") {
@@ -1348,6 +1368,7 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", message, "flood", true);
                       } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要" || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) === true) {
                         if (this.queue === true) {
+                          this.lastPage = "";
                           this.queue = false;
                           await this.ctx.storage.put("queue", false);
                           //console.log("(" + this.currentStep + ") " + message);
@@ -1363,6 +1384,7 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       } else if (message.includes("文件获取完毕 文件总数：") === true) {
                         if (this.queue === true) {
+                          this.lastPage = "";
                           this.queue = false;
                           await this.ctx.storage.put("queue", false);
                           //console.log("(" + this.currentStep + ") 文件获取完毕");
@@ -1424,8 +1446,6 @@ export class WebSocketServer extends DurableObject {
               this.offsetId += this.count;
               this.count = 0;
               await this.ctx.storage.put("offsetId", this.offsetId);
-            // } else {
-            //   this.offsetId -= 1;
             }
             //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
             this.sendLog("start", "没有获取到有效的消息", "error", true);
