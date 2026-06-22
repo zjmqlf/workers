@@ -3070,5 +3070,6 @@
   "V_DataPanBot_Jal8kDenwrN3JgVX33oer5nigmZ6r1wDZGIUE3GkCDnGETgvhqOpzLemHW",
   "V_DataPanBot_yka1HEEiCkEVJLI9XYQ0UGWaTATyIphbLfvFnyYCrQ7R0R",
   "V_DataPanBot_bbP9bCK538pRjKgYmdDK3wkmBcc5MspEZXmvpnZfNroexK0OlkthleN2nf",
-  "V_DataPanBot_haacvlmP889kYlXUA6f3AVbtnv9qktuBYeWdMhvpxvbEpv"
+  "V_DataPanBot_haacvlmP889kYlXUA6f3AVbtnv9qktuBYeWdMhvpxvbEpv",
+  "V_DataPanBot_o3CSzhD13PLm4oeC2UZvvjfsvOrxI2zoXKMO4fDm7oE"
 ]

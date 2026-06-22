@@ -25,8 +25,13 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "dghuddvhi_WebSocketServer",
-        "script_name": "dghuddvhi",
+        "name": "ryumasepongmilku_WebSocketServer",
+        "script_name": "ryumasepongmilku",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "lunindiacipoksupretto_WebSocketServer",
+        "script_name": "lunindiacipoksupretto",
         "class_name": "WebSocketServer"
       },
       {

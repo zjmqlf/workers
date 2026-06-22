@@ -17,7 +17,7 @@ const mmyzybot = [];
 // const KodeXMedia1bot = [];
 // const AllXFilesbot = [];
 // const MediaXFilebot = [];
-// const KodeXFiles2bot = [];
+const KodeXFiles2bot = [];
 // const DEANIgniteNationsbot = [];
 const RyumaSepongMilkubot = [];
 // const HikkiTusbolPaijobot = [];
@@ -97,10 +97,10 @@ const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/gi;   //mmyzybot
 // const MediaXFilebot2Regexp = /(MediaXFilebot_p:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
 // const MediaXFilebot3Regexp = /(MediaXFilebot_d:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
 // const MediaXFilebot4Regexp = /(MediaXFilebot_col:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
-// const KodeXFiles2bot1Regexp = /(KodeXFiles2bot_v:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-// const KodeXFiles2bot2Regexp = /(KodeXFiles2bot_p:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-// const KodeXFiles2bot3Regexp = /(KodeXFiles2bot_d:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-// const KodeXFiles2bot4Regexp = /(KodeXFiles2bot_col:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
+const KodeXFiles2bot1Regexp = /(KodeXFiles2bot_v:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
+const KodeXFiles2bot2Regexp = /(KodeXFiles2bot_p:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
+const KodeXFiles2bot3Regexp = /(KodeXFiles2bot_d:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
+const KodeXFiles2bot4Regexp = /(KodeXFiles2bot_col:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
 // const DEANIgniteNationsbot1Regexp = /(DEANIgniteNations_bot_v:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
 // const DEANIgniteNationsbot2Regexp = /(DEANIgniteNations_bot_p:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
 // const DEANIgniteNationsbot3Regexp = /(DEANIgniteNations_bot_d:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
@@ -999,61 +999,61 @@ try {
         //   }
         // }
 
-        // const KodeXFiles2bot1Matches = str.match(KodeXFiles2bot1Regexp);
-        // // console.log(KodeXFiles2bot1Matches);  //测试
-        // if (KodeXFiles2bot1Matches) {
-        //   const KodeXFiles2bot1MatchesLength = KodeXFiles2bot1Matches.length;
-        //   // console.log("KodeXFiles2bot1MatchesLength : " + KodeXFiles2bot1MatchesLength);  //测试
-        //   if (KodeXFiles2bot1MatchesLength > 0) {
-        //     for (let j = 0; j < KodeXFiles2bot1MatchesLength; j++) {
-        //       if (KodeXFiles2bot1Matches[j]) {
-        //         KodeXFiles2bot.push(KodeXFiles2bot1Matches[j]);
-        //       }
-        //     }
-        //   }
-        // }
+        const KodeXFiles2bot1Matches = str.match(KodeXFiles2bot1Regexp);
+        // console.log(KodeXFiles2bot1Matches);  //测试
+        if (KodeXFiles2bot1Matches) {
+          const KodeXFiles2bot1MatchesLength = KodeXFiles2bot1Matches.length;
+          // console.log("KodeXFiles2bot1MatchesLength : " + KodeXFiles2bot1MatchesLength);  //测试
+          if (KodeXFiles2bot1MatchesLength > 0) {
+            for (let j = 0; j < KodeXFiles2bot1MatchesLength; j++) {
+              if (KodeXFiles2bot1Matches[j]) {
+                KodeXFiles2bot.push(KodeXFiles2bot1Matches[j]);
+              }
+            }
+          }
+        }
 
-        // const KodeXFiles2bot2Matches = str.match(KodeXFiles2bot2Regexp);
-        // // console.log(KodeXFiles2bot2Matches);  //测试
-        // if (KodeXFiles2bot2Matches) {
-        //   const KodeXFiles2bot2MatchesLength = KodeXFiles2bot2Matches.length;
-        //   // console.log("KodeXFiles2bot2MatchesLength : " + KodeXFiles2bot2MatchesLength);  //测试
-        //   if (KodeXFiles2bot2MatchesLength > 0) {
-        //     for (let j = 0; j < KodeXFiles2bot2MatchesLength; j++) {
-        //       if (KodeXFiles2bot2Matches[j]) {
-        //         KodeXFiles2bot.push(KodeXFiles2bot2Matches[j]);
-        //       }
-        //     }
-        //   }
-        // }
+        const KodeXFiles2bot2Matches = str.match(KodeXFiles2bot2Regexp);
+        // console.log(KodeXFiles2bot2Matches);  //测试
+        if (KodeXFiles2bot2Matches) {
+          const KodeXFiles2bot2MatchesLength = KodeXFiles2bot2Matches.length;
+          // console.log("KodeXFiles2bot2MatchesLength : " + KodeXFiles2bot2MatchesLength);  //测试
+          if (KodeXFiles2bot2MatchesLength > 0) {
+            for (let j = 0; j < KodeXFiles2bot2MatchesLength; j++) {
+              if (KodeXFiles2bot2Matches[j]) {
+                KodeXFiles2bot.push(KodeXFiles2bot2Matches[j]);
+              }
+            }
+          }
+        }
 
-        // const KodeXFiles2bot3Matches = str.match(KodeXFiles2bot3Regexp);
-        // // console.log(KodeXFiles2bot3Matches);  //测试
-        // if (KodeXFiles2bot3Matches) {
-        //   const KodeXFiles2bot3MatchesLength = KodeXFiles2bot3Matches.length;
-        //   // console.log("KodeXFiles2bot3MatchesLength : " + KodeXFiles2bot3MatchesLength);  //测试
-        //   if (KodeXFiles2bot3MatchesLength > 0) {
-        //     for (let j = 0; j < KodeXFiles2bot3MatchesLength; j++) {
-        //       if (KodeXFiles2bot3Matches[j]) {
-        //         KodeXFiles2bot.push(KodeXFiles2bot3Matches[j]);
-        //       }
-        //     }
-        //   }
-        // }
+        const KodeXFiles2bot3Matches = str.match(KodeXFiles2bot3Regexp);
+        // console.log(KodeXFiles2bot3Matches);  //测试
+        if (KodeXFiles2bot3Matches) {
+          const KodeXFiles2bot3MatchesLength = KodeXFiles2bot3Matches.length;
+          // console.log("KodeXFiles2bot3MatchesLength : " + KodeXFiles2bot3MatchesLength);  //测试
+          if (KodeXFiles2bot3MatchesLength > 0) {
+            for (let j = 0; j < KodeXFiles2bot3MatchesLength; j++) {
+              if (KodeXFiles2bot3Matches[j]) {
+                KodeXFiles2bot.push(KodeXFiles2bot3Matches[j]);
+              }
+            }
+          }
+        }
 
-        // const KodeXFiles2bot4Matches = str.match(KodeXFiles2bot4Regexp);
-        // // console.log(KodeXFiles2bot4Matches);  //测试
-        // if (KodeXFiles2bot4Matches) {
-        //   const KodeXFiles2bot4MatchesLength = KodeXFiles2bot4Matches.length;
-        //   // console.log("KodeXFiles2bot4MatchesLength : " + KodeXFiles2bot4MatchesLength);  //测试
-        //   if (KodeXFiles2bot4MatchesLength > 0) {
-        //     for (let j = 0; j < KodeXFiles2bot4MatchesLength; j++) {
-        //       if (KodeXFiles2bot4Matches[j]) {
-        //         KodeXFiles2bot.push(KodeXFiles2bot4Matches[j]);
-        //       }
-        //     }
-        //   }
-        // }
+        const KodeXFiles2bot4Matches = str.match(KodeXFiles2bot4Regexp);
+        // console.log(KodeXFiles2bot4Matches);  //测试
+        if (KodeXFiles2bot4Matches) {
+          const KodeXFiles2bot4MatchesLength = KodeXFiles2bot4Matches.length;
+          // console.log("KodeXFiles2bot4MatchesLength : " + KodeXFiles2bot4MatchesLength);  //测试
+          if (KodeXFiles2bot4MatchesLength > 0) {
+            for (let j = 0; j < KodeXFiles2bot4MatchesLength; j++) {
+              if (KodeXFiles2bot4Matches[j]) {
+                KodeXFiles2bot.push(KodeXFiles2bot4Matches[j]);
+              }
+            }
+          }
+        }
 
         // const DEANIgniteNationsbot1Matches = str.match(DEANIgniteNationsbot1Regexp);
         // // console.log(DEANIgniteNationsbot1Matches);  //测试
@@ -3600,28 +3600,28 @@ try {
   //   }
   // }
 
-  // all += KodeXFiles2bot.length;
-  // console.log("KodeXFiles2bot : " + KodeXFiles2bot.length);  //测试
-  // if (KodeXFiles2bot.length > 0) {
-  //   const data = fs.readFileSync("./code/KodeXFiles2bot.txt", "utf-8");
-  //   try {
-  //     let uniqueArr = JSON.parse(data);
-  //     const oldLength = uniqueArr.length;
-  //     uniqueArr = [...uniqueArr, ...KodeXFiles2bot];
-  //     uniqueArr = [...new Set(uniqueArr)];
-  //     if (uniqueArr.length > oldLength) {
-  //       fs.writeFile("./code/KodeXFiles2bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
-  //         if (err) {
-  //           console.log(err);
-  //         }
-  //       });
-  //     // } else {
-  //     //   console.log("没有新加数据");
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
+  all += KodeXFiles2bot.length;
+  console.log("KodeXFiles2bot : " + KodeXFiles2bot.length);  //测试
+  if (KodeXFiles2bot.length > 0) {
+    const data = fs.readFileSync("./code/KodeXFiles2bot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...KodeXFiles2bot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/KodeXFiles2bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   // all += DEANIgniteNationsbot.length;
   // console.log("DEANIgniteNationsbot : " + DEANIgniteNationsbot.length);  //测试

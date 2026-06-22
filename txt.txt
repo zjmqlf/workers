@@ -17,6 +17,9 @@ npm run deploy-forward
 npm run build-forward1
 npm run deploy-forward1
 
+npm run build-favorites1
+npm run deploy-favorites1
+
 
 zjmqlf2022:
 
@@ -26,8 +29,8 @@ npm run deploy-pansou
 npm run build-forward2
 npm run deploy-forward2
 
-npm run build-favorites1
-npm run deploy-favorites1
+npm run build-favorites2
+npm run deploy-favorites2
 
 
 zjmqlf2023:
@@ -47,8 +50,11 @@ npm run deploy-qqfile
 npm run build-zyxfiles
 npm run deploy-zyxfiles
 
-npm run build-dghuddvhi
-npm run deploy-dghuddvhi
+npm run build-ryumasepongmilku
+npm run deploy-ryumasepongmilku
+
+npm run build-lunindiacipoksupretto
+npm run deploy-lunindiacipoksupretto
 
 npm run build-hijautebal
 npm run deploy-hijautebal

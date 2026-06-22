@@ -12,7 +12,6 @@ import * as errors from "../errors";
 import * as utils from "../Utils";
 import type { TelegramClient } from "./";
 import bigInt from "big-integer";
-import { LogLevel } from "../extensions";
 import { RequestState, MTProtoSender } from "../network";
 
 export async function invoke<R extends Api.AnyRequest>(
@@ -336,11 +335,9 @@ export async function getInputEntity(
 
             return utils.getInputPeer(channels.chats[0]);
         } catch (e) {
+            client._log.error("Error while resolving channel entity", e);
             if (client._errorHandler) {
                 await client._errorHandler(e as Error);
-            }
-            if (client._log.canSend(LogLevel.ERROR)) {
-                console.error(e);
             }
         }
     }

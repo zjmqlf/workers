@@ -12,11 +12,11 @@ export class WebSocketServer extends DurableObject {
   currentStep = 0;
   compress = false;
   batch = false;
-  api = apiString.slice();
+  api = apiString.slice(0, 23);
   clientCount = 0;
   tg = [];
-  waitTime = 240000;
-  pingTime = 10000;
+  waitTime = 60000;
+  pingTime = 5000;
   filterType = -1;
   limit = 0;
   errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
@@ -128,11 +128,11 @@ export class WebSocketServer extends DurableObject {
       // this.webSocket = [];
       this.apiCount = 0;
       this.currentStep = 0;
-      this.api = apiString.slice();
+      this.api = apiString.slice(0, 23);
       this.clientCount = this.api.length;
       this.tg = Array(this.clientCount).fill(null);
-      this.waitTime = 240000;
-      this.pingTime = 20000;
+      this.waitTime = 60000;
+      this.pingTime = 5000;
       this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
       this.messageArray = [];
       this.cacheMessage = null;
@@ -734,7 +734,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ?, `filterType` = ? WHERE `tgId` = ?;").bind(this.tg[clientIndex].chatId, this.tg[clientIndex].filterType, this.tg[clientIndex].clientId).run();
+      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ?, `filterType` = ? WHERE `tgId` = ? AND `name` = 'favorites';").bind(this.tg[clientIndex].chatId, this.tg[clientIndex].filterType, this.tg[clientIndex].clientId).run();
     } catch (e) {
       //console.log("updateConfig出错 : " + e);
       this.sendLog(clientIndex, "updateConfig", "出错 : " + e.message, null, true);
@@ -1043,7 +1043,7 @@ export class WebSocketServer extends DurableObject {
           let chatResult = {};
           try {
             // if (this.tg[clientIndex].filterType === 0) {
-            //   chatResult = await this.env.MAINDB.prepare("SELECT * FROM `FORWARDCHAT` WHERE `tgId` = ? AND `current` = 0 AND `noforwards` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").bind(this.tg[clientIndex].  clientId).run();
+            //   chatResult = await this.env.MAINDB.prepare("SELECT * FROM `FORWARDCHAT` WHERE `tgId` = ? AND `current` = 0 AND `noforwards` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").bind(this.tg[clientIndex].clientId).run();
             // } else if (this.tg[clientIndex].filterType === 1) {
             //   chatResult = await this.env.MAINDB.prepare("SELECT * FROM `FORWARDCHAT` WHERE `tgId` = ? AND `photo` = 0 AND `noforwards` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").bind(this.tg[clientIndex].clientId).run();
             // } else if (this.tg[clientIndex].filterType === 2) {
@@ -1114,13 +1114,15 @@ export class WebSocketServer extends DurableObject {
         // count += 1;
         this.tg[clientIndex].count += 1;
         if (message) {
-          if (message.media) {
-            if (message.media.document) {
-              this.messageArray.push(message);
-            } else if (message.media.photo) {
-              this.messageArray.push(message);
+          // if (message.noforwards === false) {
+            if (message.media) {
+              if (message.media.document) {
+                this.messageArray.push(message);
+              } else if (message.media.photo) {
+                this.messageArray.push(message);
+              }
             }
-          }
+          // }
         }
       }
       if (this.tg[clientIndex].count > this.tg[clientIndex].limit) {
@@ -2285,7 +2287,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("favorites");
+      const id = env.WEBSOCKET_SERVER.idFromName("favorites1");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

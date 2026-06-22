@@ -1,35 +1,29 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "favorites1",
-  "main": "favorites1.js",
+  "name": "lunindiacipoksupretto",
+  "main": "lunindiacipoksupretto.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
     "nodejs_als"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./forward1/build"
-  },
-  "routes": [
-    {
-      "pattern": "favorites1.19421.xyz/*",
-      "zone_name": "19421.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./bot/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "lunindiacipoksupretto.19422.xyz/*",
+  //     "zone_name": "19422.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
-  "d1_databases": [
-    {
-      "binding": "MAINDB",
-      "database_name": "maindb",
-      "database_id": "97d41e14-a9b6-45a9-b5cc-f60eb29acc02"
-    }
-  ],
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
+        "script_name": "lunindiacipoksupretto",
         "class_name": "WebSocketServer"
       }
     ]

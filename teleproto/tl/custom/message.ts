@@ -7,8 +7,8 @@ import * as utils from "../../Utils";
 import { Forward } from "./forward";
 import { File } from "./file";
 import { returnBigInt } from "../../Helpers";
-import { _selfId } from "../../client/users";
 import bigInt, { BigInteger } from "big-integer";
+import { MessageButton } from "./messageButton";
 import { Buffer } from "node:buffer";
 
 interface MessageBaseInterface {
@@ -456,7 +456,7 @@ export class CustomMessage extends SenderGetter {
     get toId() {
         if (this._client && !this.out && this.isPrivate) {
             return new Api.PeerUser({
-                userId: _selfId(this._client)!,
+                userId: this._client._selfInputPeer?.userId!,
             });
         }
         return this.peerId;

@@ -3474,5 +3474,10 @@
   "newjmqbot_14p_1v_0d_FBKFWyePfnCdp",
   "newjmqbot_7p_93v_0d_YY3sRPINUnl1q",
   "newjmqbot_0p_1v_0d_LQjQfVd5n1MKB",
-  "newjmqbot_0p_1v_0d_KL3ciAOC9XzrE"
+  "newjmqbot_0p_1v_0d_KL3ciAOC9XzrE",
+  "newjmqbot_1p_0v_0d_rYimiIsGXf2PL",
+  "newjmqbot_1p_0v_0d_OqkN0GgmWEa3R",
+  "newjmqbot_0p_0v_1d_7sayT2D6TS5xk",
+  "newjmqbot_0p_1v_0d_mWIwZejxDLlIl",
+  "newjmqbot_0p_1v_0d_vfS61gehFzMbc"
 ]

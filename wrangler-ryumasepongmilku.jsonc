@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "betapahatitakbahagia",
-  "main": "betapahatitakbahagia.js",
+  "name": "ryumasepongmilku",
+  "main": "ryumasepongmilku.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat",
@@ -13,7 +13,7 @@
   // },
   // "routes": [
   //   {
-  //     "pattern": "betapahatitakbahagia.19422.xyz/*",
+  //     "pattern": "ryumasepongmilku.19422.xyz/*",
   //     "zone_name": "19422.xyz"
   //   }
   // ],
@@ -23,7 +23,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "betapahatitakbahagia",
+        "script_name": "ryumasepongmilku",
         "class_name": "WebSocketServer"
       }
     ]

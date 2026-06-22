@@ -10,11 +10,9 @@ import * as userMethods from "./users";
 import * as dialogMethods from "./dialogs";
 import type { Entity, EntityLike, MessageIDLike } from "../define";
 import { Api } from "../tl";
-import { sanitizeParseMode } from "../Utils";
 import { MTProtoSender } from "../network";
 import { LAYER } from "../tl/runtime/registry";
 import { Session } from "../sessions";
-import { LogLevel } from "../extensions";
 
 export class TelegramClient extends TelegramBaseClient {
     constructor(
@@ -41,10 +39,28 @@ export class TelegramClient extends TelegramBaseClient {
             | undefined
     ) {
         if (mode) {
-            this._parseMode = sanitizeParseMode(mode);
+            this._parseMode = this._sanitizeParseMode(mode);
         } else {
             this._parseMode = undefined;
         }
+    }
+
+    _sanitizeParseMode(
+        mode: string | parseMethods.ParseInterface
+    ): parseMethods.ParseInterface {
+        if (mode === "md" || mode === "markdown") {
+            return MarkdownParser;
+        }
+        if (mode === "md2" || mode === "markdownv2") {
+            return MarkdownV2Parser;
+        }
+        if (mode == "html") {
+            return HTMLParser;
+        }
+        if (typeof mode == "object" && "parse" in mode && "unparse" in mode) {
+            return mode;
+        }
+        throw new Error(`Invalid parse mode type ${mode}`);
     }
 
     iterMessages(
@@ -115,12 +131,9 @@ export class TelegramClient extends TelegramBaseClient {
         try {
             const res = await this.getMe();
         } catch (e) {
-            this._log.error(`Error while trying to reconnect`);
+            this._log.error(`Error while trying to reconnect`, e);
             if (this._errorHandler) {
                 await this._errorHandler(e as Error);
-            }
-            if (this._log.canSend(LogLevel.ERROR)) {
-                console.error(e);
             }
         }
     }
