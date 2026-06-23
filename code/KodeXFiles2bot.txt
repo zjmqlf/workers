@@ -1237,5 +1237,8 @@
   "KodeXFiles2bot_p:egOwzbWZRaL3KMZ1oba6QpLg1Ob6CTZu",
   "KodeXFiles2bot_v:C6w40EhwpIaMoLtg5UwwMkk2iJRkzdgG",
   "KodeXFiles2bot_v:xSnUk2dUtsJrHmUkj3LMUHgFbtZyIBnu",
-  "KodeXFiles2bot_p:rOqYMaIhWmzoqpCX8PFpEGdD4evItYTA"
+  "KodeXFiles2bot_p:rOqYMaIhWmzoqpCX8PFpEGdD4evItYTA",
+  "KodeXFiles2bot_v:S1c9ukq20YlV9d4rGjlZSfECrUerMtvf",
+  "KodeXFiles2bot_p:iuguOWPgTG4c8NOILTaPZtFAlZ6uHimp",
+  "KodeXFiles2bot_p:8hiizAOqShxF6YYSUwjcOJKuI247doxP"
 ]

@@ -34,6 +34,8 @@ const betapahatitakbahagiabot = [];
 const QQfilebot = [];
 // const Zhuahihaibot = [];
 // const REDDFILEBOT = [];
+const wenjianjibot = [];
+const amumujiemabot = [];
 const parludecodingBot = [];
 const teestpanbot = [];
 const atfileslinksbot = [];
@@ -230,6 +232,8 @@ const QQan4cbot7Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*D)/gi;   //QQan4cbot
 // const Zhuahihaibot6Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/gi;   //Zhuahihaibot
 // const Zhuahihaibot7Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/gi;   //Zhuahihaibot
 // const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/gi;    //REDDFILEBOT
+const wenjianjibotRegexp = /(wenjianjibot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{16})/gi;   //wenjianjibot
+const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/gi;   //amumujiemabot
 const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/gi;   //parludecodingBot
 const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //teestpanbot
 const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //atfileslinksbot
@@ -2861,6 +2865,34 @@ try {
         //   }
         // }
 
+        const wenjianjibotMatches = str.match(wenjianjibotRegexp);
+        // console.log(wenjianjibotMatches);  //测试
+        if (wenjianjibotMatches) {
+          const wenjianjibotMatchesLength = wenjianjibotMatches.length;
+          // console.log("wenjianjibotMatchesLength : " + wenjianjibotMatchesLength);  //测试
+          if (wenjianjibotMatchesLength > 0) {
+            for (let j = 0; j < wenjianjibotMatchesLength; j++) {
+              if (wenjianjibotMatches[j]) {
+                wenjianjibot.push(wenjianjibotMatches[j]);
+              }
+            }
+          }
+        }
+
+        const amumujiemabotMatches = str.match(amumujiemabotRegexp);
+        // console.log(amumujiemabotMatches);  //测试
+        if (amumujiemabotMatches) {
+          const amumujiemabotMatchesLength = amumujiemabotMatches.length;
+          // console.log("amumujiemabotMatchesLength : " + amumujiemabotMatchesLength);  //测试
+          if (amumujiemabotMatchesLength > 0) {
+            for (let j = 0; j < amumujiemabotMatchesLength; j++) {
+              if (amumujiemabotMatches[j]) {
+                amumujiemabot.push(amumujiemabotMatches[j]);
+              }
+            }
+          }
+        }
+
         const parludecodingBotMatches = str.match(parludecodingBotRegexp);
         // console.log(parludecodingBotMatches);  //测试
         if (parludecodingBotMatches) {
@@ -3990,6 +4022,52 @@ try {
   //     console.log(e);
   //   }
   // }
+
+  all += wenjianjibot.length;
+  console.log("wenjianjibot : " + wenjianjibot.length);  //测试
+  if (wenjianjibot.length > 0) {
+    const data = fs.readFileSync("./code/wenjianjibot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...wenjianjibot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/wenjianjibot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += amumujiemabot.length;
+  console.log("amumujiemabot : " + amumujiemabot.length);  //测试
+  if (amumujiemabot.length > 0) {
+    const data = fs.readFileSync("./code/amumujiemabot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...amumujiemabot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/amumujiemabot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   all += parludecodingBot.length;
   console.log("parludecodingBot : " + parludecodingBot.length);  //测试

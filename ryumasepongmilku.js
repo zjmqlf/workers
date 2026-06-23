@@ -1024,6 +1024,7 @@ export class WebSocketServer extends DurableObject {
               await this.ctx.storage.put("client", 0);
             }
           }
+          await scheduler.wait(10000);
           await this.getMessage(1);
           await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
