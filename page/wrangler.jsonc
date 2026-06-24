@@ -25,6 +25,11 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "kodexfiles2_WebSocketServer",
+        "script_name": "kodexfiles2",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "ryumasepongmilku_WebSocketServer",
         "script_name": "ryumasepongmilku",
         "class_name": "WebSocketServer"

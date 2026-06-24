@@ -15,6 +15,8 @@
     "deploy-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc",
     "build-zyxfiles": "wrangler deploy -c ./wrangler-zyxfiles.jsonc --dry-run --outdir=./bot/dist",
     "deploy-zyxfiles": "wrangler deploy -c ./wrangler-zyxfiles.jsonc",
+    "build-kodexfiles2": "wrangler deploy -c ./wrangler-kodexfiles2.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-kodexfiles2": "wrangler deploy -c ./wrangler-kodexfiles2.jsonc",
     "build-ryumasepongmilku": "wrangler deploy -c ./wrangler-ryumasepongmilku.jsonc --dry-run --outdir=./bot/dist",
     "deploy-ryumasepongmilku": "wrangler deploy -c ./wrangler-ryumasepongmilku.jsonc",
     "build-lunindiacipoksupretto": "wrangler deploy -c ./wrangler-lunindiacipoksupretto.jsonc --dry-run --outdir=./bot/dist",

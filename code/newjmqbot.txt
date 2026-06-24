@@ -3483,5 +3483,15 @@
   "newjmqbot_3p_0v_0d_mbiXwt6BiWVyq",
   "newjmqbot_1p_0v_0d_yDYYwrAiws47I",
   "newjmqbot_3p_0v_0d_AMGMGkZOcWAdZ",
-  "newjmqbot_0p_1v_0d_SUOxWuRJIhcMj"
+  "newjmqbot_0p_1v_0d_SUOxWuRJIhcMj",
+  "newjmqbot_66p_14v_0d_eycofOgP0A87a",
+  "newjmqbot_0p_66v_0d_Pwzxq4rDbLF6v",
+  "newjmqbot_3p_0v_0d_usoqq3zFQM52Q",
+  "newjmqbot_0p_0v_1d_pLPSEHedUwIry",
+  "newjmqbot_0p_1v_0d_dk3BYMEn5xNlw",
+  "newjmqbot_0p_1v_0d_uaXRCmu0zUUZm",
+  "newjmqbot_0p_0v_1d_PNUJ7ld015qxu",
+  "newjmqbot_262p_0v_0d_zMiQizVDsW7qV",
+  "newjmqbot_0p_1v_0d_4q6s8XFuNIgcP",
+  "newjmqbot_0p_0v_9d_ct01tQFuv68t0"
 ]
