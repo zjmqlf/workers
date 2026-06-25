@@ -731,21 +731,69 @@ export class WebSocketServer extends DurableObject {
   }
 
   async checkChat(tryCount, chatResult) {
-    if (chatResult.channelId && chatResult.accessHash) {
-      let result = null;
-      try {
-        result = await this.client.invoke(new Api.channels.GetChannels({
-          id: [new Api.InputChannel({
-            channelId: bigInt(chatResult.channelId),
-            accessHash: bigInt(chatResult.accessHash),
-          })],
-        }));
-      } catch (e) {
-        //console.log("(" + this.currentStep + ")出错 : " + e);
-        this.sendLog("checkChat", "出错 : " + JSON.stringify(e), null, true);
-        if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
-          await this.noExistChat(1, chatResult.Cindex);
-          this.chatId += 1;
+    if (chatResult.chatType === 1) {
+      if (chatResult.channelId && chatResult.accessHash) {
+        let result = null;
+        try {
+          result = await this.client.invoke(new Api.channels.GetChannels({
+            id: [new Api.InputChannel({
+              channelId: bigInt(chatResult.channelId),
+              accessHash: bigInt(chatResult.accessHash),
+            })],
+          }));
+        } catch (e) {
+          //console.log("(" + this.currentStep + ")出错 : " + e);
+          this.sendLog("checkChat", "出错 : " + JSON.stringify(e), null, true);
+          if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
+            await this.noExistChat(1, chatResult.Cindex);
+            this.chatId += 1;
+            if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+              //console.log(chatResult.title + " : chat已不存在了");  //测试
+              this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
+              await this.nextChat(1, true);
+            } else {
+              //console.log(this.endChat + " : 超过最大chat了");  //测试
+              this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+            }
+          } else {
+            if (tryCount === 20) {
+              this.stop = 2;
+              //console.log("(" + this.currentStep + ")checkChat超出tryCount限制");
+              this.sendLog("checkChat", "超出tryCount限制", null, true);
+              await this.close();
+            } else {
+              await scheduler.wait(10000);
+              await this.checkChat(tryCount + 1, chatResult);
+            }
+          }
+          return;
+        }
+        // console.log(this.fromPeer);  //测试
+        if (result && result.chats && result.chats.length > 0) {
+          this.chatId = chatResult.Cindex;
+          if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+            this.fromPeer = result.chats[0];
+            if (this.fromPeer) {
+              this.setOffsetId(chatResult);
+              this.sendLog("checkChat", this.chatId + " : " + chatResult.title, "add", false);
+            } else {
+              await this.noExistChat(1, chatResult.Cindex);
+              this.chatId = chatResult.Cindex + 1;
+              if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+                //console.log(chatResult.title + " : chat已不存在了");  //测试
+                this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
+                await this.nextChat(1, true);
+              } else {
+                //console.log(this.endChat + " : 超过最大chat了");  //测试
+                this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+              }
+            }
+          } else {
+            //console.log(this.endChat + " : 超过最大chat了");  //测试
+            this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+          }
+        } else {
+          this.chatId = chatResult.Cindex + 1;
           if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
             //console.log(chatResult.title + " : chat已不存在了");  //测试
             this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
@@ -754,7 +802,36 @@ export class WebSocketServer extends DurableObject {
             //console.log(this.endChat + " : 超过最大chat了");  //测试
             this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
           }
+        }
+      } else {
+        await this.noExistChat(1, chatResult.Cindex);
+        this.chatId = chatResult.Cindex + 1;
+        if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+          //console.log(chatResult.title + " : channelId或accessHash出错");  //测试
+          this.sendLog("checkChat", chatResult.title + " : channelId或accessHash出错", null, true);
+          await this.nextChat(1, true);
         } else {
+          //console.log(this.endChat + " : 超过最大chat了");  //测试
+          this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+        }
+      }
+    } else if (chatResult.chatType === 2) {
+      if (chatResult.channelId) {
+        let users = null;
+        try {
+          users = await this.client.invoke(
+            new Api.users.GetUsers({
+              id: [
+                new Api.InputUser({
+                  userId: bigInt(chatResult.channelId),
+                  accessHash: chatResult.accessHash ? bigInt(chatResult.accessHash) : bigInt.zero,
+                }),
+              ],
+            })
+          );
+        } catch (e) {
+          //console.log("(" + this.currentStep + ")出错 : " + e);
+          this.sendLog("checkChat", "出错 : " + JSON.stringify(e), null, true);
           if (tryCount === 20) {
             this.stop = 2;
             //console.log("(" + this.currentStep + ")checkChat超出tryCount限制");
@@ -764,54 +841,53 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(10000);
             await this.checkChat(tryCount + 1, chatResult);
           }
+          return;
         }
-        return;
-      }
-      // console.log(this.fromPeer);  //测试
-      if (result && result.chats && result.chats.length > 0) {
-        this.chatId = chatResult.Cindex;
-        if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
-          this.fromPeer = result.chats[0];
-          if (this.fromPeer) {
-            this.setOffsetId(chatResult);
-            this.sendLog("checkChat", this.chatId + " : " + chatResult.title, "add", false);
-          } else {
-            await this.noExistChat(1, chatResult.Cindex);
-            this.chatId = chatResult.Cindex + 1;
-            if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
-              //console.log(chatResult.title + " : chat已不存在了");  //测试
-              this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
-              await this.nextChat(1, true);
+        if (users.length && !(users[0] instanceof Api.UserEmpty)) {
+          if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+            this.chatId = chatResult.Cindex;
+            this.fromPeer = utils.getInputPeer(users[0]);
+            if (this.fromPeer) {
+              this.setOffsetId(chatResult);
+              this.sendLog("checkChat", this.chatId + " : " + chatResult.title, "add", false);
             } else {
-              //console.log(this.endChat + " : 超过最大chat了");  //测试
-              this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+              await this.noExistChat(1, chatResult.Cindex);
+              this.chatId = chatResult.Cindex + 1;
+              if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+                //console.log(chatResult.title + " : chat已不存在了");  //测试
+                this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
+                await this.nextChat(1, true);
+              } else {
+                //console.log(this.endChat + " : 超过最大chat了");  //测试
+                this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+              }
             }
+          } else {
+            //console.log(this.endChat + " : 超过最大chat了");  //测试
+            this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
           }
         } else {
-          //console.log(this.endChat + " : 超过最大chat了");  //测试
-          this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+          this.chatId = chatResult.Cindex + 1;
+          if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
+            //console.log(chatResult.title + " : chat已不存在了");  //测试
+            this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
+            await this.nextChat(1, true);
+          } else {
+            //console.log(this.endChat + " : 超过最大chat了");  //测试
+            this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
+          }
         }
       } else {
+        await this.noExistChat(1, chatResult.Cindex);
         this.chatId = chatResult.Cindex + 1;
         if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
-          //console.log(chatResult.title + " : chat已不存在了");  //测试
-          this.sendLog("checkChat", chatResult.title + " : chat已不存在了", null, true);
+          //console.log(chatResult.title + " : channelId出错");  //测试
+          this.sendLog("checkChat", chatResult.title + " : channelId出错", null, true);
           await this.nextChat(1, true);
         } else {
           //console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
         }
-      }
-    } else {
-      await this.noExistChat(1, chatResult.Cindex);
-      this.chatId = chatResult.Cindex + 1;
-      if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
-        //console.log(chatResult.title + " : channelId或accessHash出错");  //测试
-        this.sendLog("checkChat", chatResult.title + " : channelId或accessHash出错", null, true);
-        await this.nextChat(1, true);
-      } else {
-        //console.log(this.endChat + " : 超过最大chat了");  //测试
-        this.sendLog("checkChat", this.endChat + " : 超过最大chat了", null, true);
       }
     }
   }
