@@ -3502,5 +3502,8 @@
   "newjmqbot_0p_1v_0d_tNAMytkDGb8Do",
   "newjmqbot_0p_1v_0d_LuaJznlilMgfv",
   "newjmqbot_0p_1v_0d_HCMyYBBnPA8XO",
-  "newjmqbot_0p_0v_1d_mjNWXQswpCkc5"
+  "newjmqbot_0p_0v_1d_mjNWXQswpCkc5",
+  "newjmqbot_0p_10v_0d_ak0SDvvq357sT",
+  "newjmqbot_8p_3v_0d_O70jG4SqiCTYe",
+  "newjmqbot_9p_34v_0d_LEnFTPeCnNOOg"
 ]
