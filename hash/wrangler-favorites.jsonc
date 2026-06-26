@@ -8,7 +8,7 @@
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./hash/build"
+    "directory": "./build"
   },
   "routes": [
     {

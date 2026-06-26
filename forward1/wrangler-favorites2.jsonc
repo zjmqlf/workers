@@ -8,7 +8,7 @@
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./forward1/build"
+    "directory": "./build"
   },
   "routes": [
     {
