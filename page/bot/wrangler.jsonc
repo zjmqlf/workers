@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "page",
+  "name": "bot",
   "compatibility_date": "2026-04-21",
   "pages_build_output_dir": "./build",
   "compatibility_flags": [

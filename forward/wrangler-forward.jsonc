@@ -1,29 +1,35 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "qqfile",
-  "main": "qqfile.js",
+  "name": "forward",
+  "main": "forward.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
-    "nodejs_compat",
-    "nodejs_als"
+    "nodejs_compat"
   ],
-  // "assets": {
-  //   "binding": "ASSETS",
-  //   "directory": "./bot/build"
-  // },
-  // "routes": [
-  //   {
-  //     "pattern": "qqfile.19421.xyz/*",
-  //     "zone_name": "19421.xyz"
-  //   }
-  // ],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./forward/build"
+  },
+  "routes": [
+    {
+      "pattern": "forward.19421.xyz/*",
+      "zone_name": "19421.xyz"
+    }
+  ],
   "preview_urls": false,
   "workers_dev": false,
+  "d1_databases": [
+    {
+      "binding": "MAINDB",
+      "database_name": "maindb",
+      "database_id": "97d41e14-a9b6-45a9-b5cc-f60eb29acc02"
+    }
+  ],
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "qqfile",
+        "script_name": "forward",
         "class_name": "WebSocketServer"
       }
     ]
@@ -47,6 +53,5 @@
   },
   "placement": {
     "mode": "smart"
-    // "host": "91.108.56.128:80"
   }
 }

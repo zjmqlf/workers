@@ -8,9 +8,6 @@ zjmqlf2021:
 npm run build-test
 npm run deploy-test
 
-npm run build-hash
-npm run deploy-hash
-
 npm run build-forward
 npm run deploy-forward
 
@@ -79,6 +76,9 @@ npm run deploy-steviarchiver
 
 
 zjmqlf2025:
+
+npm run build-hash
+npm run deploy-hash
 
 npm run build-favorites
 npm run deploy-favorites

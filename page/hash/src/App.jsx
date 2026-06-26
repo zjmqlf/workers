@@ -45,7 +45,7 @@ const App = () => {
   const pagination = true;
   const paginationPageSize = 50;
   const paginationPageSizeSelector = [50, 150, 200];
-  const lastId = useRef(-1);
+  const lastId = useRef(0);
   const lastRow = useRef(null);
   const ws = useRef(null);
   const stop = useRef(false);
@@ -55,7 +55,8 @@ const App = () => {
   const errorCount = useRef(0);
   const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
-  const gridStyle = useMemo(() => ({ width: "65%", height: "95%" }), []);
+  const gridStyle = useMemo(() => ({ width: "100%", height: "80%" }), []);
+  const [documentValue, setDocumentValue] = useState(2);
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
@@ -68,9 +69,36 @@ const App = () => {
   const [logData, setLogData] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isSendBtnDisabled, setSendBtnDisabled] = useState(true);
-  const getRowId = useCallback((params) => String(params.data.codeIndex), []);
+  const getRowId = useCallback((params) => String(params.data.offsetId), []);
 
-  const renderTime = useCallback((timestamp ) => {
+  const resultRenderer = useCallback((params) => {
+    return params.value === true ?
+      <span className="missionSpan">
+        {<img alt="" src="icons/tick-in-circle.png" className="missionIcon"/>}
+      </span> :
+      params.value === false ?
+        <span className="missionSpan">
+          {<img alt="" src="icons/cross-in-circle.png" className="missionIcon"/>}
+        </span> :
+        "";
+  }, []);
+
+  const renderSize = useCallback((value) => {
+    if (value) {
+      const unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+      let index = 0;
+      const srcsize = parseFloat(value);
+      index = Math.floor(Math.log(srcsize) / Math.log(1024));
+      let size = srcsize / Math.pow(1024, index);
+      size = size.toFixed(2);
+      return size + unitArr[index];
+    } else {
+      // return "0 Bytes";
+      return "";
+    }
+  }, []);
+
+  const renderTime = useCallback((timestamp) => {
     if (timestamp && timestamp > 0) {
       const dateTime = new Date(timestamp);
       let hour = dateTime.getHours();
@@ -87,24 +115,29 @@ const App = () => {
     }
   }, []);
 
-  const columnTypes = useMemo(() => { 
-    return {
-      step: {
-        width: 50,
-      },
-      codeLength: {
-        width: 150,
-      },
-      codeIndex: {
-        width: 150,
-      },
-      offsetId: {
-        width: 150,
-      },
-    };
+  const utcToTimestamp = useCallback((utcTime) => {
+    if (utcTime && utcTime > 0) {
+      const secondTemp = Math.floor(utcTime / 1000);
+      if (secondTemp > 60) {
+        const second = secondTemp % 60;
+        if (second > 0) {
+          return Math.floor(secondTemp / 60) + "分" + second + "秒";
+        } else {
+          return Math.floor(secondTemp / 60) + "分";
+        }
+      } else {
+        if (secondTemp === 0) {
+          return "1秒";
+        } else {
+          return secondTemp + "秒";
+        }
+      }
+    } else {
+      return "";
+    }
   }, []);
 
-  const getColumnDefs = useCallback(() => {
+  const getColumnDefs = () => {
     return [
       {
         headerName: "data",
@@ -114,47 +147,113 @@ const App = () => {
           {
             field: "step",
             headerName: "step",
-            type: "step",
-            columnGroupShow: "open",
+            columnGroupShow: "closed",
           },
           {
-            field: "codeLength",
-            headerName:"codeLength",
-            type: "codeLength",
-            columnGroupShow: "open",
+            field: "chatId",
+            headerName:"chatId",
+            columnGroupShow: "closed",
           },
-          {
-            field: "codeIndex",
-            headerName:"codeIndex",
-            type: "codeIndex",
-            columnGroupShow: "open",
-          },
+          // {
+          //   field: "messageLength",
+          //   headerName: "messageLength",
+          //   columnGroupShow: "closed",
+          // },
+          // {
+          //   field: "messageIndex",
+          //   headerName: "messageIndex",
+          //   columnGroupShow: "closed",
+          // },
           {
             field: "offsetId",
             headerName:"offsetId",
-            type: "offsetId",
             columnGroupShow: "open",
           },
           {
-            field: "photoCount",
-            headerName:"photo",
+            field: "dcId",
+            headerName: "dcId",
             columnGroupShow: "open",
           },
           {
-            field: "videoCount",
-            headerName:"video",
+            field: "category",
+            headerName:"category",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "messageId",
+            headerName:"messageId",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "id",
+            headerName: "id",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "accessHash",
+            headerName: "accessHash",
+            columnGroupShow: "closed",
+          },
+        ],
+      },
+      {
+        headerName: "media",
+        groupId: "media",
+        openByDefault: true,
+        children: [
+          {
+            field: "size",
+            headerName: "size",
+            columnGroupShow: "open",
+            valueFormatter: params => renderSize(params.value),
+          },
+          {
+            field: "fileName",
+            headerName: "fileName",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "type",
+            headerName: "type",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "duration",
+            headerName: "duration",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "width",
+            headerName: "width",
+            columnGroupShow: "closed",
+          },
+          {
+            field: "height",
+            headerName: "height",
+            columnGroupShow: "closed",
+          },
+        ],
+      },
+      {
+        headerName: "photo",
+        groupId: "photo",
+        openByDefault: true,
+        children: [
+          {
+            field: "type",
+            headerName: "type",
             columnGroupShow: "open",
           },
           {
-            field: "fileCount",
-            headerName:"file",
-            columnGroupShow: "open",
+            field: "photoLength",
+            headerName: "photoLength",
+            columnGroupShow: "closed",
           },
-          // {
-          //   field: "messageId",
-          //   headerName:"messageId",
-          //   columnGroupShow: "open",
-          // },
+          {
+            field: "photoIndex",
+            headerName: "photoIndex",
+            columnGroupShow: "closed",
+          },
         ],
       },
       {
@@ -163,25 +262,73 @@ const App = () => {
         openByDefault: true,
         children: [
           {
-            field: "messageIndex",
-            headerName: "index",
+            field: "hashLength",
+            headerName: "hashLength",
             columnGroupShow: "open",
           },
           {
-            field: "messageLength",
-            headerName: "length",
+            field: "hashIndex",
+            headerName: "hashIndex",
             columnGroupShow: "open",
           },
-          // {
-          //   field: "error",
-          //   headerName: "error",
-          //   columnGroupShow: "open",
-          // },
           {
-            field: "date",
-            headerName: "date",
+            field: "selectIndex",
+            headerName: "selectIndex",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "selectFile",
+            headerName: "selectFile",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "insertFile",
+            headerName: "insertFile",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "insertIndex",
+            headerName: "insertIndex",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "selectMessage",
+            headerName: "selectMessage",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "insertMessage",
+            headerName: "insertMessage",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
+            field: "error",
+            headerName: "error",
+            columnGroupShow: "open",
+          },
+          {
+            field: "time",
+            headerName: "startTime",
             columnGroupShow: "open",
             cellRenderer: params => renderTime(params.value),
+          },
+          {
+            field: "date",
+            headerName: "endTime",
+            columnGroupShow: "open",
+            cellRenderer: params => renderTime(params.value),
+          },
+          {
+            field: "useTime",
+            headerName: "useTime",
+            columnGroupShow: "open",
+            cellRenderer: params => utcToTimestamp(params.value),
           },
           // {
           //   field: "status",
@@ -192,9 +339,9 @@ const App = () => {
         ],
       },
     ]
-  }, []);
+  };
 
-  const [columnDefs, setColumnDefs] = useState(getColumnDefs);
+  const [colDefs] = useState(getColumnDefs);
 
   const defaultColDef = useMemo(() => {
     return {
@@ -219,20 +366,12 @@ const App = () => {
 
   const rowClassRules = useMemo(() => {
     return {
-      "rag-red": params => stop.current === true && params.node.data.codeIndex === lastRow.current.data.codeIndex,
+      "rag-red": params => stop.current === true && params.node.data.offsetId === lastRow.current.data.offsetId,
     };
   }, []);
 
-  // const onRowDataUpdated = useCallback((event) => {
-  //   const rowNodeIndex = event.node?.rowIndex;
-  //   // console.log(rowNodeIndex);  //测试
-  //   if (rowNodeIndex > 0) {
-  //     gridRef.current.api.ensureIndexVisible(rowNodeIndex, 'middle');
-  //   }
-  // }, []);
-
   const addNewEvent = useCallback((newItem) => {
-    // if (logData.length >= 200) {
+    // if (logData.length >= 100) {
     //   setLogData([]);
     //   console.log("删除log成功");  //测试
     // }
@@ -265,23 +404,18 @@ const App = () => {
       setClearGridBtnDisabled(true);
       console.log("删除grid成功");  //测试
     }
-    if (lastId.current > 0) {
-      if (items.codeIndex <= lastId.current) {
-        return;
-      }
-    }
     const res = gridRef.current.api.applyTransaction({
-      add: [items],
+      add: items,
       addIndex: 0,
     });
-    // console.log(res);  //测试
+    //console.log(res);  //测试
     if (res.add && res.add.length > 0) {
       lastRow.current = res.add[0];
       //console.log(lastRow.current);  //测试
-      lastId.current = lastRow.current.data.codeIndex;
+      lastId.current = lastRow.current.data.offsetId;
     } else {
       lastRow.current = null;
-      lastId.current = -1;
+      lastId.current = 0;
       console.log("添加row失败");
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>> 添加row失败",
@@ -296,6 +430,9 @@ const App = () => {
   }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled]);
 
   const updateLastRow = useCallback((items) => {
+    if (items.date && (items.date >= lastRow.current.data.time)) {
+      lastRow.current.setDataValue("useTime", items.date - lastRow.current.data.time);
+    }
     for (const name in items) {
       //console.log(name);  //测试
       //console.log(items[name]);  //测试
@@ -313,12 +450,12 @@ const App = () => {
     }
   }, []);
 
-  const getLastRow = useCallback((codeIndex, items) => {
+  const getLastRow = useCallback((offsetId, items) => {
     let found = false;
     gridRef.current.api.forEachNode((rowNode) => {
-      if (rowNode.data.codeIndex === codeIndex) {
+      if (rowNode.data.offsetId === offsetId) {
         lastRow.current = rowNode;
-        lastId.current = lastRow.current.data.codeIndex;
+        lastId.current = lastRow.current.data.offsetId;
         updateLastRow(items);
         found = true;
         return;
@@ -330,25 +467,69 @@ const App = () => {
       //   "error": true,
       //   "message": renderTime(Date.now()) + "  >>> lastRow错误",
       // });
-      addItems({codeIndex, ...items});
+      // addItems({offsetId, ...items});
     }
   }, [updateLastRow, addItems]);
 
   const updateItems = useCallback((data) => {
     //console.log(lastRow.current);  //测试
-    const {codeIndex, ...items} = data;
+    const {offsetId, ...items} = data;
     if (lastRow.current) {
-      //console.log(codeIndex);  //测试
+      //console.log(offsetId);  //测试
       //console.log(items);  //测试
-      if (lastId.current === codeIndex) {
+      if (lastId.current === offsetId) {
         updateLastRow(items);
       } else {
-        getLastRow(codeIndex, items);
+        getLastRow(offsetId, items);
       }
     } else {
-      getLastRow(codeIndex, items);
+      getLastRow(offsetId, items);
     }
   }, [updateLastRow, getLastRow]);
+
+  const updateSelect = useCallback((message, name) => {
+    if (message.status === "try") {
+      // updateItems({
+      //   "offsetId": message.offsetId,
+      //   [name]: false,
+      //   "error": true,
+      //   "date": message.date,
+      // });
+      addNewEvent({
+        "error": true,
+        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+      });
+    } else {
+      console.log("未知消息 : " + JSON.stringify(message));
+    }
+  }, [addNewEvent, renderTime, updateItems]);
+
+  const updateInsert = useCallback((message, name) => {
+    if (message.status === "success") {
+      updateItems({
+        "offsetId": message.offsetId,
+        [name]: true,
+        "date": message.date,
+      });
+    } else if (message.status === "error") {
+      // updateItems({
+      //   "offsetId": message.offsetId,
+      //   [name]: false,
+      //   "date": message.date,
+      // });
+      addNewEvent({
+        "error": true,
+        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+      });
+    } else if (message.status === "try") {
+      addNewEvent({
+        "error": true,
+        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+      });
+    } else {
+      console.log("未知消息 : " + JSON.stringify(message));
+    }
+  }, [addNewEvent, renderTime, updateItems]);
 
   const handleBeforeUnload = useCallback((event) => {
     event.preventDefault();
@@ -416,7 +597,7 @@ const App = () => {
       ws.current.close();
       // handlerClose();
     } else if (message.result === "end") {
-      lastId.current = -1;
+      lastId.current = 0;
       lastRow.current = null;
       // setRowData([]);
       // setClearGridBtnDisabled(true);
@@ -425,83 +606,305 @@ const App = () => {
       // });
       // setClearLogBtnDisabled(true);
       //console.log("当前chat采集完毕");  //测试
-      addNewEvent({
-        "message": renderTime(Date.now()) + "  >>>当前chat采集完毕",
-        // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
-      });
+      // addNewEvent({
+      //   "message": renderTime(Date.now()) + "  >>>当前chat采集完毕",
+      //   // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
+      // });
     } else if (message.result === "over") {
       over.current = true;
       clearTimeout(timeOut.current);
       //console.log("全部chat采集完毕");  //测试
-      addNewEvent({
-        "message": renderTime(Date.now()) + "  >>>全部chat采集完毕",
-        // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
-      });
+      // addNewEvent({
+      //   "message": renderTime(Date.now()) + "  >>>全部chat采集完毕",
+      //   // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
+      // });
     } else {
-      if (message.codeIndex >= 0) {
-        if (message.codeIndex < lastId.current) {
-          console.log("消息codeIndex小了");
+      if (message.offsetId && message.offsetId >= 0) {
+        if (message.offsetId < lastId.current) {
+          // console.log("消息offsetId小了");
           addNewEvent({
             "error": true,
-            "message": renderTime(message.date) + " " + message.codeIndex + ":" + message.operate + " 消息codeIndex小了" + (message.message ? " - " + message.message  : " "),
+            "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " 消息offsetId小了" + (message.message ? " - " + message.message  : " "),
           });
         } else {
           switch (message.operate) {
-            case "nextStep":
-            case "start":
+            case "nextHash":
               if (message.status === "update") {
-                // delete message.operate;
-                // delete message.status;
+                if (message.hashIndex && message.hashIndex > 0) {
+                  updateItems({
+                    "offsetId": message.offsetId,
+                    "hashIndex": message.hashIndex,
+                    "date": message.date,
+                  });
+                } else {
+                  console.log("hashIndex错误");
+                }
+              } else if (message.status === "error") {
+                // updateItems({
+                //   "offsetId": message.offsetId,
+                //   "date": message.date,
+                // });
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else if (message.status === "limit") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "getHash":
+              if (message.status === "try") {
+                // updateItems({
+                //   "offsetId": message.offsetId,
+                //   "hashIndex": message.hashIndex,
+                //   "date": message.date,
+                // });
+                // if (message.hashIndex === 1) {
+                //   addNewEvent({
+                //     "error": true,
+                //     "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - 查询首个hash出错 - " + message.message,
+                //   });
+                // } else if (message.hashIndex > 1) {
+                if (message.hashIndex && message.hashIndex > 0) {
+                  addNewEvent({
+                    "error": true,
+                    "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - 查询hash出错",
+                  });
+                } else {
+                  console.log("hashIndex错误");
+                }
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "nextMessage":
+              if (message.status === "add") {
+                if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
+                  //delete message.operate;
+                  //delete message.status;
+                  const {
+                    operate,
+                    status,
+                    ...temp
+                  } = message;
+                  addItems([temp]);
+                }
+              } else if (message.status === "error") {
+                // if (isCompressChecked === false) {
+                //   updateItems({
+                //     "offsetId": message.offsetId,
+                //     "date": message.date,
+                //   });
+                // }
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else if (message.status === "limit") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "start":
+            case "nextStep":
+              if (message.status === "add") {
+                if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
+                  //delete message.operate;
+                  //delete message.status;
+                  const {
+                    operate,
+                    status,
+                    ...temp
+                  } = message;
+                  addItems([temp]);
+                }
+              } else if (message.status === "error") {
+                // if (isCompressChecked === false) {
+                //   updateItems({
+                //     "offsetId": message.offsetId,
+                //     "date": message.date,
+                //   });
+                // }
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else if (message.status === "limit") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else if (message.status === "flood") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "getMedia":
+            case "getPhoto":
+            case "getFile":
+              if (message.status === "update") {
                 const {
                   operate,
                   status,
                   ...temp
                 } = message;
                 updateItems(temp);
-              } if (message.status === "add") {
-                const {
-                  operate,
-                  status,
-                  ...temp
-                } = message;
-                addItems(temp);
-              // } else if (message.status === "flood") {
-              // } else if (message.status === "error") {
-              // } else if (message.status === "wait") {
-              } else {
-                //console.log("未知消息");
+              } else if (message.status === "error") {
+                // if (isCompressChecked === false) {
+                //   updateItems({
+                //     "offsetId": message.offsetId,
+                //     "date": message.date,
+                //   });
+                // }
                 addNewEvent({
-                  "error": message.error,
-                  "message": renderTime(message.date) + " " + (message.step ? "  (" + message.step + ")" : " ") + " " + message.operate + " - " + message.message,
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
                 });
+              } else if (message.status === "indexExist") {
+                updateItems({
+                  "offsetId": message.offsetId,
+                  "selectIndex": true,
+                  "date": message.date,
+                });
+              } else if (message.status === "fileExist") {
+                updateItems({
+                  "offsetId": message.offsetId,
+                  "selectFile": true,
+                  "date": message.date,
+                });
+              } else if (message.status === "cache") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
               }
               break;
-            default:
-              //console.log("未知消息");
+            case "selectMediaIndex":
+              updateSelect(message, "selectIndex");
+              break;
+            case "insertMedia":
+              updateInsert(message, "insertFile");
+              break;
+            case "insertMediaIndex":
+              updateInsert(message, "insertIndex");
+              break;
+            case "selectPhotoIndex":
+              updateSelect(message, "selectIndex");
+              break;
+            case "insertPhoto":
+              updateInsert(message, "insertFile");
+              break;
+            case "insertPhotoIndex":
+              updateInsert(message, "insertIndex");
+              break;
+            case "endMessage":
+            case "endMediaMessage":
+            case "endPhotoMessage":
+              if (message.status === "try") {
+                // updateItems({
+                //   "offsetId": message.offsetId,
+                //   "date": message.date,
+                // });
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "selectMedia":
+            case "selectMediaMessage":
+            case "selectPhoto":
+            case "selectPhotoMessage":
+              updateSelect(message, "selectMessage");
+              break;
+            case "insertMessage":
+              updateInsert(message, "insertMessage");
+              break;
+            case "endInsert":
+            case "endMediaInsert":
+            case "endPhotoInsert":
+              if (message.status === "exist") {
+                updateItems({
+                  "offsetId": message.offsetId,
+                  "selectMessage": true,
+                  "date": message.date,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "getMessage":
+              if (message.status === "flood") {
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else if (message.status === "error") {
+                // if (isCompressChecked === false) {
+                //   updateItems({
+                //     "offsetId": message.offsetId,
+                //     "date": message.date,
+                //   });
+                // }
+                addNewEvent({
+                  "error": true,
+                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
+                });
+              } else {
+                console.log("未知消息 : " + JSON.stringify(message));
+              }
+              break;
+            case "getNext":
+            case "waitNext":
+            case "forwardMessage":
               addNewEvent({
                 "error": message.error,
-                "message": renderTime(message.date) + " " + (message.step ? "  (" + message.step + ")" : " ") + " " + message.operate + " - " + message.message,
+                "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
               });
+              break;
+            default:
+              console.log("未知消息 : " + JSON.stringify(message));
           }
         }
       } else {
-        if (!message.date) {
-          console.log(message);
-        }
         addNewEvent({
           "error": message.error,
           "message": renderTime(message.date) + (message.step ? "  (" + message.step + ")":" ") + message.operate + " - " + message.message,
         });
       }
     }
-  }, [addNewEvent, renderTime, addItems, updateItems]);
+  }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled, setLogData, setClearLogBtnDisabled, addItems, updateInsert, updateItems, updateSelect, isCompressChecked]);
 
   const setTime = useCallback(() => {
     clearTimeout(timeOut.current);
+    // let time = 120000;
+    // let count = 2;
+    // if (documentValue === 1) {
+    //   time = 60000;
+    //   count = 1;
+    // }
     timeOut.current = setTimeout(function() {
       if (over.current === false) {
         addNewEvent({
           "error": true,
+          // "message": renderTime(Date.now()) + "  >>> 过了" + count + "分钟都没有收到任何消息",
           "message": renderTime(Date.now()) + "  >>> 过了1分钟都没有收到任何消息",
         });
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
@@ -518,11 +921,14 @@ const App = () => {
           "message": renderTime(Date.now()) + "  >>> 停止采集，不再继续send",
         });
       }
+    // }, time);
     }, 60000);
+//  }, [addNewEvent, renderTime, documentValue]);
  }, [addNewEvent, renderTime]);
 
   const collectWS = useCallback((command) => {
-    //const url = "wss://bot.19425.xyz/ws";  //测试
+    // console.log("documentValue : " + documentValue);  //测试
+    //const url = "wss://workers.19425.xyz/ws";  //测试
     const url = new URL(window.location);
     url.protocol = "wss";
     url.pathname = "/ws";
@@ -570,6 +976,7 @@ const App = () => {
           }
           // waitReconnect(JSON.stringify({
           //   "command": "start",
+          //   "filterType": documentValue,
           // }), waitTime.current);
         }
       } else {
@@ -622,13 +1029,15 @@ const App = () => {
     ws.current.addEventListener("close", () => {
       handlerClose();
       if (over.current === false) {
+        // console.log(documentValue);  //测试
         waitReconnect(JSON.stringify({
           "command": "start",
+          "filterType": documentValue,
         }), waitTime.current);
       }
     })
 
-  }, [addNewEvent, renderTime, handleBeforeUnload, parseMessage, setTime, handlerClose, waitReconnect]);
+  }, [addNewEvent, renderTime, handleBeforeUnload, parseMessage, setTime, handlerClose, waitReconnect, documentValue]);
 
   waitReconnect = useCallback((command, time) => {
     setTimeout(function() {
@@ -659,6 +1068,11 @@ const App = () => {
     }, time);
   }, [addNewEvent, renderTime, handlerBtnEnable, collectWS, handlerBtnUnable, waitReconnect]);
 
+  const handlerRadioChange = useCallback((e) => {
+    // console.log(parseInt(e.target.value));  //测试
+    setDocumentValue(parseInt(e.target.value));
+  }, [setDocumentValue]);
+
   const handlerMessageError = useCallback((message) => {
     addNewEvent({
       "error": true,
@@ -687,15 +1101,17 @@ const App = () => {
         handlerMessageError("  >>> 没有连接ws");
       }
     } else if (pauseBtnText === "开始") {
+      // console.log(documentValue);  //测试
       setPauseBtnText("暂停");
       handlerBtn(false);
       if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
         waitReconnect(JSON.stringify({
           "command": "start",
+          "filterType": documentValue,
         }), 1000);
       }
     }
-  }, [setPauseBtnText, handlerBtn, handlerBtnEnable, handlerMessageError, waitReconnect, pauseBtnText]);
+  }, [setPauseBtnText, handlerBtn, handlerBtnEnable, handlerMessageError, waitReconnect, pauseBtnText, documentValue]);
 
   const handlerCollectBtnClick = useCallback(() => {
     handlerBtnUnable();
@@ -750,6 +1166,23 @@ const App = () => {
     }
   }, [setNextBtnDisabled, handlerMessageError]);
 
+  const handlerChatBtnClick = useCallback(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({
+          "command": "chat",
+        }));
+      } catch (e) {
+        // console.log(e);  //测试
+        handlerMessageError("  >>> chat失败");
+      }
+    } else {
+      waitReconnect(JSON.stringify({
+        "command": "chat",
+      }), 1000);
+    }
+  }, [handlerMessageError, waitReconnect]);
+
   const handlerClearCacheBtnClick = useCallback(() => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -758,67 +1191,7 @@ const App = () => {
         }));
       } catch (e) {
         // console.log(e);  //测试
-        handlerMessageError("  >>> clear cache失败");
-      }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-    }
-  }, [handlerMessageError]);
-
-  const handlerClearQueueBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "cache",
-        }));
-      } catch (e) {
-        // console.log(e);  //测试
-        handlerMessageError("  >>> clear queue失败");
-      }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-    }
-  }, [handlerMessageError]);
-
-  const handlerResetOffsetBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "offset",
-        }));
-      } catch (e) {
-        // console.log(e);  //测试
-        handlerMessageError("  >>> reset offset失败");
-      }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-    }
-  }, [handlerMessageError]);
-
-  const handlerResetCodeBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "code",
-        }));
-      } catch (e) {
-        // console.log(e);  //测试
-        handlerMessageError("  >>> reset code失败");
-      }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-    }
-  }, [handlerMessageError]);
-
-  const handlerResetQueueBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "queue",
-        }));
-      } catch (e) {
-        // console.log(e);  //测试
-        handlerMessageError("  >>> reset queue失败");
+        handlerMessageError("  >>> clear失败");
       }
     } else {
       handlerMessageError("  >>> 没有连接ws");
@@ -826,7 +1199,7 @@ const App = () => {
   }, [handlerMessageError]);
 
   const handlerClearGridBtnClick = useCallback(() => {
-    lastId.current = -1;
+    lastId.current = 0;
     lastRow.current = null;
     setRowData([]);
     setClearGridBtnDisabled(true);
@@ -910,7 +1283,7 @@ const App = () => {
   // useEffect(() => {
   //   if (rowData.length === 0) {
   //     setClearGridBtnDisabled(true);
-  //   } else if (rowData.length >= 100) {
+  //   } else if (rowData.length >= 200) {
   //     setLogData(() => {
   //       return [];
   //     });
@@ -926,7 +1299,7 @@ const App = () => {
   useEffect(() => {
     if (logData.length === 0) {
       setClearLogBtnDisabled(true);
-    } else if (logData.length >= 200) {
+    } else if (logData.length >= 100) {
       setLogData(() => {
         return [];
       });
@@ -962,48 +1335,63 @@ const App = () => {
 
   return (
     <div style={containerStyle}>
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "row" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={gridStyle}>
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
-            columnDefs={columnDefs}
-            columnTypes={columnTypes}
+            columnDefs={colDefs}
             defaultColDef={defaultColDef}
             getRowId={getRowId}
             rowClassRules={rowClassRules}
             rowSelection={rowSelection}
-            // onRowDataUpdated={onRowDataUpdated}
             pagination={pagination}
             paginationPageSize={paginationPageSize}
             paginationPageSizeSelector={paginationPageSizeSelector}
           />
-          <div style={{ width: "100%", height: "5%" }}>
-            <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
-            <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>
-            <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
-            <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
-            <button onClick={handlerClearCacheBtnClick}>清空cache</button>
-            <button onClick={handlerClearQueueBtnClick}>清空队列</button>
-            <button onClick={handlerResetOffsetBtnClick}>重置offset</button>
-            <button onClick={handlerResetCodeBtnClick}>重置code</button>
-            <button onClick={handlerResetQueueBtnClick}>重置queue</button>
-            <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
-            <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
-            <label>
-              <input type="checkbox" checked={isCompressChecked} onChange={handlerCompressChange} />
-              压缩
-            </label>
-            <label>
-              <input type="checkbox" checked={isBatchChecked} onChange={handlerBatchChange} />
-              批量
-            </label>
-            <input type="text" value={inputValue} onChange={inputHandleChange} />
-            <button onClick={handlerSendBtnClick} disabled={isSendBtnDisabled}>发送</button>
-          </div>
         </div>
-        <div style={{ width: "35%", height: "100%", minHeight: 0, flexGrow: 1, overflow: "auto" }}>
-          <h4>日志</h4>
+        <div style={{ width: "100%", height: "5%" }}>
+          <label>
+            <input type="radio" name="filterType" value="0" checked={documentValue === 0} onChange={handlerRadioChange} />
+            媒体
+          </label>
+          <label>
+            <input type="radio" name="filterType" value="1" checked={documentValue === 1} onChange={handlerRadioChange} />
+            图片
+          </label>
+          <label>
+            <input type="radio" name="filterType" value="2" checked={documentValue === 2} onChange={handlerRadioChange} />
+            视频
+          </label>
+          <label>
+            <input type="radio" name="filterType" value="3" checked={documentValue === 3} onChange={handlerRadioChange} />
+            文件
+          </label>
+          <label>
+            <input type="radio" name="filterType" value="4" checked={documentValue === 4} onChange={handlerRadioChange} />
+            动图
+          </label>
+          <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
+          <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>
+          <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
+          <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
+          <button onClick={handlerChatBtnClick}>chat</button>
+          <button onClick={handlerClearCacheBtnClick}>清空cache</button>
+          <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
+          <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
+          <label>
+            <input type="checkbox" checked={isCompressChecked} onChange={handlerCompressChange} />
+            压缩
+          </label>
+          <label>
+            <input type="checkbox" checked={isBatchChecked} onChange={handlerBatchChange} />
+            批量
+          </label>
+          <input type="text" value={inputValue} onChange={inputHandleChange} />
+          <button onClick={handlerSendBtnClick} disabled={isSendBtnDisabled}>发送</button>
+        </div>
+        <div style={{ width: "100%", height: "20%", minHeight: 0, flexGrow: 1, overflow: "auto" }}>
+          {/* <h4>日志</h4> */}
             <ul>
               {logData.map((item) => (
                 item.error ? 

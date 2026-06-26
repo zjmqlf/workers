@@ -1,20 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "favorites",
-  "main": "favorites.js",
+  "name": "favorites1",
+  "main": "favorites1.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
-    "nodejs_compat",
-    "nodejs_als"
+    "nodejs_compat"
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./hash/build"
+    "directory": "./forward1/build"
   },
   "routes": [
     {
-      "pattern": "favorites.19422.xyz/*",
-      "zone_name": "19422.xyz"
+      "pattern": "favorites1.19421.xyz/*",
+      "zone_name": "19421.xyz"
     }
   ],
   "preview_urls": false,
@@ -23,28 +22,14 @@
     {
       "binding": "MAINDB",
       "database_name": "maindb",
-      "database_id": "aec6fc9f-94b9-4d8f-8c27-d9e730a0f5c7"
-    },
-    {
-      "binding": "MESSAGEDB",
-      "database_name": "message",
-      "database_id": "2bed0b37-bee4-42a6-a4bb-8cd9cd011050"
-    },
-    {
-      "binding": "MEDIADB",
-      "database_name": "media",
-      "database_id": "6cd82b51-cb8a-49bc-829e-4704d87fea64"
-    },
-    {
-      "binding": "PHOTODB",
-      "database_name": "photo",
-      "database_id": "20a9bdc1-46c0-41ed-8fa5-cc65138c1fd2"
+      "database_id": "97d41e14-a9b6-45a9-b5cc-f60eb29acc02"
     }
   ],
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
+        "script_name": "favorites1",
         "class_name": "WebSocketServer"
       }
     ]

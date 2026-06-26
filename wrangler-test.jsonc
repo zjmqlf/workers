@@ -4,8 +4,7 @@
   "main": "test.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
-    "nodejs_compat",
-    "nodejs_als"
+    "nodejs_compat"
   ],
   "routes": [
     {
