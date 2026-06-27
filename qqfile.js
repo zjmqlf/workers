@@ -525,7 +525,7 @@ export class WebSocketServer extends DurableObject {
         const string = code.split(":");
         if (string[0] === "QQfile_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("-")[0]);
-        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot") {
+        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
           status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
         }
         if (status) {
@@ -960,7 +960,7 @@ export class WebSocketServer extends DurableObject {
                       // this.getCount1(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot") {
+                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                       this.getCount1(message, 2);
@@ -1116,8 +1116,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8895531043"),
-              accessHash: bigInt("-4179187748054768437"),
+              userId: bigInt("8662575474"),
+              accessHash: bigInt("-2842955702063451497"),
             }),
           ],
         })
@@ -1350,7 +1350,7 @@ export class WebSocketServer extends DurableObject {
                         // this.getCount1(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot") {
+                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
                         // await this.ctx.storage.put(message, 1);
                         await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
                         this.getCount1(message, 2);

@@ -669,5 +669,8 @@
   "@filepan_bot:_150P_19V_wJ7YOKc5w5y8",
   "@filepan_bot:_1P_vybpr8fPwVr6",
   "@filepan_bot:_1V_a4d8Tg6TTcWn",
-  "@filepan_bot:_30V_mXhTNaUZLY13"
+  "@filepan_bot:_30V_mXhTNaUZLY13",
+  "@filepan_bot:_1P_cpcW1WbPXCDM",
+  "@filepan_bot:_2P_HD0kMtkehLgV",
+  "@filepan_bot:_6P_19V_BqieTP8jp4UB"
 ]

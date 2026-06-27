@@ -1,19 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "favorites2",
-  "main": "favorites2.js",
+  "name": "forward1",
+  "main": "forward1.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./build"
+    "directory": "./forward1/build"
   },
   "routes": [
     {
-      "pattern": "favorites2.19420.xyz/*",
-      "zone_name": "19420.xyz"
+      "pattern": "forward1.19421.xyz/*",
+      "zone_name": "19421.xyz"
     }
   ],
   "preview_urls": false,
@@ -22,14 +22,14 @@
     {
       "binding": "MAINDB",
       "database_name": "maindb",
-      "database_id": "52bec4a2-a12a-484d-8f58-4f254b8cffd0"
+      "database_id": "97d41e14-a9b6-45a9-b5cc-f60eb29acc02"
     }
   ],
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "favorites2",
+        "script_name": "forward1",
         "class_name": "WebSocketServer"
       }
     ]

@@ -1,19 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "user",
-  "main": "user.js",
+  "name": "forward2",
+  "main": "forward2.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./build"
+    "directory": "./forward1/build"
   },
   "routes": [
     {
-      "pattern": "user.19422.xyz/*",
-      "zone_name": "19422.xyz"
+      "pattern": "forward2.19420.xyz/*",
+      "zone_name": "19420.xyz"
     }
   ],
   "preview_urls": false,
@@ -22,29 +22,14 @@
     {
       "binding": "MAINDB",
       "database_name": "maindb",
-      "database_id": "aec6fc9f-94b9-4d8f-8c27-d9e730a0f5c7"
-    },
-    {
-      "binding": "MESSAGEDB",
-      "database_name": "message",
-      "database_id": "2bed0b37-bee4-42a6-a4bb-8cd9cd011050"
-    },
-    {
-      "binding": "MEDIADB",
-      "database_name": "media",
-      "database_id": "6cd82b51-cb8a-49bc-829e-4704d87fea64"
-    },
-    {
-      "binding": "PHOTODB",
-      "database_name": "photo",
-      "database_id": "20a9bdc1-46c0-41ed-8fa5-cc65138c1fd2"
+      "database_id": "52bec4a2-a12a-484d-8f58-4f254b8cffd0"
     }
   ],
   "durable_objects": {
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "user",
+        "script_name": "forward2",
         "class_name": "WebSocketServer"
       }
     ]
