@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "qyg100b",
-  "main": "qyg100b.js",
+  "name": "fileport",
+  "main": "fileport.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
@@ -12,7 +12,7 @@
   // },
   // "routes": [
   //   {
-  //     "pattern": "qyg100b.19422.xyz/*",
+  //     "pattern": "fileport.19422.xyz/*",
   //     "zone_name": "19422.xyz"
   //   }
   // ],
@@ -22,7 +22,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "qyg100b",
+        "script_name": "fileport",
         "class_name": "WebSocketServer"
       }
     ]

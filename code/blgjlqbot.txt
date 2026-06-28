@@ -103,5 +103,7 @@
   "blgjlqbot_26p14v0d_jtf6Oq7ai7WnCXeV",
   "blgjlqbot_0p1v0d_dfrRSMei99kpFvoD",
   "blgjlqbot_0p0v2d_rXTyCVIlrkcKv9Mh",
-  "blgjlqbot_0p1v0d_tYcyp5KaGC3j0AzQ"
+  "blgjlqbot_0p1v0d_tYcyp5KaGC3j0AzQ",
+  "blgjlqbot_0p3v0d_KqQtGIQIc5pLhwRT",
+  "blgjlqbot_0p3v0d_UwZDImAFe2sv7ikr"
 ]

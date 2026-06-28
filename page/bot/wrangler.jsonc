@@ -20,6 +20,21 @@
       //   "class_name": "WebSocketServer"
       // },
       {
+        "name": "amumujiema_WebSocketServer",
+        "script_name": "amumujiema",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "fileport_WebSocketServer",
+        "script_name": "fileport",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "xiumi_WebSocketServer",
+        "script_name": "xiumi",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "zyxfiles_WebSocketServer",
         "script_name": "zyxfiles",
         "class_name": "WebSocketServer"

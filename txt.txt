@@ -2,6 +2,8 @@
 
 npx wrangler login
 
+node code.js
+
 
 zjmqlf2021:
 
@@ -43,6 +45,15 @@ zjmqlf2024:
 
 npm run build-qqfile
 npm run deploy-qqfile
+
+npm run build-amumujiema
+npm run deploy-amumujiema
+
+npm run build-fileport
+npm run deploy-fileport
+
+npm run build-xiumi
+npm run deploy-xiumi
 
 npm run build-zyxfiles
 npm run deploy-zyxfiles

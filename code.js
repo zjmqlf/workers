@@ -41,6 +41,7 @@ const teestpanbot = [];
 const atfileslinksbot = [];
 const lockHivebot = [];
 const tgdecoderbot = [];
+const xiumi1bot = [];
 const ZYXFilesBot = [];
 const ntmjmqbot = [];
 const newjmqbot = [];
@@ -249,6 +250,7 @@ const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const lockHivebot2Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
+const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/gi;   //xiumi1bot
 const ZYXFilesBotRegexp = /(📌 取件码：[A-Za-z0-9]+)/gi;   //ZYXFilesBot
 const ntmjmqbotRegexp = /(ntmjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //ntmjmqbot
 const newjmqbotRegexp = /(newjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //newjmqbot
@@ -3111,6 +3113,22 @@ try {
         //   }
         // }
 
+        const xiumi1botMatches = str.match(xiumi1botRegexp);
+        // console.log(xiumi1botMatches);  //测试
+        if (xiumi1botMatches) {
+          const xiumi1botMatchesLength = xiumi1botMatches.length;
+          // console.log("xiumi1botMatchesLength : " + xiumi1botMatchesLength);  //测试
+          if (xiumi1botMatchesLength > 0) {
+            for (let j = 0; j < xiumi1botMatchesLength; j++) {
+              if (xiumi1botMatches[j]) {
+                if (xiumi1botMatches[j].length === 16) {
+                  xiumi1bot.push(xiumi1botMatches[j]);
+                }
+              }
+            }
+          }
+        }
+
         const ZYXFilesBotMatches = str.match(ZYXFilesBotRegexp);
         // console.log(ZYXFilesBotMatches);  //测试
         if (ZYXFilesBotMatches) {
@@ -4292,6 +4310,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tgdecoderbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += xiumi1bot.length;
+  console.log("xiumi1bot : " + xiumi1bot.length);  //测试
+  if (xiumi1bot.length > 0) {
+    const data = fs.readFileSync("./code/xiumi1bot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...xiumi1bot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/xiumi1bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }

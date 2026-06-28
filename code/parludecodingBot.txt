@@ -1,5 +1,7 @@
 [
   "ParludecodingBot_1p0v0d_YsnCjgA9mbfPHlCw",
   "ParludecodingBot_4p27v0d_1enyFy7oE6UlJHKQ",
-  "ParludecodingBot_0p1v0d_yYoRWemEYw50ZIhV"
+  "ParludecodingBot_0p1v0d_yYoRWemEYw50ZIhV",
+  "ParludecodingBot_0p0v2d_kKTV94frcwdDVl15",
+  "ParludecodingBot_0p1v0d_ZEQYN68BPmmsk2TB"
 ]
