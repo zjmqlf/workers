@@ -251,7 +251,8 @@ const lockHivebot2Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
 const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/gi;   //xiumi1bot
-const ZYXFilesBotRegexp = /(📌 取件码：[A-Za-z0-9]+)/gi;   //ZYXFilesBot
+const ZYXFilesBot1Regexp = /(📌 取件码：[A-Za-z0-9]+)/gi;   //ZYXFilesBot
+const ZYXFilesBot2Regexp = /([a-z0-9]{40})/g;   //ZYXFilesBot
 const ntmjmqbotRegexp = /(ntmjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //ntmjmqbot
 const newjmqbotRegexp = /(newjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //newjmqbot
 const filepanbotRegexp = /(@filepan_bot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //filepanbot
@@ -3129,15 +3130,29 @@ try {
           }
         }
 
-        const ZYXFilesBotMatches = str.match(ZYXFilesBotRegexp);
-        // console.log(ZYXFilesBotMatches);  //测试
-        if (ZYXFilesBotMatches) {
-          const ZYXFilesBotMatchesLength = ZYXFilesBotMatches.length;
-          // console.log("ZYXFilesBotMatchesLength : " + ZYXFilesBotMatchesLength);  //测试
-          if (ZYXFilesBotMatchesLength > 0) {
-            for (let j = 0; j < ZYXFilesBotMatchesLength; j++) {
-              if (ZYXFilesBotMatches[j]) {
-                ZYXFilesBot.push(ZYXFilesBotMatches[j].replace("📌 取件码：", ""));
+        const ZYXFilesBot1Matches = str.match(ZYXFilesBot1Regexp);
+        // console.log(ZYXFilesBot1Matches);  //测试
+        if (ZYXFilesBot1Matches) {
+          const ZYXFilesBot1MatchesLength = ZYXFilesBot1Matches.length;
+          // console.log("ZYXFilesBot1MatchesLength : " + ZYXFilesBot1MatchesLength);  //测试
+          if (ZYXFilesBot1MatchesLength > 0) {
+            for (let j = 0; j < ZYXFilesBot1MatchesLength; j++) {
+              if (ZYXFilesBot1Matches[j]) {
+                ZYXFilesBot.push(ZYXFilesBot1Matches[j].replace("📌 取件码：", ""));
+              }
+            }
+          }
+        }
+
+        const ZYXFilesBot2Matches = str.match(ZYXFilesBot2Regexp);
+        // console.log(ZYXFilesBot2Matches);  //测试
+        if (ZYXFilesBot2Matches) {
+          const ZYXFilesBot2MatchesLength = ZYXFilesBot2Matches.length;
+          // console.log("ZYXFilesBot2MatchesLength : " + ZYXFilesBot2MatchesLength);  //测试
+          if (ZYXFilesBot2MatchesLength > 0) {
+            for (let j = 0; j < ZYXFilesBot2MatchesLength; j++) {
+              if (ZYXFilesBot2Matches[j]) {
+                ZYXFilesBot.push(ZYXFilesBot2Matches[j]);
               }
             }
           }

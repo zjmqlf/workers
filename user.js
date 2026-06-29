@@ -35,7 +35,7 @@ export class WebSocketServer extends DurableObject {
   cacheMessage = null;
   batchMessage = [];
   dialogArray = [];
-  chatArray = userString;
+  chatArray = userString.slice();
 
   constructor(ctx, env) {
     super(ctx, env);
@@ -131,7 +131,7 @@ export class WebSocketServer extends DurableObject {
       this.batchMessage = [];
       this.dialogArray = [];
       // this.chatArray = JSON.parse(JSON.stringify(userString));
-      this.chatArray = userString;
+      this.chatArray = userString.slice();
     }
   }
 

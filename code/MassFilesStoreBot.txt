@@ -30,5 +30,7 @@
   "Mass_Files_Store_Bot_tsLh2QkMRNO0bCMb",
   "Mass_Files_Store_Bot_pK1pcJTt1zKk4bfS",
   "Mass_Files_Store_Bot_GTD1ANR8HuF8sjvG",
-  "Mass_Files_Store_Bot_d86lrC5pzIaLS6o0"
+  "Mass_Files_Store_Bot_d86lrC5pzIaLS6o0",
+  "Mass_Files_Store_Bot_CMtHvEx7vFnZCmo0",
+  "Mass_Files_Store_Bot_CQtiZLJlIQtahD1j"
 ]

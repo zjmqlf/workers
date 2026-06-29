@@ -25,5 +25,8 @@
   "amumujiemabot_s0hxyydhse",
   "amumujiemabot_bgqqg60a3g",
   "amumujiemabot_4vb1zmj3ht",
-  "amumujiemabot_1m56uqdxhq"
+  "amumujiemabot_1m56uqdxhq",
+  "amumujiemabot_i9med9nbz4",
+  "amumujiemabot_ec8tc5ymcm",
+  "amumujiemabot_53r8uilkgm"
 ]
