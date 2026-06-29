@@ -248,6 +248,7 @@ const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/g
 const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //atfileslinksbot
 const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const lockHivebot2Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot3Regexp = /(f_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
 const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/gi;   //xiumi1bot
@@ -3081,6 +3082,20 @@ try {
             for (let j = 0; j < lockHivebot2MatchesLength; j++) {
               if (lockHivebot2Matches[j]) {
                 lockHivebot.push(lockHivebot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const lockHivebot3Matches = str.match(lockHivebot3Regexp);
+        // console.log(lockHivebot3Matches);  //测试
+        if (lockHivebot3Matches) {
+          const lockHivebot3MatchesLength = lockHivebot3Matches.length;
+          // console.log("lockHivebot3MatchesLength : " + lockHivebot3MatchesLength);  //测试
+          if (lockHivebot3MatchesLength > 0) {
+            for (let j = 0; j < lockHivebot3MatchesLength; j++) {
+              if (lockHivebot3Matches[j]) {
+                lockHivebot.push(lockHivebot3Matches[j]);
               }
             }
           }

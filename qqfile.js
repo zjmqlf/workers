@@ -26,6 +26,7 @@ export class WebSocketServer extends DurableObject {
   pingTime = 5000;
   startTime = 0;
   lastPage = "";
+  first = true;
   count = 0;
   flood = 0;
   time = 0;
@@ -113,6 +114,7 @@ export class WebSocketServer extends DurableObject {
       this.pingTime = 5000;
       this.startTime = 0;
       this.lastPage = "";
+      this.first = true;
       this.photoCount = 0;
       this.videoCount = 0;
       this.fileCount = 0;
@@ -314,7 +316,7 @@ export class WebSocketServer extends DurableObject {
         deviceModel: "Desktop",
         systemVersion: "Windows 11",
         appVersion: "6.7.6 x64",
-        langCode: "Chinese (Simplified)",
+        langCode: "zhcncc",
         systemLangCode: "zh-CN",
       });
       this.client.session.setDC(5, "91.108.56.128", 80);
@@ -1067,7 +1069,16 @@ export class WebSocketServer extends DurableObject {
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
           if (this.queue === false) {
-            await this.sendQuery(1);
+            if (this.first === false) {
+              this.first = true;
+              await this.sendQuery(1);
+            } else {
+              await this.waitNext(120000, false);
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            }
           }
           await this.endStep("nextStep");
         } else if (this.stop === 2) {
