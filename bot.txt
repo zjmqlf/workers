@@ -169,6 +169,11 @@ WenJianJibot
 8916418335
 4042836364938212872
 
+直接发送Code解码
+UUjiebot
+8818094610
+4220181957029002783
+
 私享Bot
 PrivShareCNBot
 8834347986
@@ -178,11 +183,6 @@ PrivShareCNBot
 bujidaobot
 7717423153
 6185691104571234701
-
-木木解码
-amumujiemabot
-8799809375
-3510575393263833231
 
 青柚解码器B
 QYG101B_bot
@@ -244,6 +244,11 @@ Pervert_Group_file_02_bot
 8540601384
 -400462571865081381
 
+变态集团_资源分享03
+Pervert_Group_resource_03_bot
+8809985243
+-5206359017628786748
+
 吾悦云盘
 WYyunbot
 8300903992
@@ -278,6 +283,7 @@ ForwardsCoverBot
 ForwardsCoverBot
 432668551
 -1279180771069992654
+
 
 
 
@@ -598,6 +604,11 @@ zyxfid_bot
 zyxfiles1bot
 8865179425
 -2356527111685471028
+
+木木解码
+amumujiemabot
+8799809375
+3510575393263833231
 
 👑搜索👑
 vipfile2bot

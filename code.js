@@ -32,6 +32,7 @@ const KodeXChatsINDbot = [];
 const MassFilesStoreBot = [];
 const betapahatitakbahagiabot = [];
 const QQfilebot = [];
+const UUjiebot = [];
 // const Zhuahihaibot = [];
 // const REDDFILEBOT = [];
 const wenjianjibot = [];
@@ -232,6 +233,7 @@ const QQld90bot4Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQld90bot
 const QQld90bot5Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P)/gi;   //QQld90bot
 const QQld90bot6Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V)/gi;   //QQld90bot
 const QQld90bot7Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*D)/gi;   //QQld90bot
+const UUjiebotRegexp = /(UUjiebot:[\-_A-Za-z0-9]{16})/gi;   //UUjiebot
 // // const ZhuahihaibotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/gi;   //Zhuahihaibot
 // const Zhuahihaibot1Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/gi;   //Zhuahihaibot
 // const Zhuahihaibot2Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/gi;   //Zhuahihaibot
@@ -246,9 +248,10 @@ const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/gi;   //amumujiemabot
 const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/gi;   //parludecodingBot
 const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //teestpanbot
 const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //atfileslinksbot
-const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
-const lockHivebot2Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
-const lockHivebot3Regexp = /(f_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{19})/gi;   //lockHivebot
+const lockHivebot2Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot3Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
+const lockHivebot4Regexp = /(f_[A-Za-z0-9]{16})/gi;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
 const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/gi;   //xiumi1bot
@@ -2863,6 +2866,20 @@ try {
           }
         }
 
+        const UUjiebotMatches = str.match(UUjiebotRegexp);
+        // console.log(UUjiebotMatches);  //测试
+        if (UUjiebotMatches) {
+          const UUjiebotMatchesLength = UUjiebotMatches.length;
+          // console.log("UUjiebotMatchesLength : " + UUjiebotMatchesLength);  //测试
+          if (UUjiebotMatchesLength > 0) {
+            for (let j = 0; j < UUjiebotMatchesLength; j++) {
+              if (UUjiebotMatches[j]) {
+                UUjiebot.push(UUjiebotMatches[j]);
+              }
+            }
+          }
+        }
+
         // // const ZhuahihaibotMatches = str.match(ZhuahihaibotRegexp);
         // // // console.log(ZhuahihaibotMatches);  //测试
         // // if (ZhuahihaibotMatches) {
@@ -3096,6 +3113,20 @@ try {
             for (let j = 0; j < lockHivebot3MatchesLength; j++) {
               if (lockHivebot3Matches[j]) {
                 lockHivebot.push(lockHivebot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const lockHivebot4Matches = str.match(lockHivebot4Regexp);
+        // console.log(lockHivebot4Matches);  //测试
+        if (lockHivebot4Matches) {
+          const lockHivebot4MatchesLength = lockHivebot4Matches.length;
+          // console.log("lockHivebot4MatchesLength : " + lockHivebot4MatchesLength);  //测试
+          if (lockHivebot4MatchesLength > 0) {
+            for (let j = 0; j < lockHivebot4MatchesLength; j++) {
+              if (lockHivebot4Matches[j]) {
+                lockHivebot.push(lockHivebot4Matches[j].replace("f_", "LH_").replace("F_", "LH_"));
               }
             }
           }
@@ -4133,6 +4164,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/QQfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += UUjiebot.length;
+  console.log("UUjiebot : " + UUjiebot.length);  //测试
+  if (UUjiebot.length > 0) {
+    const data = fs.readFileSync("./code/UUjiebot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...UUjiebot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/UUjiebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }

@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./amumujiemaString";
+import { codeString } from "./uujieString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -773,7 +773,8 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    if (message.substr(0, 14) === "amumujiemabot_") {
+                    const string = message.split(":");
+                    if (string[0] === "UUjiebot") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
@@ -870,8 +871,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8799809375"),
-              accessHash: bigInt("3510575393263833231"),
+              userId: bigInt("8818094610"),
+              accessHash: bigInt("4220181957029002783"),
             }),
           ],
         })
@@ -1009,7 +1010,8 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      if (message.substr(0, 14) === "amumujiemabot_") {
+                      const string = message.split(":");
+                      if (string[0] === "UUjiebot") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
@@ -1219,7 +1221,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("amumujiema");
+      const id = env.WEBSOCKET_SERVER.idFromName("uujie");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

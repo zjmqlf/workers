@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "amumujiema",
-  "main": "amumujiema.js",
+  "name": "uujie",
+  "main": "uujie.js",
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
@@ -12,7 +12,7 @@
   // },
   // "routes": [
   //   {
-  //     "pattern": "amumujiema.19422.xyz/*",
+  //     "pattern": "uujie.19422.xyz/*",
   //     "zone_name": "19422.xyz"
   //   }
   // ],
@@ -22,7 +22,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "amumujiema",
+        "script_name": "uujie",
         "class_name": "WebSocketServer"
       }
     ]

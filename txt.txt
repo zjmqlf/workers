@@ -46,11 +46,11 @@ zjmqlf2024:
 npm run build-qqfile
 npm run deploy-qqfile
 
-npm run build-amumujiema
-npm run deploy-amumujiema
-
 npm run build-fileport
 npm run deploy-fileport
+
+npm run build-uujie
+npm run deploy-uujie
 
 npm run build-xiumi
 npm run deploy-xiumi
