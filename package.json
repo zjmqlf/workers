@@ -51,10 +51,10 @@
     "deploy-massfilesstore": "wrangler deploy -c ./wrangler-massfilesstore.jsonc",
     "build-steviarchiver": "wrangler deploy -c ./wrangler-steviarchiver.jsonc --dry-run --outdir=./bot/dist",
     "deploy-steviarchiver": "wrangler deploy -c ./wrangler-steviarchiver.jsonc",
-    "build-hash": "wrangler deploy -c ./hash/wrangler-hash.jsonc --dry-run --outdir=./hash/dist",
-    "deploy-hash": "wrangler deploy -c ./hash/wrangler-hash.jsonc",
-    "build-favorites": "wrangler deploy -c ./hash/wrangler-favorites.jsonc --dry-run --outdir=./hash/dist",
-    "deploy-favorites": "wrangler deploy -c ./hash/wrangler-favorites.jsonc"
+    "build-hash": "wrangler deploy -c ./wrangler-hash.jsonc --dry-run --outdir=./hash/dist",
+    "deploy-hash": "wrangler deploy -c ./wrangler-hash.jsonc",
+    "build-favorites": "wrangler deploy -c ./wrangler-favorites.jsonc --dry-run --outdir=./hash/dist",
+    "deploy-favorites": "wrangler deploy -c ./wrangler-favorites.jsonc"
   },
   "author": "",
   "license": "MIT",

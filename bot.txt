@@ -64,6 +64,11 @@ KodeXChatsINDbot
 8983376881
 2798403794734196826
 
+Decoder File Bot
+DecoderFileBot
+8817732525
+3614009175123304785
+
 filebox
 FilePortBot
 8317350694
@@ -253,6 +258,16 @@ lingbot_01
 lingbot_01_bot
 8128970239
 -5710040898753835817
+
+易盘📁网盘文件助手
+epanXfile_bot
+8888716502
+-2969402899093634993
+
+蜂巢中转-TurnAuto
+TurnAutoBot
+8895642139
+3778852488442431990
 
 蜂巢密钥搜索器
 HiveSeekbot

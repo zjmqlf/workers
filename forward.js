@@ -291,7 +291,7 @@ export class WebSocketServer extends DurableObject {
   async open(tryCount) {
     const apiId = 1334621;
     const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7gn5wG+YL7sXsWHDBKraoOeFFd/txTBSsgrT6pJkiV5hJNxPQqxHdflP31Xs4IsnpDmF0ipInV0LGpQo9hbV3sObZWxSVRURzDHOpf58pFn4N73s+10De8RgjA8xcCbqIABbgbD5CvHtU5VKTcaDM/FvJxJHD6lf89/2nTnHvb5UK8MdHd2FlznhfMdo3WHyyhk6PKzk13eBE51w+3DXys06WC8l9DqriJBNY3WyjNTKb7fShTlnOjufcnoST20Lt4kwpWieIeJrwwMF/iXOcYLHuraSidyC+nF/Js9UfBG271+Zd9+KLkpNfT2nUwAwScWAKtq1x1nfjLbSOiK4/yA==";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7mCOZuErJstLxS/pAJKeDY1EjcrtZC/e/KbqNDCVLdcD+Bl5sz3fIsc8zxKze4HG7HGz8NUUPtfVbqSb29SWUOm7Ou3niFDjEqnI1tHSRR87RwcAu9DXHDFmMHV00Yg+ZUjs3mHyrc4UYRwH+pfNxNg7kJcGdvor3mnjZrnwvPIWbR1xA9xYPJn3PcxTm0SksTZyyjDAIEQ0jmTbO3vZK1GqwnsCcHZD2ndKze7nZeh3h6s4/vX65hkgnSErAqe5VTFnvq857AhOmMlBl2+OV4gM9Pc5N4Npfeq7K7t4xhzMdiNrth6iMTEnuJoOcn9wxRzTgUgZradl/neEbSueHaw==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
         timeout: 5,
@@ -822,7 +822,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let configResult = {};
     try {
-      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'collect' AND `tgId` = 0;").bind(this.chatId).run();
+      configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'forward' AND `tgId` = 0;").bind(this.chatId).run();
     } catch (e) {
       //console.log("updateConfig出错 : " + e);
       this.sendLog("updateConfig", "出错 : " + e.message, null, true);

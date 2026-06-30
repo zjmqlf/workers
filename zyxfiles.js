@@ -685,7 +685,7 @@ export class WebSocketServer extends DurableObject {
       });
       await this.close()
     } else {
-      if (this.queue === true) {
+      // if (this.queue === true) {
         for (let i = 0; i < 6; i++) {
           if (this.stop === 2) {
             this.broadcast({
@@ -704,9 +704,9 @@ export class WebSocketServer extends DurableObject {
             });
           }
         }
-      } else {
-        await scheduler.wait(5000);
-      }
+      // } else {
+      //   await scheduler.wait(5000);
+      // }
       await this.nextStep();
     }
   }
@@ -774,20 +774,20 @@ export class WebSocketServer extends DurableObject {
                   if (message) {
                     const regexp = /[A-Za-z0-9]{40}/i;
                     if (message.length === 40 && regexp.test(message) === true) {
-                      if (this.queue === false) {
-                        this.queue = true;
-                        await this.ctx.storage.put("queue", true);
-                      }
+                      // if (this.queue === false) {
+                      //   this.queue = true;
+                      //   await this.ctx.storage.put("queue", true);
+                      // }
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
                     } else if (message === "✅ 所有文件已发送完成！") {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
+                      // if (this.queue === true) {
+                      //   this.queue = false;
+                      //   await this.ctx.storage.put("queue", false);
                         //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
                         this.sendForward("nextStep", "所有文件已发送完成！", "", "update", false);
-                      }
+                      // }
                     } else if (message.includes("您已被限制使用,限制期限为：") === true) {
                       const date = message.replace("您已被限制使用,限制期限为：", "");
                       if (date) {
@@ -1029,20 +1029,20 @@ export class WebSocketServer extends DurableObject {
                     if (message) {
                       const regexp = /[A-Za-z0-9]{40}/i;
                       if (message.length === 40 && regexp.test(message) === true) {
-                        if (this.queue === false) {
-                          this.queue = true;
-                          await this.ctx.storage.put("queue", true);
-                        }
+                        // if (this.queue === false) {
+                        //   this.queue = true;
+                        //   await this.ctx.storage.put("queue", true);
+                        // }
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
                       } else if (message === "✅ 所有文件已发送完成！") {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
+                        // if (this.queue === true) {
+                        //   this.queue = false;
+                        //   await this.ctx.storage.put("queue", false);
+                        //   //console.log("(" + this.currentStep + ") 所有文件已发送完成！");
                           this.sendForward("start", "所有文件已发送完成！", "", "update", false);
-                        }
+                        // }
                       } else if (message.includes("您已被限制使用,限制期限为：") === true) {
                         const date = message.replace("您已被限制使用,限制期限为：", "");
                         if (date) {

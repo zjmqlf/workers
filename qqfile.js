@@ -835,6 +835,9 @@ export class WebSocketServer extends DurableObject {
         if (this.stop === 1) {
           // let temp = null;
           let status = false;
+          if (this.first === true) {
+            this.first = false;
+          }
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
@@ -1069,8 +1072,8 @@ export class WebSocketServer extends DurableObject {
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
           if (this.queue === false) {
-            if (this.first === false) {
-              this.first = true;
+            if (this.first === true) {
+              this.first = false;
               await this.sendQuery(1);
             } else {
               await this.waitNext(120000, false);

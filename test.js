@@ -28,7 +28,7 @@ export default {
       "770d14fcd25ebebc574c5d2a6358a0b3"
     ];
     const sessionStringArray = [
-      "1BQANOTEuMTA4LjU2LjE0NwG7f4mxXoaNQUpf9BBT1+W86HfUeE1amMhwy/C48BYf8CMxuRZndMKz9GlJCMzLJCXksxFWF8SFm1O1WwqrXdjuuKe4+2bYTH1nx0VvNFC5He857JO39sb4ruDsdXHwESXqFB5HUUFCbKdCwMce5jenU7Yf2NJwQkKAX2lQ0x+lElh5+rzcA/SYbiwtHly1sVvpgMdjAxD24nY50Og9ouAcMVeZqBsgSlA9wxwfu8wXPomx0rkcAYD4yYSyH0qj5BSxf3/F8nOcLaMiCBd6WUAJBjxd4lnhIwGVFlqpNdl9ntlNG4JM+VkbsgnRnA9wz6rsuEep5tjZrXrOwb34UcTowg==",
+      "1BQANOTEuMTA4LjU2LjE4MwG7hRgdaJwLQk6Z3MtsGp1GpAt7DMmmevLD8PvAMyH7B2tj7AM2j0fFAdtDywbosx8DK1rDuRnOcYbaIqAcvysfutIUm1G5AHRjhh5P6RYQB0AsN/uWCriKte4Pm1TXAH/9xhdP/JNqWj4r6eQTdzsezRv2c7fhya1j/7ZcfnImp6EnzmziDxB1tbXu/FOjOpjPRwNmO9qZqfCdTxRHyvL8zNZEzJrAcfJiud3ysF649DikJOx7hDEacc6rR3oQCkSk7rkCw2LzXJtMFIVDd8QIdZ7zd3IpnBxXBOnTUU+bNCmvcaOxxgpHtmuukw/6Q/zJGGraOte3IZhkTNPyDqbzmQ==",
       "1BQANOTEuMTA4LjU2LjEyOABQLHDMD4nttp5nlyYavCPWP5Mu6WVqx7EprUCty5ZofNENdyWJn6FsczIjIQ95L/qNm5v3Z/pCBJ7kC25NdWudkeIAKXQBrE37b16VObxHq+0oXQk/ySOspHUPJSFy3E1UDPQjFdWS0lbKiAs4Fhd1/P7FYFNpXeGobfi9lfWY8TZlbS0m5+7s2L6bxj/JGWbNFtPL+0B+F0QbhGW9pFdmpdw/eEAiw7ZENCZxY0hJ74KNiPRqunDHXQRiXLPlXU/NoxygvOizxKFsCduCKrcloIrjZTLnbeF26SmNR3EdC8MmC1emxoPyfxd1KpQyWUPRmx+nZBV4NRDZPS3Y8JetHw==",
       "1BQAWZmxvcmEud2ViLnRlbGVncmFtLm9yZwG7be+PddSzlPTzgS/mbCsxeZYLhE9ohnesT10Ntv+pdypA3wfrAUdXGXBLb2uturgLlkO49XMxAsIoELAdi8OprHkYfeEWZrQPF9RqjucdgWviAVd3oy/JIHk6lbB6NCS06US2CMdLZMxAsLFLu2JTgWiI07Xm2tpCIaaYED9mmH7NiROvqBx+jpB2GoFM4xzqaoB3y43BURo/ZYPEM3uUB4AVsS7IwdK0/j8pJL/ChB3buNnNtyVADe8wFvEAcbMn/385Xz53T21BdYqanzMuZX2O9cv4UNCpA9P6HoEYRn0D9XsljY6xJFNdR/RRKGHBqlVLK/Xt6PagRm321YBAvw==",
       "1AQAOMTQ5LjE1NC4xNzUuNTEBuy4sBpNWS3AGvzOzpaxdcW/u15EswUdbFZimjS+y+EyJzgU+mfNZnvDBUGUz57eY85qmRUYgMTduQi1OPS2j8pZOmLVWkigkyUVRsfAUZ/IY9cWdIwjzNfZXDyE0wMEqn66NrBx/oSQauJEpsyljZfb99tdQUW+P6Zg4FDMltO3uxqrWyMu9OKJLf6tgup47dALQDSCsHBuZR+RVHRFdvUbzVye7sBM5NwyYdRBlxGig/aAbpqO9jiUYPqKwrSDWLuH5uVRtOK4Dr9ukhcpXOZcfq9qzwtdDlt6t9c6w7svQiYB6drg6YjEfkaBnr2yibFpPkHIlUCsKvuIpCtrcYa0="
@@ -186,10 +186,10 @@ export default {
         //     break;  //测试
         //   }
         // }
-        // if (dialog.isUser === true) {
-        if (dialog.draft._entity.bot === true) {
-        // if (dialog.entity.deleted === true) {
-        // if (dialog.draft._entity.bot === true && dialog.entity.deleted === true) {
+        // if (dialog?.isUser === true) {
+        if (dialog?.draft?._entity?.bot === true) {
+        // if (dialog?.entity?.deleted === true) {
+        // if (dialog?.draft?._entity?.bot === true && dialog?.entity?.deleted === true) {
           const cache = [];
           const json_str = JSON.stringify(dialog, function(key, value) {
             if (typeof value === 'object' && value !== null) {
