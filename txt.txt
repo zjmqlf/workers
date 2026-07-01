@@ -49,32 +49,47 @@ npm run deploy-qqfile
 npm run build-fileport
 npm run deploy-fileport
 
-npm run build-uujie
-npm run deploy-uujie
-
 npm run build-xiumi
 npm run deploy-xiumi
+
+npm run build-wenjianji
+npm run deploy-wenjianji
 
 npm run build-zyxfiles
 npm run deploy-zyxfiles
 
+npm run build-aotem
+npm run deploy-aotem
+
+npm run build-jiematop
+npm run deploy-jiematop
+
+npm run build-uujie
+npm run deploy-uujie
+
+npm run build-safsadf
+npm run deploy-safsadf
+
 npm run build-kodexfiles2
 npm run deploy-kodexfiles2
-
-npm run build-ryumasepongmilku
-npm run deploy-ryumasepongmilku
 
 npm run build-lunindiacipoksupretto
 npm run deploy-lunindiacipoksupretto
 
-npm run build-hijautebal
-npm run deploy-hijautebal
+npm run build-paniang
+npm run deploy-paniang
+
+npm run build-ryumasepongmilku
+npm run deploy-ryumasepongmilku
 
 npm run build-fileshubro
 npm run deploy-fileshubro
 
 npm run build-filespanindo
 npm run deploy-filespanindo
+
+npm run build-hijautebal
+npm run deploy-hijautebal
 
 npm run build-kodexchatsind
 npm run deploy-kodexchatsind

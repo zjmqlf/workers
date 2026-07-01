@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./qqfileString";
+import { codeString } from "./string/qqfileString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {

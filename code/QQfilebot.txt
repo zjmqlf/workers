@@ -9494,5 +9494,15 @@
   "QQld90_bot:qqcode18c68695a0_1V",
   "QQld90_bot:qqcode10c67696c0_1V",
   "QQld90_bot:qqcode18c65697e0_1V",
-  "QQld90_bot:qqcode10c6479800_1V"
+  "QQld90_bot:qqcode10c6479800_1V",
+  "QQld90_bot:qqcode1cc68590f0_1V",
+  "QQld90_bot:qqcode17c510b551_4V",
+  "QQld90_bot:qqcode10c6e79b80_15P_7V",
+  "QQld90_bot:qqcode10c6e79b80_15P",
+  "QQld90_bot:qqcode1cc6379db0_5V",
+  "QQld90_bot:qqcode10c6b79dc0_1V",
+  "QQld90_bot:qqcode14c6279ed0_1P_1V",
+  "QQld90_bot:qqcode14c6279ed0_1P",
+  "QQld90_bot:qqcode1cc1ad49c0_1V",
+  "QQld90_bot:qqcode1cc6a8a270_1D"
 ]

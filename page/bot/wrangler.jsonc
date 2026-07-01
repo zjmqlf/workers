@@ -25,13 +25,13 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "uujie_WebSocketServer",
-        "script_name": "uujie",
+        "name": "xiumi_WebSocketServer",
+        "script_name": "xiumi",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "xiumi_WebSocketServer",
-        "script_name": "xiumi",
+        "name": "wenjianji_WebSocketServer",
+        "script_name": "wenjianji",
         "class_name": "WebSocketServer"
       },
       {
@@ -40,18 +40,43 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "aotem_WebSocketServer",
+        "script_name": "aotem",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "jiematop_WebSocketServer",
+        "script_name": "jiematop",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "uujie_WebSocketServer",
+        "script_name": "uujie",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "safsadf_WebSocketServer",
+        "script_name": "safsadf",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "kodexfiles2_WebSocketServer",
         "script_name": "kodexfiles2",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "ryumasepongmilku_WebSocketServer",
-        "script_name": "ryumasepongmilku",
+        "name": "lunindiacipoksupretto_WebSocketServer",
+        "script_name": "lunindiacipoksupretto",
         "class_name": "WebSocketServer"
       },
       {
-        "name": "lunindiacipoksupretto_WebSocketServer",
-        "script_name": "lunindiacipoksupretto",
+        "name": "paniang_WebSocketServer",
+        "script_name": "paniang",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "ryumasepongmilku_WebSocketServer",
+        "script_name": "ryumasepongmilku",
         "class_name": "WebSocketServer"
       },
       {

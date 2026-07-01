@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./tgjmqString";
+import { codeString } from "./string/tangbreString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -21,7 +21,6 @@ export class WebSocketServer extends DurableObject {
   // error = false;
   fromPeer = null;
   toPeer = null;
-  wait = false;
   queue = false;
   waitTime = 60000;
   pingTime = 5000;
@@ -110,7 +109,6 @@ export class WebSocketServer extends DurableObject {
       // this.error = false;
       this.fromPeer = null;
       this.toPeer = null;
-      this.wait = false;
       this.queue = await this.ctx.storage.get("queue") || false;
       this.waitTime = 60000;
       this.pingTime = 5000;
@@ -315,8 +313,8 @@ export class WebSocketServer extends DurableObject {
         deviceModel: "Desktop",
         systemVersion: "Windows 11",
         appVersion: "6.7.6 x64",
-        langCode: "en",
-        systemLangCode: "en-US",
+        langCode: "zhcncc",
+        systemLangCode: "zh-CN",
       });
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);
@@ -424,46 +422,27 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  getCount(text) {
-    let string = text.slice(10);
+  getCount(text, num) {
+    let string = text.slice(num);
     string = string.split("_");
-    if (string.length === 2) {
-      const temp = string[0];
-      string = temp.split("P");
-      if (string.length === 2) {
-        this.photoCount = parseInt(string[0]);
-        string = string[1].split("V");
-        if (string.length === 2) {
-          this.videoCount = parseInt(string[0]);
-          string = string[1].split("D");
-          if (string.length === 2) {
-            this.fileCount = parseInt(string[0]);
-          } else {
-            this.fileCount = 0;
-          }
-        } else {
-          this.videoCount = 0;
-          string = string[0].split("D");
-          if (string.length === 2) {
-            this.fileCount = parseInt(string[0]);
-          } else {
-            this.fileCount = 0;
-          }
-        }
+    if (string.length === 4) {
+      let temp = string[0].split("p");
+      if (temp.length === 2) {
+        this.photoCount = parseInt(temp[0]);
       } else {
         this.photoCount = 0;
-        string = string[0].split("V");
-        if (string.length === 2) {
-          this.videoCount = parseInt(string[0]);
-          string = string[1].split("D");
-          if (string.length === 2) {
-            this.fileCount = parseInt(string[0]);
-          } else {
-            this.fileCount = 0;
-          }
-        } else {
-          this.videoCount = 0;
-        }
+      }
+      temp = string[1].split("v");
+      if (temp.length === 2) {
+        this.videoCount = parseInt(temp[0]);
+      } else {
+        this.videoCount = 0;
+      }
+      temp = string[2].split("d");
+      if (temp.length === 2) {
+        this.fileCount = parseInt(temp[0]);
+      } else {
+        this.fileCount = 0;
       }
     }
   }
@@ -734,7 +713,7 @@ export class WebSocketServer extends DurableObject {
       });
       await this.close()
     } else {
-      // await scheduler.wait(5000);
+      // await scheduler.wait(10000);
       for (let i = 0; i < 4; i++) {
         if (this.stop === 2) {
           this.broadcast({
@@ -791,64 +770,62 @@ export class WebSocketServer extends DurableObject {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                 const id = messageArray[messageIndex].id;
                 if (messageArray[messageIndex].replyMarkup) {
-                  this.wait = false;
                   if (messageArray[messageIndex].replyMarkup.rows) {
-                    let both = false;
-                    let text = "";
+                    let next = true;
+                    let found = false;
+                    let current = false;
                     for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      for (const button of row.buttons) {
-                        if (button.text === "下一页 ➡️") {
-                          both = false;
-                          if (this.queue === false) {
-                            this.queue = true;
-                            await this.ctx.storage.put("queue", true);
-                          }
-                          const result = await this.client.invoke(
-                            new Api.messages.GetBotCallbackAnswer({
-                              peer: this.fromPeer,
-                              msgId: id,
-                              data: button.data,
-                            })
-                          );
-                          await scheduler.wait(5000);
-                          if (result && result.message === "数据已过期，请重新取件。") {
-                            this.sendLog("nextStep", result.message , "error", true);
-                          }
-                          // console.log("(" + this.currentStep + ")" + text ? "(" + text + ")下一页" : "下一页");
-                          this.sendForward("nextStep", text ? "(" + text + ")下一页" : "下一页", text, "update", false);
-                        } else if (button.text === "⬅️ 上一页") {
-                          both = true;
-                        } else {
-                          const regexp = /📄 \d+\/\d+/i;
-                          if (regexp.test(button.text) === true) {
-                            text = button.text.replace("📄 ", "");
-                            const regexp = /(\d+)/gi;
-                            const matches = button.text.match(regexp);
-                            if (matches && matches.length === 2) {
-                              if (matches[0] === matches[1]) {
-                                if (this.queue === true) {
-                                  this.queue = false;
-                                  await this.ctx.storage.put("queue", false);
-                                  //console.log("(" + this.currentStep + ") " + text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕");
-                                  this.sendForward("nextStep", text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕", text, "update", false);
+                      if (next === true) {
+                        for (const button of row.buttons) {
+                          const regexp1 = /共 \d+ 页/i;
+                          const regexp2 = /\d+ ✅/i;
+                          const regexp3 = /^\d+$/i;
+                          if (regexp1.test(button.text) === true) {
+                            // if (this.queue === true) {
+                            //   this.queue = false;
+                            //   await this.ctx.storage.put("queue", false);
+                            //   //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                            //   this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                            // }
+                          } else if (regexp2.test(button.text) === true) {
+                            current = true;
+                            if (this.queue === false) {
+                              this.queue = true;
+                              await this.ctx.storage.put("queue", true);
+                            }
+                          } else if (regexp3.test(button.text) === true) {
+                            if (current === true) {
+                              if (parseInt(button.text).toString() === button.text) {
+                                next = false;
+                                found = true;
+                                if (this.queue === false) {
+                                  this.queue = true;
+                                  await this.ctx.storage.put("queue", true);
                                 }
+                                const result = await this.client.invoke(
+                                  new Api.messages.GetBotCallbackAnswer({
+                                    peer: this.fromPeer,
+                                    msgId: id,
+                                    data: button.data,
+                                  })
+                                );
+                                await scheduler.wait(5000);
+                                // console.log("(" + this.currentStep + ") 下一页");
+                                this.sendForward("nextStep", "下一页", button.text, "update", false);
+                                if (result && result.message) {
+                                  this.sendLog("nextStep", result.message , null, false);
+                                }
+                                break;
                               }
                             }
                           }
                         }
-                      }
-                    }
-                    if (both === true) {
-                      if (this.queue === true) {
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") " + text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕");
-                        this.sendForward("nextStep", text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕", text, "update", false);
+                      } else {
+                        break;
                       }
                     }
                   }
                 } else if (messageArray[messageIndex].media) {
-                  this.wait = false;
                   let fileId = null;
                   if (messageArray[messageIndex].media.document) {
                     // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -876,18 +853,31 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const str = message.substr(0, 10);
-                    if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
+                    // const regexp = /([a-z0-9]{32})/i;
+                    if (message.substr(0, 11) === "TangBRebot_") {
                       await this.ctx.storage.put(message, 1);
-                      this.getCount(message);
+                      this.getCount(message, 11);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message === "正在取件...") {
-                      this.wait = true;
-                    } else if (message.includes("密钥不存在或无权访问") === true) {
-                      this.wait = false;
-                      //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
-                      this.sendLog("nextStep", "密钥不存在或无权访问", "error", true);
+                    // } else if (message.substr(0, 8) === "decoder_") {
+                    //   await this.ctx.storage.put(message, 1);
+                    //   this.getCount(message, 8);
+                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                    //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    // } else if (regexp.test(message) === true) {
+                    //   await this.ctx.storage.put(message, 1);
+                    //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                    //   this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (message.includes("✅ 代码输出完成") === true) {
+                      if (this.queue === true) {
+                        this.queue = false;
+                        await this.ctx.storage.put("queue", false);
+                      }
+                      //console.log("(" + this.currentStep + ") " + message);
+                      this.sendLog("nextStep", message, null, false);
+                    } else if (message.includes("❌ 提取码无效或已失效") === true) {
+                      //console.log("(" + this.currentStep + ") " + message);
+                      this.sendLog("nextStep", message, "error", true);
                     } else if (message.includes("操作太频繁，请等待") === true) {
                       const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
                       if (time && time > 0) {
@@ -896,23 +886,6 @@ export class WebSocketServer extends DurableObject {
                       }
                       //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                       this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                    } else {
-                      const regexp = /📄 第\d+页\/共\d+页/i;
-                      if (regexp.test(message) === true) {
-                        const regexp = /(\d+)/gi;
-                        const matches = message.match(regexp);
-                        // console.log(matches);  //测试
-                        if (matches && matches.length === 2) {
-                          if (matches[0] === matches[1]) {
-                            if (this.queue === true) {
-                              this.queue = false;
-                              await this.ctx.storage.put("queue", false);
-                              //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                              this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
-                            }
-                          }
-                        }
-                      }
                     }
                   }
                 }
@@ -1014,8 +987,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8467205694"),
-              accessHash: bigInt("-395199986707233322"),
+              userId: bigInt("8759014183"),
+              accessHash: bigInt("-3132189805851610302"),
             }),
           ],
         })
@@ -1125,64 +1098,62 @@ export class WebSocketServer extends DurableObject {
                 if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                   const id = messageArray[messageIndex].id;
                   if (messageArray[messageIndex].replyMarkup) {
-                    this.wait = false;
                     if (messageArray[messageIndex].replyMarkup.rows) {
-                      let both = false;
-                      let text = "";
+                      let next = true;
+                      let found = false;
+                      let current = false;
                       for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        for (const button of row.buttons) {
-                          if (button.text === "下一页 ➡️") {
-                            both = false;
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                            const result = await this.client.invoke(
-                              new Api.messages.GetBotCallbackAnswer({
-                                peer: this.fromPeer,
-                                msgId: id,
-                                data: button.data,
-                              })
-                            );
-                            await scheduler.wait(5000);
-                            if (result && result.message === "数据已过期，请重新取件。") {
-                              this.sendLog("start", result.message , "error", true);
-                            }
-                            // console.log("(" + this.currentStep + ")" + text ? "(" + text + ")下一页" : "下一页");
-                            this.sendForward("start", text ? "(" + text + ")下一页" : "下一页", "update", false);
-                          } else if (button.text === "⬅️ 上一页") {
-                            both = true;
-                          } else {
-                            const regexp = /📄 \d+\/\d+/i;
-                            if (regexp.test(button.text) === true) {
-                              text = button.text.replace("📄 ", "");
-                              const regexp = /(\d+)/gi;
-                              const matches = button.text.match(regexp);
-                              if (matches && matches.length === 2) {
-                                if (matches[0] === matches[1]) {
-                                  if (this.queue === true) {
-                                    this.queue = false;
-                                    await this.ctx.storage.put("queue", false);
-                                    // console.log("(" + this.currentStep + ") " + text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕");
-                                    this.sendForward("start", text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕", text, "update", false);
+                        if (next === true) {
+                          for (const button of row.buttons) {
+                            const regexp1 = /共 \d+ 页/i;
+                            const regexp2 = /\d+ ✅/i;
+                            const regexp3 = /\d+/i;
+                            if (regexp1.test(button.text) === true) {
+                              // if (this.queue === true) {
+                              //   this.queue = false;
+                              //   await this.ctx.storage.put("queue", false);
+                              //   //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                              //   this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
+                              // }
+                            } else if (regexp2.test(button.text) === true) {
+                              current = true;
+                              if (this.queue === false) {
+                                this.queue = true;
+                                await this.ctx.storage.put("queue", true);
+                              }
+                            } else if (regexp3.test(button.text) === true) {
+                              if (current === true) {
+                                if (parseInt(button.text).toString() === button.text) {
+                                  next = false;
+                                  found = true;
+                                  if (this.queue === false) {
+                                    this.queue = true;
+                                    await this.ctx.storage.put("queue", true);
                                   }
+                                  const result = await this.client.invoke(
+                                    new Api.messages.GetBotCallbackAnswer({
+                                      peer: this.fromPeer,
+                                      msgId: id,
+                                      data: button.data,
+                                    })
+                                  );
+                                  await scheduler.wait(5000);
+                                  // console.log("(" + this.currentStep + ") 下一页");
+                                  this.sendForward("start", "下一页", button.text, "update", false);
+                                  if (result && result.message) {
+                                    this.sendLog("start", result.message , null, false);
+                                  }
+                                  break;
                                 }
                               }
                             }
                           }
-                        }
-                      }
-                      if (both === true) {
-                        if (this.queue === true) {
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          // console.log("(" + this.currentStep + ") " + text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕");
-                          this.sendForward("start", text ? "(" + text + ")所有媒体已获取完毕" : "所有媒体已获取完毕", text, "update", false);
+                        } else {
+                          break;
                         }
                       }
                     }
                   } else if (messageArray[messageIndex].media) {
-                    this.wait = false;
                     let fileId = null;
                     if (messageArray[messageIndex].media.document) {
                       // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -1210,18 +1181,31 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const str = message.substr(0, 10);
-                      if (str === "tgjmq1bot_" || str === "tgjmq3bot_" || str === "tgjmq5bot_" || str === "tgjmq01bot" || str === "tgjmq0fyvc") {
+                      const regexp = /([a-z0-9]{32})/i;
+                      if (message.substr(0, 11) === "TangBRebot_") {
                         await this.ctx.storage.put(message, 1);
-                        this.getCount(message);
+                        this.getCount(message, 11);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message === "正在取件...") {
-                        this.wait = true;
-                      } else if (message.includes("密钥不存在或无权访问") === true) {
-                        this.wait = false;
-                        //console.log("(" + this.currentStep + ") 密钥不存在或无权访问");
-                        this.sendLog("start", "密钥不存在或无权访问", "error", true);
+                      // } else if (message.substr(0, 8) === "decoder_") {
+                      //   await this.ctx.storage.put(message, 1);
+                      //   this.getCount(message, 8);
+                      //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      //   this.sendForward("start", "代码入库完毕", "", "add", false);
+                      // } else if (regexp.test(message) === true) {
+                      //   await this.ctx.storage.put(message, 1);
+                      //   //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      //   this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (message.includes("✅ 代码输出完成") === true) {
+                        if (this.queue === true) {
+                          this.queue = false;
+                          await this.ctx.storage.put("queue", false);
+                        }
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("start", message, null, false);
+                      } else if (message.includes("❌ 提取码无效或已失效") === true) {
+                        //console.log("(" + this.currentStep + ") " + message);
+                        this.sendLog("start", message, "error", true);
                       } else if (message.includes("操作太频繁，请等待") === true) {
                         const time = parseInt(message.replace("操作太频繁，请等待 ", "").replace(" 秒后再试", ""));
                         if (time && time > 0) {
@@ -1230,23 +1214,6 @@ export class WebSocketServer extends DurableObject {
                         }
                         //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
                         this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                      } else {
-                        const regexp = /📄 第\d+页\/共\d+页/i;
-                        if (regexp.test(message) === true) {
-                          const regexp = /(\d+)/gi;
-                          const matches = message.match(regexp);
-                          // console.log(matches);  //测试
-                          if (matches && matches.length === 2) {
-                            if (matches[0] === matches[1]) {
-                              if (this.queue === true) {
-                                this.queue = false;
-                                await this.ctx.storage.put("queue", false);
-                                // console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                                this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
-                              }
-                            }
-                          }
-                        }
                       }
                     }
                   }
@@ -1461,7 +1428,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("tgjmq");
+      const id = env.WEBSOCKET_SERVER.idFromName("tangbre");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

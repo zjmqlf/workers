@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./fileLeakString";
+import { codeString } from "./string/fileLeakString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -313,8 +313,8 @@ export class WebSocketServer extends DurableObject {
         deviceModel: "Desktop",
         systemVersion: "Windows 11",
         appVersion: "6.7.6 x64",
-        langCode: "en",
-        systemLangCode: "en-US",
+        langCode: "zhcncc",
+        systemLangCode: "zh-CN",
       });
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);

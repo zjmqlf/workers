@@ -1,33 +1,42 @@
 import { DurableObject } from "cloudflare:workers";
-import { TelegramClient, Api, sessions } from "./teleproto";
+import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
+import { codeString } from "./deanignitenationsString";
 import bigInt from "big-integer";
-
 
 export class WebSocketServer extends DurableObject {
   // webSocket = [];
   ws = null;
   stop = 0;
-  apiCount = 0;
   currentStep = 0;
-  compress = true;
+  compress = false;
   batch = false;
+  codeIndex = -1;
+  codes = codeString.slice();
+  codeLength = 0;
   client = null;
-  chatId = 0;
-  reverse = true;
-  limit = 2;
+  endCode = 0;
+  limit = 100;
   offsetId = 0;
+  // error = false;
   fromPeer = null;
-  errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+  toPeer = null;
+  queue = false;
+  waitTime = 60000;
+  pingTime = 5000;
+  count = 0;
+  flood = 0;
+  time = 0;
   messageArray = [];
   cacheMessage = null;
   batchMessage = [];
-  dialogArray = [];
+  idArray = [];
+  fileIdArray = [];
 
   constructor(ctx, env) {
     super(ctx, env);
     this.ctx = ctx;
-    // this.storage = ctx.storage;
+    this.storage = ctx.storage;
     // this.sql = ctx.storage.sql;
     this.env = env;
 
@@ -57,7 +66,7 @@ export class WebSocketServer extends DurableObject {
     );
   }
 
-  init(option) {
+  async init(option) {
     if (!this.client || !this.stop || this.stop === 0) {
     // if (!this.stop || this.stop === 0) {
       if (option) {
@@ -67,11 +76,11 @@ export class WebSocketServer extends DurableObject {
         if (option.batch) {
           this.batch = option.batch;
         }
-        if (option.chatId && option.chatId > 0) {
-          this.chatId = option.chatId;
+        if (option.codeIndex && option.codeIndex > 0) {
+          this.codeIndex = option.codeIndex;
         }
-        if (option.reverse) {
-          this.reverse = option.reverse;
+        if (option.endCode && option.endCode > 0) {
+          this.endCode = option.endCode;
         }
         if (option.limit && option.limit > 0) {
           this.limit = option.limit;
@@ -80,116 +89,94 @@ export class WebSocketServer extends DurableObject {
           this.offsetId = option.offsetId;
         }
       } else {
-        this.compress = true;
+        this.compress = false;
         this.batch = false;
-        this.chatId = 0;
-        this.reverse = true;
-        this.limit = 2;
-        this.offsetId = 0;
+        this.codeIndex = await this.ctx.storage.get("codeIndex") || -1;
+        this.endCode = 0;
+        this.limit = 100;
+        this.offsetId = await this.ctx.storage.get("offsetId") || 0;
       }
       // this.ws = null;
       // this.client = null;
       // this.stop = 0;
       // this.webSocket = [];
-      this.apiCount = 0;
       this.currentStep = 0;
+      this.codes = codeString.slice();
+      this.codeLength = this.codes.length;
+      // this.error = false;
       this.fromPeer = null;
-      this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+      this.toPeer = null;
+      this.queue = await this.ctx.storage.get("queue") || false;
+      this.waitTime = 60000;
+      this.pingTime = 5000;
+      this.photoCount = 0;
+      this.videoCount = 0;
+      this.fileCount = 0;
+      this.count = 0;
+      this.flood = 0;
+      this.time = 0;
       this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
-      this.dialogArray = [];
+      let temp = await this.ctx.storage.get("idArray");
+      if (!temp || temp === "[]") {
+        this.idArray = [];
+      } else {
+        this.idArray = JSON.parse(temp);
+      }
+      temp = await this.ctx.storage.get("fileIdArray");
+      if (!temp || temp === "[]") {
+        this.fileIdArray = [];
+      } else {
+        this.fileIdArray = JSON.parse(temp);
+        const length = this.fileIdArray.length;
+        for (let i = 0; i < length; i++) {
+          if (this.fileIdArray[i]) {
+            this.fileIdArray[i] = bigInt(this.fileIdArray[i]);
+          }
+        }
+      }
+    }
+  }
+
+  updateTime(date) {
+    if (date && (date >= this.cacheMessage.time)) {
+      this.cacheMessage.date = date;
+      if (date >= this.cacheMessage.time) {
+        this.cacheMessage.useTime = date - this.cacheMessage.time;
+      }
     }
   }
 
   broadcast(message) {
     if (this.compress === true) {
-      if (message.operate === "nextMessage") {
-        if (message.status === "add") {
+      if (message.operate === "forwardMessage") {
+        if (message.status === "update") {
           if (this.cacheMessage) {
             if (message.offsetId > this.cacheMessage.offsetId) {
               const temp = message;
               message = this.cacheMessage;
               this.cacheMessage = temp;
+              // this.updateTime(message.date);
             } else {
               this.cacheMessage = null;
               return;
             }
           } else {
             this.cacheMessage = message;
+            // this.updateTime(message.date);
             return;
           }
-        } else if (message.status === "update") {
-          if (this.cacheMessage) {
-            if (message.offsetId === this.cacheMessage.offsetId) {
-              const {
-                offsetId,
-                operate,
-                status,
-                ...Items
-              } = message;
-              for (const name in Items) {
-                this.cacheMessage[name] = Items[name];
-              }
-            }
-          }
-          return;
-        } else if (message.status === "indexExist") {
-          if (this.cacheMessage) {
-            if (message.offsetId === this.cacheMessage.offsetId) {
-              this.cacheMessage["selectMessageIndex"] = true;
-            }
-          }
-          return;
-        } else if (message.status === "exist") {
-          if (this.cacheMessage) {
-            if (message.offsetId === this.cacheMessage.offsetId) {
-              this.cacheMessage["selectMessage"] = true;
-            }
-          }
-          return;
-        } else if (message.status === "webpage") {
-          if (this.cacheMessage) {
-            if (message.offsetId === this.cacheMessage.offsetId) {
-              this.cacheMessage["webpage"] = true;
-            }
-          }
-          return;
         } else if (message.status === "error") {
         } else if (message.status === "limit") {
         } else if (!message.error) {
         } else {
           return;
         }
-      } else if (message.operate === "insertMessage") {
-        if (this.cacheMessage) {
-          if (message.offsetId === this.cacheMessage.offsetId) {
-            if (message.status === "success") {
-              this.cacheMessage["insertMessage"] = true;
-            } else if (message.status === "error") {
-              this.cacheMessage["insertMessage"] = false;
-            }
-          }
-        }
-        return;
-      // } else if (message.operate === "insertMessageIndex") {
-      //   if (this.cacheMessage) {
-      //     if (message.offsetId === this.cacheMessage.offsetId) {
-      //       if (message.status === "success") {
-      //         this.cacheMessage["insertMessageIndex"] = true;
-      //       } else if (message.status === "error") {
-      //         this.cacheMessage["insertMessageIndex"] = false;
-      //       }
-      //     }
-      //   }
-      //   return;
-      } else if (message.operate === "cache") {
       } else if (message.operate === "open") {
       } else if (message.operate === "close") {
-      } else if (message.operate === "checkChat") {
-      } else if (message.operate === "chat") {
-      } else if (message.operate === "backup") {
       } else if (message.status === "limit") {
+      } else if (message.status === "flood") {
       } else if (!message.error) {
         if (!message.result) {
           return;
@@ -258,6 +245,7 @@ export class WebSocketServer extends DurableObject {
   sendGrid(operate, message, status, error) {
     this.broadcast({
       "step": this.currentStep,
+      "codeIndex": this.codeIndex + 1,
       "offsetId": this.offsetId,
       "operate": operate,
       "message": message,
@@ -278,6 +266,25 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
+  sendForward(operate, message, messageIndex, status, error) {
+    this.broadcast({
+      "step": this.currentStep,
+      "codeLength": this.codeLength,
+      "codeIndex": this.codeIndex + 1,
+      "offsetId": this.offsetId,
+      "operate": operate,
+      "messageIndex": messageIndex,
+      "messageLength": this.idArray.length,
+      "photoCount": this.photoCount,
+      "videoCount": this.videoCount,
+      "fileCount": this.fileCount,
+      "message": message,
+      "status": status,
+      "error": error,
+      "date": new Date().getTime(),
+    });
+  }
+
   async close() {
     if (this.client) {
       await this.client.destroy();
@@ -291,21 +298,20 @@ export class WebSocketServer extends DurableObject {
   }
 
   async open(tryCount) {
-    const apiId = 25429403;
-    const apiHash = "2bb9a1bfd8f598da6cb5c511f0e5fbdf";
-    const sessionString = "1BQAWZmxvcmEud2ViLnRlbGVncmFtLm9yZwG7be+PddSzlPTzgS/mbCsxeZYLhE9ohnesT10Ntv+pdypA3wfrAUdXGXBLb2uturgLlkO49XMxAsIoELAdi8OprHkYfeEWZrQPF9RqjucdgWviAVd3oy/JIHk6lbB6NCS06US2CMdLZMxAsLFLu2JTgWiI07Xm2tpCIaaYED9mmH7NiROvqBx+jpB2GoFM4xzqaoB3y43BURo/ZYPEM3uUB4AVsS7IwdK0/j8pJL/ChB3buNnNtyVADe8wFvEAcbMn/385Xz53T21BdYqanzMuZX2O9cv4UNCpA9P6HoEYRn0D9XsljY6xJFNdR/RRKGHBqlVLK/Xt6PagRm321YBAvw==";
+    const apiId = 1334621;
+    const apiHash = "2bc36173f487ece3052a00068be59e7b";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7BOSn4tw5dznEmJS7Z58vPhNf6Oi9oHukQBdWc+bAGh/UKzkp+DAa+OJCDQ2Pt/DYmsPN+xNe6TvnlQFlhGMp1lvMfedMcOWP/ZKU+M7xVizs57ZKk0lGIq0pbdaRwavH7CSdqPyDhLQSLaQs/HRv2ESqxY+SqNB16C0ZBT28vvOEqb3/3MJzbhimVL3ccPiAeEv4vOsc6E0Y+h1d+fM7QuhtwW9wSyD1Jsl5f/kcPK5wahRVV3+ZbCWA6XFaQXZ5pDfDevFKDn/zyOhmwdvqbOKk9rbKU8fqhVnC+5XsVDeZQEqidyOmf6nTF8mJm4P2kR6wrftOXL2Y+nEgOclPNw==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
-        connectionRetries: Number.MAX_VALUE,
+        timeout: 5,
+        retryDelay: 1000,
+        connectionRetries: 5,
         autoReconnect: true,
         deviceModel: "Desktop",
         systemVersion: "Windows 11",
         appVersion: "6.7.6 x64",
         langCode: "en",
         systemLangCode: "en-US",
-        //downloadRetries: 1,
-        //retryDelay: 0,
-        //useWSS: false,
       });
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);
@@ -331,35 +337,74 @@ export class WebSocketServer extends DurableObject {
     //await scheduler.wait(5000);
   }
 
+  async overStep() {
+    if (this.idArray.length > 100) {
+      await this.checkMessage(true);
+    }
+    if (this.idArray.length > 0) {
+      const result = await this.forwardMessage(this.idArray, this.fileIdArray);
+      if (result === true) {
+        this.idArray = [];
+        this.fileIdArray = [];
+        await this.ctx.storage.put("idArray", "[]");
+        await this.ctx.storage.put("fileIdArray", "[]");
+        //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+        this.sendLog("overStep", "清空idArray成功", null, false);  //测试
+      }
+    }
+  }
+
   async getMessage(tryCount) {
     try {
+      // let count = 0;
       // this.messageArray = [];
+      this.count = 0;
       for await (const message of this.client.iterMessages(
         this.fromPeer,
         //"me",  //测试
         {
           limit: this.limit,
-          //limit: 2,  //测试
-          reverse: this.reverse,
-          //reverse: false,  //测试
+          //limit: 20,  //测试
+          reverse: true,  //测试
           addOffset: -this.offsetId,
           //addOffset: 0,  //测试
           waitTime: 60,
         })
       ) {
-        // if (message.message) {
-        //   this.messageArray.push(message);
+        // count += 1;
+        this.count += 1;
+        // if (message.noforwards === false) {
+          this.messageArray.push(message);
         // }
-        this.messageArray.push(message);
       }
+      // if (this.count > this.limit) {
+      //   //console.log("(" + this.currentStep + ") messageCount比limit大");
+      //   this.sendLog("getMessage", "messageCount比limit大", null, true);
+      // }
+      // return count;
     } catch (e) {
       this.messageArray = [];
-      //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
-      this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
+      // this.count = 0;
       if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        // this.waitTime += 120000;
+        if (e.seconds && e.seconds > 0) {
+          this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+          await this.ctx.storage.put("client", this.flood);
+        }
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+      } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+        await this.overStep();
+        //console.log("(" + this.currentStep + ") 用户已注销" + e);
+        this.sendLog("getMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
       } else {
+        //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
+        this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
         if (tryCount === 20) {
           this.stop = 2;
           //console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
@@ -374,253 +419,482 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectMessageError(tryCount, code) {
+  async sendQueryError(tryCount) {
     if (tryCount === 20) {
-      this.stop = 2;
-      //console.log("(" + this.currentStep + ")selectMessage超出tryCount限制");
-      this.sendLog("selectMessage", "超出tryCount限制", null, true);
+      //console.log("(" + this.currentStep + ")sendQuery超出tryCount限制");
+      this.sendLog("sendQuery", "超出tryCount限制", null, true);
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectMessage(tryCount + 1, code);
+      await this.sendQuery(tryCount + 1);
     }
   }
 
-  async selectMessage(tryCount, code) {
-    this.apiCount += 1;
-    let messageResult = {};
-    try {
-      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `CODE` WHERE `chatId` = ? AND  `code` = ? LIMIT 1;").bind(this.chatId, code).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage出错 : " + e);
-      this.sendGrid("selectMessage", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
-        this.stop = 2;
-        this.broadcast({
-          "result": "pause",
-        });
-        await this.close();
-      } else {
-        await this.selectMessageError(tryCount, code);
-      }
+  async sendQuery(tryCount) {
+    this.codeIndex += 1;
+    if (this.endCode && this.codeIndex > this.endCode) {
+      //console.log("(" + this.currentStep + ") 超过endCode，已经没有code了");
+      this.sendLog("sendQuery", "超过endCode，已经没有code了", "error", true);
       return;
     }
-    //console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
-    if (messageResult.success === true) {
-      if (messageResult.results && messageResult.results.length > 0) {
-        return messageResult.results[0]["COUNT(id)"];
-      }
-    } else {
-      await this.selectMessageError(tryCount, code);
-    }
-  }
-
-  async insertMessageError(tryCount, code, txt, counts) {
-    if (tryCount === 20) {
-      this.stop = 2;
-      //console.log("(" + this.currentStep + ")insertMessage超出tryCount限制");
-      this.sendLog("insertMessage", "超出tryCount限制", null, true);
-      await this.close();
-    } else {
-      await scheduler.wait(10000);
-      await this.insertMessage(tryCount + 1, code, txt, counts);
-    }
-  }
-
-  async insertMessage(tryCount, code, txt, counts) {
-    this.apiCount += 1;
-    let messageResult = {};
-    try {
-      messageResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, txt, counts) VALUES (?, ?, ?, ?);").bind(this.chatId, code, txt, counts).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage出错 : " + e);;
-      this.sendGrid("insertMessage", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
-        this.stop = 2;
-        this.broadcast({
-          "result": "pause",
-        });
-        await this.close();
-      } else {
-        await this.insertMessageError(tryCount, code, txt, counts);
-      }
-      return;
-    }
-    //console.log(messageResult);  //测试
-    if (messageResult.success === true) {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 插入message数据成功");
-      this.sendGrid("insertMessage", "", "success", false);
-    } else {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 插入message数据失败");
-      this.sendGrid("insertMessage", "插入message数据失败", "error", true);
-      await this.insertMessageError(tryCount, code, txt, counts);
-    }
-  }
-
-  async nextMessage(messageLength, messageIndex, message) {
-    if (this.stop === 1) {
-      if (this.apiCount < 900) {
-        if (message) {
-          const messageId = message.id;
-          const txt = message.message;
-          this.broadcast({
-            "step": this.currentStep,
-            "operate": "nextMessage",
-            // "messageLength": messageLength,
-            // "messageIndex": messageIndex,
-            "chatId": this.chatId,
-            "offsetId": this.offsetId,
-            "messageId": messageId,
-            "status": "add",
-            "date": new Date().getTime(),
-          });
-          if (txt) {
-            const regexp = /🔑密钥：(LH_[A-Za-z0-9]{16})\n📁描述：(.*?)\n📦文件个数：(\d+)/gi;
-            const matches = txt.matchAll(regexp);
-            // console.log(matches);  //测试
-            if (matches) {
-              const matchesLength = matches.length;
-              // console.log("matchesLength : " + matchesLength);  //测试
-              if (matchesLength > 0) {
-                for (let i = 0; i < matchesLength; i++) {
-                  if (matches[i] && matches[i].length === 4) {
-                    if (matches[i][0] && matches[i][1] && matches[i][2]) {
-                      const messageCount = await this.selectMessage(1, matches[i][0]);
-                      if (parseInt(messageCount) === 0) {
-                        await this.insertMessage(1, matches[i][0], matches[i][1], matches[i][2]);
-                      } else {
-                        //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                        this.sendGrid("nextMessage", "", "exist", false);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          } else {
-            //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-            this.sendGrid("nextMessage", "txt为空", "error", true);
-          }
-          const regexp = /第\d+页\/共\d+页/i;
-          if (regexp.test(message) === true) {
-            const regexp = / (\d+) /gi;
-            const matches = message.match(regexp);
-            // console.log(matches);  //测试
-            if (matches) {
-              if (matches.length === 2) {
-                if (matches[0] === matches[1]) {
-                  //console.log("(" + this.currentStep + ") 所有分页点击完毕");
-                  this.sendLog("nextStep", "所有分页点击完毕", "update", false);
-                  this.offsetId += 1;
-                } else {
-                  if (message.replyMarkup) {
-                    if (message.replyMarkup.rows) {
-                      for (const row of message.replyMarkup.rows) {
-                        // console.log(row);  //测试
-                        for (const button of row.buttons) {
-                          // console.log(button);  //测试
-                          if (button.text === "下一页 ➡️") {
-                            const result = await this.client.invoke(
-                              new Api.messages.GetBotCallbackAnswer({
-                                peer: this.fromPeer,
-                                msgId: messageId,
-                                data: button.data,
-                              })
-                            );
-                            //console.log("(" + this.currentStep + ") 下一页");
-                            this.sendLog("nextStep", "下一页", null, false);
-                            await scheduler.wait(10000);
-                            if (result && result.message) {
-                              this.sendLog("nextStep", result.message , null, false);
-                            }
-                          // } else {
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              } else {
-                //console.log("(" + this.currentStep + ") " + text);
-                this.sendLog("nextStep", "第" + matches[0] + "页", "update", false);
-              }
-            }
-          }
+    if (this.codeIndex < this.codeLength) {
+      await this.ctx.storage.put("codeIndex", this.codeIndex);
+      const code = this.codes[this.codeIndex];
+      if (code) {
+        this.photoCount = 0;
+        this.videoCount = 0;
+        this.fileCount = 0;
+        const status = await this.ctx.storage.get(code);
+        if (status) {
+          //console.log("sendQuery当前代码已入过库了");
+          this.sendLog("sendQuery", "当前代码已入过库了", null, true);
+          await this.sendQuery(1);
+          return;
         } else {
-          //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-          this.sendGrid("nextMessage", "错误的消息", "error", true);
-          this.offsetId += 1;
+          try {
+            await this.client.invoke(
+              new Api.messages.SendMessage({
+                peer: this.fromPeer,
+                message: code,
+                silent: true,
+              })
+            );
+          } catch (e) {
+            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+              this.codeIndex -= 1;
+              await this.ctx.storage.put("codeIndex", this.codeIndex);
+              // this.waitTime += 120000;
+              if (e.seconds && e.seconds > 0) {
+                this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+                await this.ctx.storage.put("client", this.flood);
+              }
+              //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+              this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+            } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+              await this.overStep();
+              //console.log("(" + this.currentStep + ") 用户已注销" + e);
+              this.sendLog("sendQuery", "用户已注销 : " + JSON.stringify(e), "error", true);
+              this.stop = 2;
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            } else {
+              //console.log("sendQuery出错 : " + e);
+              this.sendLog("sendQuery", "出错 : " + JSON.stringify(e), "error", true);
+              await this.sendQueryError(tryCount);
+            }
+            return;
+          }
+          //console.log("(" + this.currentStep + ") code : " + code);
+          this.sendLog("sendQuery", code, null, false);
         }
       } else {
-        this.stop = 2;
-        //console.log("(" + this.currentStep + ")nextMessage超出apiCount限制");
-        this.sendGrid("nextMessage", "超出apiCount限制", "limit", true);
-        await this.close();
-        // this.ctx.abort("reset");
+        //console.log("(" + this.currentStep + ") code为空");
+        this.sendLog("sendQuery", "code为空", "error", true);
       }
-    } else if (this.stop === 2) {
+    } else {
+      await this.overStep();
+      //console.log("(" + this.currentStep + ") 超过codeLength，已经没有code了");
+      this.sendLog("sendQuery", "超过codeLength，已经没有code了", "error", true);
+    }
+  }
+
+  async waitNext(time, flood) {
+    if (time && time > 0) {
+      if (flood === false) {
+        //console.log("(" + this.currentStep + ") 还需等待" + (time / 1000) + "秒");
+        this.sendLog("waitNext", "还需等待" + Math.ceil(time / 1000) + "秒", "wait", true);
+      }
+      // const pingInterval = setInterval(function () {
+      //   // this.ws.ping();
+      //   this.ws.send("ping");
+      // }, 30000);
+      // await this.ctx.storage.setAlarm(30000);
+      // await scheduler.wait(time);
+      // clearInterval(pingInterval);
+      // await this.ctx.storage.deleteAlarm();
+      if (time > this.pingTime) {
+        // const timeLength = Math.floor(time / 60000);
+        const timeLength = Math.ceil(time / this.pingTime);
+        for (let i = 0; i < timeLength; i++) {
+          if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+            break;
+          } else {
+            await scheduler.wait(this.pingTime);
+            // this.ws.ping();
+            // this.ws.send({
+            //   "result": "ping",
+            // });
+            this.broadcast({
+              "result": "ping",
+            });
+          }
+        }
+      } else {
+        await scheduler.wait(time);
+      }
+    }
+  }
+
+  async forwardMessage(idArray, fileIdArray) {
+    const messageLength = idArray.length;
+    // if (messageLength > this.limit) {
+    //   //console.log("(" + this.currentStep + ") messageLength比limit大");
+    //   this.sendLog("forwardMessage", "messageLength比limit大", "error", true);
+    // }
+    //console.log(length);  //测试
+    if (this.flood && this.flood > 0) {
+      this.count = 0;
+      if (this.flood > new Date().getTime()) {
+        //console.log("(" + this.currentStep + ") 还需等待" + ((this.flood - new Date().getTime()) / 1000) + "秒的洪水警告时间");
+        this.sendLog("forwardMessage", "还需等待" + Math.ceil((this.flood - new Date().getTime()) / 1000) + "秒的洪水警告时间", "flood", true);
+        return false;
+      } else {
+        this.flood = 0;
+        await this.ctx.storage.put("client", 0);
+      }
+    } else {
+      const time = this.waitTime - (new Date().getTime() - this.time);
+      await this.waitNext(time, false);
+    }
+    if (messageLength > 0) {
+      try {
+        const forwardResult = await this.client.invoke(new Api.messages.ForwardMessages({
+          fromPeer: this.fromPeer,
+          id: idArray,
+          randomId: fileIdArray,
+          toPeer: this.toPeer,
+          silent: true,
+          background: true,
+          withMyScore: true,
+          dropAuthor: true,
+          dropMediaCaptions: true,
+          // noforwards: true,
+          // scheduleDate: 0,
+          // sendAs: "username",
+        }));
+        //console.log(forwardResult);
+        // this.sendLog("forwardMessage", JSON.stringify(forwardResult), null, false);
+      } catch (e) {
+        if (e.errorMessage === "RANDOM_ID_DUPLICATE" || e.code === 500) {
+          //console.log("(" + this.currentStep + ") " + e);
+          this.sendLog("forwardMessage", JSON.stringify(e), "error", true);
+          this.time = new Date().getTime();
+          return true;
+        } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+          await this.overStep();
+          //console.log("(" + this.currentStep + ") 用户已注销" + e);
+          this.sendLog("forwardMessage", "用户已注销 : " + JSON.stringify(e), "error", true);
+          this.stop = 2;
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+          return false;
+        } else if (e.errorMessage === "CHAT_FORWARDS_RESTRICTED" || e.code === 400) {
+          // this.offsetId += this.count;
+          // this.count = 0;
+          // await this.ctx.storage.put("offsetId", this.offsetId);
+          // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
+          this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
+          return false;
+        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+          this.count = 0;
+          // this.waitTime += 120000;
+          if (e.seconds && e.seconds > 0) {
+            this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+            await this.ctx.storage.put("client", this.flood);
+          }
+          //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+          this.sendLog("forwardMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+          return false;
+        } else {
+          this.count = 0;
+          //console.log("(" + this.currentStep + ") 转发消息时发生错误" + e);
+          this.sendLog("forwardMessage", "转发消息时发生错误 : " + JSON.stringify(e), "error", true);
+          return false;
+        }
+      }
+      // this.offsetId += this.count;
+      // this.count = 0;
+      // await this.ctx.storage.put("offsetId", this.offsetId);
+      //console.log("(" + this.currentStep + ") 成功转发了" + length + "条消息");
+      this.sendLog("forwardMessage", "成功转发了" + messageLength + "条消息", null, false);
+      this.time = new Date().getTime();
+      return true;
+    } else {
+      // this.offsetId += this.count;
+      // this.count = 0;
+      // await this.ctx.storage.put("offsetId", this.offsetId);
+      //console.log("(" + this.currentStep + ") 消息无需转发");
+      this.sendLog("forwardMessage", "消息无需转发", "error", true);
+      return false;
+    }
+  }
+
+  async checkMessage(status) {
+    if (status === true) {
+      const idLength = this.idArray.length;
+      if (idLength === 100) {
+        const idArray = this.idArray.slice();
+        const fileIdArray = this.fileIdArray.slice();
+        const result = await this.forwardMessage(idArray, fileIdArray);
+        if (result === true) {
+          this.idArray = [];
+          this.fileIdArray = [];
+          await this.ctx.storage.put("idArray", "[]");
+          await this.ctx.storage.put("fileIdArray", "[]");
+          //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+          this.sendLog("checkMessage", "清空idArray成功", null, false);  //测试
+        }
+      } else if (idLength > 100) {
+        const idArray = this.idArray.slice(0, 100);
+        const fileIdArray = this.fileIdArray.slice(0, 100);
+        const result = await this.forwardMessage(idArray, fileIdArray);
+        if (result === true) {
+          this.idArray = this.idArray.slice(100, idLength);
+          this.fileIdArray = this.fileIdArray.slice(100, idLength);
+          await this.ctx.storage.put("idArray", JSON.stringify(this.idArray));
+          await this.ctx.storage.put("fileIdArray", JSON.stringify(this.fileIdArray));
+          //console.log("(" + this.currentStep + ") 清空idArray成功");  //测试
+          this.sendLog("checkMessage", "清空idArray成功", null, false);  //测试
+        }
+      } else {
+        await this.ctx.storage.put("idArray", JSON.stringify(this.idArray));
+        await this.ctx.storage.put("fileIdArray", JSON.stringify(this.fileIdArray));
+      }
+    }
+    this.offsetId += this.count;
+    this.count = 0;
+    await this.ctx.storage.put("offsetId", this.offsetId);
+    //console.log("(" + this.currentStep + ") idArrayLength : " + this.idArray.length);  //测试
+    this.sendLog("checkMessage", "idArrayLength : " + this.idArray.length, null, false);  //测试
+  }
+
+  async endStep(operate) {
+    if ((this.endCode && this.codeIndex > this.endCode) || this.codeIndex > this.codeLength) {
+      //console.log("(" + this.currentStep + ") 当前bot采集完毕");
+      this.sendLog(operate, "当前bot采集完毕", null, false);
       this.broadcast({
-        "result": "pause",
+        "result": "end",
       });
-      await this.close();
+      await this.close()
+    } else {
+      if (this.queue === true) {
+        for (let i = 0; i < 6; i++) {
+          if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+            break;
+          } else {
+            await scheduler.wait(5000);
+            // this.ws.ping();
+            // this.ws.send({
+            //   "result": "ping",
+            // });
+            this.broadcast({
+              "result": "ping",
+            });
+          }
+        }
+      } else {
+        await scheduler.wait(5000);
+      }
+      await this.nextStep();
     }
   }
 
   async nextStep() {
     if (this.stop === 1) {
-      if (this.apiCount < 900) {
-        this.currentStep += 1;
-        await this.getMessage(1);
-        await scheduler.wait(3000);
-        const messageArray = this.messageArray.slice();
-        const messageLength = messageArray.length;
-        this.messageArray = [];
-        if (messageLength && messageLength > 0) {
-          //console.log("(" + this.currentStep + ")messageLength : " + messageLength);
-          this.sendLog("nextStep", "messageLength : " + messageLength, null, false);
-          if (this.stop === 1) {
-            for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-              await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
-              // this.offsetId += 1;
-            }
-            if (this.stop === 1) {
-              if (this.apiCount < 900) {
-                await this.nextStep();
-              } else {
-                this.stop = 2;
-                //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
-                await this.close();
-                // this.ctx.abort("reset");
+      this.currentStep += 1;
+      if (this.flood && this.flood > 0) {
+        this.count = 0;
+        if (this.flood > new Date().getTime()) {
+          const time = this.flood - new Date().getTime();
+          //console.log("(" + this.currentStep + ") 还需等待" + Math.ceil(time / 1000) + "秒的洪水警告时间");
+          this.sendLog("nextStep", "还需等待" + Math.ceil(time / 1000) + "秒的洪水警告时间", "flood", true);
+          await this.waitNext(time, true);
+        } else {
+          this.flood = 0;
+          await this.ctx.storage.put("client", 0);
+        }
+      }
+      await this.getMessage(1);
+      await scheduler.wait(5000);
+      const messageArray = this.messageArray.slice();
+      const messageLength = messageArray.length;
+      this.messageArray = [];
+      //console.log("(" + this.currentStep + ")messageLength : " + messageLength);  //测试
+      // this.sendLog("nextStep", "messageLength : " + messageLength, null, false);  //测试
+      // if (messageLength > this.limit) {
+      //   //console.log("(" + this.currentStep + ") messageLength比limit大");
+      //   this.sendLog("nextStep", "messageLength比limit大", null, true);
+      // }
+      if (messageLength && messageLength > 0) {
+        if (this.stop === 1) {
+          let temp = null;
+          let status = false;
+          for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
+            if (messageArray[messageIndex]) {
+              if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
+                const id = messageArray[messageIndex].id;
+                if (messageArray[messageIndex].replyMarkup) {
+                  if (messageArray[messageIndex].replyMarkup.rows) {
+                    // let text = "";
+                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
+                      for (const button of row.buttons) {
+                        if (button.text === "▶️ 自动发送") {
+                          temp = {
+                            id: id,
+                            data: button.data,
+                          };
+                        // } else if (button.text === "⬇️ 全部发送") {
+                        // } else {
+                        }
+                      }
+                    }
+                  }
+                } else if (messageArray[messageIndex].media) {
+                  let fileId = null;
+                  if (messageArray[messageIndex].media.document) {
+                    // const mimeType = messageArray[messageIndex].media.document.mimeType;
+                    // if (mimeType.startsWith("video/")) {
+                    //   fileId = messageArray[messageIndex].media.document.id;
+                    // } else if (mimeType.startsWith("image/")) {
+                    //   fileId = messageArray[messageIndex].media.document.id;
+                    // // } else if (mimeType.startsWith("application/")) {
+                    // // } else {
+                    // }
+                    fileId = messageArray[messageIndex].media.document.id;
+                  } else if (messageArray[messageIndex].media.photo) {
+                    fileId = messageArray[messageIndex].media.photo.id;
+                  }
+                  if (id && fileId) {
+                    if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
+                      status = true;
+                      this.idArray.push(id);
+                      this.fileIdArray.push(fileId);
+                    } else {
+                      //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
+                      this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
+                    }
+                  }
+                } else {
+                  const message = messageArray[messageIndex].message.trim();
+                  if (message) {
+                    const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
+                    const string = message.split(":");
+                    if (string[0] === "DEANIgniteNations_bot_v" || string[0] === "DEANIgniteNations_bot_p" || string[0] === "DEANIgniteNations_bot_d" || string[0] === "DEANIgniteNations_bot_col") {
+                      await this.ctx.storage.put(message, 1);
+                      //console.log("(" + this.currentStep + ") 代码入库完毕");
+                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                    } else if (regexp.test(message) === true) {
+                      temp = null;
+                      const text = message.replace("✅ 自动发送完成！成功 ", "");
+                      const regexp = /(\d+)/gi;
+                      const matches = message.match(regexp);
+                      if (matches) {
+                        if (matches.length === 2) {
+                          if (matches[0] === matches[1]) {
+                            temp = null;
+                            if (this.queue === true) {
+                              this.queue = false;
+                              await this.ctx.storage.put("queue", false);
+                              //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                              this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                            }
+                          }
+                        } else {
+                          //console.log("(" + this.currentStep + ") " + text);
+                          this.sendForward("start", "", text, "update", false);
+                        }
+                      }
+                    }
+                  }
+                }
               }
-            } else if (this.stop === 2) {
-              this.broadcast({
-                "result": "pause",
-              });
-              await this.close();
             }
+          }
+          if (this.queue === false) {
+            if (temp) {
+              this.queue = true;
+              await this.ctx.storage.put("queue", true);
+              const result = await this.client.invoke(
+                new Api.messages.GetBotCallbackAnswer({
+                  peer: this.fromPeer,
+                  msgId: temp.id,
+                  data: temp.data,
+                })
+              );
+              //console.log("(" + this.currentStep + ") 自动发送");
+              this.sendLog("nextStep", "自动发送", null, false);
+              await scheduler.wait(5000);
+              if (result && result.message) {
+                this.sendLog("nextStep", result.message , null, false);
+              }
+            // } else {
+            //   if (status === true) {
+            //     await this.sendQuery(1);
+            //   }
+            }
+          }
+          await this.checkMessage(status);
+          if (this.stop === 1) {
+            await this.endStep("nextStep");
           } else if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
             });
             await this.close();
           }
-        } else {
-          this.fromPeer = null;
-          //console.log("(" + this.currentStep + ")" + this.chatId + " : 当前chat采集完毕");
-          this.sendLog("nextStep", this.chatId + " : 当前chat采集完毕", null, false);
+        } else if (this.stop === 2) {
           this.broadcast({
-            "result": "end",
+            "result": "pause",
           });
+          await this.close();
         }
+      } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
+        await this.forwardMessage(this.idArray, this.fileIdArray);
+        await this.ctx.storage.put("offsetId", this.offsetId);
+        await this.ctx.storage.put("idArray", "[]");
+        await this.ctx.storage.put("fileIdArray", "[]");
+        // this.idArray = [];
+        // this.fileIdArray = [];
+        //console.log("(" + this.currentStep + ") 当前bot采集完毕");
+        this.sendLog("nextStep", "当前bot采集完毕", null, false);
+        this.broadcast({
+          "result": "end",
+        });
+        await this.close()
       } else {
-        this.stop = 2;
-        //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-        this.sendLog("nextStep", "超出apiCount限制", "limit", true);
-        await this.close();
-        // this.ctx.abort("reset");
+        if (this.count > 0) {
+          this.offsetId += this.count;
+          this.count = 0;
+          await this.ctx.storage.put("offsetId", this.offsetId);
+        }
+        //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
+        this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
+        if (this.stop === 1) {
+          if (this.queue === false) {
+            await this.sendQuery(1);
+          }
+          await this.endStep("nextStep");
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
     } else if (this.stop === 2) {
+      await this.ctx.storage.put("offsetId", this.offsetId);
       this.broadcast({
         "result": "pause",
       });
@@ -640,6 +914,82 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
+  async getBotrError(tryCount) {
+    if (tryCount === 20) {
+      //console.log("(" + this.currentStep + ")getBotr超出tryCount限制");
+      this.sendLog("getBotr", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.getBotr(tryCount + 1);
+    }
+  }
+
+  async getBot(tryCount) {
+    let users = {};
+    try {
+      users = await this.client.invoke(
+        new Api.users.GetUsers({
+          id: [
+            new Api.InputUser({
+              userId: bigInt("8737186679"),
+              accessHash: bigInt("1024528739420182834"),
+            }),
+          ],
+        })
+      );
+    } catch (e) {
+      //console.log("getBot出错 : " + e);
+      this.sendLog("getBot", "出错 : " + JSON.stringify(e), null, true);
+      await this.getBotrError(tryCount);
+      return;
+    }
+    // console.log(users);  //测试
+    // console.log(users.length);  //测试
+    if (users.length && !(users[0] instanceof Api.UserEmpty)) {
+      this.fromPeer = utils.getInputPeer(users[0]);
+      // console.log(this.fromPeer);  //测试
+    }
+  }
+
+  async getUserError(tryCount) {
+    if (tryCount === 20) {
+      //console.log("(" + this.currentStep + ")getUser超出tryCount限制");
+      this.sendLog("getUser", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.getUser(tryCount + 1);
+    }
+  }
+
+  async getUser(tryCount) {
+    let users = {};
+    try {
+      users = await this.client.invoke(
+        new Api.users.GetUsers({
+          id: [
+            new Api.InputUser({
+              userId: 7585811878,   //zjm4038
+              accessHash: bigInt.zero,
+            }),
+          ],
+        })
+      );
+    } catch (e) {
+      //console.log("getUser出错 : " + e);
+      this.sendLog("getUser", "出错 : " + JSON.stringify(e), null, true);
+      await this.getUserError(tryCount);
+      return;
+    }
+    // console.log(users);  //测试
+    // console.log(users.length);  //测试
+    if (users.length && !(users[0] instanceof Api.UserEmpty)) {
+      this.toPeer = utils.getInputPeer(users[0]);
+      // console.log(toPeer);  //测试
+    }
+  }
+
   async start(option) {
     if (this.client || this.stop === 1) {
     // if (this.stop === 1) {
@@ -652,57 +1002,202 @@ export class WebSocketServer extends DurableObject {
       }));
       return;
     }
-    this.init(option);
+    await this.init(option);
+    this.sendLog("start", "codeIndex : " + this.codeIndex, null, false);  //测试
     // this.stop = 1;
     await this.open(1);
-    await this.getChat();
+    await this.getBot(1);
     if (this.fromPeer) {
-      if (this.stop === 1) {
-        this.currentStep += 1;
-        await this.getMessage(1);
-        await scheduler.wait(3000);
-        const messageArray = this.messageArray.slice();
-        const messageLength = messageArray.length;
-        this.messageArray = [];
-        this.sendLog("start", "messageLength : " + messageLength, null, false);  //测试
-        if (messageLength && messageLength > 0) {
-          for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-            await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
-            // this.offsetId += 1;
-          }
-          if (this.stop === 1) {
-            if (this.apiCount < 900) {
-              await this.nextStep();
+      await this.getUser(1);
+      if (this.toPeer) {
+        if (this.stop === 1) {
+          this.currentStep += 1;
+          this.flood = await this.ctx.storage.get("client") || 0;
+          if (this.flood > 0) {
+            if (this.flood > new Date().getTime()) {
+              const time = this.flood - new Date().getTime();
+              //console.log("(" + this.currentStep + ") 还需等待" + Math.ceil(time / 1000) + "秒的洪水警告时间");
+              this.sendLog("start", "还需等待" + Math.ceil(time / 1000) + "秒的洪水警告时间", "flood", true);
+              await this.waitNext(time, true);
             } else {
-              this.stop = 2;
-              //console.log("(" + this.currentStep + ")start超出apiCount限制");
-              this.sendLog("start", "超出apiCount限制", "limit", true);
-              await this.close();
-              // this.ctx.abort("reset");
+              this.flood = 0;
+              await this.ctx.storage.put("client", 0);
             }
-          } else if (this.stop === 2) {
-            this.broadcast({
-              "result": "pause",
-            });
-            await this.close();
           }
-        } else {
-          this.fromPeer = null;
-          //console.log("(" + this.currentStep + ")" + this.chatId + " : 当前chat采集完毕");
-          this.sendLog("start", this.chatId + " : 当前chat采集完毕", null, false);
+          await this.getMessage(1);
+          await scheduler.wait(5000);
+          const messageArray = this.messageArray.slice();
+          const messageLength = messageArray.length;
+          this.messageArray = [];
+          //console.log("(" + this.currentStep + ")messageLength : " + messageLength);  //测试
+          // this.sendLog("start", "messageLength : " + messageLength, null, false);  //测试
+          // if (messageLength > this.limit) {
+          //   //console.log("(" + this.currentStep + ") messageLength比limit大");
+          //   this.sendLog("start", "messageLength比limit大", null, true);
+          // }
+          if (messageLength && messageLength > 0) {
+            let temp = null;
+            let status = false;
+            for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
+              if (messageArray[messageIndex]) {
+                if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
+                  const id = messageArray[messageIndex].id;
+                  if (messageArray[messageIndex].replyMarkup) {
+                    if (messageArray[messageIndex].replyMarkup.rows) {
+                      let text = "";
+                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
+                        for (const button of row.buttons) {
+                          if (button.text === "▶️ 自动发送") {
+                            temp = {
+                              id: id,
+                              data: button.data,
+                            };
+                          // } else if (button.text === "⬇️ 全部发送") {
+                          // } else {
+                          }
+                        }
+                      }
+                    }
+                  } else if (messageArray[messageIndex].media) {
+                    let fileId = null;
+                    if (messageArray[messageIndex].media.document) {
+                      // const mimeType = messageArray[messageIndex].media.document.mimeType;
+                      // if (mimeType.startsWith("video/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // } else if (mimeType.startsWith("image/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // // } else if (mimeType.startsWith("application/")) {
+                      // // } else {
+                      // }
+                      fileId = messageArray[messageIndex].media.document.id;
+                    } else if (messageArray[messageIndex].media.photo) {
+                      fileId = messageArray[messageIndex].media.photo.id;
+                    }
+                    if (id && fileId) {
+                      if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
+                        status = true;
+                        this.idArray.push(id);
+                        this.fileIdArray.push(fileId);
+                      } else {
+                        //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
+                        this.sendLog("start", "该媒体已在数据库中", "error", true);
+                      }
+                    }
+                  } else {
+                    const message = messageArray[messageIndex].message.trim();
+                    if (message) {
+                      const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
+                      const string = message.split(":");
+                      if (string[0] === "DEANIgniteNations_bot_v" || string[0] === "DEANIgniteNations_bot_p" || string[0] === "DEANIgniteNations_bot_d" || string[0] === "DEANIgniteNations_bot_col") {
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("start", "代码入库完毕", "", "add", false);
+                      } else if (regexp.test(message) === true) {
+                        temp = null;
+                        const text = message.replace("✅ 自动发送完成！成功 ", "");
+                        const regexp = /(\d+)/gi;
+                        const matches = message.match(regexp);
+                        if (matches) {
+                          if (matches.length === 2) {
+                            if (matches[0] === matches[1]) {
+                              temp = null;
+                              if (this.queue === true) {
+                                this.queue = false;
+                                await this.ctx.storage.put("queue", false);
+                                //console.log("(" + this.currentStep + ") 所有媒体已发送完毕");
+                                this.sendForward("start", "所有媒体已发送完毕", text, "update", false);
+                              }
+                            }
+                          } else {
+                            //console.log("(" + this.currentStep + ") " + text);
+                            this.sendForward("start", "", text, "update", false);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            if (this.queue === false) {
+              if (temp) {
+                this.queue = true;
+                await this.ctx.storage.put("queue", true);
+                const result = await this.client.invoke(
+                  new Api.messages.GetBotCallbackAnswer({
+                    peer: this.fromPeer,
+                    msgId: temp.id,
+                    data: temp.data,
+                  })
+                );
+                //console.log("(" + this.currentStep + ") 自动发送");
+                this.sendLog("start", "自动发送", null, false);
+                await scheduler.wait(5000);
+                if (result && result.message) {
+                  this.sendLog("start", result.message , null, false);
+                }
+              // } else {
+              //   if (status === true) {
+              //     await this.sendQuery(1);
+              //   }
+              }
+            }
+            await this.checkMessage(status);
+            if (this.stop === 1) {
+              await this.endStep("start");
+            } else if (this.stop === 2) {
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            }
+          } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
+            await this.forwardMessage(this.idArray, this.fileIdArray);
+            await this.ctx.storage.put("offsetId", this.offsetId);
+            await this.ctx.storage.put("idArray", "[]");
+            await this.ctx.storage.put("fileIdArray", "[]");
+            // this.idArray = [];
+            // this.fileIdArray = [];
+            //console.log("(" + this.currentStep + ") 当前bot采集完毕");
+            this.sendLog("start", "当前bot采集完毕", null, false);
+            this.broadcast({
+              "result": "end",
+            });
+            await this.close()
+          } else {
+            if (this.count > 0) {
+              this.offsetId += this.count;
+              this.count = 0;
+              await this.ctx.storage.put("offsetId", this.offsetId);
+            }
+            //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
+            this.sendLog("start", "没有获取到有效的消息", "error", true);
+            if (this.stop === 1) {
+              if (this.queue === false) {
+                await this.sendQuery(1);
+              }
+              await this.endStep("start");
+            } else if (this.stop === 2) {
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            }
+          }
+        } else if (this.stop === 2) {
           this.broadcast({
-            "result": "end",
+            "result": "pause",
           });
+          await this.close();
         }
-      } else if (this.stop === 2) {
-        this.broadcast({
-          "result": "pause",
-        });
+      } else {
+        //console.log("获取toPeer出错");
+        this.sendLog("start", "获取toPeer出错", "error", true);
         await this.close();
       }
     } else {
-      //console.log("全部chat采集完毕");
-      this.sendLog("start", "全部chat采集完毕", null, false);
+      //console.log("全部bot采集完毕");
+      this.sendLog("start", "全部bot采集完毕", null, false);
       this.broadcast({
         "result": "over",
       });
@@ -740,6 +1235,16 @@ export class WebSocketServer extends DurableObject {
         "result": "over",
       });
       await this.close();
+    } else if (command === "clear") {
+      await this.ctx.storage.deleteAll();
+      //console.log("删除cache成功");
+      this.broadcast({
+        "operate": "clearCache",
+        "step": this.currentStep,
+        "message": "删除cache成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
     } else if (command === "compress") {
       this.compress = true;
     } else if (command === "noCompress") {
@@ -748,14 +1253,63 @@ export class WebSocketServer extends DurableObject {
       this.batch = true;
     } else if (command === "noBatch") {
       this.batch = false;
-    } else if (command === "chatId") {
-      if (data.chatId && data.chatId >= 0 && this.chatId !== data.chatId) {
-        this.chatId = data.chatId;
+    } else if (command === "codeIndex") {
+      if (data.codeIndex && data.codeIndex >= 0 && this.codeIndex !== data.codeIndex) {
+        this.codeIndex = data.codeIndex;
+        await this.ctx.storage.put("codeIndex", this.codeIndex);
       }
     } else if (command === "offsetId") {
       if (data.offsetId && data.offsetId >= 0 && this.offsetId !== data.offsetId) {
         this.offsetId = data.offsetId;
       }
+    } else if (command === "endCode") {
+      if (data.endCode && data.endCode > 0 && this.endCode !== data.endCode) {
+        this.endCode = data.endCode;
+      }
+    } else if (command === "cache") {
+      this.idArray = [];
+      this.fileIdArray = [];
+      //console.log("清空队列缓存成功");
+      this.broadcast({
+        "operate": "clearQueue",
+        "step": this.currentStep,
+        "message": "清空队列缓存成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
+    } else if (command === "offset") {
+      this.offsetId = 0;
+      await this.ctx.storage.put("offsetId", 0);
+      //console.log("重置offset序号成功");
+      this.broadcast({
+        "operate": "resetOffset",
+        "step": this.currentStep,
+        "message": "重置offset序号成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
+    } else if (command === "code") {
+      this.codeIndex = -1;
+      await this.ctx.storage.put("codeIndex", -1);
+      //console.log("重置code序号成功");
+      this.broadcast({
+        "operate": "resetCode",
+        "step": this.currentStep,
+        "message": "重置code序号成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
+    } else if (command === "queue") {
+      this.queue = false;
+      await this.ctx.storage.put("queue", false);
+      //console.log("重置queue状态成功");
+      this.broadcast({
+        "operate": "resetQueue",
+        "step": this.currentStep,
+        "message": "重置queue状态成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
     } else {
       this.broadcast({
         "operate": "webSocketMessage",
@@ -768,6 +1322,7 @@ export class WebSocketServer extends DurableObject {
 
   async webSocketClose(ws, code, reason, wasClean) {
     // if (this.stop === 1) {
+    //   await this.ctx.storage.put("offsetId", this.offsetId);
     // }
     // this.stop = 0;
     ws.close(code, "Durable Object is closing WebSocket");
@@ -787,7 +1342,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("code");
+      const id = env.WEBSOCKET_SERVER.idFromName("deanignitenations");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

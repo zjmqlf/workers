@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./qyg100bString";
+import { codeString } from "./string/jiematopString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -310,8 +310,8 @@ export class WebSocketServer extends DurableObject {
         deviceModel: "Desktop",
         systemVersion: "Windows 11",
         appVersion: "6.7.6 x64",
-        langCode: "en",
-        systemLangCode: "en-US",
+        langCode: "zhcncc",
+        systemLangCode: "zh-CN",
       });
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);
@@ -444,9 +444,7 @@ export class WebSocketServer extends DurableObject {
         this.photoCount = 0;
         this.videoCount = 0;
         this.fileCount = 0;
-        // const status = await this.ctx.storage.get(code);
-        const string = code.split(":");
-        const status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
+        const status = await this.ctx.storage.get(code);
         if (status) {
           //console.log("sendQuery当前代码已入过库了");
           this.sendLog("sendQuery", "当前代码已入过库了", null, true);
@@ -688,7 +686,7 @@ export class WebSocketServer extends DurableObject {
       await this.close()
     } else {
       if (this.queue === true) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -741,86 +739,13 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
-          // let temp = null;
+          let temp = null;
           let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                 const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    let next = true;
-                    let found = false;
-                    const regexp1 = /✓\d+/i;
-                    const regexp2 = /●\d+●/i;
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      if (next === true) {
-                        for (const button of row.buttons) {
-                          if (regexp1.test(button.text) === true) {
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                          } else if (regexp2.test(button.text) === true) {
-                            found = true;
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                          } else if (typeof button.text === "number") {
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                            if (found === true) {
-                              // temp = {
-                              //   id: id,
-                              //   data: button.data,
-                              // };
-                              if (this.queue === true) {
-                                // const result = await this.client.invoke(
-                                const result = this.client.invoke(
-                                  new Api.messages.GetBotCallbackAnswer({
-                                    peer: this.fromPeer,
-                                    msgId: id,
-                                    data: button.data,
-                                  })
-                                );
-                                //console.log("(" + this.currentStep + ") " + button.text);
-                                this.sendLog("nextStep", button.text, null, false);
-                                await scheduler.wait(15000);
-                                if (result && result.message) {
-                                  this.sendLog("nextStep", result.message , null, false);
-                                }
-                              }
-                              next = false;
-                              break;
-                            }
-                          // } else {
-                          }
-                        }
-                      }
-                    }
-                  }
-                  const message = messageArray[messageIndex].message?.trim();
-                  if (message) {
-                    const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
-                    if (regexp.test(message) === true) {
-                      const regexp = / (\d+)\/(\d+) /gi;
-                      const matches = [...message.matchAll(regexp)];
-                      if (matches && matches.length === 3) {
-                        if (matches[1] === matches[2]) {
-                          if (this.queue === true) {
-                            this.queue = false;
-                            await this.ctx.storage.put("queue", false);
-                            //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                            this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
-                          }
-                        }
-                      }
-                    }
-                  }
-                } else if (messageArray[messageIndex].media) {
+                if (messageArray[messageIndex].media) {
                   let fileId = null;
                   if (messageArray[messageIndex].media.document) {
                     // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -849,47 +774,16 @@ export class WebSocketServer extends DurableObject {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
                     const string = message.split(":");
-                    if (string[0] === "QYG100B_bot") {
+                    if (string[0] === "jiematopbot") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                      const date = message.replace("您已被限制使用,限制期限为：", "");
-                      if (date) {
-                        this.flood = new Date(date).getTime();
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }
               }
             }
           }
-          // if (this.queue === false) {
-          //   if (temp) {
-          //     this.queue = true;
-          //     await this.ctx.storage.put("queue", true);
-          //     const result = await this.client.invoke(
-          //       new Api.messages.GetBotCallbackAnswer({
-          //         peer: this.fromPeer,
-          //         msgId: temp.id,
-          //         data: temp.data,
-          //       })
-          //     );
-          //     //console.log("(" + this.currentStep + ") 自动发送");
-          //     this.sendLog("nextStep", "自动发送", null, false);
-          //     await scheduler.wait(5000);
-          //     if (result && result.message) {
-          //       this.sendLog("nextStep", result.message , null, false);
-          //     }
-          //   // } else {
-          //   //   if (status === true) {
-          //   //     await this.sendQuery(1);
-          //   //   }
-          //   }
-          // }
           await this.checkMessage(status);
           if (this.stop === 1) {
             await this.endStep("nextStep");
@@ -977,8 +871,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8147466930"),
-              accessHash: bigInt("-2327320768880226014"),
+              userId: bigInt("8908766090"),
+              accessHash: bigInt("4697995986322785712"),
             }),
           ],
         })
@@ -1082,86 +976,13 @@ export class WebSocketServer extends DurableObject {
           //   this.sendLog("start", "messageLength比limit大", null, true);
           // }
           if (messageLength && messageLength > 0) {
-            // let temp = null;
+            let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
               if (messageArray[messageIndex]) {
                 if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                   const id = messageArray[messageIndex].id;
-                  if (messageArray[messageIndex].replyMarkup) {
-                    if (messageArray[messageIndex].replyMarkup.rows) {
-                      let next = true;
-                      let found = false;
-                      const regexp1 = /✓\d+/i;
-                      const regexp2 = /●\d+●/i;
-                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        if (next === true) {
-                          for (const button of row.buttons) {
-                            if (regexp1.test(button.text) === true) {
-                              if (this.queue === false) {
-                                this.queue = true;
-                                await this.ctx.storage.put("queue", true);
-                              }
-                            } else if (regexp2.test(button.text) === true) {
-                              found = true;
-                              if (this.queue === false) {
-                                this.queue = true;
-                                await this.ctx.storage.put("queue", true);
-                              }
-                            } else if (typeof button.text === "number") {
-                              if (this.queue === false) {
-                                this.queue = true;
-                                await this.ctx.storage.put("queue", true);
-                              }
-                              if (found === true) {
-                                // temp = {
-                                //   id: id,
-                                //   data: button.data,
-                                // };
-                                if (this.queue === true) {
-                                  // const result = await this.client.invoke(
-                                  const result = this.client.invoke(
-                                    new Api.messages.GetBotCallbackAnswer({
-                                      peer: this.fromPeer,
-                                      msgId: id,
-                                      data: button.data,
-                                    })
-                                  );
-                                  //console.log("(" + this.currentStep + ") " + button.text);
-                                  this.sendLog("start", button.text, null, false);
-                                  await scheduler.wait(15000);
-                                  if (result && result.message) {
-                                    this.sendLog("start", result.message , null, false);
-                                  }
-                                }
-                                next = false;
-                                break;
-                              }
-                            // } else {
-                            }
-                          }
-                        }
-                      }
-                    }
-                    const message = messageArray[messageIndex].message?.trim();
-                    if (message) {
-                      const regexp = /共 \d+ 个文件，第 \d+\/\d+ 页/i;
-                      if (regexp.test(message) === true) {
-                        const regexp = / (\d+)\/(\d+) /gi;
-                        const matches = [...message.matchAll(regexp)];
-                        if (matches && matches.length === 3) {
-                          if (matches[1] === matches[2]) {
-                            if (this.queue === true) {
-                              this.queue = false;
-                              await this.ctx.storage.put("queue", false);
-                              //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                              this.sendForward("start", "所有媒体已获取完毕", "", "update", false);
-                            }
-                          }
-                        }
-                      }
-                    }
-                  } else if (messageArray[messageIndex].media) {
+                  if (messageArray[messageIndex].media) {
                     let fileId = null;
                     if (messageArray[messageIndex].media.document) {
                       // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -1190,47 +1011,16 @@ export class WebSocketServer extends DurableObject {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
                       const string = message.split(":");
-                      if (string[0] === "QYG100B_bot") {
+                      if (string[0] === "jiematopbot") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                        const date = message.replace("您已被限制使用,限制期限为：", "");
-                        if (date) {
-                          this.flood = new Date(date).getTime();
-                          await this.ctx.storage.put("client", this.flood);
-                        }
-                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
                       }
                     }
                   }
                 }
               }
             }
-            // if (this.queue === false) {
-            //   if (temp) {
-            //     this.queue = true;
-            //     await this.ctx.storage.put("queue", true);
-            //     const result = await this.client.invoke(
-            //       new Api.messages.GetBotCallbackAnswer({
-            //         peer: this.fromPeer,
-            //         msgId: temp.id,
-            //         data: temp.data,
-            //       })
-            //     );
-            //     //console.log("(" + this.currentStep + ") 自动发送");
-            //     this.sendLog("start", "自动发送", null, false);
-            //     await scheduler.wait(5000);
-            //     if (result && result.message) {
-            //       this.sendLog("start", result.message , null, false);
-            //     }
-            //   // } else {
-            //   //   if (status === true) {
-            //   //     await this.sendQuery(1);
-            //   //   }
-            //   }
-            // }
             await this.checkMessage(status);
             if (this.stop === 1) {
               await this.endStep("start");
@@ -1431,7 +1221,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("qyg100b");
+      const id = env.WEBSOCKET_SERVER.idFromName("jiematop");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }
