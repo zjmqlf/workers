@@ -321,5 +321,10 @@
   "paniang_bot_col:4opwU3UOVGC7vCzZyaImNQFb4PBXMuPx",
   "paniang_bot_col:WRGlqon4qRx9fiIhrRKu8jYB2otWFKFh",
   "paniang_bot_col:JZkt6biiOo9MjileB0gARKfysVivgkQR",
-  "paniang_bot_col:TItSdNbYeATn6Tv22eerZgX2jPDfPcEo"
+  "paniang_bot_col:TItSdNbYeATn6Tv22eerZgX2jPDfPcEo",
+  "paniang_bot_v:qM6H7O6bvxnnohs1PEuC4hrqR2qsYlVf",
+  "paniang_bot_v:dDuKkJ9MALoS0VrWmQK7geoifCIH5y0f",
+  "paniang_bot_v:8xOVsE3mEguhnaYmLIaMDiU1k8A5AsLt",
+  "paniang_bot_v:NNKbKtnkuegluseFYSHUzJVXocKuFFzV",
+  "paniang_bot_v:R8lEGA40difL4mNMPfUIflxHa0EaaGm3"
 ]

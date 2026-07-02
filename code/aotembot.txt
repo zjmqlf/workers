@@ -5,5 +5,6 @@
   "aotem_bot:ZHwHWpOdRMBLeDW5",
   "aotem_bot:zVWYCqRbZXSjMH7D",
   "aotem_bot:5waD7IAOQlySCaAd",
-  "aotem_bot:CF94jF2wg1zozlR_"
+  "aotem_bot:CF94jF2wg1zozlR_",
+  "aotem_bot:jUi8ixFQpcpk4pqM"
 ]
