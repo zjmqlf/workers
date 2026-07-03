@@ -199,7 +199,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   broadcast(message) {
-    // if (this.timeOver > 0 && this.filterType === 1) {
+    // if (this.timeOver > 0) {
     //   clearTimeout(this.timeOver);
     //   this.timeOver = 0;
     // }
@@ -382,7 +382,7 @@ export class WebSocketServer extends DurableObject {
         this.batchMessage = [temp];
       }
     }
-    if (this.timeOver > 0 && this.filterType === 1) {
+    if (this.timeOver > 0) {
       clearTimeout(this.timeOver);
       this.timeOver = 0;
     }
@@ -2391,14 +2391,17 @@ export class WebSocketServer extends DurableObject {
     if (!option || !option.chatId || !option.filterType || !option.reverse || !option.limited) {
       await this.getConfig(1, option);
     }
-    if (this.filterType === 1) {
-      this.timeOver = setTimeout(async function() {
-        this.sendLog("start", "过了1分钟没任何响应", null, true);
+    this.timeOver = setTimeout(async function() {
+      this.sendLog("start", "过了1分钟没任何响应", null, true);
+      let errorCount = await this.ctx.storage.get(this.offsetId) || 0;
+      errorCount += 1;
+      await this.ctx.storage.put(this.offsetId, errorCount);
+      if (errorCount >= 5) {
         this.offsetId += 1;
         await this.updateChat(1);
-        await this.close();
-      }, 60000);
-    }
+      }
+      await this.close();
+    }, 60000);
     this.switchType();
     await this.getChat();
     if (this.fromPeer) {

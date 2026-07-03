@@ -53,5 +53,6 @@
   "@Teestpanbot:_17V_3xZiA6iPqBgh",
   "@Teestpanbot:_1P_jHRaZ7ZeeEd3",
   "@Teestpanbot:_1V_xyGiSDkya8kE",
-  "@Teestpanbot:_2V_PUgTL78Rj5yv"
+  "@Teestpanbot:_2V_PUgTL78Rj5yv",
+  "@Teestpanbot:_1V_bjjV34WwnmBs"
 ]

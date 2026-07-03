@@ -26,7 +26,7 @@ export class WebSocketServer extends DurableObject {
   pingTime = 5000;
   startTime = 0;
   lastPage = "";
-  first = true;
+  // first = true;
   count = 0;
   flood = 0;
   time = 0;
@@ -114,7 +114,7 @@ export class WebSocketServer extends DurableObject {
       this.pingTime = 5000;
       this.startTime = 0;
       this.lastPage = "";
-      this.first = true;
+      // this.first = true;
       this.photoCount = 0;
       this.videoCount = 0;
       this.fileCount = 0;
@@ -835,9 +835,9 @@ export class WebSocketServer extends DurableObject {
         if (this.stop === 1) {
           // let temp = null;
           let status = false;
-          if (this.first === true) {
-            this.first = false;
-          }
+          // if (this.first === true) {
+          //   this.first = false;
+          // }
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
@@ -1072,16 +1072,17 @@ export class WebSocketServer extends DurableObject {
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
           if (this.queue === false) {
-            if (this.first === true) {
-              this.first = false;
-              await this.sendQuery(1);
-            } else {
-              await this.waitNext(120000, false);
-              this.broadcast({
-                "result": "pause",
-              });
-              await this.close();
-            }
+            await this.sendQuery(1);
+            // if (this.first === true) {
+            //   this.first = false;
+            //   await this.sendQuery(1);
+            // } else {
+            //   await this.waitNext(120000, false);
+            //   this.broadcast({
+            //     "result": "pause",
+            //   });
+            //   await this.close();
+            // }
           }
           await this.endStep("nextStep");
         } else if (this.stop === 2) {
@@ -1130,8 +1131,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8662575474"),
-              accessHash: bigInt("-2842955702063451497"),
+              userId: bigInt("8853472189"),
+              accessHash: bigInt("7891319393540029174"),
             }),
           ],
         })
