@@ -7,6 +7,9 @@ node code.js
 
 zjmqlf2021:
 
+npm run build-bot
+npm run deploy-bot
+
 npm run build-test
 npm run deploy-test
 
@@ -48,6 +51,9 @@ npm run deploy-qqfile
 
 npm run build-fileport
 npm run deploy-fileport
+
+npm run build-tebiejie
+npm run deploy-tebiejie
 
 npm run build-xiumi
 npm run deploy-xiumi

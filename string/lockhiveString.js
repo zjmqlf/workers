@@ -662,5 +662,13 @@ export const codeString = [
   "LockHivebot_dzaILGWQCTbDO6pK",
   "LockHivebot_wDeTDoktQtN05Nfl",
   "LockHivebot_2mUxzbvyouXLV3Dk",
-  "F_8eQ5PbzrCnj5qBGZ"
+  "LH_z05InNLgopQuEYo3",
+  "LH_8eQ5PbzrCnj5qBGZ",
+  "LH_K9tTXrRxWBzrvRf1wCR",
+  "LH_F01JGpMbYxPZFD1MrEb",
+  "LH_K9tTXrRxWBzrvRf1",
+  "LH_MXB3VApNu6qr5PEP",
+  "LH_F01JGpMbYxPZFD1M",
+  "LH_dQj827Gu6rOEfo3g5Hf",
+  "LH_dQj827Gu6rOEfo3g"
 ];

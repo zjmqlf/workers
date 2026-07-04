@@ -5,6 +5,8 @@
   "private": true,
   "main": "worker.js",
   "scripts": {
+    "build-bot": "wrangler deploy -c ./wrangler-bot.jsonc --dry-run --outdir=dist",
+    "deploy-bot": "wrangler deploy -c ./wrangler-bot.jsonc",
     "build-test": "wrangler deploy -c ./wrangler-test.jsonc --dry-run --outdir=dist",
     "deploy-test": "wrangler deploy -c ./wrangler-test.jsonc",
     "build-forward": "wrangler deploy -c ./wrangler-forward.jsonc --dry-run --outdir=./forward/dist",
@@ -27,6 +29,8 @@
     "deploy-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc",
     "build-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc --dry-run --outdir=./bot/dist",
     "deploy-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc",
+    "build-tebiejie": "wrangler deploy -c ./wrangler-tebiejie.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-tebiejie": "wrangler deploy -c ./wrangler-tebiejie.jsonc",
     "build-xiumi": "wrangler deploy -c ./wrangler-xiumi.jsonc --dry-run --outdir=./bot/dist",
     "deploy-xiumi": "wrangler deploy -c ./wrangler-xiumi.jsonc",
     "build-wenjianji": "wrangler deploy -c ./wrangler-wenjianji.jsonc --dry-run --outdir=./bot/dist",

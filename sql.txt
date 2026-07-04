@@ -29,6 +29,7 @@ npx wrangler d1 execute maindb --remote --file=./sql/MAINDB3.sql
 
 
 
+SELECT `txt` FROM `PANMESSAGE` WHERE `chatId` = 417;
 
 SELECT * FROM `FORWARDCHAT` WHERE `title` = "test110";
 
