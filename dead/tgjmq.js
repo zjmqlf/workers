@@ -541,6 +541,7 @@ export class WebSocketServer extends DurableObject {
       } else {
         //console.log("(" + this.currentStep + ") code为空");
         this.sendLog("sendQuery", "code为空", "error", true);
+        await this.sendQuery(1);
       }
     } else {
       await this.overStep();
@@ -732,7 +733,7 @@ export class WebSocketServer extends DurableObject {
       this.broadcast({
         "result": "end",
       });
-      await this.close()
+      await this.close();
     } else {
       // await scheduler.wait(5000);
       for (let i = 0; i < 4; i++) {
@@ -755,6 +756,21 @@ export class WebSocketServer extends DurableObject {
       }
       await this.nextStep();
     }
+  }
+
+  async overClear(operate) {
+    await this.forwardMessage(this.idArray, this.fileIdArray);
+    await this.ctx.storage.put("offsetId", this.offsetId);
+    await this.ctx.storage.put("idArray", "[]");
+    await this.ctx.storage.put("fileIdArray", "[]");
+    // this.idArray = [];
+    // this.fileIdArray = [];
+    //console.log("(" + this.currentStep + ") 当前bot采集完毕");
+    this.sendLog(operate, "当前bot采集完毕", null, false);
+    this.broadcast({
+      "result": "end",
+    });
+    await this.close();
   }
 
   async nextStep() {
@@ -940,18 +956,7 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         }
       } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
-        await this.forwardMessage(this.idArray, this.fileIdArray);
-        await this.ctx.storage.put("offsetId", this.offsetId);
-        await this.ctx.storage.put("idArray", "[]");
-        await this.ctx.storage.put("fileIdArray", "[]");
-        // this.idArray = [];
-        // this.fileIdArray = [];
-        //console.log("(" + this.currentStep + ") 当前bot采集完毕");
-        this.sendLog("nextStep", "当前bot采集完毕", null, false);
-        this.broadcast({
-          "result": "end",
-        });
-        await this.close()
+        await this.overClear("nextStep");
       } else {
         if (this.count > 0) {
           this.offsetId += this.count;
@@ -1268,18 +1273,7 @@ export class WebSocketServer extends DurableObject {
               await this.close();
             }
           } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
-            await this.forwardMessage(this.idArray, this.fileIdArray);
-            await this.ctx.storage.put("offsetId", this.offsetId);
-            await this.ctx.storage.put("idArray", "[]");
-            await this.ctx.storage.put("fileIdArray", "[]");
-            // this.idArray = [];
-            // this.fileIdArray = [];
-            //console.log("(" + this.currentStep + ") 当前bot采集完毕");
-            this.sendLog("start", "当前bot采集完毕", null, false);
-            this.broadcast({
-              "result": "end",
-            });
-            await this.close()
+            await this.overClear("start");
           } else {
             if (this.count > 0) {
               this.offsetId += this.count;

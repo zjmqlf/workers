@@ -1290,22 +1290,22 @@ export class WebSocketServer extends DurableObject {
             "result": "end",
           });
           await this.getNext();
-        }
-        if (this.stop === 1) {
-          if (this.apiCount < 900) {
-            await this.nextStep();
-          } else {
-            this.stop = 2;
-            //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-            this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+          if (this.stop === 1) {
+            if (this.apiCount < 900) {
+              await this.nextStep();
+            } else {
+              this.stop = 2;
+              //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+              this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+              await this.close();
+              // this.ctx.abort("reset");
+            }
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
             await this.close();
-            // this.ctx.abort("reset");
           }
-        } else if (this.stop === 2) {
-          this.broadcast({
-            "result": "pause",
-          });
-          await this.close();
         }
       } else {
         this.stop = 2;
@@ -1490,7 +1490,7 @@ export class WebSocketServer extends DurableObject {
               } else {
                 this.stop = 2;
                 //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+                this.sendLog("start", "超出apiCount限制", "limit", true);
                 await this.close();
                 // this.ctx.abort("reset");
               }
@@ -1520,8 +1520,8 @@ export class WebSocketServer extends DurableObject {
                 await this.nextStep();
               } else {
                 this.stop = 2;
-                //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+                //console.log("(" + this.currentStep + ")start超出apiCount限制");
+                this.sendLog("start", "超出apiCount限制", "limit", true);
                 await this.close();
                 // this.ctx.abort("reset");
               }
@@ -1539,6 +1539,22 @@ export class WebSocketServer extends DurableObject {
               "result": "end",
             });
             await this.getNext();
+            if (this.stop === 1) {
+              if (this.apiCount < 900) {
+                await this.nextStep();
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")start超出apiCount限制");
+                this.sendLog("start", "超出apiCount限制", "limit", true);
+                await this.close();
+                // this.ctx.abort("reset");
+              }
+            } else if (this.stop === 2) {
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            }
           }
         } else if (this.stop === 2) {
           this.broadcast({

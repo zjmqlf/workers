@@ -155,12 +155,13 @@ export class WebSocketServer extends DurableObject {
     //   console.log(JSON.stringify(resultsArray[index]));
     // }
     // const oneRow = await this.sql.exec("SELECT * FROM artist WHERE artistname = ?;", "Alice").one();
+    await this.ctx.storage.deleteAll();
     await this.ctx.storage.put("1", "111");
     await this.ctx.storage.put("2", "222");
     await this.ctx.storage.put("3", "333");
     // await this.ctx.storage.get();
     // await this.ctx.storage.delete();
-    console.log(JSON.stringify(await this.ctx.storage.get("1")));
+    console.log(await this.ctx.storage.get("1"));
     const results = await this.ctx.storage.list({
       // start: 0,
       // startAfter: 0,
@@ -170,7 +171,8 @@ export class WebSocketServer extends DurableObject {
       // limit: 10,
     });
     for (const item of results) {
-      console.log(JSON.stringify(item));
+      // console.log(JSON.stringify(item));
+      console.log(item[0] + " - " + item[1]);
     }
     // console.log(JSON.stringify(results));
     return new Response(JSON.stringify(results));

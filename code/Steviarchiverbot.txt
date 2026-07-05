@@ -1288,5 +1288,6 @@
   "mov_5_AqV5AFUJ",
   "pic_1_DI9S3LIP",
   "mov_1_9qG9WOBa",
-  "mov_1_xXDkiuTg"
+  "mov_1_xXDkiuTg",
+  "pic_2_5vONgM4Y"
 ]

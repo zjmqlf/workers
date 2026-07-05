@@ -8,6 +8,7 @@ export class WebSocketServer extends DurableObject {
   // webSocket = [];
   ws = null;
   stop = 0;
+  apiCount = 0;
   currentStep = 0;
   compress = false;
   batch = false;
@@ -28,6 +29,7 @@ export class WebSocketServer extends DurableObject {
   count = 0;
   flood = 0;
   time = 0;
+  fromDB = false;
   messageArray = [];
   cacheMessage = null;
   batchMessage = [];
@@ -101,6 +103,7 @@ export class WebSocketServer extends DurableObject {
       // this.client = null;
       // this.stop = 0;
       // this.webSocket = [];
+      this.apiCount = 0;
       this.currentStep = 0;
       this.codes = codeString.slice();
       this.codeLength = this.codes.length;
@@ -115,6 +118,7 @@ export class WebSocketServer extends DurableObject {
       this.count = 0;
       this.flood = 0;
       this.time = 0;
+      this.fromDB = false;
       this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
@@ -419,6 +423,89 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async selectCodeError(tryCount) {
+    if (tryCount === 20) {
+      this.stop = 2;
+      //console.log("(" + this.currentStep + ")selectCode超出tryCount限制");
+      this.sendLog("selectCode", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.selectCode(tryCount + 1);
+    }
+  }
+
+  async selectCode(tryCount) {
+    this.apiCount += 1;
+    let codeResult = {};
+    try {
+      codeResult = await this.env.MAINDB.prepare("SELECT * FROM `CODE` WHERE `status` = 0 ORDER BY `Cindex` ASC LIMIT 1;").run();
+    } catch (e) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
+      this.sendGrid("selectCode", "出错 : " + e.message, "try", true);
+      if (e.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.selectCodeError(tryCount);
+      }
+      return;
+    }
+    //console.log("codeResult : " + codeResult);  //测试
+    if (codeResult.success === true) {
+      if (codeResult.results && codeResult.results.length > 0) {
+        return codeResult.results[0];
+      }
+    } else {
+      await this.selectCodeError(tryCount);
+    }
+  }
+
+  async updateCodeError(tryCount, Cindex, status) {
+    if (tryCount === 20) {
+      this.stop = 2;
+      //console.log("(" + this.currentStep + ")updateCode超出tryCount限制");
+      this.sendLog("updateCode", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.updateCode(tryCount + 1, Cindex, status);
+    }
+  }
+
+  async updateCode(tryCount, Cindex, status) {
+    this.apiCount += 1;
+    let codeResult = {};
+    try {
+      codeResult = await this.env.MAINDB.prepare("UPDATE `CODE` SET `status` = ? WHERE `Cindex` = ?;").bind(status, Cindex).run();
+    } catch (e) {
+      //console.log("updateCode出错 : " + e);
+      this.sendLog("updateCode", "出错 : " + e.message, null, true);
+      if (e.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.updateCodeError(tryCount, Cindex, status);
+      }
+      return;
+    }
+    //console.log(codeResult);  //测试
+    if (codeResult.success === true) {
+      //console.log("更新code数据成功");
+      this.sendLog("updateCode", "更新code数据成功", null, false);
+    } else {
+      //console.log("更新code数据失败");
+      this.sendLog("updateCode", "更新code数据失败", null, true);
+      await this.updateCodeError(tryCount, Cindex, status);
+    }
+  }
+
   async sendQueryError(tryCount) {
     if (tryCount === 20) {
       //console.log("(" + this.currentStep + ")sendQuery超出tryCount限制");
@@ -431,70 +518,118 @@ export class WebSocketServer extends DurableObject {
   }
 
   async sendQuery(tryCount) {
-    this.codeIndex += 1;
-    if (this.endCode && this.codeIndex > this.endCode) {
-      //console.log("(" + this.currentStep + ") 超过endCode，已经没有code了");
-      this.sendLog("sendQuery", "超过endCode，已经没有code了", "error", true);
-      return;
-    }
-    if (this.codeIndex < this.codeLength) {
-      await this.ctx.storage.put("codeIndex", this.codeIndex);
-      const code = this.codes[this.codeIndex];
-      if (code) {
-        const status = await this.ctx.storage.get(code);
-        if (status) {
-          //console.log("sendQuery当前代码已入过库了");
-          this.sendLog("sendQuery", "当前代码已入过库了", null, true);
+    let code = "";
+    let Cindex = 0;
+    if (this.fromDB === true) {
+      const codeResult = await this.selectCode(1);
+      if (codeResult) {
+        Cindex = codeResult.Cindex;
+        code = codeResult.code;
+        if (Cindex && Cindex > 0 && code && code != "") {
+          this.codeIndex = this.codeLength + Cindex;
+          await this.updateCode(1, Cindex, 1);
+        } else {
+          //console.log("(" + this.currentStep + ") 查询code出错");
+          this.sendLog("sendQuery", "查询code出错", "error", true);
+          return;
+        }
+      } else {
+        //console.log("(" + this.currentStep + ") 查询codeResult出错");
+        this.sendLog("sendQuery", "查询codeResult出错", "error", true);
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+        return;
+      }
+    } else {
+      this.codeIndex += 1;
+      if (this.endCode && this.codeIndex > this.endCode) {
+        if (this.fromDB === false) {
+          this.fromDB = true;
           await this.sendQuery(1);
           return;
-        } else {
-          this.lastPage = "";
-          try {
-            await this.client.invoke(
-              new Api.messages.SendMessage({
-                peer: this.fromPeer,
-                message: code,
-                silent: true,
-              })
-            );
-          } catch (e) {
-            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        }
+        //console.log("(" + this.currentStep + ") 超过endCode，已经没有code了");
+        this.sendLog("sendQuery", "超过endCode，已经没有code了", "error", true);
+        return;
+      }
+      if (this.codeIndex < this.codeLength) {
+        await this.ctx.storage.put("codeIndex", this.codeIndex);
+        code = this.codes[this.codeIndex];
+      } else {
+        if (this.fromDB === false) {
+          this.fromDB = true;
+          await this.sendQuery(1);
+          return;
+        }
+        await this.overStep();
+        //console.log("(" + this.currentStep + ") 超过codeLength，已经没有code了");
+        this.sendLog("sendQuery", "超过codeLength，已经没有code了", "error", true);
+        return;
+      }
+    }
+    if (code) {
+      const status = await this.ctx.storage.get(code);
+      if (status) {
+        //console.log("sendQuery当前代码已入过库了");
+        this.sendLog("sendQuery", "当前代码已入过库了", null, true);
+        await this.sendQuery(1);
+        return;
+      } else {
+        this.lastPage = "";
+        try {
+          await this.client.invoke(
+            new Api.messages.SendMessage({
+              peer: this.fromPeer,
+              message: code,
+              silent: true,
+            })
+          );
+        } catch (e) {
+          if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+            if (this.fromDB === true) {
+              await this.updateCode(1, Cindex, 0);
+            } else {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
-              // this.waitTime += 120000;
-              if (e.seconds && e.seconds > 0) {
-                this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
-                await this.ctx.storage.put("client", this.flood);
-              }
-              //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
-              this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
-            } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
-              await this.overStep();
-              //console.log("(" + this.currentStep + ") 用户已注销" + e);
-              this.sendLog("sendQuery", "用户已注销 : " + JSON.stringify(e), "error", true);
-              this.stop = 2;
-              this.broadcast({
-                "result": "pause",
-              });
-              await this.close();
-            } else {
-              //console.log("sendQuery出错 : " + e);
-              this.sendLog("sendQuery", "出错 : " + JSON.stringify(e), "error", true);
-              await this.sendQueryError(tryCount);
             }
-            return;
+            // this.waitTime += 120000;
+            if (e.seconds && e.seconds > 0) {
+              this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+              await this.ctx.storage.put("client", this.flood);
+            }
+            //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+            this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+          } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+            await this.overStep();
+            //console.log("(" + this.currentStep + ") 用户已注销" + e);
+            this.sendLog("sendQuery", "用户已注销 : " + JSON.stringify(e), "error", true);
+            this.stop = 2;
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          } else {
+            //console.log("sendQuery出错 : " + e);
+            this.sendLog("sendQuery", "出错 : " + JSON.stringify(e), "error", true);
+            await this.sendQueryError(tryCount);
           }
-          //console.log("(" + this.currentStep + ") code : " + code);
-          this.sendLog("sendQuery", code, null, false);
+          return;
         }
+        //console.log("(" + this.currentStep + ") code : " + code);
+        this.sendLog("sendQuery", code, null, false);
+      }
+    } else {
+      if (this.fromDB === true) {
+        //console.log("(" + this.currentStep + ") 已经没有code了");
+        this.sendLog("sendQuery", "已经没有code了", "error", true);
       } else {
         //console.log("(" + this.currentStep + ") code为空");
         this.sendLog("sendQuery", "code为空", "error", true);
+        await this.sendQuery(1);
       }
-    } else {
-      await this.overStep();
-      //console.log("(" + this.currentStep + ") 超过codeLength，已经没有code了");
-      this.sendLog("sendQuery", "超过codeLength，已经没有code了", "error", true);
     }
   }
 
@@ -675,13 +810,13 @@ export class WebSocketServer extends DurableObject {
   }
 
   async endStep(operate) {
-    if ((this.endCode && this.codeIndex > this.endCode) || this.codeIndex > this.codeLength) {
+    if (this.fromDB === false && ((this.endCode && this.codeIndex > this.endCode) || this.codeIndex > this.codeLength)) {
       //console.log("(" + this.currentStep + ") 当前bot采集完毕");
       this.sendLog(operate, "当前bot采集完毕", null, false);
       this.broadcast({
         "result": "end",
       });
-      await this.close()
+      await this.close();
     } else {
       if (this.queue === true) {
         for (let i = 0; i < 6; i++) {
@@ -707,6 +842,21 @@ export class WebSocketServer extends DurableObject {
       }
       await this.nextStep();
     }
+  }
+
+  async overClear(operate) {
+    await this.forwardMessage(this.idArray, this.fileIdArray);
+    await this.ctx.storage.put("offsetId", this.offsetId);
+    await this.ctx.storage.put("idArray", "[]");
+    await this.ctx.storage.put("fileIdArray", "[]");
+    // this.idArray = [];
+    // this.fileIdArray = [];
+    //console.log("(" + this.currentStep + ") 当前bot采集完毕");
+    this.sendLog(operate, "当前bot采集完毕", null, false);
+    this.broadcast({
+      "result": "end",
+    });
+    await this.close();
   }
 
   async nextStep() {
@@ -737,159 +887,175 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
-          let temp = null;
-          let status = false;
-          for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-            if (messageArray[messageIndex]) {
-              if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
-                const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].media) {
-                  let fileId = null;
-                  if (messageArray[messageIndex].media.document) {
-                    // const mimeType = messageArray[messageIndex].media.document.mimeType;
-                    // if (mimeType.startsWith("video/")) {
-                    //   fileId = messageArray[messageIndex].media.document.id;
-                    // } else if (mimeType.startsWith("image/")) {
-                    //   fileId = messageArray[messageIndex].media.document.id;
-                    // // } else if (mimeType.startsWith("application/")) {
-                    // // } else {
-                    // }
-                    fileId = messageArray[messageIndex].media.document.id;
-                  } else if (messageArray[messageIndex].media.photo) {
-                    fileId = messageArray[messageIndex].media.photo.id;
-                  }
-                  if (id && fileId) {
-                    if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
-                      status = true;
-                      this.idArray.push(id);
-                      this.fileIdArray.push(fileId);
-                    } else {
-                      //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
-                      this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
+          if (this.apiCount < 900) {
+            let temp = null;
+            let status = false;
+            for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
+              if (messageArray[messageIndex]) {
+                if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
+                  const id = messageArray[messageIndex].id;
+                  if (messageArray[messageIndex].media) {
+                    let fileId = null;
+                    if (messageArray[messageIndex].media.document) {
+                      // const mimeType = messageArray[messageIndex].media.document.mimeType;
+                      // if (mimeType.startsWith("video/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // } else if (mimeType.startsWith("image/")) {
+                      //   fileId = messageArray[messageIndex].media.document.id;
+                      // // } else if (mimeType.startsWith("application/")) {
+                      // // } else {
+                      // }
+                      fileId = messageArray[messageIndex].media.document.id;
+                    } else if (messageArray[messageIndex].media.photo) {
+                      fileId = messageArray[messageIndex].media.photo.id;
                     }
-                  }
-                } else if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      for (const button of row.buttons) {
-                        if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
-                          // if (this.queue === false) {
-                          //   this.queue = true;
-                          //   await this.ctx.storage.put("queue", true);
-                          // }
-                          // if (this.lastPage && this.lastPage === button.text) {
-                          //   //console.log("(" + this.currentStep + ") 同一页码");
-                          //   this.sendLog("nextStep", "同一页码", null, true);
-                          // } else {
-                          //   this.lastPage = button.text;
-                          // }
-                          // const result = await this.client.invoke(
-                          //   new Api.messages.GetBotCallbackAnswer({
-                          //     peer: this.fromPeer,
-                          //     msgId: id,
-                          //     data: button.data,
-                          //   })
-                          // );
-                          // await scheduler.wait(5000);
-                          // if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
-                          //   this.sendLog("nextStep", result.message , "error", true);
-                          //   await scheduler.wait(5000);
-                          // }
-                          // if (button.text === "📦 全部获取") {
-                          //   // console.log("(" + this.currentStep + ")" + button.text);
-                          //   this.sendLog("nextStep", button.text, null, false);
-                          // } else {
-                          //   // console.log("(" + this.currentStep + ")" + button.text);
-                          //   this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
-                          // }
-                          temp = {
-                            id: id,
-                            data: button.data,
-                            text: button.text,
-                          };
-                        } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
-                          temp = null;
-                          this.lastPage = "";
-                          if (this.queue === true) {
-                            this.queue = false;
-                            await this.ctx.storage.put("queue", false);
-                            //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
-                            this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                    if (id && fileId) {
+                      if (this.idArray.includes(id) === false && this.fileIdArray.includes(fileId) === false) {
+                        status = true;
+                        this.idArray.push(id);
+                        this.fileIdArray.push(fileId);
+                      } else {
+                        //console.log("(" + this.currentStep + ") 该媒体已在数据库中");
+                        this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
+                      }
+                    }
+                  } else if (messageArray[messageIndex].replyMarkup) {
+                    if (messageArray[messageIndex].replyMarkup.rows) {
+                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
+                        for (const button of row.buttons) {
+                          if (button.text === "📦 全部获取" || button.text.includes("➡️ 查看下一组 (") === true) {
+                            // if (this.queue === false) {
+                            //   this.queue = true;
+                            //   await this.ctx.storage.put("queue", true);
+                            // }
+                            // if (this.lastPage && this.lastPage === button.text) {
+                            //   //console.log("(" + this.currentStep + ") 同一页码");
+                            //   this.sendLog("nextStep", "同一页码", null, true);
+                            // } else {
+                            //   this.lastPage = button.text;
+                            // }
+                            // const result = await this.client.invoke(
+                            //   new Api.messages.GetBotCallbackAnswer({
+                            //     peer: this.fromPeer,
+                            //     msgId: id,
+                            //     data: button.data,
+                            //   })
+                            // );
+                            // await scheduler.wait(5000);
+                            // if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+                            //   this.sendLog("nextStep", result.message , "error", true);
+                            //   await scheduler.wait(5000);
+                            // }
+                            // if (button.text === "📦 全部获取") {
+                            //   // console.log("(" + this.currentStep + ")" + button.text);
+                            //   this.sendLog("nextStep", button.text, null, false);
+                            // } else {
+                            //   // console.log("(" + this.currentStep + ")" + button.text);
+                            //   this.sendForward("nextStep", button.text, button.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+                            // }
+                            temp = {
+                              id: id,
+                              data: button.data,
+                              text: button.text,
+                            };
+                          } else if (button.text === "🫵体验蜂巢密钥搜索" || messageArray[messageIndex].message.includes("🏁 文件获取完成！") === true) {
+                            temp = null;
+                            this.lastPage = "";
+                            if (this.queue === true) {
+                              this.queue = false;
+                              await this.ctx.storage.put("queue", false);
+                              //console.log("(" + this.currentStep + ") 所有媒体已获取完毕");
+                              this.sendForward("nextStep", "所有媒体已获取完毕", "", "update", false);
+                            }
                           }
                         }
                       }
                     }
-                  }
-                } else {
-                  const message = messageArray[messageIndex].message?.trim();
-                  if (message) {
-                    // if (message.substr(0, 3) === "LH_") {
-                    if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
-                      await this.ctx.storage.put(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message.includes("🚫 操作过于频繁") === true) {
-                      const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
-                      const matches = message.match(regexp);
-                      if (matches && matches.length === 1) {
-                        const time = matches[0];
-                        if (time && time > 0) {
-                          this.flood = new Date().getTime() + 30000 + time * 1000;
-                          await this.ctx.storage.put("client", this.flood);
+                  } else {
+                    const message = messageArray[messageIndex].message?.trim();
+                    if (message) {
+                      // if (message.substr(0, 3) === "LH_") {
+                      if (message.substr(0, 3) === "LH_" || message.substr(0, 12) === "LockHivebot_") {
+                        await this.ctx.storage.put(message, 1);
+                        //console.log("(" + this.currentStep + ") 代码入库完毕");
+                        this.sendForward("nextStep", "代码入库完毕", "", "add", false);
+                      } else if (message.includes("🚫 操作过于频繁") === true) {
+                        const regexp = /⏳ 请耐心等待 (\d+) 秒后恢复。/gi;
+                        const matches = message.match(regexp);
+                        if (matches && matches.length === 1) {
+                          const time = matches[0];
+                          if (time && time > 0) {
+                            this.flood = new Date().getTime() + 30000 + time * 1000;
+                            await this.ctx.storage.put("client", this.flood);
+                          }
                         }
+                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
+                        this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                       }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
                     }
                   }
                 }
               }
             }
-          }
-          // if (this.queue === false) {
-          //   if (status === true) {
-          //     await this.sendQuery(1);
-          //   }
-          // }
-          if (temp) {
-            if (this.queue === false) {
-              this.queue = true;
-              await this.ctx.storage.put("queue", true);
-            }
-            if (this.lastPage && this.lastPage === temp.text) {
-              //console.log("(" + this.currentStep + ") 同一页码");
-              this.sendLog("nextStep", "同一页码", null, true);
-            } else {
-              this.lastPage = temp.text;
-            }
-            const result = await this.client.invoke(
-              new Api.messages.GetBotCallbackAnswer({
-                peer: this.fromPeer,
-                msgId: temp.id,
-                data: temp.data,
-              })
-            );
-            await scheduler.wait(5000);
-            if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
-              this.sendLog("nextStep", result.message , "error", true);
+            // if (this.queue === false) {
+            //   if (status === true) {
+            //     await this.sendQuery(1);
+            //   }
+            // }
+            if (temp) {
+              if (this.queue === false) {
+                this.queue = true;
+                await this.ctx.storage.put("queue", true);
+              }
+              if (this.lastPage && this.lastPage === temp.text) {
+                //console.log("(" + this.currentStep + ") 同一页码");
+                this.sendLog("nextStep", "同一页码", null, true);
+              } else {
+                this.lastPage = temp.text;
+              }
+              const result = await this.client.invoke(
+                new Api.messages.GetBotCallbackAnswer({
+                  peer: this.fromPeer,
+                  msgId: temp.id,
+                  data: temp.data,
+                })
+              );
               await scheduler.wait(5000);
+              if (result && result.message === "😭哥们！你点太快了！我好累啊！让我缓一秒！") {
+                this.sendLog("nextStep", result.message , "error", true);
+                await scheduler.wait(5000);
+              }
+              if (temp.text === "📦 全部获取") {
+                // console.log("(" + this.currentStep + ")" + temp.text);
+                this.sendLog("nextStep", temp.text, null, false);
+              } else {
+                // console.log("(" + this.currentStep + ")" + temp.text);
+                this.sendForward("nextStep", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+              }
             }
-            if (temp.text === "📦 全部获取") {
-              // console.log("(" + this.currentStep + ")" + temp.text);
-              this.sendLog("nextStep", temp.text, null, false);
-            } else {
-              // console.log("(" + this.currentStep + ")" + temp.text);
-              this.sendForward("nextStep", temp.text, temp.text.replace("➡️ 查看下一组 (", "").replace(")", ""), "update", false);
+            await this.checkMessage(status);
+            if (this.stop === 1) {
+              if (this.apiCount < 900) {
+                await this.endStep("nextStep");
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+                this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+                await this.close();
+                // this.ctx.abort("reset");
+              }
+            } else if (this.stop === 2) {
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
             }
-          }
-          await this.checkMessage(status);
-          if (this.stop === 1) {
-            await this.endStep("nextStep");
-          } else if (this.stop === 2) {
-            this.broadcast({
-              "result": "pause",
-            });
+          } else {
+            this.stop = 2;
+            //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+            this.sendLog("nextStep", "超出apiCount限制", "limit", true);
             await this.close();
+            // this.ctx.abort("reset");
           }
         } else if (this.stop === 2) {
           this.broadcast({
@@ -897,19 +1063,8 @@ export class WebSocketServer extends DurableObject {
           });
           await this.close();
         }
-      } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
-        await this.forwardMessage(this.idArray, this.fileIdArray);
-        await this.ctx.storage.put("offsetId", this.offsetId);
-        await this.ctx.storage.put("idArray", "[]");
-        await this.ctx.storage.put("fileIdArray", "[]");
-        // this.idArray = [];
-        // this.fileIdArray = [];
-        //console.log("(" + this.currentStep + ") 当前bot采集完毕");
-        this.sendLog("nextStep", "当前bot采集完毕", null, false);
-        this.broadcast({
-          "result": "end",
-        });
-        await this.close()
+      } else if (this.fromDB === false && ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength)) {
+        await this.overClear("nextStep");
       } else {
         if (this.count > 0) {
           this.offsetId += this.count;
@@ -919,13 +1074,21 @@ export class WebSocketServer extends DurableObject {
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
-          if (this.queue === false) {
-            await this.sendQuery(1);
-          // } else if (this.queue === true) {
-          //   this.offsetId -= 1;
+          if (this.apiCount < 900) {
+            if (this.queue === false) {
+              await this.sendQuery(1);
+            // } else if (this.queue === true) {
+            //   this.offsetId -= 1;
+            }
+            await scheduler.wait(5000);
+            await this.endStep("nextStep");
+          } else {
+            this.stop = 2;
+            //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+            this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+            await this.close();
+            // this.ctx.abort("reset");
           }
-          await scheduler.wait(5000);
-          await this.endStep("nextStep");
         } else if (this.stop === 2) {
           this.broadcast({
             "result": "pause",
@@ -1224,26 +1387,23 @@ export class WebSocketServer extends DurableObject {
             }
             await this.checkMessage(status);
             if (this.stop === 1) {
-              await this.endStep("start");
+              if (this.apiCount < 900) {
+                await this.endStep("start");
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")start超出apiCount限制");
+                this.sendLog("start", "超出apiCount限制", "limit", true);
+                await this.close();
+                // this.ctx.abort("reset");
+              }
             } else if (this.stop === 2) {
               this.broadcast({
                 "result": "pause",
               });
               await this.close();
             }
-          } else if ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength) {
-            await this.forwardMessage(this.idArray, this.fileIdArray);
-            await this.ctx.storage.put("offsetId", this.offsetId);
-            await this.ctx.storage.put("idArray", "[]");
-            await this.ctx.storage.put("fileIdArray", "[]");
-            // this.idArray = [];
-            // this.fileIdArray = [];
-            //console.log("(" + this.currentStep + ") 当前bot采集完毕");
-            this.sendLog("start", "当前bot采集完毕", null, false);
-            this.broadcast({
-              "result": "end",
-            });
-            await this.close()
+          } else if (this.fromDB === false && ((this.endCode && this.codeIndex >= this.endCode) || this.codeIndex >= this.codeLength)) {
+            await this.overClear("start");
           } else {
             if (this.count > 0) {
               this.offsetId += this.count;
@@ -1253,13 +1413,21 @@ export class WebSocketServer extends DurableObject {
             //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
             this.sendLog("start", "没有获取到有效的消息", "error", true);
             if (this.stop === 1) {
-              if (this.queue === false) {
-                await this.sendQuery(1);
-              // } else if (this.queue === true) {
-              //   this.offsetId -= 1;
+              if (this.apiCount < 900) {
+                if (this.queue === false) {
+                  await this.sendQuery(1);
+                // } else if (this.queue === true) {
+                //   this.offsetId -= 1;
+                }
+                await scheduler.wait(5000);
+                await this.endStep("start");
+              } else {
+                this.stop = 2;
+                //console.log("(" + this.currentStep + ")start超出apiCount限制");
+                this.sendLog("start", "超出apiCount限制", "limit", true);
+                await this.close();
+                // this.ctx.abort("reset");
               }
-              await scheduler.wait(5000);
-              await this.endStep("start");
             } else if (this.stop === 2) {
               this.broadcast({
                 "result": "pause",

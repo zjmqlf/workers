@@ -2373,9 +2373,24 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
+  async setCheck() {
+    this.timeOver = setTimeout(async function() {
+      this.sendLog("start", "过了1分钟没任何响应", null, true);
+      let errorCount = await this.ctx.storage.get(this.offsetId) || 0;
+      errorCount += 1;
+      await this.ctx.storage.put(this.offsetId, errorCount);
+      if (errorCount >= 5) {
+        this.offsetId += 1;
+        await this.updateChat(1);
+      }
+      await this.close();
+    }, 60000);
+  }
+
   async start(option) {
     if (this.client || this.stop === 1) {
     // if (this.stop === 1) {
+      await this.setCheck();
       this.ws.send(JSON.stringify({
         "step": this.currentStep,
         "operate": "start",
@@ -2391,17 +2406,7 @@ export class WebSocketServer extends DurableObject {
     if (!option || !option.chatId || !option.filterType || !option.reverse || !option.limited) {
       await this.getConfig(1, option);
     }
-    this.timeOver = setTimeout(async function() {
-      this.sendLog("start", "过了1分钟没任何响应", null, true);
-      let errorCount = await this.ctx.storage.get(this.offsetId) || 0;
-      errorCount += 1;
-      await this.ctx.storage.put(this.offsetId, errorCount);
-      if (errorCount >= 5) {
-        this.offsetId += 1;
-        await this.updateChat(1);
-      }
-      await this.close();
-    }, 60000);
+    await this.setCheck();
     this.switchType();
     await this.getChat();
     if (this.fromPeer) {

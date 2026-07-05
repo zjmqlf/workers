@@ -2,6 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "user",
   "main": "user.js",
+  "vars": {
+    "MESSAGE_DB_INDEX": 1,
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

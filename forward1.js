@@ -1828,12 +1828,12 @@ export class WebSocketServer extends DurableObject {
                 if (this.tg[clientIndex].errorCount >= 3) {
                   await this.ctx.storage.put(this.tg[clientIndex].chatId, 0);
                   //console.log("(" + this.currentStep + ") 连续3轮没有获取到包含有效媒体的消息");
-                  this.sendForward(clientIndex, "nextStep", "连续3轮没有获取到包含有效媒体的消息", 0, "error", true);
+                  this.sendForward(clientIndex, "start", "连续3轮没有获取到包含有效媒体的消息", 0, "error", true);
                   await this.getNext(clientIndex);
                 } else {
                   await this.ctx.storage.put(this.tg[clientIndex].chatId, this.tg[clientIndex].errorCount);
                   //console.log("(" + this.currentStep + ") 第" + this.tg[clientIndex].errorCount + "轮没有获取到包含有效媒体的消息");
-                  this.sendForward(clientIndex, "nextStep", "第" + this.tg[clientIndex].errorCount + "轮没有获取到包含有效媒体的消息", 0, "error", true);
+                  this.sendForward(clientIndex, "start", "第" + this.tg[clientIndex].errorCount + "轮没有获取到包含有效媒体的消息", 0, "error", true);
                 }
                 if (this.stop === 2) {
                   this.broadcast({

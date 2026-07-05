@@ -43,6 +43,9 @@ npm run deploy-user
 npm run build-lockhive
 npm run deploy-lockhive
 
+npm run build-lockhivecode
+npm run deploy-lockhivecode
+
 
 zjmqlf2024:
 

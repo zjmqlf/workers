@@ -252,6 +252,51 @@ export class WebSocketServer extends DurableObject {
     //await scheduler.wait(5000);
   }
 
+  async getChat(tryCount) {
+    let result = null;
+    try {
+      result = await this.client.invoke(
+        new Api.channels.GetChannels({
+          id: [new Api.InputChannel({
+            channelId: bigInt(3982534960),   //蜂巢热门密钥
+            accessHash: bigInt(6100294192930071508),
+          })],
+        })
+      );
+    } catch (e) {
+      //console.log("(" + this.currentStep + ")出错 : " + e);
+      this.sendLog("getChat", "出错 : " + JSON.stringify(e), null, true);
+      if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
+        //console.log("chat已不存在了");  //测试
+        this.sendLog("getChat", "chat已不存在了", null, true);
+      } else {
+        if (tryCount === 20) {
+          this.stop = 2;
+          //console.log("(" + this.currentStep + ")getChat超出tryCount限制");
+          this.sendLog("getChat", "超出tryCount限制", null, true);
+          await this.close();
+        } else {
+          await scheduler.wait(10000);
+          await this.getChat(tryCount + 1);
+        }
+      }
+      return;
+    }
+    // console.log(this.fromPeer);  //测试this.
+    if (result && result.chats && result.chats.length > 0) {
+      this.fromPeer = result.chats[0];
+      if (this.fromPeer) {
+        this.sendLog("getChat", "caht", "add", false);
+      } else {
+        //console.log("chat已不存在了");  //测试
+        this.sendLog("getChat", "chat已不存在了", null, true);
+      }
+    } else {
+      //console.log("chat已不存在了");  //测试
+      this.sendLog("getChat", "chat已不存在了", null, true);
+    }
+  }
+
   async getMessage(tryCount) {
     try {
       // this.messageArray = [];
@@ -272,9 +317,10 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (e) {
       this.messageArray = [];
-      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
-        //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
-        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+      if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
+        this.fromPeer = null;
+        //console.log("chat已不存在了");  //测试
+        this.sendLog("getMessage", "chat已不存在了", null, true);
       } else {
         //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
         this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
@@ -292,44 +338,152 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async waitNext(time, flood) {
-    if (time && time > 0) {
-      if (flood === false) {
-        //console.log("(" + this.currentStep + ") 还需等待" + (time / 1000) + "秒");
-        this.sendLog("waitNext", "还需等待" + Math.ceil(time / 1000) + "秒", "wait", true);
+  async selectCodeError(tryCount, code) {
+    if (tryCount === 20) {
+      this.stop = 2;
+      //console.log("(" + this.currentStep + ")selectCode超出tryCount限制");
+      this.sendLog("selectCode", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.selectCode(tryCount + 1, code);
+    }
+  }
+
+  async selectCode(tryCount, code) {
+    this.apiCount += 1;
+    let codeResult = {};
+    try {
+      codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? LIMIT 1;").bind(code).run();
+    } catch (e) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
+      this.sendGrid("selectCode", "出错 : " + e.message, "try", true);
+      if (e.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.selectCodeError(tryCount, code);
       }
-      // const pingInterval = setInterval(function () {
-      //   // this.ws.ping();
-      //   this.ws.send("ping");
-      // }, 30000);
-      // await this.ctx.storage.setAlarm(30000);
-      // await scheduler.wait(time);
-      // clearInterval(pingInterval);
-      // await this.ctx.storage.deleteAlarm();
-      if (time > this.pingTime) {
-        // const timeLength = Math.floor(time / 60000);
-        const timeLength = Math.ceil(time / this.pingTime);
-        for (let i = 0; i < timeLength; i++) {
-          if (this.stop === 2) {
-            this.broadcast({
-              "result": "pause",
-            });
-            await this.close();
-            break;
+      return;
+    }
+    //console.log("codeResult : " + codeResult["COUNT(code)"]);  //测试
+    if (codeResult.success === true) {
+      if (codeResult.results && codeResult.results.length > 0) {
+        return codeResult.results[0]["COUNT(code)"];
+      }
+    } else {
+      await this.selectCodeError(tryCount, code);
+    }
+  }
+
+  async insertCodeError(tryCount, code) {
+    if (tryCount === 20) {
+      this.stop = 2;
+      //console.log("(" + this.currentStep + ")insertCode超出tryCount限制");
+      this.sendLog("insertCode", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      await this.insertCode(tryCount + 1, code);
+    }
+  }
+
+  async insertCode(tryCount, code) {
+    this.apiCount += 1;
+    let codeResult = {};
+    try {
+      codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (code, status) VALUES (?, ?);").bind(code, 0).run();
+    } catch (e) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode出错 : " + e);;
+      this.sendGrid("insertCode", "出错 : " + e.message, "try", true);
+      if (e.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.insertCodeError(tryCount, code);
+      }
+      return;
+    }
+    //console.log(codeResult);  //测试
+    if (codeResult.success === true) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据成功");
+      this.sendGrid("insertCode", "", "success", false);
+    } else {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据失败");
+      this.sendGrid("insertCode", "插入code数据失败", "error", true);
+      await this.insertCodeError(tryCount, code);
+    }
+  }
+
+  async nextMessage(messageLength, messageIndex, message) {
+    if (this.stop === 1) {
+      if (this.apiCount < 900) {
+        if (message) {
+          const messageId = message.id;
+          const entities = message.entities;
+          this.broadcast({
+            "step": this.currentStep,
+            "operate": "nextMessage",
+            // "messageLength": messageLength,
+            // "messageIndex": messageIndex,
+            "chatId": this.chatId,
+            "offsetId": this.offsetId,
+            "messageId": messageId,
+            "status": "add",
+            "date": new Date().getTime(),
+          });
+          if (entities) {
+            for (const item of entities) {
+              const url = item.url?.trim();
+              if (url) {
+                const string = url.split("https://t.me/Turnautobot?start=");
+                if (string.length === 2) {
+                  const code = string[1].replace("f_", "LH_").replace("F_", "LH_");
+                  if (code) {
+                    const codeCount = await this.selectCode(1, code);
+                    if (parseInt(codeCount) === 0) {
+                      await this.insertCode(1, code);
+                    } else {
+                      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
+                      this.sendGrid("nextMessage", "", "exist", false);
+                    }
+                  } else {
+                    //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : code为空");
+                    this.sendGrid("nextMessage", "code为空", "error", true);
+                  }
+                  break;
+                }
+              }
+            }
+            this.offsetId += 1;
           } else {
-            await scheduler.wait(this.pingTime);
-            // this.ws.ping();
-            // this.ws.send({
-            //   "result": "ping",
-            // });
-            this.broadcast({
-              "result": "ping",
-            });
+            //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
+            this.sendGrid("nextMessage", "txt为空", "error", true);
+            this.offsetId += 1;
           }
+        } else {
+          //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
+          this.sendGrid("nextMessage", "错误的消息", "error", true);
+          this.offsetId += 1;
         }
       } else {
-        await scheduler.wait(time);
+        this.stop = 2;
+        //console.log("(" + this.currentStep + ")nextMessage超出apiCount限制");
+        this.sendGrid("nextMessage", "超出apiCount限制", "limit", true);
+        await this.close();
+        // this.ctx.abort("reset");
       }
+    } else if (this.stop === 2) {
+      this.broadcast({
+        "result": "pause",
+      });
+      await this.close();
     }
   }
 
@@ -348,41 +502,23 @@ export class WebSocketServer extends DurableObject {
       //   this.sendLog("nextStep", "messageLength比limit大", null, true);
       // }
       if (messageLength && messageLength > 0) {
+        //console.log("(" + this.currentStep + ")messageLength : " + messageLength);
+        this.sendLog("nextStep", "messageLength : " + messageLength, null, false);
         if (this.stop === 1) {
-          let temp = null;
-          let status = false;
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-            if (messageArray[messageIndex]) {
-              const id = messageArray[messageIndex].id;
-              const message = messageArray[messageIndex].message.trim();
-              if (message) {
-                const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                const string = message.split(":");
-                if (string[0] === "DEANIgniteNations_bot_v") {
-                  await this.ctx.storage.put(message, 1);
-                  //console.log("(" + this.currentStep + ") 代码入库完毕");
-                  this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                } else if (regexp.test(message) === true) {
-                  temp = null;
-                  const text = message.replace("✅ 自动发送完成！成功 ", "");
-                  const regexp = /(\d+)/gi;
-                  const matches = message.match(regexp);
-                  if (matches) {
-                    if (matches.length === 2) {
-                      if (matches[0] === matches[1]) {
-                        temp = null;
-                      }
-                    } else {
-                      //console.log("(" + this.currentStep + ") " + text);
-                      this.sendForward("start", "", text, "update", false);
-                    }
-                  }
-                }
-              }
-            }
+            await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
+            // this.offsetId += 1;
           }
           if (this.stop === 1) {
-            await this.nextStep();
+            if (this.apiCount < 900) {
+              await this.nextStep();
+            } else {
+              this.stop = 2;
+              //console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
+              this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+              await this.close();
+              // this.ctx.abort("reset");
+            }
           } else if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -396,11 +532,6 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         }
       } else {
-        if (this.count > 0) {
-          this.offsetId += this.count;
-          this.count = 0;
-          await this.ctx.storage.put("offsetId", this.offsetId);
-        }
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
@@ -447,6 +578,7 @@ export class WebSocketServer extends DurableObject {
     this.init(option);
     // this.stop = 1;
     await this.open(1);
+    await this.getChat(1);
     if (this.fromPeer) {
       if (this.stop === 1) {
         this.currentStep += 1;
@@ -463,37 +595,19 @@ export class WebSocketServer extends DurableObject {
         // }
         if (messageLength && messageLength > 0) {
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
-            if (messageArray[messageIndex]) {
-              const id = messageArray[messageIndex].id;
-              const message = messageArray[messageIndex].message.trim();
-              if (message) {
-                const regexp = /✅ 自动发送完成！成功 \d+\/\d+/i;
-                const string = message.split(":");
-                if (string[0] === "DEANIgniteNations_bot_v") {
-                  await this.ctx.storage.put(message, 1);
-                  //console.log("(" + this.currentStep + ") 代码入库完毕");
-                  this.sendForward("start", "代码入库完毕", "", "add", false);
-                } else if (regexp.test(message) === true) {
-                  temp = null;
-                  const text = message.replace("✅ 自动发送完成！成功 ", "");
-                  const regexp = /(\d+)/gi;
-                  const matches = message.match(regexp);
-                  if (matches) {
-                    if (matches.length === 2) {
-                      if (matches[0] === matches[1]) {
-                        temp = null;
-                      }
-                    } else {
-                      //console.log("(" + this.currentStep + ") " + text);
-                      this.sendForward("start", "", text, "update", false);
-                    }
-                  }
-                }
-              }
-            }
+            await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
+            // this.offsetId += 1;
           }
           if (this.stop === 1) {
-            await this.nextStep();
+            if (this.apiCount < 900) {
+              await this.nextStep();
+            } else {
+              this.stop = 2;
+              //console.log("(" + this.currentStep + ")start超出apiCount限制");
+              this.sendLog("start", "超出apiCount限制", "limit", true);
+              await this.close();
+              // this.ctx.abort("reset");
+            }
           } else if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -501,11 +615,6 @@ export class WebSocketServer extends DurableObject {
             await this.close();
           }
         } else {
-          if (this.count > 0) {
-            this.offsetId += this.count;
-            this.count = 0;
-            await this.ctx.storage.put("offsetId", this.offsetId);
-          }
           //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
           this.sendLog("start", "没有获取到有效的消息", "error", true);
           if (this.stop === 1) {
@@ -524,8 +633,8 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       }
     } else {
-      //console.log("全部chat采集完毕");
-      this.sendLog("start", "全部chat采集完毕", null, false);
+      //console.log("查找不到fromPeer");
+      this.sendLog("start", "查找不到fromPeer", null, false);
       this.broadcast({
         "result": "over",
       });
@@ -586,9 +695,6 @@ export class WebSocketServer extends DurableObject {
   }
 
   async webSocketClose(ws, code, reason, wasClean) {
-    // if (this.stop === 1) {
-    //   await this.updateChat(1);
-    // }
     // this.stop = 0;
     ws.close(code, "Durable Object is closing WebSocket");
   }
@@ -607,7 +713,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("lockhiveCode");
+      const id = env.WEBSOCKET_SERVER.idFromName("lockhivecode");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

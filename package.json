@@ -25,6 +25,8 @@
     "deploy-user": "wrangler deploy -c ./wrangler-user.jsonc",
     "build-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc --dry-run --outdir=./bot/dist",
     "deploy-lockhive": "wrangler deploy -c ./wrangler-lockhive.jsonc",
+    "build-lockhivecode": "wrangler deploy -c ./wrangler-lockhivecode.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-lockhivecode": "wrangler deploy -c ./wrangler-lockhivecode.jsonc",
     "build-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc --dry-run --outdir=./bot/dist",
     "deploy-qqfile": "wrangler deploy -c ./wrangler-qqfile.jsonc",
     "build-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc --dry-run --outdir=./bot/dist",
