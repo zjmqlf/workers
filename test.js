@@ -135,6 +135,87 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
+  async selectMediaIndex(id) {
+    let mediaResult = {};
+    try {
+      mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= 0 ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
+    } catch (e) {
+      console.log("selectMediaIndex出错 : " + e);
+      return;
+    }
+    //console.log("mediaResult : " + mediaResult);  //测试
+    if (mediaResult.success === true) {
+      if (mediaResult.results && mediaResult.results.length > 0) {
+        return mediaResult.results;
+      } else {
+        return [];
+      }
+    }
+  }
+
+  async selectPhotoIndex(id) {
+    let photoResult = {};
+    try {
+      photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= 0 ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
+    } catch (e) {
+      console.log("selectPhotoIndex出错 : " + e);
+      return;
+    }
+    //console.log("photoResult : " + photoResult);  //测试
+    if (photoResult.success === true) {
+      if (photoResult.results && photoResult.results.length > 0) {
+        return photoResult.results;
+      } else {
+        return [];
+      }
+    }
+  }
+
+  async countMessage() {
+    const messageResult = await env.MEDIADB.prepare("SELECT COUNT(MESSAGE) FROM `MESSAGE` WHERE 1 = 1;").run();
+    //console.log("messageResult : " + messageResult["COUNT(MESSAGE)"]);  //测试
+    if (messageResult.success === true) {
+      if (messageResult.results && messageResult.results.length > 0) {
+        return messageResult.results[0]["COUNT(MESSAGE)"];
+      }
+    }
+    return -1;
+  }
+
+  async selectMessage(id) {
+    let messageResult = null;
+    try {
+      messageResult = await this.env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(id).run();
+    } catch (e) {
+      console.log("selectMessage出错 : " + e);
+      return;
+    }
+    //console.log("messageResult : " + messageResult);  //测试
+    if (messageResult.success === true) {
+      if (messageResult.results && messageResult.results.length > 0) {
+        return messageResult.results;
+      }
+    } else {
+        return [];
+    }
+  }
+
+  async insertMessageIndex(result) {
+    let messageResult = {};
+    try {
+      messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?, ?);").bind(1, result.userId, result.Mindex, result.id).run();
+    } catch (e) {
+      console.log("insertMessageIndex出错 : " + e);;
+      return;
+    }
+    //console.log(messageResult);  //测试
+    if (messageResult.success === true) {
+      console.log("插入messageIndex数据成功");
+    } else {
+      console.log("插入messageIndex数据失败");
+    }
+  }
+
   async fetch() {
     // await this.sql.exec(`
     //   CREATE TABLE IF NOT EXISTS artist(
@@ -155,27 +236,37 @@ export class WebSocketServer extends DurableObject {
     //   console.log(JSON.stringify(resultsArray[index]));
     // }
     // const oneRow = await this.sql.exec("SELECT * FROM artist WHERE artistname = ?;", "Alice").one();
-    await this.ctx.storage.deleteAll();
-    await this.ctx.storage.put("1", "111");
-    await this.ctx.storage.put("2", "222");
-    await this.ctx.storage.put("3", "333");
-    // await this.ctx.storage.get();
-    // await this.ctx.storage.delete();
-    console.log(await this.ctx.storage.get("1"));
-    const results = await this.ctx.storage.list({
-      // start: 0,
-      // startAfter: 0,
-      // end: 0,
-      // prefix: "",
-      // reverse : true,
-      // limit: 10,
-    });
-    for (const item of results) {
-      // console.log(JSON.stringify(item));
-      console.log(item[0] + " - " + item[1]);
+
+    // await this.ctx.storage.deleteAll();
+    // await this.ctx.storage.put("1", "111");
+    // await this.ctx.storage.put("2", "222");
+    // await this.ctx.storage.put("3", "333");
+    // // await this.ctx.storage.get();
+    // // await this.ctx.storage.delete();
+    // console.log(await this.ctx.storage.get("1"));
+    // const results = await this.ctx.storage.list({
+    //   // start: 0,
+    //   // startAfter: 0,
+    //   // end: 0,
+    //   // prefix: "",
+    //   // reverse : true,
+    //   // limit: 10,
+    // });
+    // for (const item of results) {
+    //   // console.log(JSON.stringify(item));
+    //   console.log(item[0] + " - " + item[1]);
+    // }
+    // // console.log(JSON.stringify(results));
+
+    let id = 0;
+    const count = await this.countMessage();
+    const results = await this.selectMessage(id);
+    const length = results.length;
+    console.log("id - " + length);
+    for (let index = 0; index < length; index++) {
+      // console.log(JSON.stringify(results[index]));
+      await this.insertMessageIndex(results[index]);
     }
-    // console.log(JSON.stringify(results));
-    return new Response(JSON.stringify(results));
 
     // const client = this.client;
     // async function* fetchData() {
@@ -260,7 +351,7 @@ export class WebSocketServer extends DurableObject {
     //   }
     // }
 
-    // return new Response("ok");
+    return new Response("ok");
   }
 }
 

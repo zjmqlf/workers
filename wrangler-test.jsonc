@@ -14,12 +14,12 @@
   ],
   "preview_urls": false,
   "workers_dev": true,
-  /**
   "d1_databases": [
     {
       "binding": "MAINDB",
       "database_name": "maindb",
       "database_id": "97d41e14-a9b6-45a9-b5cc-f60eb29acc02"
+  /**
     },
     {
       "binding": "MEDIADB13",
@@ -55,9 +55,9 @@
       "binding": "MEDIADB19",
       "database_name": "media19",
       "database_id": "9afe975b-2ec7-4d9b-99f2-6d93f28d1939"
+  */
     }
   ],
-  */
   "durable_objects": {
     "bindings": [
       {
