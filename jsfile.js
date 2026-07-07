@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./string/aotemString";
+import { codeString } from "./string/jsfileString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -789,8 +789,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const string = message.split(":");
-                    if (string[0] === "aotem_bot") {
+                    if (message.substr(0, 11) === "JSfile_bot_") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
@@ -876,8 +875,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8938703432"),
-              accessHash: bigInt("-1693611293010661294"),
+              userId: bigInt("8387944209"),
+              accessHash: bigInt("8200926976721649317"),
             }),
           ],
         })
@@ -1015,8 +1014,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const string = message.split(":");
-                      if (string[0] === "aotem_bot") {
+                      if (message.substr(0, 11) === "JSfile_bot_") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
@@ -1215,7 +1213,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("aotem");
+      const id = env.WEBSOCKET_SERVER.idFromName("jsfile");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

@@ -55,6 +55,15 @@ npm run deploy-qqfile
 npm run build-fileport
 npm run deploy-fileport
 
+npm run build-jsfile
+npm run deploy-jsfile
+
+npm run build-palucode
+npm run deploy-palucode
+
+npm run build-siren
+npm run deploy-siren
+
 npm run build-tebiejie
 npm run deploy-tebiejie
 

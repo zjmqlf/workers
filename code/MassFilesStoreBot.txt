@@ -64,5 +64,7 @@
   "Mass_Files_Store_Bot_U1c0urDYlVUr_F4C",
   "Mass_Files_Store_Bot_MAPKu_HJIxTO9dJZ",
   "Mass_Files_Store_Bot_YG_EeDprt53GwCya",
-  "Mass_Files_Store_Bot_yQKKpVT8Ce8Xyrw5"
+  "Mass_Files_Store_Bot_yQKKpVT8Ce8Xyrw5",
+  "Mass_Files_Store_Bot_L0Y8Tjn6adn_mJgL",
+  "Mass_Files_Store_Bot_Gdgo_kEY7zjtUR0g"
 ]

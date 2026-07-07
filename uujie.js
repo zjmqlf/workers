@@ -686,8 +686,8 @@ export class WebSocketServer extends DurableObject {
       });
       await this.close();
     } else {
-      if (this.queue === true) {
-        for (let i = 0; i < 10; i++) {
+      // if (this.queue === true) {
+        for (let i = 0; i < 6; i++) {
           if (this.stop === 2) {
             this.broadcast({
               "result": "pause",
@@ -705,9 +705,9 @@ export class WebSocketServer extends DurableObject {
             });
           }
         }
-      } else {
-        await scheduler.wait(5000);
-      }
+      // } else {
+      //   await scheduler.wait(5000);
+      // }
       await this.nextStep();
     }
   }
@@ -826,9 +826,9 @@ export class WebSocketServer extends DurableObject {
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
-          if (this.queue === false) {
+          // if (this.queue === false) {
             await this.sendQuery(1);
-          }
+          // }
           await this.endStep("nextStep");
         } else if (this.stop === 2) {
           this.broadcast({
@@ -1046,9 +1046,9 @@ export class WebSocketServer extends DurableObject {
             //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
             this.sendLog("start", "没有获取到有效的消息", "error", true);
             if (this.stop === 1) {
-              if (this.queue === false) {
+              // if (this.queue === false) {
                 await this.sendQuery(1);
-              }
+              // }
               await this.endStep("start");
             } else if (this.stop === 2) {
               this.broadcast({

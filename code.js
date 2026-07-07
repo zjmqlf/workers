@@ -36,6 +36,7 @@ const aotembot = [];
 const jiematopbot = [];
 const UUjiebot = [];
 const safsadfbot = [];
+const sirenbot = [];
 // const Zhuahihaibot = [];
 // const REDDFILEBOT = [];
 const wenjianjibot = [];
@@ -59,228 +60,235 @@ const mediaBK2Bot = [];
 const mouseFilebot = [];
 const dataPanBot = [];
 const filesPan1Bot = [];
-const showfilesbotRegexp = /(showfilesbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //showfilesbot
-const showfiles3botRegexp = /(showfiles3bot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //showfiles3bot
-const tgjmq1botRegexp = /(tgjmq1bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/gi;   //tgjmq1bot
-const tgjmq3botRegexp = /(tgjmq3bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/gi;   //tgjmq3bot
-const tgjmq5botRegexp = /(tgjmq5bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/gi;   //tgjmq5bot
-const tgjmq01botRegexp = /(tgjmq01bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/gi;   //tgjmq01bot
-const blgjlqbotRegexp = /(blgjlqbot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/gi;   //blgjlqbot
-const fileLeakBotRegexp = /(fileLeakBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //fileLeakBot
-const nnfilebotRegexp = /(nnfilebot_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]{12})/gi;   //nnfilebot
-const tangBRebotRegexp = /(TangBRebot_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tangBRebot
-const decoderrobotRegexp = /(files_\d+v_\d+p_\d+d_[a-z0-9]{12})/gi;   //decoderrobot
-// const tebiejie1botRegexp = /(tebiejie1_\d*V*\d*P*\d*D*_[A-Za-z0-9]{22})/gi;   //tebiejie1bot
-// const tebiejie3botRegexp = /(tebiejie3bot_\d+V_\d+P_\d+D_[A-Za-z0-9]{12})/gi;   //tebiejie3bot
-const mmyzybot1Regexp = /(mmyzy_bot_v:[A-Za-z0-9]{32})/gi;   //mmyzybot
-const mmyzybot2Regexp = /(mmyzy_bot_p:[A-Za-z0-9]{32})/gi;   //mmyzybot
-const mmyzybot3Regexp = /(mmyzy_bot_d:[A-Za-z0-9]{32})/gi;   //mmyzybot
-const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/gi;   //mmyzybot
-const paniangbot1Regexp = /(paniang_bot_v:[A-Za-z0-9]{32})/gi;   //paniangbot
-const paniangbot2Regexp = /(paniang_bot_p:[A-Za-z0-9]{32})/gi;   //paniangbot
-const paniangbot3Regexp = /(paniang_bot_d:[A-Za-z0-9]{32})/gi;   //paniangbot
-const paniangbot4Regexp = /(paniang_bot_col:[A-Za-z0-9]{32})/gi;   //paniangbot
-// const kkjmqmbot1Regexp = /(kkjmqmbot_v:[A-Za-z0-9]{32})/gi;   //kkjmqmbot
-// const kkjmqmbot2Regexp = /(kkjmqmbot_p:[A-Za-z0-9]{32})/gi;   //kkjmqmbot
-// const kkjmqmbot3Regexp = /(kkjmqmbot_d:[A-Za-z0-9]{32})/gi;   //kkjmqmbot
-// const kkjmqmbot4Regexp = /(kkjmqmbot_col:[A-Za-z0-9]{32})/gi;   //kkjmqmbot
-// const KodeXFilesbot1Regexp = /(KodeXFiles_bot_v:[A-Za-z0-9]{32})/gi;   //KodeXFilesbot
-// const KodeXFilesbot2Regexp = /(KodeXFiles_bot_p:[A-Za-z0-9]{32})/gi;   //KodeXFilesbot
-// const KodeXFilesbot3Regexp = /(KodeXFiles_bot_d:[A-Za-z0-9]{32})/gi;   //KodeXFilesbot
-// const KodeXFilesbot4Regexp = /(KodeXFiles_bot_col:[A-Za-z0-9]{32})/gi;   //KodeXFilesbot
-// const kodexfilebot1Regexp = /(kodexfilebot_v:[A-Za-z0-9]{32})/gi;   //kodexfilebot
-// const kodexfilebot2Regexp = /(kodexfilebot_p:[A-Za-z0-9]{32})/gi;   //kodexfilebot
-// const kodexfilebot3Regexp = /(kodexfilebot_d:[A-Za-z0-9]{32})/gi;   //kodexfilebot
-// const kodexfilebot4Regexp = /(kodexfilebot_col:[A-Za-z0-9]{32})/gi;   //kodexfilebot
-// const KodeXMedia1bot1Regexp = /(KodeXMedia1bot_v:[A-Za-z0-9]{32})/gi;   //KodeXMedia1bot
-// const KodeXMedia1bot2Regexp = /(KodeXMedia1bot_p:[A-Za-z0-9]{32})/gi;   //KodeXMedia1bot
-// const KodeXMedia1bot3Regexp = /(KodeXMedia1bot_d:[A-Za-z0-9]{32})/gi;   //KodeXMedia1bot
-// const KodeXMedia1bot4Regexp = /(KodeXMedia1bot_col:[A-Za-z0-9]{32})/gi;   //KodeXMedia1bot
-// const AllXFilesbot1Regexp = /(AllXFilesbot_v:[A-Za-z0-9]{32})/gi;   //AllXFilesbot
-// const AllXFilesbot2Regexp = /(AllXFilesbot_p:[A-Za-z0-9]{32})/gi;   //AllXFilesbot
-// const AllXFilesbot3Regexp = /(AllXFilesbot_d:[A-Za-z0-9]{32})/gi;   //AllXFilesbot
-// const AllXFilesbot4Regexp = /(AllXFilesbot_col:[A-Za-z0-9]{32})/gi;   //AllXFilesbot
-// const MediaXFilebot1Regexp = /(MediaXFilebot_v:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
-// const MediaXFilebot2Regexp = /(MediaXFilebot_p:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
-// const MediaXFilebot3Regexp = /(MediaXFilebot_d:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
-// const MediaXFilebot4Regexp = /(MediaXFilebot_col:[A-Za-z0-9]{32})/gi;   //MediaXFilebot
-const KodeXFiles2bot1Regexp = /(KodeXFiles2bot_v:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-const KodeXFiles2bot2Regexp = /(KodeXFiles2bot_p:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-const KodeXFiles2bot3Regexp = /(KodeXFiles2bot_d:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-const KodeXFiles2bot4Regexp = /(KodeXFiles2bot_col:[A-Za-z0-9]{32})/gi;   //KodeXFiles2bot
-// const DEANIgniteNationsbot1Regexp = /(DEANIgniteNations_bot_v:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
-// const DEANIgniteNationsbot2Regexp = /(DEANIgniteNations_bot_p:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
-// const DEANIgniteNationsbot3Regexp = /(DEANIgniteNations_bot_d:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
-// const DEANIgniteNationsbot4Regexp = /(DEANIgniteNations_bot_col:[A-Za-z0-9]{32})/gi;   //DEANIgniteNationsbot
-const RyumaSepongMilkubot1Regexp = /(RyumaSepongMilku_bot_v:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
-const RyumaSepongMilkubot2Regexp = /(RyumaSepongMilku_bot_p:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
-const RyumaSepongMilkubot3Regexp = /(RyumaSepongMilku_bot_d:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
-const RyumaSepongMilkubot4Regexp = /(RyumaSepongMilku_bot_col:[A-Za-z0-9]{32})/gi;   //RyumaSepongMilkubot
-// const HikkiTusbolPaijobot1Regexp = /(HikkiTusbolPaijo_bot_v:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
-// const HikkiTusbolPaijobot2Regexp = /(HikkiTusbolPaijo_bot_p:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
-// const HikkiTusbolPaijobot3Regexp = /(HikkiTusbolPaijo_bot_d:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
-// const HikkiTusbolPaijobot4Regexp = /(HikkiTusbolPaijo_bot_col:[A-Za-z0-9]{32})/gi;   //HikkiTusbolPaijobot
-const LunindiaCipokSuprettobot1Regexp = /(LunindiaCipokSupretto_bot_v:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
-const LunindiaCipokSuprettobot2Regexp = /(LunindiaCipokSupretto_bot_p:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
-const LunindiaCipokSuprettobot3Regexp = /(LunindiaCipokSupretto_bot_d:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
-const LunindiaCipokSuprettobot4Regexp = /(LunindiaCipokSupretto_bot_col:[A-Za-z0-9]{32})/gi;   //LunindiaCipokSuprettobot
-// const PaijoKontolBurikbot1Regexp = /(PaijoKontolBurik_bot_v:[A-Za-z0-9]{32})/gi;   //PaijoKontolBurikbot
-// const PaijoKontolBurikbot2Regexp = /(PaijoKontolBurik_bot_p:[A-Za-z0-9]{32})/gi;   //PaijoKontolBurikbot
-// const PaijoKontolBurikbot3Regexp = /(PaijoKontolBurik_bot_d:[A-Za-z0-9]{32})/gi;   //PaijoKontolBurikbot
-// const PaijoKontolBurikbot4Regexp = /(PaijoKontolBurik_bot_col:[A-Za-z0-9]{32})/gi;   //PaijoKontolBurikbot
-const Steviarchiverbot1Regexp = /(mov_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
-const Steviarchiverbot2Regexp = /(pic_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
-const Steviarchiverbot3Regexp = /(grp_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
-const Steviarchiverbot4Regexp = /(gif_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
-const Steviarchiverbot5Regexp = /(doc_\d+_[A-Za-z0-9]{8})/gi;   //Steviarchiverbot
-const DghuddvhiBOTRegexp = /(DghuddvhiBOT:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //DghuddvhiBOT
-const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //Hijautebalbot
-const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //filespanindobot
-const KodeXChatsINDbotRegexp = /(KodeXChatsINDbot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //KodeXChatsINDbot
-const FilesHubRobotRegexp = /(FilesHub_Robot_[a-z0-9]{20})/gi;   //FilesHubRobot
-const MassFilesStoreBotRegexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/gi;   //MassFilesStoreBot
-const betapahatitakbahagiabotRegexp = /(betapahatitakbahagia_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/gi;   //betapahatitakbahagiabot
-const QQfilebotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/gi;   //QQfilebot
-// const QQfilebot1Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/gi;   //QQfilebot
-// const QQfilebot2Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/gi;   //QQfilebot
-// const QQfilebot3Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V_\d*D)/gi;   //QQfilebot
-// const QQfilebot4Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V)/gi;   //QQfilebot
-// const QQfilebot5Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P)/gi;   //QQfilebot
-// const QQfilebot6Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/gi;   //QQfilebot
-// const QQfilebot7Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/gi;   //QQfilebot
-// const QQfile2botRegexp = /(QQfile2_bot:[a-z0-9]{12})/gi;   //QQfile2bot
-const QQfile2bot1Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*V_\d*D)/gi;   //QQfile2bot
-const QQfile2bot2Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*D)/gi;   //QQfile2bot
-const QQfile2bot3Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*V_\d*D)/gi;   //QQfile2bot
-const QQfile2bot4Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*V)/gi;   //QQfile2bot
-const QQfile2bot5Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P)/gi;   //QQfile2bot
-const QQfile2bot6Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*V)/gi;   //QQfile2bot
-const QQfile2bot7Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*D)/gi;   //QQfile2bot
-// const QQfile4botRegexp = /(QQfile4_bot:[a-z0-9]{12})/gi;   //QQfile4bot
-const QQfile4bot1Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*V_\d*D)/gi;   //QQfile4bot
-const QQfile4bot2Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*D)/gi;   //QQfile4bot
-const QQfile4bot3Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*V_\d*D)/gi;   //QQfile4bot
-const QQfile4bot4Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*V)/gi;   //QQfile4bot
-const QQfile4bot5Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P)/gi;   //QQfile4bot
-const QQfile4bot6Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*V)/gi;   //QQfile4bot
-const QQfile4bot7Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*D)/gi;   //QQfile4bot
-// const QQfile10botRegexp = /(QQfile10_bot:[a-z0-9]{12})/gi;   //QQfile10bot
-const QQfile10bot1Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQfile10bot
-const QQfile10bot2Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQfile10bot
-const QQfile10bot3Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQfile10bot
-const QQfile10bot4Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQfile10bot
-const QQfile10bot5Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P)/gi;   //QQfile10bot
-const QQfile10bot6Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*V)/gi;   //QQfile10bot
-const QQfile10bot7Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*D)/gi;   //QQfile10bot
-// const QQfile11botRegexp = /(QQfile11_bot:[a-z0-9]{12})/gi;   //QQfile11bot
-const QQfile11bot1Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQfile11bot
-const QQfile11bot2Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQfile11bot
-const QQfile11bot3Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQfile11bot
-const QQfile11bot4Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQfile11bot
-const QQfile11bot5Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P)/gi;   //QQfile11bot
-const QQfile11bot6Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*V)/gi;   //QQfile11bot
-const QQfile11bot7Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*D)/gi;   //QQfile11bot
-// const QQn8zwbotRegexp = /(QQn8zw_bot:[a-z0-9]{12})/gi;   //QQn8zwbot
-const QQn8zwbot1Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQn8zwbot
-const QQn8zwbot2Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQn8zwbot
-const QQn8zwbot3Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQn8zwbot
-const QQn8zwbot4Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQn8zwbot
-const QQn8zwbot5Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P)/gi;   //QQn8zwbot
-const QQn8zwbot6Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*V)/gi;   //QQn8zwbot
-const QQn8zwbot7Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*D)/gi;   //QQn8zwbot
-// const QQirfubotRegexp = /(QQirfu_bot:[a-z0-9]{12})/gi;   //QQirfubot
-const QQirfubot1Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQirfubot
-const QQirfubot2Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQirfubot
-const QQirfubot3Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQirfubot
-const QQirfubot4Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQirfubot
-const QQirfubot5Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P)/gi;   //QQirfubot
-const QQirfubot6Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*V)/gi;   //QQirfubot
-const QQirfubot7Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*D)/gi;   //QQirfubot
-// const QQz32obotRegexp = /(QQz32o_bot:[a-z0-9]{12})/gi;   //QQz32obot
-const QQz32obot1Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQz32obot
-const QQz32obot2Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQz32obot
-const QQz32obot3Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQz32obot
-const QQz32obot4Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQz32obot
-const QQz32obot5Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P)/gi;   //QQz32obot
-const QQz32obot6Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*V)/gi;   //QQz32obot
-const QQz32obot7Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*D)/gi;   //QQz32obot
-// const QQdvbkbotRegexp = /(QQdvbk_bot:[a-z0-9]{12})/gi;   //QQdvbkbot
-const QQdvbkbot1Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQdvbkbot
-const QQdvbkbot2Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQdvbkbot
-const QQdvbkbot3Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQdvbkbot
-const QQdvbkbot4Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQdvbkbot
-const QQdvbkbot5Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P)/gi;   //QQdvbkbot
-const QQdvbkbot6Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*V)/gi;   //QQdvbkbot
-const QQdvbkbot7Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*D)/gi;   //QQdvbkbot
-// const QQer16botRegexp = /(QQer16_bot:[a-z0-9]{12})/gi;   //QQer16bot
-const QQer16bot1Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQer16bot
-const QQer16bot2Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQer16bot
-const QQer16bot3Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQer16bot
-const QQer16bot4Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQer16bot
-const QQer16bot5Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P)/gi;   //QQer16bot
-const QQer16bot6Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V)/gi;   //QQer16bot
-const QQer16bot7Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*D)/gi;   //QQer16bot
-// const QQan4cbotRegexp = /(QQan4c_bot:[a-z0-9]{12})/gi;   //QQan4cbot
-const QQan4cbot1Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQan4cbot
-const QQan4cbot2Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQan4cbot
-const QQan4cbot3Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQan4cbot
-const QQan4cbot4Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQan4cbot
-const QQan4cbot5Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P)/gi;   //QQan4cbot
-const QQan4cbot6Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*V)/gi;   //QQan4cbot
-const QQan4cbot7Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*D)/gi;   //QQan4cbot
-// const QQld90botRegexp = /(QQld90_bot:[a-z0-9]{12})/gi;   //QQld90bot
-const QQld90bot1Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/gi;   //QQld90bot
-const QQld90bot2Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*D)/gi;   //QQld90bot
-const QQld90bot3Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V_\d*D)/gi;   //QQld90bot
-const QQld90bot4Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V)/gi;   //QQld90bot
-const QQld90bot5Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P)/gi;   //QQld90bot
-const QQld90bot6Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V)/gi;   //QQld90bot
-const QQld90bot7Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*D)/gi;   //QQld90bot
-const aotembotRegexp = /(aotem_bot:[\-_A-Za-z0-9]{16})/gi;   //aotembot
-const jiematopbotRegexp = /(jiematopbot:[\-_A-Za-z0-9]{16})/gi;   //jiematopbot
-const UUjiebotRegexp = /(UUjiebot:[\-_A-Za-z0-9]{16})/gi;   //UUjiebot
-const safsadfbotRegexp = /(safsadfbot:[\-_A-Za-z0-9]{16})/gi;   //safsadfbot
-// // const ZhuahihaibotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/gi;   //Zhuahihaibot
-// const Zhuahihaibot1Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/gi;   //Zhuahihaibot
-// const Zhuahihaibot2Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/gi;   //Zhuahihaibot
-// const Zhuahihaibot3Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V_\d*D)/gi;   //Zhuahihaibot
-// const Zhuahihaibot4Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V)/gi;   //Zhuahihaibot
-// const Zhuahihaibot5Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P)/gi;   //Zhuahihaibot
-// const Zhuahihaibot6Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/gi;   //Zhuahihaibot
-// const Zhuahihaibot7Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/gi;   //Zhuahihaibot
-// const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/gi;    //REDDFILEBOT
-const wenjianjibotRegexp = /(wenjianjibot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{16})/gi;   //wenjianjibot
-const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/gi;   //amumujiemabot
-const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/gi;   //parludecodingBot
-const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //teestpanbot
-const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/gi;   //atfileslinksbot
-const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{19})/gi;   //lockHivebot
-const lockHivebot2Regexp = /(LH_[A-Za-z0-9]{16})/gi;   //lockHivebot
-const lockHivebot3Regexp = /(LockHivebot_[A-Za-z0-9]{16})/gi;   //lockHivebot
-const lockHivebot4Regexp = /(f_[A-Za-z0-9]{16})/gi;   //lockHivebot
-const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/gi;   //tgdecoderbot
-// const tgdecoderbot1Regexp = /([a-z0-9]{32})/gi;   //tgdecoderbot
-const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/gi;   //xiumi1bot
-const ZYXFilesBot1Regexp = /(📌 取件码：[A-Za-z0-9]+)/gi;   //ZYXFilesBot
+const showfilesbotRegexp = /(showfilesbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/g;   //showfilesbot
+const showfiles3botRegexp = /(showfiles3bot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/g;   //showfiles3bot
+const tgjmq1botRegexp = /(tgjmq1bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq1bot
+const tgjmq3botRegexp = /(tgjmq3bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq3bot
+const tgjmq5botRegexp = /(tgjmq5bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq5bot
+const tgjmq01botRegexp = /(tgjmq01bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq01bot
+const blgjlqbotRegexp = /(blgjlqbot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/g;   //blgjlqbot
+const fileLeakBotRegexp = /(fileLeakBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //fileLeakBot
+const nnfilebotRegexp = /(nnfilebot_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]{12})/g;   //nnfilebot
+const tangBRebotRegexp = /(TangBRebot_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tangBRebot
+const decoderrobotRegexp = /(files_\d+v_\d+p_\d+d_[a-z0-9]{12})/g;   //decoderrobot
+// const tebiejie1botRegexp = /(tebiejie1_\d*V*\d*P*\d*D*_[A-Za-z0-9]{22})/g;   //tebiejie1bot
+// const tebiejie3botRegexp = /(tebiejie3bot_\d+V_\d+P_\d+D_[A-Za-z0-9]{12})/g;   //tebiejie3bot
+const mmyzybot1Regexp = /(mmyzy_bot_v:[A-Za-z0-9]{32})/g;   //mmyzybot
+const mmyzybot2Regexp = /(mmyzy_bot_p:[A-Za-z0-9]{32})/g;   //mmyzybot
+const mmyzybot3Regexp = /(mmyzy_bot_d:[A-Za-z0-9]{32})/g;   //mmyzybot
+const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/g;   //mmyzybot
+const paniangbot1Regexp = /(paniang_bot_v:[A-Za-z0-9]{32})/g;   //paniangbot
+const paniangbot2Regexp = /(paniang_bot_p:[A-Za-z0-9]{32})/g;   //paniangbot
+const paniangbot3Regexp = /(paniang_bot_d:[A-Za-z0-9]{32})/g;   //paniangbot
+const paniangbot4Regexp = /(paniang_bot_col:[A-Za-z0-9]{32})/g;   //paniangbot
+// const kkjmqmbot1Regexp = /(kkjmqmbot_v:[A-Za-z0-9]{32})/g;   //kkjmqmbot
+// const kkjmqmbot2Regexp = /(kkjmqmbot_p:[A-Za-z0-9]{32})/g;   //kkjmqmbot
+// const kkjmqmbot3Regexp = /(kkjmqmbot_d:[A-Za-z0-9]{32})/g;   //kkjmqmbot
+// const kkjmqmbot4Regexp = /(kkjmqmbot_col:[A-Za-z0-9]{32})/g;   //kkjmqmbot
+// const KodeXFilesbot1Regexp = /(KodeXFiles_bot_v:[A-Za-z0-9]{32})/g;   //KodeXFilesbot
+// const KodeXFilesbot2Regexp = /(KodeXFiles_bot_p:[A-Za-z0-9]{32})/g;   //KodeXFilesbot
+// const KodeXFilesbot3Regexp = /(KodeXFiles_bot_d:[A-Za-z0-9]{32})/g;   //KodeXFilesbot
+// const KodeXFilesbot4Regexp = /(KodeXFiles_bot_col:[A-Za-z0-9]{32})/g;   //KodeXFilesbot
+// const kodexfilebot1Regexp = /(kodexfilebot_v:[A-Za-z0-9]{32})/g;   //kodexfilebot
+// const kodexfilebot2Regexp = /(kodexfilebot_p:[A-Za-z0-9]{32})/g;   //kodexfilebot
+// const kodexfilebot3Regexp = /(kodexfilebot_d:[A-Za-z0-9]{32})/g;   //kodexfilebot
+// const kodexfilebot4Regexp = /(kodexfilebot_col:[A-Za-z0-9]{32})/g;   //kodexfilebot
+// const KodeXMedia1bot1Regexp = /(KodeXMedia1bot_v:[A-Za-z0-9]{32})/g;   //KodeXMedia1bot
+// const KodeXMedia1bot2Regexp = /(KodeXMedia1bot_p:[A-Za-z0-9]{32})/g;   //KodeXMedia1bot
+// const KodeXMedia1bot3Regexp = /(KodeXMedia1bot_d:[A-Za-z0-9]{32})/g;   //KodeXMedia1bot
+// const KodeXMedia1bot4Regexp = /(KodeXMedia1bot_col:[A-Za-z0-9]{32})/g;   //KodeXMedia1bot
+// const AllXFilesbot1Regexp = /(AllXFilesbot_v:[A-Za-z0-9]{32})/g;   //AllXFilesbot
+// const AllXFilesbot2Regexp = /(AllXFilesbot_p:[A-Za-z0-9]{32})/g;   //AllXFilesbot
+// const AllXFilesbot3Regexp = /(AllXFilesbot_d:[A-Za-z0-9]{32})/g;   //AllXFilesbot
+// const AllXFilesbot4Regexp = /(AllXFilesbot_col:[A-Za-z0-9]{32})/g;   //AllXFilesbot
+// const MediaXFilebot1Regexp = /(MediaXFilebot_v:[A-Za-z0-9]{32})/g;   //MediaXFilebot
+// const MediaXFilebot2Regexp = /(MediaXFilebot_p:[A-Za-z0-9]{32})/g;   //MediaXFilebot
+// const MediaXFilebot3Regexp = /(MediaXFilebot_d:[A-Za-z0-9]{32})/g;   //MediaXFilebot
+// const MediaXFilebot4Regexp = /(MediaXFilebot_col:[A-Za-z0-9]{32})/g;   //MediaXFilebot
+const KodeXFiles2bot1Regexp = /(KodeXFiles2bot_v:[A-Za-z0-9]{32})/g;   //KodeXFiles2bot
+const KodeXFiles2bot2Regexp = /(KodeXFiles2bot_p:[A-Za-z0-9]{32})/g;   //KodeXFiles2bot
+const KodeXFiles2bot3Regexp = /(KodeXFiles2bot_d:[A-Za-z0-9]{32})/g;   //KodeXFiles2bot
+const KodeXFiles2bot4Regexp = /(KodeXFiles2bot_col:[A-Za-z0-9]{32})/g;   //KodeXFiles2bot
+// const DEANIgniteNationsbot1Regexp = /(DEANIgniteNations_bot_v:[A-Za-z0-9]{32})/g;   //DEANIgniteNationsbot
+// const DEANIgniteNationsbot2Regexp = /(DEANIgniteNations_bot_p:[A-Za-z0-9]{32})/g;   //DEANIgniteNationsbot
+// const DEANIgniteNationsbot3Regexp = /(DEANIgniteNations_bot_d:[A-Za-z0-9]{32})/g;   //DEANIgniteNationsbot
+// const DEANIgniteNationsbot4Regexp = /(DEANIgniteNations_bot_col:[A-Za-z0-9]{32})/g;   //DEANIgniteNationsbot
+const RyumaSepongMilkubot1Regexp = /(RyumaSepongMilku_bot_v:[A-Za-z0-9]{32})/g;   //RyumaSepongMilkubot
+const RyumaSepongMilkubot2Regexp = /(RyumaSepongMilku_bot_p:[A-Za-z0-9]{32})/g;   //RyumaSepongMilkubot
+const RyumaSepongMilkubot3Regexp = /(RyumaSepongMilku_bot_d:[A-Za-z0-9]{32})/g;   //RyumaSepongMilkubot
+const RyumaSepongMilkubot4Regexp = /(RyumaSepongMilku_bot_col:[A-Za-z0-9]{32})/g;   //RyumaSepongMilkubot
+// const HikkiTusbolPaijobot1Regexp = /(HikkiTusbolPaijo_bot_v:[A-Za-z0-9]{32})/g;   //HikkiTusbolPaijobot
+// const HikkiTusbolPaijobot2Regexp = /(HikkiTusbolPaijo_bot_p:[A-Za-z0-9]{32})/g;   //HikkiTusbolPaijobot
+// const HikkiTusbolPaijobot3Regexp = /(HikkiTusbolPaijo_bot_d:[A-Za-z0-9]{32})/g;   //HikkiTusbolPaijobot
+// const HikkiTusbolPaijobot4Regexp = /(HikkiTusbolPaijo_bot_col:[A-Za-z0-9]{32})/g;   //HikkiTusbolPaijobot
+const LunindiaCipokSuprettobot1Regexp = /(LunindiaCipokSupretto_bot_v:[A-Za-z0-9]{32})/g;   //LunindiaCipokSuprettobot
+const LunindiaCipokSuprettobot2Regexp = /(LunindiaCipokSupretto_bot_p:[A-Za-z0-9]{32})/g;   //LunindiaCipokSuprettobot
+const LunindiaCipokSuprettobot3Regexp = /(LunindiaCipokSupretto_bot_d:[A-Za-z0-9]{32})/g;   //LunindiaCipokSuprettobot
+const LunindiaCipokSuprettobot4Regexp = /(LunindiaCipokSupretto_bot_col:[A-Za-z0-9]{32})/g;   //LunindiaCipokSuprettobot
+// const PaijoKontolBurikbot1Regexp = /(PaijoKontolBurik_bot_v:[A-Za-z0-9]{32})/g;   //PaijoKontolBurikbot
+// const PaijoKontolBurikbot2Regexp = /(PaijoKontolBurik_bot_p:[A-Za-z0-9]{32})/g;   //PaijoKontolBurikbot
+// const PaijoKontolBurikbot3Regexp = /(PaijoKontolBurik_bot_d:[A-Za-z0-9]{32})/g;   //PaijoKontolBurikbot
+// const PaijoKontolBurikbot4Regexp = /(PaijoKontolBurik_bot_col:[A-Za-z0-9]{32})/g;   //PaijoKontolBurikbot
+const Steviarchiverbot1Regexp = /(mov_\d+_[A-Za-z0-9]{8})/g;   //Steviarchiverbot
+const Steviarchiverbot2Regexp = /(pic_\d+_[A-Za-z0-9]{8})/g;   //Steviarchiverbot
+const Steviarchiverbot3Regexp = /(grp_\d+_[A-Za-z0-9]{8})/g;   //Steviarchiverbot
+const Steviarchiverbot4Regexp = /(gif_\d+_[A-Za-z0-9]{8})/g;   //Steviarchiverbot
+const Steviarchiverbot5Regexp = /(doc_\d+_[A-Za-z0-9]{8})/g;   //Steviarchiverbot
+const DghuddvhiBOTRegexp = /(DghuddvhiBOT:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //DghuddvhiBOT
+const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //Hijautebalbot
+const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //filespanindobot
+const KodeXChatsINDbotRegexp = /(KodeXChatsINDbot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //KodeXChatsINDbot
+const FilesHubRobotRegexp = /(FilesHub_Robot_[a-z0-9]{20})/g;   //FilesHubRobot
+const MassFilesStoreBotRegexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/g;   //MassFilesStoreBot
+const betapahatitakbahagiabotRegexp = /(betapahatitakbahagia_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //betapahatitakbahagiabot
+const QQfilebotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/g;   //QQfilebot
+// const QQfilebot1Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/g;   //QQfilebot
+// const QQfilebot2Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/g;   //QQfilebot
+// const QQfilebot3Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V_\d*D)/g;   //QQfilebot
+// const QQfilebot4Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V)/g;   //QQfilebot
+// const QQfilebot5Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P)/g;   //QQfilebot
+// const QQfilebot6Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/g;   //QQfilebot
+// const QQfilebot7Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/g;   //QQfilebot
+// const QQfile2botRegexp = /(QQfile2_bot:[a-z0-9]{12})/g;   //QQfile2bot
+const QQfile2bot1Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*V_\d*D)/g;   //QQfile2bot
+const QQfile2bot2Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*D)/g;   //QQfile2bot
+const QQfile2bot3Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*V_\d*D)/g;   //QQfile2bot
+const QQfile2bot4Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P_\d*V)/g;   //QQfile2bot
+const QQfile2bot5Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*P)/g;   //QQfile2bot
+const QQfile2bot6Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*V)/g;   //QQfile2bot
+const QQfile2bot7Regexp = /(QQfile2_bot:[a-z0-9]{12}_\d*D)/g;   //QQfile2bot
+// const QQfile4botRegexp = /(QQfile4_bot:[a-z0-9]{12})/g;   //QQfile4bot
+const QQfile4bot1Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*V_\d*D)/g;   //QQfile4bot
+const QQfile4bot2Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*D)/g;   //QQfile4bot
+const QQfile4bot3Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*V_\d*D)/g;   //QQfile4bot
+const QQfile4bot4Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P_\d*V)/g;   //QQfile4bot
+const QQfile4bot5Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*P)/g;   //QQfile4bot
+const QQfile4bot6Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*V)/g;   //QQfile4bot
+const QQfile4bot7Regexp = /(QQfile4_bot:[a-z0-9]{12}_\d*D)/g;   //QQfile4bot
+// const QQfile10botRegexp = /(QQfile10_bot:[a-z0-9]{12})/g;   //QQfile10bot
+const QQfile10bot1Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQfile10bot
+const QQfile10bot2Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQfile10bot
+const QQfile10bot3Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQfile10bot
+const QQfile10bot4Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQfile10bot
+const QQfile10bot5Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*P)/g;   //QQfile10bot
+const QQfile10bot6Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*V)/g;   //QQfile10bot
+const QQfile10bot7Regexp = /(QQfile10_bot:[a-z0-9]{16}_\d*D)/g;   //QQfile10bot
+// const QQfile11botRegexp = /(QQfile11_bot:[a-z0-9]{12})/g;   //QQfile11bot
+const QQfile11bot1Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQfile11bot
+const QQfile11bot2Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQfile11bot
+const QQfile11bot3Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQfile11bot
+const QQfile11bot4Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQfile11bot
+const QQfile11bot5Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*P)/g;   //QQfile11bot
+const QQfile11bot6Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*V)/g;   //QQfile11bot
+const QQfile11bot7Regexp = /(QQfile11_bot:[a-z0-9]{16}_\d*D)/g;   //QQfile11bot
+// const QQn8zwbotRegexp = /(QQn8zw_bot:[a-z0-9]{12})/g;   //QQn8zwbot
+const QQn8zwbot1Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQn8zwbot
+const QQn8zwbot2Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQn8zwbot
+const QQn8zwbot3Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQn8zwbot
+const QQn8zwbot4Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQn8zwbot
+const QQn8zwbot5Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*P)/g;   //QQn8zwbot
+const QQn8zwbot6Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*V)/g;   //QQn8zwbot
+const QQn8zwbot7Regexp = /(QQn8zw_bot:[a-z0-9]{16}_\d*D)/g;   //QQn8zwbot
+// const QQirfubotRegexp = /(QQirfu_bot:[a-z0-9]{12})/g;   //QQirfubot
+const QQirfubot1Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQirfubot
+const QQirfubot2Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQirfubot
+const QQirfubot3Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQirfubot
+const QQirfubot4Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQirfubot
+const QQirfubot5Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*P)/g;   //QQirfubot
+const QQirfubot6Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*V)/g;   //QQirfubot
+const QQirfubot7Regexp = /(QQirfu_bot:[a-z0-9]{16}_\d*D)/g;   //QQirfubot
+// const QQz32obotRegexp = /(QQz32o_bot:[a-z0-9]{12})/g;   //QQz32obot
+const QQz32obot1Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQz32obot
+const QQz32obot2Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQz32obot
+const QQz32obot3Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQz32obot
+const QQz32obot4Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQz32obot
+const QQz32obot5Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*P)/g;   //QQz32obot
+const QQz32obot6Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*V)/g;   //QQz32obot
+const QQz32obot7Regexp = /(QQz32o_bot:[a-z0-9]{16}_\d*D)/g;   //QQz32obot
+// const QQdvbkbotRegexp = /(QQdvbk_bot:[a-z0-9]{12})/g;   //QQdvbkbot
+const QQdvbkbot1Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQdvbkbot
+const QQdvbkbot2Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQdvbkbot
+const QQdvbkbot3Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQdvbkbot
+const QQdvbkbot4Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQdvbkbot
+const QQdvbkbot5Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*P)/g;   //QQdvbkbot
+const QQdvbkbot6Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*V)/g;   //QQdvbkbot
+const QQdvbkbot7Regexp = /(QQdvbk_bot:[a-z0-9]{16}_\d*D)/g;   //QQdvbkbot
+// const QQer16botRegexp = /(QQer16_bot:[a-z0-9]{12})/g;   //QQer16bot
+const QQer16bot1Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQer16bot
+const QQer16bot2Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQer16bot
+const QQer16bot3Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQer16bot
+const QQer16bot4Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQer16bot
+const QQer16bot5Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*P)/g;   //QQer16bot
+const QQer16bot6Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*V)/g;   //QQer16bot
+const QQer16bot7Regexp = /(QQer16_bot:[a-z0-9]{16}_\d*D)/g;   //QQer16bot
+// const QQan4cbotRegexp = /(QQan4c_bot:[a-z0-9]{12})/g;   //QQan4cbot
+const QQan4cbot1Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQan4cbot
+const QQan4cbot2Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQan4cbot
+const QQan4cbot3Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQan4cbot
+const QQan4cbot4Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQan4cbot
+const QQan4cbot5Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*P)/g;   //QQan4cbot
+const QQan4cbot6Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*V)/g;   //QQan4cbot
+const QQan4cbot7Regexp = /(QQan4c_bot:[a-z0-9]{16}_\d*D)/g;   //QQan4cbot
+// const QQld90botRegexp = /(QQld90_bot:[a-z0-9]{12})/g;   //QQld90bot
+const QQld90bot1Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V_\d*D)/g;   //QQld90bot
+const QQld90bot2Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*D)/g;   //QQld90bot
+const QQld90bot3Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V_\d*D)/g;   //QQld90bot
+const QQld90bot4Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQld90bot
+const QQld90bot5Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P)/g;   //QQld90bot
+const QQld90bot6Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V)/g;   //QQld90bot
+const QQld90bot7Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*D)/g;   //QQld90bot
+const aotembotRegexp = /(aotem_bot:[\-_A-Za-z0-9]{16})/g;   //aotembot
+const jiematopbotRegexp = /(jiematopbot:[\-_A-Za-z0-9]{16})/g;   //jiematopbot
+const UUjiebotRegexp = /(UUjiebot:[\-_A-Za-z0-9]{16})/g;   //UUjiebot
+const safsadfbotRegexp = /(safsadfbot:[\-_A-Za-z0-9]{16})/g;   //safsadfbot
+const sirenbot1Regexp = /(Share_\d+P_\d+V_\d+D_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot2Regexp = /(Share_\d+P_\d+V_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot3Regexp = /(Share_\d+P_\d+D_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot4Regexp = /(Share_\d+V_\d+D_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot5Regexp = /(Share_\d+P_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot6Regexp = /(Share_\d+V_[A-Z0-9]{10})/g;   //sirenbot
+const sirenbot7Regexp = /(Share_\d+D_[A-Z0-9]{10})/g;   //sirenbot
+// // const ZhuahihaibotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/g;   //Zhuahihaibot
+// const Zhuahihaibot1Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/g;   //Zhuahihaibot
+// const Zhuahihaibot2Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*D)/g;   //Zhuahihaibot
+// const Zhuahihaibot3Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V_\d*D)/g;   //Zhuahihaibot
+// const Zhuahihaibot4Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V)/g;   //Zhuahihaibot
+// const Zhuahihaibot5Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P)/g;   //Zhuahihaibot
+// const Zhuahihaibot6Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/g;   //Zhuahihaibot
+// const Zhuahihaibot7Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/g;   //Zhuahihaibot
+// const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/g;    //REDDFILEBOT
+const wenjianjibotRegexp = /(wenjianjibot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{16})/g;   //wenjianjibot
+const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/g;   //amumujiemabot
+const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/g;   //parludecodingBot
+const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/g;   //teestpanbot
+const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/g;   //atfileslinksbot
+const lockHivebot1Regexp = /(LH_[A-Za-z0-9]{19})/g;   //lockHivebot
+const lockHivebot2Regexp = /(LH_[A-Za-z0-9]{16})/g;   //lockHivebot
+const lockHivebot3Regexp = /(LockHivebot_[A-Za-z0-9]{16})/g;   //lockHivebot
+const lockHivebot4Regexp = /(f_[A-Za-z0-9]{16})/g;   //lockHivebot
+const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tgdecoderbot
+// const tgdecoderbot1Regexp = /([a-z0-9]{32})/g;   //tgdecoderbot
+const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/g;   //xiumi1bot
+const ZYXFilesBot1Regexp = /(📌 取件码：[A-Za-z0-9]+)/g;   //ZYXFilesBot
 const ZYXFilesBot2Regexp = /([a-z0-9]{40})/g;   //ZYXFilesBot
-const ntmjmqbotRegexp = /(ntmjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //ntmjmqbot
-const newjmqbotRegexp = /(newjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //newjmqbot
-const filepanbotRegexp = /(@filepan_bot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/gi;   //filepanbot
-const myseseXBotRegexp = /(myseseXBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //myseseXBot
-const save2BoxBotRegexp = /(Save2BoxBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/gi;   //save2BoxBot
-const mtfxqbotRegexp = /(mtfxqbot_[0-9PVD_]*_[A-Za-z0-9]{20})/gi;   //mtfxqbot
-const mtfxq2botRegexp = /(mtfxq2bot_[0-9PVD_]*_[A-Za-z0-9]{20})/gi;   //mtfxq2bot
-const grpRegexp = /([A-Za-z0-9]{12}_[A-Za-z0-9]{11}=_grp)/gi;   //grp
-const mdaRegexp = /([A-Za-z0-9-\+]*=_mda)/gi;   //mda
-const v_Regexp = /(v_BAACAg[A-Za-z0-9_\-]*)/gi;   //v_
-const vi_Regexp = /(vi_BAACAg[A-Za-z0-9_\-]*)/gi;   //vi_
-const p_Regexp = /(p_AgACAg[A-Za-z0-9_\-]*)/gi;   //p_
-const d_Regexp = /(d_BQACAg[A-Za-z0-9_\-]*)/gi;   //d_
-const P_DataPanBotRegexp = /(P_DataPanBot_[A-Za-z0-9_\-]*)/gi;   //p_FilesPan1Bot
-const V_DataPanBotRegexp = /(V_DataPanBot_[A-Za-z0-9_\-]*)/gi;   //v_FilesPan1Bot
-const D_DataPanBotRegexp = /(D_DataPanBot_[A-Za-z0-9_\-]*)/gi;   //p_FilesPan1Bot
-const p_FilesPan1BotRegexp = /(p_FilesPan1Bot_[A-Za-z0-9_\-]*)/gi;   //p_FilesPan1Bot
-const v_FilesPan1BotRegexp = /(v_FilesPan1Bot_[A-Za-z0-9_\-]*)/gi;   //v_FilesPan1Bot
+const ntmjmqbotRegexp = /(ntmjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //ntmjmqbot
+const newjmqbotRegexp = /(newjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //newjmqbot
+const filepanbotRegexp = /(@filepan_bot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/g;   //filepanbot
+const myseseXBotRegexp = /(myseseXBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //myseseXBot
+const save2BoxBotRegexp = /(Save2BoxBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //save2BoxBot
+const mtfxqbotRegexp = /(mtfxqbot_[0-9PVD_]*_[A-Za-z0-9]{20})/g;   //mtfxqbot
+const mtfxq2botRegexp = /(mtfxq2bot_[0-9PVD_]*_[A-Za-z0-9]{20})/g;   //mtfxq2bot
+const grpRegexp = /([A-Za-z0-9]{12}_[A-Za-z0-9]{11}=_grp)/g;   //grp
+const mdaRegexp = /([A-Za-z0-9-\+]*=_mda)/g;   //mda
+const v_Regexp = /(v_BAACAg[A-Za-z0-9_\-]*)/g;   //v_
+const vi_Regexp = /(vi_BAACAg[A-Za-z0-9_\-]*)/g;   //vi_
+const p_Regexp = /(p_AgACAg[A-Za-z0-9_\-]*)/g;   //p_
+const d_Regexp = /(d_BQACAg[A-Za-z0-9_\-]*)/g;   //d_
+const P_DataPanBotRegexp = /(P_DataPanBot_[A-Za-z0-9_\-]*)/g;   //p_FilesPan1Bot
+const V_DataPanBotRegexp = /(V_DataPanBot_[A-Za-z0-9_\-]*)/g;   //v_FilesPan1Bot
+const D_DataPanBotRegexp = /(D_DataPanBot_[A-Za-z0-9_\-]*)/g;   //p_FilesPan1Bot
+const p_FilesPan1BotRegexp = /(p_FilesPan1Bot_[A-Za-z0-9_\-]*)/g;   //p_FilesPan1Bot
+const v_FilesPan1BotRegexp = /(v_FilesPan1Bot_[A-Za-z0-9_\-]*)/g;   //v_FilesPan1Bot
 // const str = "炼铜基地原创媒体组分此条媒体分此条媒体分享newjmqbot_0p_32v_4d_uaBpSUCc8NAEd载下来慢慢看这个有人有更多吗结尾 [主要推";
 let all = 0;
 let data = [];
@@ -2914,6 +2922,104 @@ try {
           }
         }
 
+        const sirenbot1Matches = str.match(sirenbot1Regexp);
+        // console.log(sirenbot1Matches);  //测试
+        if (sirenbot1Matches) {
+          const sirenbot1MatchesLength = sirenbot1Matches.length;
+          // console.log("sirenbot1MatchesLength : " + sirenbot1MatchesLength);  //测试
+          if (sirenbot1MatchesLength > 0) {
+            for (let j = 0; j < sirenbot1MatchesLength; j++) {
+              if (sirenbot1Matches[j]) {
+                sirenbot.push(sirenbot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot2Matches = str.match(sirenbot2Regexp);
+        // console.log(sirenbot2Matches);  //测试
+        if (sirenbot2Matches) {
+          const sirenbot2MatchesLength = sirenbot2Matches.length;
+          // console.log("sirenbot2MatchesLength : " + sirenbot2MatchesLength);  //测试
+          if (sirenbot2MatchesLength > 0) {
+            for (let j = 0; j < sirenbot2MatchesLength; j++) {
+              if (sirenbot2Matches[j]) {
+                sirenbot.push(sirenbot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot3Matches = str.match(sirenbot3Regexp);
+        // console.log(sirenbot3Matches);  //测试
+        if (sirenbot3Matches) {
+          const sirenbot3MatchesLength = sirenbot3Matches.length;
+          // console.log("sirenbot3MatchesLength : " + sirenbot3MatchesLength);  //测试
+          if (sirenbot3MatchesLength > 0) {
+            for (let j = 0; j < sirenbot3MatchesLength; j++) {
+              if (sirenbot3Matches[j]) {
+                sirenbot.push(sirenbot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot4Matches = str.match(sirenbot4Regexp);
+        // console.log(sirenbot4Matches);  //测试
+        if (sirenbot4Matches) {
+          const sirenbot4MatchesLength = sirenbot4Matches.length;
+          // console.log("sirenbot4MatchesLength : " + sirenbot4MatchesLength);  //测试
+          if (sirenbot4MatchesLength > 0) {
+            for (let j = 0; j < sirenbot4MatchesLength; j++) {
+              if (sirenbot4Matches[j]) {
+                sirenbot.push(sirenbot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot5Matches = str.match(sirenbot5Regexp);
+        // console.log(sirenbot5Matches);  //测试
+        if (sirenbot5Matches) {
+          const sirenbot5MatchesLength = sirenbot5Matches.length;
+          // console.log("sirenbot5MatchesLength : " + sirenbot5MatchesLength);  //测试
+          if (sirenbot5MatchesLength > 0) {
+            for (let j = 0; j < sirenbot5MatchesLength; j++) {
+              if (sirenbot5Matches[j]) {
+                sirenbot.push(sirenbot5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot6Matches = str.match(sirenbot6Regexp);
+        // console.log(sirenbot6Matches);  //测试
+        if (sirenbot6Matches) {
+          const sirenbot6MatchesLength = sirenbot6Matches.length;
+          // console.log("sirenbot6MatchesLength : " + sirenbot6MatchesLength);  //测试
+          if (sirenbot6MatchesLength > 0) {
+            for (let j = 0; j < sirenbot6MatchesLength; j++) {
+              if (sirenbot6Matches[j]) {
+                sirenbot.push(sirenbot6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const sirenbot7Matches = str.match(sirenbot7Regexp);
+        // console.log(sirenbot7Matches);  //测试
+        if (sirenbot7Matches) {
+          const sirenbot7MatchesLength = sirenbot7Matches.length;
+          // console.log("sirenbot7MatchesLength : " + sirenbot7MatchesLength);  //测试
+          if (sirenbot7MatchesLength > 0) {
+            for (let j = 0; j < sirenbot7MatchesLength; j++) {
+              if (sirenbot7Matches[j]) {
+                sirenbot.push(sirenbot7Matches[j]);
+              }
+            }
+          }
+        }
+
         const UUjiebotMatches = str.match(UUjiebotRegexp);
         // console.log(UUjiebotMatches);  //测试
         if (UUjiebotMatches) {
@@ -4281,6 +4387,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/safsadfbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += sirenbot.length;
+  console.log("sirenbot : " + sirenbot.length);  //测试
+  if (sirenbot.length > 0) {
+    const data = fs.readFileSync("./code/sirenbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...sirenbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/sirenbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }
