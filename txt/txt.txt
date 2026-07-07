@@ -52,30 +52,6 @@ zjmqlf2024:
 npm run build-qqfile
 npm run deploy-qqfile
 
-npm run build-fileport
-npm run deploy-fileport
-
-npm run build-jsfile
-npm run deploy-jsfile
-
-npm run build-palucode
-npm run deploy-palucode
-
-npm run build-siren
-npm run deploy-siren
-
-npm run build-tebiejie
-npm run deploy-tebiejie
-
-npm run build-xiumi
-npm run deploy-xiumi
-
-npm run build-wenjianji
-npm run deploy-wenjianji
-
-npm run build-zyxfiles
-npm run deploy-zyxfiles
-
 npm run build-aotem
 npm run deploy-aotem
 
@@ -117,6 +93,33 @@ npm run deploy-massfilesstore
 
 npm run build-steviarchiver
 npm run deploy-steviarchiver
+
+npm run build-fileport
+npm run deploy-fileport
+
+npm run build-jsfile
+npm run deploy-jsfile
+
+npm run build-messenger
+npm run deploy-messenger
+
+npm run build-palucode
+npm run deploy-palucode
+
+npm run build-siren
+npm run deploy-siren
+
+npm run build-tebiejie
+npm run deploy-tebiejie
+
+npm run build-xiumi
+npm run deploy-xiumi
+
+npm run build-wenjianji
+npm run deploy-wenjianji
+
+npm run build-zyxfiles
+npm run deploy-zyxfiles
 
 
 zjmqlf2025:

@@ -33,6 +33,8 @@
     "deploy-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc",
     "build-jsfile": "wrangler deploy -c ./wrangler-jsfile.jsonc --dry-run --outdir=./bot/dist",
     "deploy-jsfile": "wrangler deploy -c ./wrangler-jsfile.jsonc",
+    "build-messenger": "wrangler deploy -c ./wrangler-messenger.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-messenger": "wrangler deploy -c ./wrangler-messenger.jsonc",
     "build-palucode": "wrangler deploy -c ./wrangler-palucode.jsonc --dry-run --outdir=./bot/dist",
     "deploy-palucode": "wrangler deploy -c ./wrangler-palucode.jsonc",
     "build-siren": "wrangler deploy -c ./wrangler-siren.jsonc --dry-run --outdir=./bot/dist",

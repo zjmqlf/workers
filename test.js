@@ -200,6 +200,23 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async selectMessageIndex(messageId) {
+    this.apiCount += 1;
+    let messageResult = null;
+    try {
+      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
+    } catch (e) {
+      console.log("selectMessageIndex出错 : " + e);
+      return;
+    }
+    //console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
+    if (messageResult.success === true) {
+      if (messageResult.results && messageResult.results.length > 0) {
+        return messageResult.results[0]["COUNT(id)"];
+      }
+    }
+  }
+
   async insertMessageIndex(result) {
     let messageResult = {};
     try {
@@ -210,9 +227,25 @@ export class WebSocketServer extends DurableObject {
     }
     //console.log(messageResult);  //测试
     if (messageResult.success === true) {
-      console.log("插入messageIndex数据成功");
+      // console.log("插入messageIndex数据成功");
     } else {
       console.log("插入messageIndex数据失败");
+    }
+  }
+
+  async deleteMessage(Mindex) {
+    let messageResult = {};
+    try {
+      messageResult = await this.env.MAINDB.prepare("DELETE FROM `MESSAGE` WHERE `Mindex` = ?;").bind(Mindex).run();
+    } catch (e) {
+      console.log("deleteMessage出错 : " + e);;
+      return;
+    }
+    //console.log(messageResult);  //测试
+    if (messageResult.success === true) {
+      // console.log("删除message数据成功");
+    } else {
+      console.log("删除message数据失败");
     }
   }
 
@@ -260,12 +293,25 @@ export class WebSocketServer extends DurableObject {
 
     let id = 0;
     const count = await this.countMessage();
-    const results = await this.selectMessage(id);
-    const length = results.length;
-    console.log("id - " + length);
-    for (let index = 0; index < length; index++) {
-      // console.log(JSON.stringify(results[index]));
-      await this.insertMessageIndex(results[index]);
+    console.log("count : " + count);
+    if (count < 0) {
+      while (id < count) {
+        const results = await this.selectMessage(id);
+        const length = results.length;
+        console.log("id - " + length);
+        for (let index = 0; index < length; index++) {
+          // console.log(JSON.stringify(results[index]));
+          const exist = await this.selectMessageIndex(results[index].id);
+          if (!exist || exist === 0) {
+            await this.insertMessageIndex(results[index]);
+          // } else if (exist > 0) {
+          //   await this.deleteMessage(results[index].Mindex);
+          }
+        }
+        id += 100;
+      }
+    } else {
+      console.log("count小于0");
     }
 
     // const client = this.client;

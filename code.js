@@ -8,8 +8,9 @@ const fileLeakBot = [];
 const nnfilebot = [];
 const tangBRebot = [];
 const decoderrobot = [];
-// const tebiejiebot = [];
+const tebiejiebot = [];
 const mmyzybot = [];
+const MessengerIIbot = [];
 // const kkjmqmbot = [];
 const paniangbot = [];
 // const KodeXFilesbot = [];
@@ -39,8 +40,9 @@ const safsadfbot = [];
 const sirenbot = [];
 // const Zhuahihaibot = [];
 // const REDDFILEBOT = [];
+const JSfilebot = [];
 const wenjianjibot = [];
-const amumujiemabot = [];
+// const amumujiemabot = [];
 const parludecodingBot = [];
 const teestpanbot = [];
 const atfileslinksbot = [];
@@ -72,11 +74,24 @@ const nnfilebotRegexp = /(nnfilebot_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za
 const tangBRebotRegexp = /(TangBRebot_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tangBRebot
 const decoderrobotRegexp = /(files_\d+v_\d+p_\d+d_[a-z0-9]{12})/g;   //decoderrobot
 // const tebiejie1botRegexp = /(tebiejie1_\d*V*\d*P*\d*D*_[A-Za-z0-9]{22})/g;   //tebiejie1bot
-// const tebiejie3botRegexp = /(tebiejie3bot_\d+V_\d+P_\d+D_[A-Za-z0-9]{12})/g;   //tebiejie3bot
+const tebiejie12botRegexp = /(tebiejie1_\d+V_\d+P_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie13botRegexp = /(tebiejie1_\d+V_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie14botRegexp = /(tebiejie1_\d+P_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie15botRegexp = /(tebiejie1_\d+V_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie16botRegexp = /(tebiejie1_\d+P_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie17botRegexp = /(tebiejie1_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie1bot
+const tebiejie31botRegexp = /(tebiejie3bot_\d+V_\d+P_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie32botRegexp = /(tebiejie3bot_\d+V_\d+P_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie33botRegexp = /(tebiejie3bot_\d+V_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie34botRegexp = /(tebiejie3bot_\d+P_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie35botRegexp = /(tebiejie3bot_\d+V_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie36botRegexp = /(tebiejie3bot_\d+P_[A-Z0-9]{10,22})/g;   //tebiejie3bot
+const tebiejie37botRegexp = /(tebiejie3bot_\d+D_[A-Z0-9]{10,22})/g;   //tebiejie3bot
 const mmyzybot1Regexp = /(mmyzy_bot_v:[A-Za-z0-9]{32})/g;   //mmyzybot
 const mmyzybot2Regexp = /(mmyzy_bot_p:[A-Za-z0-9]{32})/g;   //mmyzybot
 const mmyzybot3Regexp = /(mmyzy_bot_d:[A-Za-z0-9]{32})/g;   //mmyzybot
 const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/g;   //mmyzybot
+const MessengerIIbotRegexp = /(MessengerIIbot_[A-Z0-9]{4}-[A-Z0-9]{4}_\d+P\d+V\d+D)/g;   //MessengerIIbot
 const paniangbot1Regexp = /(paniang_bot_v:[A-Za-z0-9]{32})/g;   //paniangbot
 const paniangbot2Regexp = /(paniang_bot_p:[A-Za-z0-9]{32})/g;   //paniangbot
 const paniangbot3Regexp = /(paniang_bot_d:[A-Za-z0-9]{32})/g;   //paniangbot
@@ -257,8 +272,9 @@ const sirenbot7Regexp = /(Share_\d+D_[A-Z0-9]{10})/g;   //sirenbot
 // const Zhuahihaibot6Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/g;   //Zhuahihaibot
 // const Zhuahihaibot7Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/g;   //Zhuahihaibot
 // const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/g;    //REDDFILEBOT
+const JSfilebotRegexp = /(JSfile_bot_\d+V\d+P\d+D_[A-Z0-9]{4}-[A-Z0-9]{4})/g;   //JSfilebot
 const wenjianjibotRegexp = /(wenjianjibot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{16})/g;   //wenjianjibot
-const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/g;   //amumujiemabot
+// const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/g;   //amumujiemabot
 const parludecodingBotRegexp = /(ParludecodingBot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/g;   //parludecodingBot
 const teestpanbotRegexp = /(@Teestpanbot:_\d*P*_*\d*V*_*\d*D*_[A-Za-z0-9]{12})/g;   //teestpanbot
 const atfileslinksbotRegexp = /(atfileslinksbot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{20})/g;   //atfileslinksbot
@@ -570,19 +586,201 @@ try {
           }
         }
 
-        // const tebiejie1botMatches = str.match(tebiejie1botRegexp);
-        // // console.log(tebiejie1botMatches);  //测试
-        // if (tebiejie1botMatches) {
-        //   const tebiejie1botMatchesLength = tebiejie1botMatches.length;
-        //   // console.log("tebiejie1botMatchesLength : " + tebiejie1botMatchesLength);  //测试
-        //   if (tebiejie1botMatchesLength > 0) {
-        //     for (let j = 0; j < tebiejie1botMatchesLength; j++) {
-        //       if (tebiejie1botMatches[j]) {
-        //         tebiejiebot.push(tebiejie1botMatches[j]);
-        //       }
-        //     }
-        //   }
-        // }
+        const tebiejie11botMatches = str.match(tebiejie11botRegexp);
+        // console.log(tebiejie11botMatches);  //测试
+        if (tebiejie11botMatches) {
+          const tebiejie11botMatchesLength = tebiejie11botMatches.length;
+          // console.log("tebiejie11botMatchesLength : " + tebiejie11botMatchesLength);  //测试
+          if (tebiejie11botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie11botMatchesLength; j++) {
+              if (tebiejie11botMatches[j]) {
+                tebiejiebot.push(tebiejie11botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie12botMatches = str.match(tebiejie12botRegexp);
+        // console.log(tebiejie12botMatches);  //测试
+        if (tebiejie12botMatches) {
+          const tebiejie12botMatchesLength = tebiejie12botMatches.length;
+          // console.log("tebiejie12botMatchesLength : " + tebiejie12botMatchesLength);  //测试
+          if (tebiejie12botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie12botMatchesLength; j++) {
+              if (tebiejie12botMatches[j]) {
+                tebiejiebot.push(tebiejie12botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie13botMatches = str.match(tebiejie13botRegexp);
+        // console.log(tebiejie13botMatches);  //测试
+        if (tebiejie13botMatches) {
+          const tebiejie13botMatchesLength = tebiejie13botMatches.length;
+          // console.log("tebiejie13botMatchesLength : " + tebiejie13botMatchesLength);  //测试
+          if (tebiejie13botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie13botMatchesLength; j++) {
+              if (tebiejie13botMatches[j]) {
+                tebiejiebot.push(tebiejie13botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie14botMatches = str.match(tebiejie14botRegexp);
+        // console.log(tebiejie14botMatches);  //测试
+        if (tebiejie14botMatches) {
+          const tebiejie14botMatchesLength = tebiejie14botMatches.length;
+          // console.log("tebiejie14botMatchesLength : " + tebiejie14botMatchesLength);  //测试
+          if (tebiejie14botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie14botMatchesLength; j++) {
+              if (tebiejie14botMatches[j]) {
+                tebiejiebot.push(tebiejie14botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie15botMatches = str.match(tebiejie15botRegexp);
+        // console.log(tebiejie15botMatches);  //测试
+        if (tebiejie15botMatches) {
+          const tebiejie15botMatchesLength = tebiejie15botMatches.length;
+          // console.log("tebiejie15botMatchesLength : " + tebiejie15botMatchesLength);  //测试
+          if (tebiejie15botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie15botMatchesLength; j++) {
+              if (tebiejie15botMatches[j]) {
+                tebiejiebot.push(tebiejie15botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie16botMatches = str.match(tebiejie16botRegexp);
+        // console.log(tebiejie16botMatches);  //测试
+        if (tebiejie16botMatches) {
+          const tebiejie16botMatchesLength = tebiejie16botMatches.length;
+          // console.log("tebiejie16botMatchesLength : " + tebiejie16botMatchesLength);  //测试
+          if (tebiejie16botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie16botMatchesLength; j++) {
+              if (tebiejie16botMatches[j]) {
+                tebiejiebot.push(tebiejie16botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie17botMatches = str.match(tebiejie17botRegexp);
+        // console.log(tebiejie17botMatches);  //测试
+        if (tebiejie17botMatches) {
+          const tebiejie17botMatchesLength = tebiejie17botMatches.length;
+          // console.log("tebiejie17botMatchesLength : " + tebiejie17botMatchesLength);  //测试
+          if (tebiejie17botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie17botMatchesLength; j++) {
+              if (tebiejie17botMatches[j]) {
+                tebiejiebot.push(tebiejie17botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie31botMatches = str.match(tebiejie31botRegexp);
+        // console.log(tebiejie31botMatches);  //测试
+        if (tebiejie31botMatches) {
+          const tebiejie31botMatchesLength = tebiejie31botMatches.length;
+          // console.log("tebiejie31botMatchesLength : " + tebiejie31botMatchesLength);  //测试
+          if (tebiejie31botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie31botMatchesLength; j++) {
+              if (tebiejie31botMatches[j]) {
+                tebiejiebot.push(tebiejie31botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie32botMatches = str.match(tebiejie32botRegexp);
+        // console.log(tebiejie32botMatches);  //测试
+        if (tebiejie32botMatches) {
+          const tebiejie32botMatchesLength = tebiejie32botMatches.length;
+          // console.log("tebiejie32botMatchesLength : " + tebiejie32botMatchesLength);  //测试
+          if (tebiejie32botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie32botMatchesLength; j++) {
+              if (tebiejie32botMatches[j]) {
+                tebiejiebot.push(tebiejie32botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie33botMatches = str.match(tebiejie33botRegexp);
+        // console.log(tebiejie33botMatches);  //测试
+        if (tebiejie33botMatches) {
+          const tebiejie33botMatchesLength = tebiejie33botMatches.length;
+          // console.log("tebiejie33botMatchesLength : " + tebiejie33botMatchesLength);  //测试
+          if (tebiejie33botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie33botMatchesLength; j++) {
+              if (tebiejie33botMatches[j]) {
+                tebiejiebot.push(tebiejie33botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie34botMatches = str.match(tebiejie34botRegexp);
+        // console.log(tebiejie34botMatches);  //测试
+        if (tebiejie34botMatches) {
+          const tebiejie34botMatchesLength = tebiejie34botMatches.length;
+          // console.log("tebiejie34botMatchesLength : " + tebiejie34botMatchesLength);  //测试
+          if (tebiejie34botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie34botMatchesLength; j++) {
+              if (tebiejie34botMatches[j]) {
+                tebiejiebot.push(tebiejie34botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie35botMatches = str.match(tebiejie35botRegexp);
+        // console.log(tebiejie35botMatches);  //测试
+        if (tebiejie35botMatches) {
+          const tebiejie35botMatchesLength = tebiejie35botMatches.length;
+          // console.log("tebiejie35botMatchesLength : " + tebiejie35botMatchesLength);  //测试
+          if (tebiejie35botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie35botMatchesLength; j++) {
+              if (tebiejie35botMatches[j]) {
+                tebiejiebot.push(tebiejie35botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie36botMatches = str.match(tebiejie36botRegexp);
+        // console.log(tebiejie36botMatches);  //测试
+        if (tebiejie36botMatches) {
+          const tebiejie36botMatchesLength = tebiejie36botMatches.length;
+          // console.log("tebiejie36botMatchesLength : " + tebiejie36botMatchesLength);  //测试
+          if (tebiejie36botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie36botMatchesLength; j++) {
+              if (tebiejie36botMatches[j]) {
+                tebiejiebot.push(tebiejie36botMatches[j]);
+              }
+            }
+          }
+        }
+
+        const tebiejie37botMatches = str.match(tebiejie37botRegexp);
+        // console.log(tebiejie37botMatches);  //测试
+        if (tebiejie37botMatches) {
+          const tebiejie37botMatchesLength = tebiejie37botMatches.length;
+          // console.log("tebiejie37botMatchesLength : " + tebiejie37botMatchesLength);  //测试
+          if (tebiejie37botMatchesLength > 0) {
+            for (let j = 0; j < tebiejie37botMatchesLength; j++) {
+              if (tebiejie37botMatches[j]) {
+                tebiejiebot.push(tebiejie37botMatches[j]);
+              }
+            }
+          }
+        }
 
         const mmyzybot1Matches = str.match(mmyzybot1Regexp);
         // console.log(mmyzybot1Matches);  //测试
@@ -635,6 +833,20 @@ try {
             for (let j = 0; j < mmyzybot4MatchesLength; j++) {
               if (mmyzybot4Matches[j]) {
                 mmyzybot.push(mmyzybot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const MessengerIIbotMatches = str.match(MessengerIIbotRegexp);
+        // console.log(MessengerIIbotMatches);  //测试
+        if (MessengerIIbotMatches) {
+          const MessengerIIbotMatchesLength = MessengerIIbotMatches.length;
+          // console.log("MessengerIIbotMatchesLength : " + MessengerIIbotMatchesLength);  //测试
+          if (MessengerIIbotMatchesLength > 0) {
+            for (let j = 0; j < MessengerIIbotMatchesLength; j++) {
+              if (MessengerIIbotMatches[j]) {
+                MessengerIIbot.push(MessengerIIbotMatches[j]);
               }
             }
           }
@@ -3160,6 +3372,20 @@ try {
         //   }
         // }
 
+        const JSfilebotMatches = str.match(JSfilebotRegexp);
+        // console.log(JSfilebotMatches);  //测试
+        if (JSfilebotMatches) {
+          const JSfilebotMatchesLength = JSfilebotMatches.length;
+          // console.log("JSfilebotMatchesLength : " + JSfilebotMatchesLength);  //测试
+          if (JSfilebotMatchesLength > 0) {
+            for (let j = 0; j < JSfilebotMatchesLength; j++) {
+              if (JSfilebotMatches[j]) {
+                JSfilebot.push(JSfilebotMatches[j]);
+              }
+            }
+          }
+        }
+
         const wenjianjibotMatches = str.match(wenjianjibotRegexp);
         // console.log(wenjianjibotMatches);  //测试
         if (wenjianjibotMatches) {
@@ -3174,19 +3400,19 @@ try {
           }
         }
 
-        const amumujiemabotMatches = str.match(amumujiemabotRegexp);
-        // console.log(amumujiemabotMatches);  //测试
-        if (amumujiemabotMatches) {
-          const amumujiemabotMatchesLength = amumujiemabotMatches.length;
-          // console.log("amumujiemabotMatchesLength : " + amumujiemabotMatchesLength);  //测试
-          if (amumujiemabotMatchesLength > 0) {
-            for (let j = 0; j < amumujiemabotMatchesLength; j++) {
-              if (amumujiemabotMatches[j]) {
-                amumujiemabot.push(amumujiemabotMatches[j]);
-              }
-            }
-          }
-        }
+        // const amumujiemabotMatches = str.match(amumujiemabotRegexp);
+        // // console.log(amumujiemabotMatches);  //测试
+        // if (amumujiemabotMatches) {
+        //   const amumujiemabotMatchesLength = amumujiemabotMatches.length;
+        //   // console.log("amumujiemabotMatchesLength : " + amumujiemabotMatchesLength);  //测试
+        //   if (amumujiemabotMatchesLength > 0) {
+        //     for (let j = 0; j < amumujiemabotMatchesLength; j++) {
+        //       if (amumujiemabotMatches[j]) {
+        //         amumujiemabot.push(amumujiemabotMatches[j]);
+        //       }
+        //     }
+        //   }
+        // }
 
         const parludecodingBotMatches = str.match(parludecodingBotRegexp);
         // console.log(parludecodingBotMatches);  //测试
@@ -3778,28 +4004,28 @@ try {
     }
   }
 
-  // all += tebiejiebot.length;
-  // console.log("tebiejiebot : " + tebiejiebot.length);  //测试
-  // if (tebiejiebot.length > 0) {
-  //   const data = fs.readFileSync("./code/tebiejiebot.txt", "utf-8");
-  //   try {
-  //     let uniqueArr = JSON.parse(data);
-  //     const oldLength = uniqueArr.length;
-  //     uniqueArr = [...uniqueArr, ...tebiejiebot];
-  //     uniqueArr = [...new Set(uniqueArr)];
-  //     if (uniqueArr.length > oldLength) {
-  //       fs.writeFile("./code/tebiejiebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
-  //         if (err) {
-  //           console.log(err);
-  //         }
-  //       });
-  //     // } else {
-  //     //   console.log("没有新加数据");
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // }
+  all += tebiejiebot.length;
+  console.log("tebiejiebot : " + tebiejiebot.length);  //测试
+  if (tebiejiebot.length > 0) {
+    const data = fs.readFileSync("./code/tebiejiebot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...tebiejiebot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/tebiejiebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   all += mmyzybot.length;
   console.log("mmyzybot : " + mmyzybot.length);  //测试
@@ -3812,6 +4038,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mmyzybot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  all += MessengerIIbot.length;
+  console.log("MessengerIIbot : " + MessengerIIbot.length);  //测试
+  if (MessengerIIbot.length > 0) {
+    const data = fs.readFileSync("./code/MessengerIIbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...MessengerIIbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/MessengerIIbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err);
           }
@@ -4491,6 +4740,29 @@ try {
   //   }
   // }
 
+  all += JSfilebot.length;
+  console.log("JSfilebot : " + JSfilebot.length);  //测试
+  if (JSfilebot.length > 0) {
+    const data = fs.readFileSync("./code/JSfilebot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...JSfilebot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/JSfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   all += wenjianjibot.length;
   console.log("wenjianjibot : " + wenjianjibot.length);  //测试
   if (wenjianjibot.length > 0) {
@@ -4514,28 +4786,28 @@ try {
     }
   }
 
-  all += amumujiemabot.length;
-  console.log("amumujiemabot : " + amumujiemabot.length);  //测试
-  if (amumujiemabot.length > 0) {
-    const data = fs.readFileSync("./code/amumujiemabot.txt", "utf-8");
-    try {
-      let uniqueArr = JSON.parse(data);
-      const oldLength = uniqueArr.length;
-      uniqueArr = [...uniqueArr, ...amumujiemabot];
-      uniqueArr = [...new Set(uniqueArr)];
-      if (uniqueArr.length > oldLength) {
-        fs.writeFile("./code/amumujiemabot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
-          if (err) {
-            console.log(err);
-          }
-        });
-      // } else {
-      //   console.log("没有新加数据");
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
+  // all += amumujiemabot.length;
+  // console.log("amumujiemabot : " + amumujiemabot.length);  //测试
+  // if (amumujiemabot.length > 0) {
+  //   const data = fs.readFileSync("./code/amumujiemabot.txt", "utf-8");
+  //   try {
+  //     let uniqueArr = JSON.parse(data);
+  //     const oldLength = uniqueArr.length;
+  //     uniqueArr = [...uniqueArr, ...amumujiemabot];
+  //     uniqueArr = [...new Set(uniqueArr)];
+  //     if (uniqueArr.length > oldLength) {
+  //       fs.writeFile("./code/amumujiemabot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+  //         if (err) {
+  //           console.log(err);
+  //         }
+  //       });
+  //     // } else {
+  //     //   console.log("没有新加数据");
+  //     }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
 
   all += parludecodingBot.length;
   console.log("parludecodingBot : " + parludecodingBot.length);  //测试

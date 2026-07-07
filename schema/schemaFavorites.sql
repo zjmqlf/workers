@@ -78,7 +78,6 @@ CREATE TABLE IF NOT EXISTS MESSAGEINDEX (
 );
 
 CREATE INDEX IF NOT EXISTS idx_messageIndex_userId_id ON MESSAGEINDEX(userId, id);
-CREATE INDEX IF NOT EXISTS idx_messageIndex_userId_id_sizeType ON MESSAGEINDEX(userId, id, sizeType);
 
 
 DROP TABLE IF EXISTS MEDIA;

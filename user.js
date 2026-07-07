@@ -1336,7 +1336,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async insertMessageIndexError(tryCount, messageId, id, type) {
+  async insertMessageIndexError(tryCount, Mindex, id) {
     if (tryCount === 20) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")insertMessageIndex超出tryCount限制");
@@ -1344,15 +1344,15 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertMessageIndex(tryCount + 1, messageId, id, type);
+      await this.insertMessageIndex(tryCount + 1, Mindex, id);
     }
   }
 
-  async insertMessageIndex(tryCount, messageId, id, type) {
+  async insertMessageIndex(tryCount, Mindex, id) {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, messageId, id, sizeType) VALUES (?, ?, ?, ?, ?);").bind(this.messageDBIndex, this.chatId, messageId, id, sizeType).run();
+      messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?);").bind(this.messageDBIndex, this.chatId, Mindex, id).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ") insertMessageIndex出错 : " + e);;
       this.sendGrid("insertMessageIndex", "出错 : " + e.message, "try", true);
@@ -1363,7 +1363,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.insertMessageIndexError(tryCount, messageId, id, type);
+        await this.insertMessageIndexError(tryCount, Mindex, id);
       }
       return;
     }
@@ -1374,7 +1374,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       //console.log("(" + this.currentStep + ") 插入messageIndex数据失败");
       this.sendGrid("insertMessageIndex", "插入messageIndex数据失败", "error", true);
-      await this.insertMessageIndexError(tryCount, messageId, id, type);
+      await this.insertMessageIndexError(tryCount, Mindex, id);
     }
   }
 
@@ -1429,11 +1429,11 @@ export class WebSocketServer extends DurableObject {
       if (messageResult) {
         const messageCount = parseInt(messageResult["COUNT(id)"]);
         if (messageCount === 0) {
-          const lastId = await this.insertMessage(1, messageId, category, "", mid, id, accessHash, txt);
-          await this.insertMessageIndex(1, lastId, messageId, "");
+          const Mindex = await this.insertMessage(1, messageId, category, "", mid, id, accessHash, txt);
+          await this.insertMessageIndex(1, Mindex, messageId);
         } else {
           const Mindex = messageResult.Mindex;
-          await this.insertMessageIndex(1, Mindex, messageId, "");
+          await this.insertMessageIndex(1, Mindex, messageId);
           //console.log("(" + this.currentStep + ") message已在数据库中");
           this.sendGrid("endMediaInsert", "", "exist", false);
         }
@@ -1454,11 +1454,11 @@ export class WebSocketServer extends DurableObject {
       if (messageResult) {
         const messageCount = parseInt(messageResult["COUNT(id)"]);
         if (messageCount === 0) {
-          const lastId = await this.insertMessage(1, messageId, category, type, mid, id, accessHash, txt);
-          await this.insertMessageIndex(1, lastId, messageId, type);
+          const Mindex = await this.insertMessage(1, messageId, category, type, mid, id, accessHash, txt);
+          await this.insertMessageIndex(1, Mindex, messageId);
         } else {
           const Mindex = messageResult.Mindex;
-          await this.insertMessageIndex(1, Mindex, messageId, type);
+          await this.insertMessageIndex(1, Mindex, messageId);
           //console.log("(" + this.currentStep + ") message已在数据库中");
           this.sendGrid("endPhotoInsert", "", "exist", false);
         }
@@ -1575,6 +1575,7 @@ export class WebSocketServer extends DurableObject {
     const id = message.media.photo.id.toString();
     const accessHash = message.media.photo.accessHash.toString();
     if (id && accessHash) {
+      const ids = [];
       const photoInfo = utils.getPhotoInfo(message.media);
       const photoLength = photoInfo.length;
       //console.log("photoLength : " + photoLength);  //测试
@@ -1620,7 +1621,10 @@ export class WebSocketServer extends DurableObject {
                   });
                   if (this.stop === 1) {
                     const Pindex = await this.endPhotoMessage(id, accessHash, dcId, photoIndex, type, size);
-                    await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
+                    if (Pindex && Pindex > 0) {
+                      ids.push(Pindex);
+                    }
+                    // await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
                   } else if (this.stop === 2) {
                     await this.updateConfig(1, 0);
                     this.broadcast({
@@ -1632,10 +1636,11 @@ export class WebSocketServer extends DurableObject {
                   //console.log("(" + this.currentStep + ") (" + photoLength +"/" + photoIndex + ") 图片"+ type + "已入过库了");
                   this.sendPhoto("getPhoto", "", photoIndex, "fileExist", false);
                   const Pindex = photoResult.Pindex;
-                  // if (Pindex && Pindex > 0) {
-                  //   await this.insertPhotoIndex(1, Pindex, id, accessHash);
-                  // }
-                  await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
+                  if (Pindex && Pindex > 0) {
+                    ids.push(Pindex);
+                    // await this.insertPhotoIndex(1, Pindex, id, accessHash);
+                  }
+                  // await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
                 }
               } else {
                 //console.log("(" + this.currentStep + ") 图片的photoResult错误");
@@ -1645,13 +1650,14 @@ export class WebSocketServer extends DurableObject {
           //     //console.log("(" + this.currentStep + ") 图片已入过索引库了");
           //     this.sendPhoto("getPhoto", "", photoIndex, "indexExist", false);
           //     const Pindex = photoIndexResult.Pindex;
-          //     await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
+          //     // await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
           //   }
           // } else {
           //   //console.log("(" + this.currentStep + ") 图片的photoIndexResult错误");
           //   this.sendPhoto("getPhoto", "图片的photoIndexResult错误", photoIndex, "error", true);
           // }
         }
+        await this.endPhotoInsert(messageId, category, "", JSON.stringify(ids), id, accessHash, txt);
         this.offsetId += 1;
         return true;
       } else {

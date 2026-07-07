@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./string/qqfileString";
+import { codeString } from "./string/messengerString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -24,9 +24,6 @@ export class WebSocketServer extends DurableObject {
   queue = false;
   waitTime = 60000;
   pingTime = 5000;
-  startTime = 0;
-  lastPage = "";
-  // first = true;
   count = 0;
   flood = 0;
   time = 0;
@@ -112,9 +109,6 @@ export class WebSocketServer extends DurableObject {
       this.queue = await this.ctx.storage.get("queue") || false;
       this.waitTime = 60000;
       this.pingTime = 5000;
-      this.startTime = 0;
-      this.lastPage = "";
-      // this.first = true;
       this.photoCount = 0;
       this.videoCount = 0;
       this.fileCount = 0;
@@ -306,7 +300,7 @@ export class WebSocketServer extends DurableObject {
   async open(tryCount) {
     const apiId = 1334621;
     const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE4MwG7fSQgdP0tvStjwu1TUuEVEl3sEmB2EO5PuecwwiMxt+0RvcN0jQv9SiIuqEP4aV5EAgIg7GB/Br8wdWckqoAeuC2nXsnqkJoBhfbUFtX8xbE3BKmnGLUScrs1ci4Hq47qvA2+5S/tFo8rt/dJCKm64s0X9IyZ1O5eIxDqkdiMy5YBQZYLTwWsi7OaO9TBS0AhIySD9OgkLB7EcaqyVbTxyt9HLGWsrQGanjn7YSE98ELDr284xdOIDDBMWYJR0Poe79Eu3twi4JihP56jZz85uvIdv2PMWp2AK79GUK4FC5gqiobuQGHIUsbxEVGEzOL9t1Ie9a2C6+bJmSGfevxFQw==";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7BOSn4tw5dznEmJS7Z58vPhNf6Oi9oHukQBdWc+bAGh/UKzkp+DAa+OJCDQ2Pt/DYmsPN+xNe6TvnlQFlhGMp1lvMfedMcOWP/ZKU+M7xVizs57ZKk0lGIq0pbdaRwavH7CSdqPyDhLQSLaQs/HRv2ESqxY+SqNB16C0ZBT28vvOEqb3/3MJzbhimVL3ccPiAeEv4vOsc6E0Y+h1d+fM7QuhtwW9wSyD1Jsl5f/kcPK5wahRVV3+ZbCWA6XFaQXZ5pDfDevFKDn/zyOhmwdvqbOKk9rbKU8fqhVnC+5XsVDeZQEqidyOmf6nTF8mJm4P2kR6wrftOXL2Y+nEgOclPNw==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
         timeout: 5,
@@ -425,78 +419,6 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  getCount1(text, type) {
-    if (type === 1) {
-      let string = text.split("-");
-      if (string.length === 2) {
-        string = string[1].split("_");
-        const length = string.length;
-        for (let i = 0; i < length; i++) {
-          let temp = string[i].split("P");
-          if (temp.length === 2) {
-            this.photoCount = parseInt(temp[0]);
-            continue;
-          }
-          temp = string[i].split("V");
-          if (temp.length === 2) {
-            this.videoCount = parseInt(temp[0]);
-            continue;
-          }
-          temp = string[i].split("D");
-          if (temp.length === 2) {
-            this.fileCount = parseInt(temp[0]);
-            continue;
-          }
-        }
-      }
-    } else if (type === 2) {
-      let string = text.split("_");
-      const length = string.length;
-      for (let i = 1; i < length; i++) {
-        let temp = string[i].split("P");
-        if (temp.length === 2) {
-          this.photoCount = parseInt(temp[0]);
-          continue;
-        }
-        temp = string[i].split("V");
-        if (temp.length === 2) {
-          this.videoCount = parseInt(temp[0]);
-          continue;
-        }
-        temp = string[i].split("D");
-        if (temp.length === 2) {
-          this.fileCount = parseInt(temp[0]);
-          continue;
-        }
-      }
-    }
-  }
-
-  getCount2(text) {
-    let string = text.slice(10);
-    string = string.split("_");
-    if (string.length === 4) {
-      let temp = string[0].split("p");
-      if (temp.length === 2) {
-        this.photoCount = parseInt(temp[0]);
-      } else {
-        this.photoCount = 0;
-      }
-      temp = string[1].split("v");
-      if (temp.length === 2) {
-        this.videoCount = parseInt(temp[0]);
-      } else {
-        this.videoCount = 0;
-      }
-      temp = string[2].split("d");
-      if (temp.length === 2) {
-        this.fileCount = parseInt(temp[0]);
-      } else {
-        this.fileCount = 0;
-      }
-    }
-  }
-
   async sendQueryError(tryCount) {
     if (tryCount === 20) {
       //console.log("(" + this.currentStep + ")sendQuery超出tryCount限制");
@@ -522,26 +444,13 @@ export class WebSocketServer extends DurableObject {
         this.photoCount = 0;
         this.videoCount = 0;
         this.fileCount = 0;
-        // const status = await this.ctx.storage.get(code);
-        let status = "";
-        const string = code.split(":");
-        if (string[0] === "QQfile_bot") {
-          status = await this.ctx.storage.get(string[0] + ":" + string[1].split("-")[0]);
-        } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
-          status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
-        }
+        const status = await this.ctx.storage.get(code);
         if (status) {
           //console.log("sendQuery当前代码已入过库了");
           this.sendLog("sendQuery", "当前代码已入过库了", null, true);
           await this.sendQuery(1);
           return;
         } else {
-          this.lastPage = "";
-          if (this.startTime > 0) {
-            const time = 200000 - (new Date().getTime() - this.startTime);
-            await this.waitNext(time, false);
-          }
-          this.startTime = new Date().getTime();
           try {
             await this.client.invoke(
               new Api.messages.SendMessage({
@@ -762,9 +671,6 @@ export class WebSocketServer extends DurableObject {
       }
     }
     this.offsetId += this.count;
-    if (this.queue === true) {
-      this.offsetId -= 1;
-    }
     this.count = 0;
     await this.ctx.storage.put("offsetId", this.offsetId);
     //console.log("(" + this.currentStep + ") idArrayLength : " + this.idArray.length);  //测试
@@ -781,26 +687,26 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       // if (this.queue === true) {
-      //   for (let i = 0; i < 3; i++) {
-      //     if (this.stop === 2) {
-      //       this.broadcast({
-      //         "result": "pause",
-      //       });
-      //       await this.close();
-      //       break;
-      //     } else {
-      //       await scheduler.wait(5000);
-      //       // this.ws.ping();
-      //       // this.ws.send({
-      //       //   "result": "ping",
-      //       // });
-      //       this.broadcast({
-      //         "result": "ping",
-      //       });
-      //     }
-      //   }
+        for (let i = 0; i < 6; i++) {
+          if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+            break;
+          } else {
+            await scheduler.wait(5000);
+            // this.ws.ping();
+            // this.ws.send({
+            //   "result": "ping",
+            // });
+            this.broadcast({
+              "result": "ping",
+            });
+          }
+        }
       // } else {
-        await scheduler.wait(5000);
+      //   await scheduler.wait(5000);
       // }
       await this.nextStep();
     }
@@ -837,7 +743,7 @@ export class WebSocketServer extends DurableObject {
         }
       }
       await this.getMessage(1);
-      await scheduler.wait(10000);
+      await scheduler.wait(5000);
       const messageArray = this.messageArray.slice();
       const messageLength = messageArray.length;
       this.messageArray = [];
@@ -849,94 +755,13 @@ export class WebSocketServer extends DurableObject {
       // }
       if (messageLength && messageLength > 0) {
         if (this.stop === 1) {
-          // let temp = null;
+          let temp = null;
           let status = false;
-          // if (this.first === true) {
-          //   this.first = false;
-          // }
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             if (messageArray[messageIndex]) {
               if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                 const id = messageArray[messageIndex].id;
-                if (messageArray[messageIndex].replyMarkup) {
-                  if (messageArray[messageIndex].replyMarkup.rows) {
-                    let next = true;
-                    let found = false;
-                    const regexp1 = /❇️\d+/i;
-                    const regexp2 = /❎\d+/i;
-                    for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                      if (next === true) {
-                        for (const button of row.buttons) {
-                          // if (button.text === "📁推送剩余全部文件") {
-                          //   temp = {
-                          //     id: id,
-                          //     data: button.data,
-                          //   };
-                          // } else if (button.text === "继续推送") {
-                          //   if (this.queue === true) {
-                          //     const result = await this.client.invoke(
-                          //       new Api.messages.GetBotCallbackAnswer({
-                          //         peer: this.fromPeer,
-                          //         msgId: id,
-                          //         data: button.data,
-                          //       })
-                          //     );
-                          //     //console.log("(" + this.currentStep + ") 继续推送");
-                          //     this.sendLog("nextStep", "继续推送", null, false);
-                          //     await scheduler.wait(10000);
-                          //     if (result && result.message) {
-                          //       this.sendLog("nextStep", result.message , null, false);
-                          //     }
-                          //   }
-                          //   this.offsetId -= 1;
-                          if (regexp1.test(button.text) === true) {
-                            found = true;
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                          } else if (regexp2.test(button.text) === true) {
-                            if (this.queue === false) {
-                              this.queue = true;
-                              await this.ctx.storage.put("queue", true);
-                            }
-                            if (found === true) {
-                              // temp = {
-                              //   id: id,
-                              //   data: button.data,
-                              // };
-                              if (this.queue === true) {
-                                if (this.lastPage && this.lastPage === button.text) {
-                                  //console.log("(" + this.currentStep + ") 同一页码");
-                                  this.sendLog("nextStep", "同一页码", null, true);
-                                } else {
-                                  this.lastPage = button.text;
-                                }
-                                // const result = await this.client.invoke(
-                                const result = this.client.invoke(
-                                  new Api.messages.GetBotCallbackAnswer({
-                                    peer: this.fromPeer,
-                                    msgId: id,
-                                    data: button.data,
-                                  })
-                                );
-                                //console.log("(" + this.currentStep + ") " + button.text);
-                                this.sendLog("nextStep", button.text, null, false);
-                                await scheduler.wait(15000);
-                                if (result && result.message) {
-                                  // this.sendForward("nextStep", "下一页", result.message, "update", false);
-                                  this.sendLog("nextStep", result.message , null, false);
-                                }
-                              }
-                              next = false;
-                              break;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                } else if (messageArray[messageIndex].media) {
+                if (messageArray[messageIndex].media) {
                   let fileId = null;
                   if (messageArray[messageIndex].media.document) {
                     // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -961,96 +786,19 @@ export class WebSocketServer extends DurableObject {
                       this.sendLog("nextStep", "该媒体已在数据库中", "error", true);
                     }
                   }
-                  const message = messageArray[messageIndex].message?.trim();
-                  if (message && message.includes("文件获取完毕 文件总数：") === true) {
-                    if (this.queue === true) {
-                      this.lastPage = "";
-                      this.queue = false;
-                      await this.ctx.storage.put("queue", false);
-                      //console.log("(" + this.currentStep + ") 文件获取完毕");
-                      this.sendForward("nextStep", "文件获取完毕", "", "update", false);
-                    }
-                  }
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const string = message.split(":");
-                    if (string[0] === "QQfile_bot") {
-                      // await this.ctx.storage.put(message, 1);
-                      await this.ctx.storage.put(string[0] + ":" + string[1].split("-")[0], 1);
-                      // this.getCount1(message, 1);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
-                      // await this.ctx.storage.put(message, 1);
-                      await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                      this.getCount1(message, 2);
-                      //console.log("(" + this.currentStep + ") 代码入库完毕");
-                      this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message.substr(0, 10) === "newjmqbot_") {
+                    if (message.substr(0, 15) === "MessengerIIbot_") {
                       await this.ctx.storage.put(message, 1);
-                      this.getCount2(message);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
-                      await this.overClear("nextStep");
-                      this.flood = new Date().getTime() + 600000;
-                      await this.ctx.storage.put("client", this.flood);
-                      //console.log("(" + this.currentStep + ") " + message);
-                      this.sendLog("nextStep", message, "flood", true);
-                    } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要") === true || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) {
-                      if (this.queue === true) {
-                        this.lastPage = "";
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("nextStep", message, "error", true);
-                      }
-                    } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                      const date = message.replace("您已被限制使用,限制期限为：", "");
-                      if (date) {
-                        this.flood = new Date(date).getTime();
-                        await this.ctx.storage.put("client", this.flood);
-                      }
-                      //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                      this.sendLog("nextStep", "触发了洪水警告，" + message, "flood", true);
-                    } else if (message.includes("文件获取完毕 文件总数：") === true) {
-                      if (this.queue === true) {
-                        this.lastPage = "";
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件获取完毕");
-                        this.sendForward("nextStep", "文件获取完毕", "", "update", false);
-                      }
                     }
                   }
                 }
               }
             }
           }
-          // if (this.queue === false) {
-          //   if (temp) {
-          //     this.queue = true;
-          //     await this.ctx.storage.put("queue", true);
-          //     const result = await this.client.invoke(
-          //       new Api.messages.GetBotCallbackAnswer({
-          //         peer: this.fromPeer,
-          //         msgId: temp.id,
-          //         data: temp.data,
-          //       })
-          //     );
-          //     //console.log("(" + this.currentStep + ") 自动发送");
-          //     this.sendLog("nextStep", "自动发送", null, false);
-          //     await scheduler.wait(5000);
-          //     if (result && result.message) {
-          //       this.sendLog("nextStep", result.message , null, false);
-          //     }
-          //   // } else {
-          //   //   if (status === true) {
-          //   //     await this.sendQuery(1);
-          //   //   }
-          //   }
-          // }
           await this.checkMessage(status);
           if (this.stop === 1) {
             await this.endStep("nextStep");
@@ -1077,19 +825,9 @@ export class WebSocketServer extends DurableObject {
         //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
         this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
-          if (this.queue === false) {
+          // if (this.queue === false) {
             await this.sendQuery(1);
-            // if (this.first === true) {
-            //   this.first = false;
-            //   await this.sendQuery(1);
-            // } else {
-            //   await this.waitNext(120000, false);
-            //   this.broadcast({
-            //     "result": "pause",
-            //   });
-            //   await this.close();
-            // }
-          }
+          // }
           await this.endStep("nextStep");
         } else if (this.stop === 2) {
           this.broadcast({
@@ -1137,8 +875,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8856955245"),
-              accessHash: bigInt("-2054098363209830326"),
+              userId: bigInt("8606449723"),
+              accessHash: bigInt("-3189013076091883541"),
             }),
           ],
         })
@@ -1231,7 +969,7 @@ export class WebSocketServer extends DurableObject {
           }
           await scheduler.wait(10000);
           await this.getMessage(1);
-          await scheduler.wait(10000);
+          await scheduler.wait(5000);
           const messageArray = this.messageArray.slice();
           const messageLength = messageArray.length;
           this.messageArray = [];
@@ -1242,91 +980,13 @@ export class WebSocketServer extends DurableObject {
           //   this.sendLog("start", "messageLength比limit大", null, true);
           // }
           if (messageLength && messageLength > 0) {
-            // let temp = null;
+            let temp = null;
             let status = false;
             for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
               if (messageArray[messageIndex]) {
                 if (!messageArray[messageIndex].noforwards || messageArray[messageIndex].noforwards === false) {
                   const id = messageArray[messageIndex].id;
-                  if (messageArray[messageIndex].replyMarkup) {
-                    if (messageArray[messageIndex].replyMarkup.rows) {
-                      let next = true;
-                      let found = false;
-                      const regexp1 = /❇️\d+/i;
-                      const regexp2 = /❎\d+/i;
-                      for (const row of messageArray[messageIndex].replyMarkup.rows) {
-                        if (next === true) {
-                          for (const button of row.buttons) {
-                            // if (button.text === "📁推送剩余全部文件") {
-                            //   temp = {
-                            //     id: id,
-                            //     data: button.data,
-                            //   };
-                            // } else if (button.text === "继续推送") {
-                            //   if (this.queue === true) {
-                            //     const result = await this.client.invoke(
-                            //       new Api.messages.GetBotCallbackAnswer({
-                            //         peer: this.fromPeer,
-                            //         msgId: id,
-                            //         data: button.data,
-                            //       })
-                            //     );
-                            //     //console.log("(" + this.currentStep + ") 继续推送");
-                            //     this.sendLog("start", "继续推送", null, false);
-                            //     await scheduler.wait(10000);
-                            //     if (result && result.message) {
-                            //       this.sendLog("start", result.message , null, false);
-                            //     }
-                            //   }
-                            //   this.offsetId -= 1;
-                            if (regexp1.test(button.text) === true) {
-                              found = true;
-                              if (this.queue === false) {
-                                this.queue = true;
-                                await this.ctx.storage.put("queue", true);
-                              }
-                            } else if (regexp2.test(button.text) === true) {
-                              if (this.queue === false) {
-                                this.queue = true;
-                                await this.ctx.storage.put("queue", true);
-                              }
-                              if (found === true) {
-                                // temp = {
-                                //   id: id,
-                                //   data: button.data,
-                                // };
-                                if (this.queue === true) {
-                                  if (this.lastPage && this.lastPage === button.text) {
-                                    //console.log("(" + this.currentStep + ") 同一页码");
-                                    this.sendLog("start", "同一页码", null, true);
-                                  } else {
-                                    this.lastPage = button.text;
-                                  }
-                                  // const result = await this.client.invoke(
-                                  const result = this.client.invoke(
-                                    new Api.messages.GetBotCallbackAnswer({
-                                      peer: this.fromPeer,
-                                      msgId: id,
-                                      data: button.data,
-                                    })
-                                  );
-                                  //console.log("(" + this.currentStep + ") " + button.text);
-                                  this.sendLog("start", button.text, null, false);
-                                  await scheduler.wait(15000);
-                                  if (result && result.message) {
-                                    // this.sendForward("start", "下一页", result.message, "update", false);
-                                    this.sendLog("start", result.message , null, false);
-                                  }
-                                }
-                                next = false;
-                                break;
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  } else if (messageArray[messageIndex].media) {
+                  if (messageArray[messageIndex].media) {
                     let fileId = null;
                     if (messageArray[messageIndex].media.document) {
                       // const mimeType = messageArray[messageIndex].media.document.mimeType;
@@ -1351,96 +1011,19 @@ export class WebSocketServer extends DurableObject {
                         this.sendLog("start", "该媒体已在数据库中", "error", true);
                       }
                     }
-                    const message = messageArray[messageIndex].message?.trim();
-                    if (message & message.includes("文件获取完毕 文件总数：") === true) {
-                      if (this.queue === true) {
-                        this.lastPage = "";
-                        this.queue = false;
-                        await this.ctx.storage.put("queue", false);
-                        //console.log("(" + this.currentStep + ") 文件获取完毕");
-                        this.sendForward("start", "文件获取完毕", "", "update", false);
-                      }
-                    }
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const string = message.split(":");
-                      if (string[0] === "QQfile_bot") {
-                        // await this.ctx.storage.put(message, 1);
-                        await this.ctx.storage.put(string[0] + ":" + string[1].split("-")[0], 1);
-                        // this.getCount1(message, 1);
-                        //console.log("(" + this.currentStep + ") 代码入库完毕");
-                        this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (string[0] === "QQfile2_bot" || string[0] === "QQfile3_bot" || string[0] === "QQfile4_bot" || string[0] === "QQfile10_bot" || string[0] === "QQfile11_bot" || string[0] === "QQn8zw_bot" || string[0] === "QQirfu_bot" || string[0] === "QQz32o_bot" || string[0] === "QQdvbk_bot" || string[0] === "QQer16_bot" || string[0] === "QQan4c_bot" || string[0] === "QQld90_bot") {
-                        // await this.ctx.storage.put(message, 1);
-                        await this.ctx.storage.put(string[0] + ":" + string[1].split("_")[0], 1);
-                        this.getCount1(message, 2);
-                        //console.log("(" + this.currentStep + ") 代码入库完毕");
-                        this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message.substr(0, 10) === "newjmqbot_") {
+                      if (message.substr(0, 15) === "MessengerIIbot_") {
                         await this.ctx.storage.put(message, 1);
-                        this.getCount2(message);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message === "解码频繁-请24小时后进行解码或开通VIP /vip") {
-                        await this.overClear("start");
-                        this.flood = new Date().getTime() + 600000;
-                        await this.ctx.storage.put("client", this.flood);
-                        //console.log("(" + this.currentStep + ") " + message);
-                        this.sendLog("start", message, "flood", true);
-                      } else if (message.includes("解码失败") === true || message.includes("文件码错误或被举报删除") === true || message === "文件码解析失败" || message.includes("当前机器人无法解析") === true || message.includes("解码间隔需要" || message.includes("获取过此资源!如确认需要重复解码请再次发送文件码即可！！")) === true) {
-                        if (this.queue === true) {
-                          this.lastPage = "";
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") " + message);
-                          this.sendLog("start", message, "error", true);
-                        }
-                      } else if (message.includes("您已被限制使用,限制期限为：") === true) {
-                        const date = message.replace("您已被限制使用,限制期限为：", "");
-                        if (date) {
-                          this.flood = new Date(date).getTime();
-                          await this.ctx.storage.put("client", this.flood);
-                        }
-                        //console.log("(" + this.currentStep + ") 触发了洪水警告" + message);
-                        this.sendLog("start", "触发了洪水警告，" + message, "flood", true);
-                      } else if (message.includes("文件获取完毕 文件总数：") === true) {
-                        if (this.queue === true) {
-                          this.lastPage = "";
-                          this.queue = false;
-                          await this.ctx.storage.put("queue", false);
-                          //console.log("(" + this.currentStep + ") 文件获取完毕");
-                          this.sendForward("start", "文件获取完毕", "", "update", false);
-                        }
                       }
                     }
                   }
                 }
               }
             }
-            // if (this.queue === false) {
-            //   if (temp) {
-            //     this.queue = true;
-            //     await this.ctx.storage.put("queue", true);
-            //     const result = await this.client.invoke(
-            //       new Api.messages.GetBotCallbackAnswer({
-            //         peer: this.fromPeer,
-            //         msgId: temp.id,
-            //         data: temp.data,
-            //       })
-            //     );
-            //     //console.log("(" + this.currentStep + ") 自动发送");
-            //     this.sendLog("start", "自动发送", null, false);
-            //     await scheduler.wait(5000);
-            //     if (result && result.message) {
-            //       this.sendLog("start", result.message , null, false);
-            //     }
-            //   // } else {
-            //   //   if (status === true) {
-            //   //     await this.sendQuery(1);
-            //   //   }
-            //   }
-            // }
             await this.checkMessage(status);
             if (this.stop === 1) {
               await this.endStep("start");
@@ -1461,9 +1044,9 @@ export class WebSocketServer extends DurableObject {
             //console.log("(" + this.currentStep + ") 没有获取到有效的消息");
             this.sendLog("start", "没有获取到有效的消息", "error", true);
             if (this.stop === 1) {
-              if (this.queue === false) {
+              // if (this.queue === false) {
                 await this.sendQuery(1);
-              }
+              // }
               await this.endStep("start");
             } else if (this.stop === 2) {
               this.broadcast({
@@ -1630,7 +1213,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("qqfile");
+      const id = env.WEBSOCKET_SERVER.idFromName("messenger");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }
