@@ -60,11 +60,16 @@
       "database_name": "pansou8",
       "database_id": "50b51529-89e0-4cba-b7ec-7485552a81c1"
     },
-    */
     {
       "binding": "PANSOUDB",
       "database_name": "pansou9",
       "database_id": "6354d842-e811-49d9-898f-3e03cd1ad8bb"
+    },
+    */
+    {
+      "binding": "PANSOUDB",
+      "database_name": "pansou10",
+      "database_id": "fc9e0dc7-1fa9-4ad4-a59d-297827cefe80"
     }
   ],
   "durable_objects": {
