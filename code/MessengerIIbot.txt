@@ -1,1 +1,8 @@
-[]
+[
+  "MessengerIIbot_WYLC-9E69_0P10V0D",
+  "MessengerIIbot_IJHT-UIYH_0P1V0D",
+  "MessengerIIbot_KYAC-NM06_0P18V0D",
+  "MessengerIIbot_IK2W-CHZB_1P0V0D",
+  "MessengerIIbot_PAF8-SCZD_1P0V0D",
+  "MessengerIIbot_BOCI-221A_0P0V1D"
+]

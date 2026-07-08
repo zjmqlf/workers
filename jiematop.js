@@ -789,8 +789,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const string = message.split(":");
-                    if (string[0] === "jiematopbot") {
+                    if (message.substr(0, 12) === "jiematopbot-") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
@@ -1015,8 +1014,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const string = message.split(":");
-                      if (string[0] === "jiematopbot") {
+                      if (message.substr(0, 12) === "jiematopbot-") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
