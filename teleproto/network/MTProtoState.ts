@@ -34,6 +34,10 @@ export class MTProtoState {
         this.reset();
     }
 
+    get sessionId(): bigInt.BigInteger {
+        return this.id;
+    }
+
     reset() {
         this.id = generateRandomLong(true);
         this._sequence = 0;
@@ -68,9 +72,10 @@ export class MTProtoState {
         buffer: BinaryWriter,
         data: Buffer,
         contentRelated: boolean,
-        afterId?: bigInt.BigInteger
+        afterId?: bigInt.BigInteger,
+        predeterminedMsgId?: bigInt.BigInteger
     ) {
-        const msgId = this._getNewMsgId();
+        const msgId = predeterminedMsgId ?? this._getNewMsgId();
         const seqNo = this._getSeqNo(contentRelated);
         let body;
         if (!afterId) {

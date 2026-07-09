@@ -100,6 +100,9 @@ npm run deploy-fileport
 npm run build-jsfile
 npm run deploy-jsfile
 
+npm run build-kfcmnb
+npm run deploy-kfcmnb
+
 npm run build-messenger
 npm run deploy-messenger
 

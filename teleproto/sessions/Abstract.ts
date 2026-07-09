@@ -16,5 +16,5 @@ export abstract class Session {
     abstract close(): void;
     abstract save(): void;
     abstract delete(): void | Promise<void>;
-    abstract processEntities(tlo: any): void;
+    abstract processEntities(tlo: any): void | Promise<void>;
 }

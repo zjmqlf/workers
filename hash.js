@@ -472,12 +472,12 @@ export class WebSocketServer extends DurableObject {
   }
 
   async close() {
-    if (this.client) {
-      await this.client.destroy();
-      this.client = null;
-      //console.log("断开服务器成功");
-      this.sendLog("close", "断开服务器成功", null, false);
-    }
+    // if (this.client) {
+    //   await this.client.destroy();
+    //   this.client = null;
+    //   //console.log("断开服务器成功");
+    //   this.sendLog("close", "断开服务器成功", null, false);
+    // }
     this.stop = 0;
     this.ws.close();
     this.ctx.abort("reset");
@@ -2380,11 +2380,12 @@ export class WebSocketServer extends DurableObject {
       errorCount += 1;
       await this.ctx.storage.put(this.offsetId, errorCount);
       if (errorCount >= 5) {
+        // await this.ctx.storage.delete(this.offsetId);
         this.offsetId += 1;
         await this.updateChat(1);
       }
       await this.close();
-    }, 60000);
+    }, 50000);
   }
 
   async start(option) {

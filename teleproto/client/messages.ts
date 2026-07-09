@@ -107,9 +107,9 @@ export class _MessagesIter extends RequestIter {
             this.request = new Api.messages.SearchGlobal({
                 q: search || "",
                 filter: filter,
-                minDate: undefined,
-                maxDate: offsetDate,
-                offsetRate: undefined,
+                minDate: 0,
+                maxDate: offsetDate ?? 0,
+                offsetRate: 0,
                 offsetPeer: new Api.InputPeerEmpty(),
                 offsetId: offsetId,
                 limit: 1,
@@ -119,7 +119,7 @@ export class _MessagesIter extends RequestIter {
                 peer: this.entity,
                 msgId: replyTo,
                 offsetId: offsetId,
-                offsetDate: offsetDate,
+                offsetDate: offsetDate ?? 0,
                 addOffset: addOffset,
                 limit: 0,
                 maxId: 0,
@@ -135,8 +135,8 @@ export class _MessagesIter extends RequestIter {
                 peer: this.entity,
                 q: search || "",
                 filter: typeof filter === "function" ? new filter() : filter,
-                minDate: undefined,
-                maxDate: offsetDate,
+                minDate: 0,
+                maxDate: offsetDate ?? 0,
                 offsetId: offsetId,
                 addOffset: addOffset,
                 limit: 0,
@@ -162,7 +162,7 @@ export class _MessagesIter extends RequestIter {
             this.request = new Api.messages.GetHistory({
                 peer: this.entity,
                 limit: 1,
-                offsetDate: offsetDate,
+                offsetDate: offsetDate ?? 0,
                 offsetId: offsetId,
                 minId: 0,
                 maxId: 0,
@@ -490,6 +490,30 @@ export function iterMessages(
             replyTo: replyTo,
         }
     );
+}
+
+export async function getMessages(
+    client: TelegramClient,
+    entity: EntityLike | undefined,
+    params: Partial<IterMessagesParams>
+): Promise<TotalList<Api.Message>> {
+    if (Object.keys(params).length == 1 && params.limit === undefined) {
+        if (params.minId === undefined && params.maxId === undefined) {
+            params.limit = undefined;
+        } else {
+            params.limit = 1;
+        }
+    }
+
+    const it = client.iterMessages(entity, params);
+    const ids = params.ids;
+    if (ids && !isArrayLike(ids)) {
+        for await (const message of it) {
+            return [message];
+        }
+        return [];
+    }
+    return (await it.collect()) as TotalList<Api.Message>;
 }
 
 export async function forwardMessages(

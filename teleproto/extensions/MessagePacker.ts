@@ -141,7 +141,8 @@ export class MessagePacker {
                     buffer,
                     state.data,
                     state.request.classType === "request",
-                    afterId
+                    afterId,
+                    state.forcedMsgId
                 );
                 this._log.debug(
                     `Assigned msgId = ${state.msgId} to ${

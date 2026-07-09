@@ -10,6 +10,7 @@ import * as userMethods from "./users";
 import * as dialogMethods from "./dialogs";
 import type { Entity, EntityLike, MessageIDLike } from "../define";
 import { Api } from "../tl";
+import { createApiProxy } from "../tl/runtime/apiProxy";
 import { MTProtoSender } from "../network";
 import { LAYER } from "../tl/runtime/registry";
 import { Session } from "../sessions";
@@ -70,6 +71,13 @@ export class TelegramClient extends TelegramBaseClient {
         return messageMethods.iterMessages(this, entity, iterParams);
     }
 
+    getMessages(
+        entity: EntityLike | undefined,
+        getMessagesParams: Partial<messageMethods.IterMessagesParams> = {}
+    ) {
+        return messageMethods.getMessages(this, entity, getMessagesParams);
+    }
+
     forwardMessages(
         entity: EntityLike,
         forwardMessagesParams: messageMethods.ForwardMessagesParams
@@ -96,6 +104,17 @@ export class TelegramClient extends TelegramBaseClient {
         sender?: MTProtoSender
     ): Promise<R["__response"]> {
         return userMethods.invoke(this, request, undefined, sender);
+    }
+
+    get api(): Api.ApiFacade {
+        if (!this._apiProxy) {
+            this._apiProxy = createApiProxy(
+                Api as unknown as Record<string, unknown>,
+                (request, dcId) =>
+                    this.invoke(request as Api.AnyRequest, dcId)
+            ) as Api.ApiFacade;
+        }
+        return this._apiProxy;
     }
 
     getMe(inputPeer: true): Promise<Api.InputPeerUser>;
@@ -154,6 +173,10 @@ export class TelegramClient extends TelegramBaseClient {
                 securityChecks: this._securityChecks,
                 autoReconnectCallback: this._handleReconnect.bind(this),
                 reconnectRetries: this._reconnectRetries,
+                dcenter: this._dcenters.get(
+                    this.session.dcId || 4,
+                    this.session.getAuthKey()
+                ),
             });
         }
         const connection = new this._connection({
@@ -190,8 +213,8 @@ export class TelegramClient extends TelegramBaseClient {
         this.session.setAuthKey(undefined);
         this.session.save();
         this._isSwitchingDc = true;
-        await this._filePool.purge();
-        await this._apiSenderPool.purge();
+        await this._media.purge();
+        await this._network.purge();
         await this._disconnect();
         this._sender = undefined;
         return await this.connect();
@@ -204,7 +227,7 @@ export class TelegramClient extends TelegramBaseClient {
         this._log.debug(`Getting DC ${dcId}`);
         if (!this._config) {
             try {
-                this._config = await this.invoke(new Api.help.GetConfig());
+                this._config = await this.api.help.getConfig();
             } catch (e) {
                 this._log.warn(
                     `help.GetConfig failed, falling back to built-in DC seeds: ${e}`
@@ -245,15 +268,17 @@ export class TelegramClient extends TelegramBaseClient {
             candidates = candidates.filter((DC) => DC.static);
         }
         const chosen = candidates[0];
-        return { id: chosen.id, ipAddress: chosen.ipAddress, port: 443 };
+        return {
+            id: chosen.id,
+            ipAddress: chosen.ipAddress,
+            port: chosen.port || 443,
+        };
     }
 
     async _getDownloadConcurrency(fileSize: number): Promise<number> {
         if (!this._appConfig) {
             try {
-                const result = await this.invoke(
-                    new Api.help.GetAppConfig({ hash: 0 })
-                );
+                const result = await this.api.help.getAppConfig({ hash: 0 });
                 if (result instanceof Api.help.AppConfig) {
                     this._appConfig = {};
                     const walk = (v: any): any => {

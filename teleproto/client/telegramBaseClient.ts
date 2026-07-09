@@ -13,13 +13,18 @@ import { EntityCache } from "../entityCache";
 import type { ParseInterface } from "./messageParse";
 import { MarkdownParser, LogLevel, Deferred } from "../extensions";
 import { MTProtoSender } from "../network";
-import { ApiSenderPool } from "../network/ApiSenderPool";
-import { FilePool, FilePoolOptions } from "../network/FilePool";
+import { DcenterRegistry } from "../network/Dcenter";
+import { Network } from "../network/Network";
+import type { SessionLease } from "../network/Network";
+import {
+    MediaScheduler,
+    MediaSchedulerOptions,
+} from "../network/MediaScheduler";
 import { LAYER } from "../tl/runtime/registry";
 import { Semaphore } from "async-mutex";
 
-const API_SENDER_IDLE_TIMEOUT_MS = 30000;
-const FILE_POOL_CLOSE_GRACE_MS = 5000;
+const SESSION_IDLE_TIMEOUT_MS = 15000;
+const SESSION_STARTUP_DELAY_MS = 800;
 const PROD_DEFAULT_DC_ID = 2;
 
 export const PROD_DC_IPV4: { readonly [id: number]: string } = {
@@ -66,7 +71,12 @@ export interface TelegramClientParams {
     securityChecks?: boolean;
     networkSocket?: typeof PromisedNetSockets;
     reCaptchaCallback?: (siteKey: string) => Promise<string>;
-    downloadPool?: Partial<FilePoolOptions>;
+    downloadPool?: Partial<MediaSchedulerOptions> & {
+        inflightPerDc?: number;
+        maxSessions?: number;
+        sessions?: number;
+    };
+    entityCache?: EntityCacheOptions;
 }
 
 const clientParamsDefault = {
@@ -123,8 +133,10 @@ export abstract class TelegramBaseClient {
         string,
         [ReturnType<typeof setTimeout>, Api.TypeUpdate[]]
     >();
-    public _apiSenderPool!: ApiSenderPool;
+    public _network!: Network;
+    public _media!: MediaScheduler;
     public _filePool!: FilePool;
+    public readonly _dcenters = new DcenterRegistry();
     _loopStarted: boolean;
     _reconnecting: boolean;
     _destroyed: boolean;
@@ -186,16 +198,18 @@ export abstract class TelegramBaseClient {
             systemVersion:
                 clientParams.systemVersion || "1.0",
             appVersion: clientParams.appVersion || "1.0",
-            langCode: clientParams.langCode,
+            langCode: clientParams.langCode || clientParamsDefault.langCode,
             langPack: "",
-            systemLangCode: clientParams.systemLangCode,
+            systemLangCode:
+                clientParams.systemLangCode ||
+                clientParamsDefault.systemLangCode,
         });
 
         this._floodWaitedRequests = {};
         this._bot = undefined;
         this._selfInputPeer = undefined;
         this._securityChecks = !!clientParams.securityChecks;
-        this._entityCache = new EntityCache();
+        this._entityCache = new EntityCache(clientParams.entityCache);
         this._config = undefined;
         this._loopStarted = false;
         this._reconnecting = false;
@@ -203,10 +217,19 @@ export abstract class TelegramBaseClient {
         this._isSwitchingDc = false;
         this._connectedDeferred = new Deferred();
         this._parseMode = MarkdownParser;
-        this._apiSenderPool = new ApiSenderPool(this, {
-            idleTimeoutMs: API_SENDER_IDLE_TIMEOUT_MS,
+        this._network = new Network(this, {
+            idleTimeoutMs: SESSION_IDLE_TIMEOUT_MS,
+            sessionStartupDelayMs: SESSION_STARTUP_DELAY_MS,
         });
-        this._filePool = new FilePool(this, clientParams.downloadPool);
+        this._media = new MediaScheduler(
+            this,
+            this._network,
+            clientParams.downloadPool
+        );
+    }
+
+    get entityCache(): EntityCache {
+        return this._entityCache;
     }
 
     get floodSleepThreshold() {
@@ -252,8 +275,8 @@ export abstract class TelegramBaseClient {
 
     async disconnect() {
         await this._disconnect();
-        await this._filePool.purge();
-        await this._apiSenderPool.purge();
+        await this._media.purge();
+        await this._network.purge();
         this._teardownUpdateState();
     }
 
@@ -282,8 +305,8 @@ export abstract class TelegramBaseClient {
     async destroy() {
         this._destroyed = true;
         await this.disconnect();
-        await this._filePool.close({ waitMs: FILE_POOL_CLOSE_GRACE_MS });
-        await this._apiSenderPool.close();
+        await this._media.close();
+        await this._network.close();
         this._eventBuilders = [];
     }
 
@@ -296,16 +319,6 @@ export abstract class TelegramBaseClient {
         const dc = await this.getDC(dcId, !!sender.authKey.getKey());
         while (true) {
             try {
-                await sender.connect(
-                    new this._connection({
-                        ip: dc.ipAddress,
-                        port: dc.port,
-                        dcId: dcId,
-                        loggers: this._log,
-                        socket: this.networkSocket,
-                    }),
-                    false
-                );
                 const needAuth =
                     this.session.dcId !== dcId && !sender._authenticated;
                 let innerQuery: Api.AnyRequest;
@@ -323,6 +336,18 @@ export abstract class TelegramBaseClient {
                 } else {
                     innerQuery = new Api.help.GetConfig();
                 }
+
+                await sender.connect(
+                    new this._connection({
+                        ip: dc.ipAddress,
+                        port: dc.port,
+                        dcId: dcId,
+                        loggers: this._log,
+                        proxy: this._proxy,
+                        socket: this.networkSocket,
+                    }),
+                    false
+                );
                 const initConn = new Api.InitConnection({
                     apiId: this._initRequest.apiId,
                     deviceModel: this._initRequest.deviceModel,
@@ -350,8 +375,8 @@ export abstract class TelegramBaseClient {
                 }
                 if (this._errorHandler) {
                     await this._errorHandler(err as Error);
-                } else if (this._log.canSend(LogLevel.ERROR)) {
-                    console.error(err);
+                } else {
+                    this._log.error("Error while connecting sender", err);
                 }
                 await sleep(1000);
                 await sender.disconnect();
@@ -363,13 +388,15 @@ export abstract class TelegramBaseClient {
         dcId: number,
         onBreak: (dcId: number) => void,
         authKey?: AuthKey,
+        autoReconnect: boolean = true,
+        tempBinding?: import("../network/MTProtoSender").SenderTempBinding,
     ): MTProtoSender {
         return new MTProtoSender(authKey ?? this.session.getAuthKey(dcId), {
             logger: this._log,
             dcId,
             retries: this._connectionRetries,
             delay: this._retryDelay,
-            autoReconnect: this._autoReconnect,
+            autoReconnect: autoReconnect && this._autoReconnect,
             connectTimeout: this._timeout,
             authKeyCallback: this._authKeyCallback.bind(this),
             isMainSender: dcId === this.session.dcId,
@@ -377,13 +404,15 @@ export abstract class TelegramBaseClient {
             client: this as unknown as TelegramClient,
             securityChecks: this._securityChecks,
             reconnectRetries: this._reconnectRetries,
+            dcenter: this._dcenters.get(dcId),
+            tempBinding,
         });
     }
 
-    getSender(dcId: number): Promise<MTProtoSender> {
+    getSender(dcId: number): Promise<SessionLease> {
         return dcId
-            ? this._apiSenderPool.borrow(dcId)
-            : Promise.resolve(this._sender!);
+            ? this._network.lease(dcId)
+            : Promise.resolve({ sender: this._sender!, release: () => {} });
     }
 
     async getDC(

@@ -61,7 +61,15 @@ export class ChatGetter {
     }
 
     async getInputChat() {
-        if (!this.inputChat && this.chatId && this._client) {
+        if (!this.inputChat && this._chatPeer && this._client) {
+            try {
+                this._inputChat = await this._client.getInputEntity(
+                    this._chatPeer
+                );
+                return this._inputChat;
+            } catch (e) {}
+        }
+        if (!this._inputChat && this.chatId && this._client) {
             try {
                 const target = this.chatId;
                 for await (const dialog of this._client.iterDialogs({

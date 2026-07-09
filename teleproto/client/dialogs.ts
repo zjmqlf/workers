@@ -31,7 +31,7 @@ export interface DialogsIterInterface {
 export class _DialogsIter extends RequestIter {
     private request?: Api.messages.GetDialogs;
     private seen?: Set<any>;
-    private offsetDate?: number;
+    private filterDate?: number;
     private ignoreMigrated?: boolean;
 
     async _init({
@@ -43,7 +43,7 @@ export class _DialogsIter extends RequestIter {
         folder,
     }: DialogsIterInterface) {
         this.request = new Api.messages.GetDialogs({
-            offsetDate,
+            offsetDate: offsetDate ?? 0,
             offsetId,
             offsetPeer,
             limit: 1,
@@ -63,7 +63,7 @@ export class _DialogsIter extends RequestIter {
         }
 
         this.seen = new Set();
-        this.offsetDate = offsetDate;
+        this.filterDate = offsetDate;
         this.ignoreMigrated = ignoreMigrated;
     }
     [Symbol.asyncIterator](): AsyncIterator<Dialog, any, undefined> {
@@ -124,9 +124,9 @@ export class _DialogsIter extends RequestIter {
             const message = messages.get(
                 _dialogMessageKey(d.peer, d.topMessage)
             );
-            if (this.offsetDate != undefined) {
+            if (this.filterDate != undefined) {
                 const date = message?.date!;
-                if (date == undefined || date > this.offsetDate) {
+                if (date == undefined || date > this.filterDate) {
                     continue;
                 }
             }

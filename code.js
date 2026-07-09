@@ -40,6 +40,7 @@ const safsadfbot = [];
 const sirenbot = [];
 // const Zhuahihaibot = [];
 // const REDDFILEBOT = [];
+const KFCMNBbot = [];
 const JSfilebot = [];
 const wenjianjibot = [];
 // const amumujiemabot = [];
@@ -272,6 +273,13 @@ const sirenbot7Regexp = /(Share_\d+D_[A-Z0-9]{10})/g;   //sirenbot
 // const Zhuahihaibot6Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*V)/g;   //Zhuahihaibot
 // const Zhuahihaibot7Regexp = /(Zhuahihaibot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*D)/g;   //Zhuahihaibot
 // const REDDFILEBOTRegexp = /(REDDFILEBOT_\d*v*\d*p*\d*d*_[A-Za-z0-9]{20})/g;    //REDDFILEBOT
+const KFCMNBbot1Regexp = /(KFCMNB_bot_\d+P_\d+V_\d+D_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot2Regexp = /(KFCMNB_bot_\d+P_\d+V_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot3Regexp = /(KFCMNB_bot_\d+P_\d+D_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot4Regexp = /(KFCMNB_bot_\d+V_\d+D_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot5Regexp = /(KFCMNB_bot_\d+P_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot6Regexp = /(KFCMNB_bot_\d+V_[A-Z0-9]{16})/g;   //KFCMNBbot
+const KFCMNBbot7Regexp = /(KFCMNB_bot_\d+D_[A-Z0-9]{16})/g;   //KFCMNBbot
 const JSfilebotRegexp = /(JSfile_bot_\d+V\d+P\d+D_[A-Z0-9]{4}-[A-Z0-9]{4})/g;   //JSfilebot
 const wenjianjibotRegexp = /(wenjianjibot_\d*p*_*\d*v*_*\d*d*_[A-Za-z0-9]{16})/g;   //wenjianjibot
 // const amumujiemabotRegexp = /(amumujiemabot_[a-z0-9]{10})/g;   //amumujiemabot
@@ -3372,6 +3380,104 @@ try {
         //   }
         // }
 
+        const KFCMNBbot1Matches = str.match(KFCMNBbot1Regexp);
+        // console.log(KFCMNBbot1Matches);  //测试
+        if (KFCMNBbot1Matches) {
+          const KFCMNBbot1MatchesLength = KFCMNBbot1Matches.length;
+          // console.log("KFCMNBbot1MatchesLength : " + KFCMNBbot1MatchesLength);  //测试
+          if (KFCMNBbot1MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot1MatchesLength; j++) {
+              if (KFCMNBbot1Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot2Matches = str.match(KFCMNBbot2Regexp);
+        // console.log(KFCMNBbot2Matches);  //测试
+        if (KFCMNBbot2Matches) {
+          const KFCMNBbot2MatchesLength = KFCMNBbot2Matches.length;
+          // console.log("KFCMNBbot2MatchesLength : " + KFCMNBbot2MatchesLength);  //测试
+          if (KFCMNBbot2MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot2MatchesLength; j++) {
+              if (KFCMNBbot2Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot3Matches = str.match(KFCMNBbot3Regexp);
+        // console.log(KFCMNBbot3Matches);  //测试
+        if (KFCMNBbot3Matches) {
+          const KFCMNBbot3MatchesLength = KFCMNBbot3Matches.length;
+          // console.log("KFCMNBbot3MatchesLength : " + KFCMNBbot3MatchesLength);  //测试
+          if (KFCMNBbot3MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot3MatchesLength; j++) {
+              if (KFCMNBbot3Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot4Matches = str.match(KFCMNBbot4Regexp);
+        // console.log(KFCMNBbot4Matches);  //测试
+        if (KFCMNBbot4Matches) {
+          const KFCMNBbot4MatchesLength = KFCMNBbot4Matches.length;
+          // console.log("KFCMNBbot4MatchesLength : " + KFCMNBbot4MatchesLength);  //测试
+          if (KFCMNBbot4MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot4MatchesLength; j++) {
+              if (KFCMNBbot4Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot5Matches = str.match(KFCMNBbot5Regexp);
+        // console.log(KFCMNBbot5Matches);  //测试
+        if (KFCMNBbot5Matches) {
+          const KFCMNBbot5MatchesLength = KFCMNBbot5Matches.length;
+          // console.log("KFCMNBbot5MatchesLength : " + KFCMNBbot5MatchesLength);  //测试
+          if (KFCMNBbot5MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot5MatchesLength; j++) {
+              if (KFCMNBbot5Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot6Matches = str.match(KFCMNBbot6Regexp);
+        // console.log(KFCMNBbot6Matches);  //测试
+        if (KFCMNBbot6Matches) {
+          const KFCMNBbot6MatchesLength = KFCMNBbot6Matches.length;
+          // console.log("KFCMNBbot6MatchesLength : " + KFCMNBbot6MatchesLength);  //测试
+          if (KFCMNBbot6MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot6MatchesLength; j++) {
+              if (KFCMNBbot6Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const KFCMNBbot7Matches = str.match(KFCMNBbot7Regexp);
+        // console.log(KFCMNBbot7Matches);  //测试
+        if (KFCMNBbot7Matches) {
+          const KFCMNBbot7MatchesLength = KFCMNBbot7Matches.length;
+          // console.log("KFCMNBbot7MatchesLength : " + KFCMNBbot7MatchesLength);  //测试
+          if (KFCMNBbot7MatchesLength > 0) {
+            for (let j = 0; j < KFCMNBbot7MatchesLength; j++) {
+              if (KFCMNBbot7Matches[j]) {
+                KFCMNBbot.push(KFCMNBbot7Matches[j]);
+              }
+            }
+          }
+        }
+
         const JSfilebotMatches = str.match(JSfilebotRegexp);
         // console.log(JSfilebotMatches);  //测试
         if (JSfilebotMatches) {
@@ -4739,6 +4845,29 @@ try {
   //     console.log(e);
   //   }
   // }
+
+  all += KFCMNBbot.length;
+  console.log("KFCMNBbot : " + KFCMNBbot.length);  //测试
+  if (KFCMNBbot.length > 0) {
+    const data = fs.readFileSync("./code/KFCMNBbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...KFCMNBbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/KFCMNBbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   all += JSfilebot.length;
   console.log("JSfilebot : " + JSfilebot.length);  //测试

@@ -13,6 +13,7 @@ import * as utils from "../Utils";
 import type { TelegramClient } from "./";
 import bigInt from "big-integer";
 import { RequestState, MTProtoSender } from "../network";
+import type { SessionLease } from "../network/Network";
 
 export async function invoke<R extends Api.AnyRequest>(
     client: TelegramClient,
@@ -24,8 +25,10 @@ export async function invoke<R extends Api.AnyRequest>(
         throw new Error("You can only invoke MTProtoRequests");
     }
     let sender = client._sender;
+    let lease: SessionLease | undefined;
     if (dcId) {
-        sender = await client.getSender(dcId);
+        lease = await client.getSender(dcId);
+        sender = lease.sender;
     }
     if (otherSender != undefined) {
         sender = otherSender;
@@ -40,101 +43,123 @@ export async function invoke<R extends Api.AnyRequest>(
             "Cannot send requests while disconnected. Please reconnect."
         );
     }
-    await client._connectedDeferred.promise;
-    await request.resolve(client, utils);
-    client._lastRequest = new Date().getTime();
-    const state = new RequestState(request);
-    let attempt: number = 0;
-    for (attempt = 0; attempt < client._requestRetries; attempt++) {
-        sender!.addStateToQueue(state);
-        try {
-            const result = await state.promise;
-            state.finished.resolve();
-            client.session.processEntities(result);
-            client._entityCache.add(result);
-            return result;
-        } catch (e: any) {
-            if (
-                e instanceof errors.ServerError ||
-                e.errorMessage === "RPC_CALL_FAIL" ||
-                e.errorMessage === "RPC_MCGET_FAIL"
-            ) {
-                client._log.warn(
-                    `Telegram is having internal issues ${e.constructor.name}`
-                );
-                await sleep(2000);
-            } else if (
-                e instanceof errors.FloodWaitError ||
-                e instanceof errors.FloodTestPhoneWaitError
-            ) {
-                if (e.seconds <= client.floodSleepThreshold) {
-                    client._log.info(
-                        `Sleeping for ${e.seconds}s on flood wait (Caused by ${request.className})`
-                    );
-                    await sleep(e.seconds * 1000);
-                } else {
-                    state.finished.resolve();
-                    throw e;
-                }
-            } else if (
-                e instanceof errors.PhoneMigrateError ||
-                e instanceof errors.NetworkMigrateError ||
-                e instanceof errors.UserMigrateError
-            ) {
-                client._log.info(`Phone migrated to ${e.newDc}`);
-                const shouldRaise =
-                    e instanceof errors.PhoneMigrateError ||
-                    e instanceof errors.NetworkMigrateError;
-                if (shouldRaise) {
-                    state.finished.resolve();
-                    throw e;
-                }
-                await client._switchDC(e.newDc);
-                sender =
-                    dcId === undefined
-                        ? client._sender
-                        : await client.getSender(dcId);
-            } else if (e instanceof errors.MsgWaitError) {
-                await state.isReady();
-                state.after = undefined;
-            } else if (
-                e.errorMessage &&
-                e.errorMessage.startsWith("RECAPTCHA_CHECK_") &&
-                client._reCaptchaCallback
-            ) {
-                const match = e.errorMessage.match(
-                    /RECAPTCHA_CHECK_.*(6Le[-\w]+)/
-                );
-                if (match) {
-                    const siteKey = match[1];
-                    const token = await client._reCaptchaCallback(siteKey);
-                    const newRequest = new Api.InvokeWithReCaptcha({
-                        token: token,
-                        query: request,
-                    });
-                    await newRequest.resolve(client, utils);
-                    state.request = newRequest;
-                    state.data = newRequest.getBytes();
-                } else {
-                    state.finished.resolve();
-                    throw e;
-                }
-            } else if (e.message === "CONNECTION_NOT_INITED") {
-                const targetSender = sender || client._sender;
-                if (targetSender) {
-                    targetSender._needsInitConnection = true;
-                }
-                client._log.warn(
-                    "CONNECTION_NOT_INITED, will re-wrap next request with initConnection"
-                );
-            } else {
+
+    try {
+        await client._connectedDeferred.promise;
+
+        await request.resolve(client, utils);
+        client._lastRequest = new Date().getTime();
+        const state = new RequestState(request);
+
+        let attempt: number = 0;
+        for (attempt = 0; attempt < client._requestRetries; attempt++) {
+            sender!.addStateToQueue(state);
+
+            try {
+                const result = await state.promise;
                 state.finished.resolve();
-                throw e;
+                try {
+                    await client.session.processEntities(result);
+                } catch (err) {
+                    client._log.warn(`session.processEntities failed: ${err}`);
+                }
+                client._entityCache.add(result);
+
+                return result;
+            } catch (e: any) {
+                if (
+                    e instanceof errors.ServerError ||
+                    e.errorMessage === "RPC_CALL_FAIL" ||
+                    e.errorMessage === "RPC_MCGET_FAIL"
+                ) {
+                    client._log.warn(
+                        `Telegram is having internal issues ${e.constructor.name}`
+                    );
+                    await sleep(2000);
+                } else if (
+                    e instanceof errors.FloodWaitError ||
+                    e instanceof errors.FloodTestPhoneWaitError
+                ) {
+                    if (e.seconds <= client.floodSleepThreshold) {
+                        client._log.info(
+                            `Sleeping for ${e.seconds}s on flood wait (Caused by ${request.className})`
+                        );
+                        await sleep(e.seconds * 1000);
+                    } else {
+                        state.finished.resolve();
+
+                        throw e;
+                    }
+                } else if (
+                    e instanceof errors.PhoneMigrateError ||
+                    e instanceof errors.NetworkMigrateError ||
+                    e instanceof errors.UserMigrateError
+                ) {
+                    client._log.info(`Phone migrated to ${e.newDc}`);
+                    const shouldRaise =
+                        e instanceof errors.PhoneMigrateError ||
+                        e instanceof errors.NetworkMigrateError;
+                    if (shouldRaise && (await client.isUserAuthorized())) {
+                        state.finished.resolve();
+
+                        throw e;
+                    }
+                    await client._switchDC(e.newDc);
+                    lease?.release();
+                    lease = undefined;
+                    if (dcId === undefined) {
+                        sender = client._sender;
+                    } else {
+                        lease = await client.getSender(dcId);
+                        sender = lease.sender;
+                    }
+                } else if (e instanceof errors.MsgWaitError) {
+                    // We need to resend this after the old one was confirmed.
+                    await state.isReady();
+
+                    state.after = undefined;
+                } else if (
+                    e.errorMessage &&
+                    e.errorMessage.startsWith("RECAPTCHA_CHECK_") &&
+                    client._reCaptchaCallback
+                ) {
+                    const match = e.errorMessage.match(
+                        /RECAPTCHA_CHECK_.*(6Le[-\w]+)/
+                    );
+                    if (match) {
+                        const siteKey = match[1];
+                        const token = await client._reCaptchaCallback(siteKey);
+                        const newRequest = new Api.InvokeWithReCaptcha({
+                            token: token,
+                            query: request,
+                        });
+                        await newRequest.resolve(client, utils);
+                        state.request = newRequest;
+                        state.data = newRequest.getBytes();
+                    } else {
+                        state.finished.resolve();
+                        throw e;
+                    }
+                } else if (e.message === "CONNECTION_NOT_INITED") {
+                    const targetSender = sender || client._sender;
+                    if (targetSender) {
+                        targetSender._needsInitConnection = true;
+                    }
+                    client._log.warn(
+                        "CONNECTION_NOT_INITED, will re-wrap next request with initConnection"
+                    );
+                } else {
+                    state.finished.resolve();
+
+                    throw e;
+                }
             }
+            state.resetPromise();
         }
-        state.resetPromise();
+        throw new Error(`Request was unsuccessful ${attempt} time(s)`);
+    } finally {
+        lease?.release();
     }
-    throw new Error(`Request was unsuccessful ${attempt} time(s)`);
 }
 
 export async function getMe<
@@ -145,9 +170,7 @@ export async function getMe<
         return client._selfInputPeer as unknown as R;
     }
     const me = (
-        await client.invoke(
-            new Api.users.GetUsers({ id: [new Api.InputUserSelf()] })
-        )
+        await client.api.users.getUsers({ id: [new Api.InputUserSelf()] })
     )[0] as Api.User;
     client._bot = me.bot;
     if (!client._selfInputPeer) {
@@ -199,21 +222,17 @@ export async function getEntity(
     let chats = lists.get(_EntityType.CHAT)!;
     let channels = lists.get(_EntityType.CHANNEL)!;
     if (users.length) {
-        users = await client.invoke(
-            new Api.users.GetUsers({
-                id: users,
-            })
-        );
+        users = await client.api.users.getUsers({
+            id: users,
+        });
     }
     if (chats.length) {
         const chatIds = chats.map((x) => x.chatId);
-        chats = (
-            await client.invoke(new Api.messages.GetChats({ id: chatIds }))
-        ).chats;
+        chats = (await client.api.messages.getChats({ id: chatIds })).chats;
     }
     if (channels.length) {
         channels = (
-            await client.invoke(new Api.channels.GetChannels({ id: channels }))
+            await client.api.channels.getChannels({ id: channels })
         ).chats;
     }
     const idEntity = new Map<string, any>();
@@ -291,7 +310,7 @@ export async function getInputEntity(
     }
     try {
         if (peer != undefined) {
-            return client.session.getInputEntity(peer);
+            return await client.session.getInputEntity(peer);
         }
         // eslint-disable-next-line no-empty
     } catch (e) {}
@@ -303,16 +322,14 @@ export async function getInputEntity(
     }
     peer = utils.getPeer(peer);
     if (peer instanceof Api.PeerUser) {
-        const users = await client.invoke(
-            new Api.users.GetUsers({
-                id: [
-                    new Api.InputUser({
-                        userId: peer.userId,
-                        accessHash: bigInt.zero,
-                    }),
-                ],
-            })
-        );
+        const users = await client.api.users.getUsers({
+            id: [
+                new Api.InputUser({
+                    userId: peer.userId,
+                    accessHash: bigInt.zero,
+                }),
+            ],
+        });
         if (users.length && !(users[0] instanceof Api.UserEmpty)) {
             return utils.getInputPeer(users[0]);
         }
@@ -322,16 +339,14 @@ export async function getInputEntity(
         });
     } else if (peer instanceof Api.PeerChannel) {
         try {
-            const channels = await client.invoke(
-                new Api.channels.GetChannels({
-                    id: [
-                        new Api.InputChannel({
-                            channelId: peer.channelId,
-                            accessHash: bigInt.zero,
-                        }),
-                    ],
-                })
-            );
+            const channels = await client.api.channels.getChannels({
+                id: [
+                    new Api.InputChannel({
+                        channelId: peer.channelId,
+                        accessHash: bigInt.zero,
+                    }),
+                ],
+            });
 
             return utils.getInputPeer(channels.chats[0]);
         } catch (e) {
@@ -356,11 +371,9 @@ export async function _getEntityFromString(
     const phone = utils.parsePhone(string);
     if (phone) {
         try {
-            const result = await client.invoke(
-                new Api.contacts.GetContacts({
-                    hash: bigInt.zero,
-                })
-            );
+            const result = await client.api.contacts.getContacts({
+                hash: bigInt.zero,
+            });
             if (!(result instanceof Api.contacts.ContactsNotModified)) {
                 for (const user of result.users) {
                     if (user instanceof Api.User && user.phone === phone) {
@@ -386,11 +399,9 @@ export async function _getEntityFromString(
     } else {
         const { username, isInvite } = utils.parseUsername(string);
         if (isInvite) {
-            const invite = await client.invoke(
-                new Api.messages.CheckChatInvite({
-                    hash: username,
-                })
-            );
+            const invite = await client.api.messages.checkChatInvite({
+                hash: username,
+            });
             if (invite instanceof Api.ChatInvite) {
                 throw new Error(
                     "Cannot get entity from a channel (or group) " +
@@ -401,9 +412,9 @@ export async function _getEntityFromString(
             }
         } else if (username) {
             try {
-                const result = await client.invoke(
-                    new Api.contacts.ResolveUsername({ username: username })
-                );
+                const result = await client.api.contacts.resolveUsername({
+                    username: username,
+                });
                 const pid = utils.getPeerId(result.peer, false);
                 if (result.peer instanceof Api.PeerUser) {
                     for (const x of result.users) {
