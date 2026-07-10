@@ -1,19 +1,6 @@
 export const codeString = [
-  "wenjianjibot_8v_v0zXyy0npPL0qRMw",
-  "wenjianjibot_1v_dVVOXjOuHNQ8i1ne",
-  "wenjianjibot_1v_kDoNqbMuTibDRxHP",
-  "wenjianjibot_1v_Uiibb8wt70Ihw9db",
-  "wenjianjibot_1v_rUSgNEdcloNWXgVi",
-  "wenjianjibot_1v_QsQwt1WyGDkBmPmi",
-  "wenjianjibot_1v_gUaAguuWjTapHLDD",
-  "wenjianjibot_2v_w8Tyaes5OETkDBDj",
-  "wenjianjibot_1v_V6LuYoGVnDhfPwUG",
-  "wenjianjibot_1v_khyYscoHdG07lHxb",
-  "wenjianjibot_1d_yZCBbXXz6QpGiXsk",
-  "wenjianjibot_1v_ZidnEv7eW27WSCXO",
-  "wenjianjibot_1v_7X20pNXNFp1ghgE9",
-  "wenjianjibot_1v_2OS9FarCt40g2jgv",
-  "wenjianjibot_1v_IyPVVph53rMr5Dtt",
-  "wenjianjibot_1v_UlSJQYPiNALRta2a",
-  "wenjianjibot_1v_hjfCrRqA0ySLvGqu"
+  "wenjianjibot_1v_TmZ4osJXjSYuC78B",
+  "wenjianjibot_1v_M8PcVe4FPfLl8snw",
+  "wenjianjibot_1v_rN0VelGqkbujREvM",
+  "wenjianjibot_1v_k5w1iRkwmsN5kDvH"
 ];

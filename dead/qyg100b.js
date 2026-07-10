@@ -385,7 +385,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+      if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -445,8 +445,8 @@ export class WebSocketServer extends DurableObject {
         this.videoCount = 0;
         this.fileCount = 0;
         // const status = await this.ctx.storage.get(code);
-        const string = code.split(":");
-        const status = await this.ctx.storage.get(string[0] + ":" + string[1].split("_")[0]);
+        const string = code?.split(":");
+        const status = await this.ctx.storage.get(string[0] + ":" + string[1]?.split("_")[0]);
         if (status) {
           //console.log("sendQuery当前代码已入过库了");
           this.sendLog("sendQuery", "当前代码已入过库了", null, true);
@@ -462,7 +462,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (e) {
-            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+            if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -606,7 +606,7 @@ export class WebSocketServer extends DurableObject {
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
           return false;
-        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {
@@ -864,7 +864,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const string = message.split(":");
+                    const string = message?.split(":");
                     if (string[0] === "QYG100B_bot") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
@@ -1194,7 +1194,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const string = message.split(":");
+                      const string = message?.split(":");
                       if (string[0] === "QYG100B_bot") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");

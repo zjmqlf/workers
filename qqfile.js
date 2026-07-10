@@ -391,7 +391,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+      if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -551,7 +551,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (e) {
-            if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+            if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -695,7 +695,7 @@ export class WebSocketServer extends DurableObject {
           // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
           this.sendLog("forwardMessage", "消息不允许转发 : " + JSON.stringify(e), "error", true);
           return false;
-        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {
@@ -974,7 +974,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    const string = message.split(":");
+                    const string = message?.split(":");
                     if (string[0] === "QQfile_bot") {
                       // await this.ctx.storage.put(message, 1);
                       await this.ctx.storage.put(string[0] + ":" + string[1].split("-")[0], 1);
@@ -987,7 +987,7 @@ export class WebSocketServer extends DurableObject {
                       this.getCount1(message, 2);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
-                    } else if (message.substr(0, 10) === "newjmqbot_") {
+                    } else if (message?.substr(0, 10) === "newjmqbot_") {
                       await this.ctx.storage.put(message, 1);
                       this.getCount2(message);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
@@ -1137,8 +1137,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8787160965"),
-              accessHash: bigInt("-8229938607591620320"),
+              userId: bigInt("8865639011"),
+              accessHash: bigInt("-4318110302000344820"),
             }),
           ],
         })
@@ -1364,7 +1364,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      const string = message.split(":");
+                      const string = message?.split(":");
                       if (string[0] === "QQfile_bot") {
                         // await this.ctx.storage.put(message, 1);
                         await this.ctx.storage.put(string[0] + ":" + string[1].split("-")[0], 1);
@@ -1377,7 +1377,7 @@ export class WebSocketServer extends DurableObject {
                         this.getCount1(message, 2);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);
-                      } else if (message.substr(0, 10) === "newjmqbot_") {
+                      } else if (message?.substr(0, 10) === "newjmqbot_") {
                         await this.ctx.storage.put(message, 1);
                         this.getCount2(message);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");

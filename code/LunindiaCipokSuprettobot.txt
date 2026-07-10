@@ -1469,5 +1469,9 @@
   "LunindiaCipokSupretto_bot_d:MLrnSHBB8uqQIyFJ64hapCik5DSeLGqV",
   "LunindiaCipokSupretto_bot_d:Kp1YwIuAx9Q7sLCQ5jiNcK0tmcxPsKRR",
   "LunindiaCipokSupretto_bot_d:lwIBuzElcNRxLj11vop0mTXhAeHlXFox",
-  "LunindiaCipokSupretto_bot_d:H0YKWG5k3gbEsEt4FTir3EPYTP39gt7V"
+  "LunindiaCipokSupretto_bot_d:H0YKWG5k3gbEsEt4FTir3EPYTP39gt7V",
+  "LunindiaCipokSupretto_bot_v:iJiMGbD25kwkFypdkX8OjPdAkaRfsOis",
+  "LunindiaCipokSupretto_bot_p:BXfHOdO0CZ6OOtqGjZa25pDCGP13Fyx3",
+  "LunindiaCipokSupretto_bot_p:wWrxDASylApQM55LRkPHVd3ppxmxNCRH",
+  "LunindiaCipokSupretto_bot_p:KYJ0jRBz5BW7OqNaT9FE3xjVrpNq1FTO"
 ]

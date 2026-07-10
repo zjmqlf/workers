@@ -12,5 +12,10 @@
   "JSfile_bot_1V0P0D_EQ54-XWVB",
   "JSfile_bot_1V0P0D_NWT4-B52C",
   "JSfile_bot_3V0P0D_CSYA-T87S",
-  "JSfile_bot_1V0P0D_59HC-A58P"
+  "JSfile_bot_1V0P0D_59HC-A58P",
+  "JSfile_bot_1V0P0D_XSWH-HABU",
+  "JSfile_bot_0V1P0D_ZCTK-RHUP",
+  "JSfile_bot_1V0P0D_JG2R-JXBC",
+  "JSfile_bot_1V0P0D_EB8G-MNH4",
+  "JSfile_bot_1V0P0D_GGEM-Z9C3"
 ]

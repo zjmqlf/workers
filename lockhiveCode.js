@@ -174,18 +174,6 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
-  sendGrid(operate, message, status, error) {
-    this.broadcast({
-      "step": this.currentStep,
-      "offsetId": this.offsetId,
-      "operate": operate,
-      "message": message,
-      "status": status,
-      "error": error,
-      "date": new Date().getTime(),
-    });
-  }
-
   sendLog(operate, message, status, error) {
     this.broadcast({
       "step": this.currentStep,
@@ -357,7 +345,7 @@ export class WebSocketServer extends DurableObject {
       codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? LIMIT 1;").bind(code).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
-      this.sendGrid("selectCode", "出错 : " + e.message, "try", true);
+      this.sendLog("selectCode", "出错 : " + e.message, "try", true);
       if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -398,7 +386,7 @@ export class WebSocketServer extends DurableObject {
       codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (code, status) VALUES (?, ?);").bind(code, 0).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode出错 : " + e);;
-      this.sendGrid("insertCode", "出错 : " + e.message, "try", true);
+      this.sendLog("insertCode", "出错 : " + e.message, "try", true);
       if (e.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -413,10 +401,10 @@ export class WebSocketServer extends DurableObject {
     //console.log(codeResult);  //测试
     if (codeResult.success === true) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据成功");
-      this.sendGrid("insertCode", "", "success", false);
+      this.sendLog("insertCode", "插入code数据成功", "success", false);
     } else {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据失败");
-      this.sendGrid("insertCode", "插入code数据失败", "error", true);
+      this.sendLog("insertCode", "插入code数据失败", "error", true);
       await this.insertCodeError(tryCount, code);
     }
   }
@@ -440,9 +428,9 @@ export class WebSocketServer extends DurableObject {
           });
           if (entities) {
             for (const item of entities) {
-              const url = item.url?.trim();
+              const url = item?.url?.trim();
               if (url) {
-                const string = url.split("https://t.me/Turnautobot?start=");
+                const string = url?.split("https://t.me/Turnautobot?start=");
                 if (string.length === 2) {
                   const code = string[1].replace("f_", "LH_").replace("F_", "LH_");
                   if (code) {
@@ -451,11 +439,11 @@ export class WebSocketServer extends DurableObject {
                       await this.insertCode(1, code);
                     } else {
                       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                      this.sendGrid("nextMessage", "", "exist", false);
+                      this.sendLog("nextMessage", "message已在数据库中", "exist", false);
                     }
                   } else {
                     //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : code为空");
-                    this.sendGrid("nextMessage", "code为空", "error", true);
+                    this.sendLog("nextMessage", "code为空", "error", true);
                   }
                   break;
                 }
@@ -464,18 +452,18 @@ export class WebSocketServer extends DurableObject {
             this.offsetId += 1;
           } else {
             //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-            this.sendGrid("nextMessage", "txt为空", "error", true);
+            this.sendLog("nextMessage", "txt为空", "error", true);
             this.offsetId += 1;
           }
         } else {
           //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-          this.sendGrid("nextMessage", "错误的消息", "error", true);
+          this.sendLog("nextMessage", "错误的消息", "error", true);
           this.offsetId += 1;
         }
       } else {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")nextMessage超出apiCount限制");
-        this.sendGrid("nextMessage", "超出apiCount限制", "limit", true);
+        this.sendLog("nextMessage", "超出apiCount限制", "limit", true);
         await this.close();
         // this.ctx.abort("reset");
       }

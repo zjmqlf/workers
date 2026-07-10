@@ -10,7 +10,7 @@ npx wrangler d1 export maindb --remote --output=./MAINDB1.sql
 
 
 zjmqlf2022:
-npx wrangler d1 export pansou8 --remote --output=./PANSOU8.sql
+npx wrangler d1 export pansou9 --remote --output=./PANSOU9.sql
 npx wrangler d1 export maindb --remote --output=./MAINDB2.sql
 
 

@@ -1148,7 +1148,7 @@ export class WebSocketServer extends DurableObject {
           this.sendLog(clientIndex, "getMessage", this.tg[clientIndex].endChat + " : 超过最大chat了", null, true);
           await this.nextFilter(clientIndex);
         }
-      } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+      } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
         // this.waitTime += 120000;
         if (e.seconds && e.seconds > 0) {
           this.tg[clientIndex].flood = new Date().getTime() + 60000 + e.seconds * 1000;
@@ -1360,7 +1360,7 @@ export class WebSocketServer extends DurableObject {
           this.sendForward(clientIndex, "forwardMessage", "消息不允许转发 : " + JSON.stringify(e), 0, "error", true);
           await this.getNext(clientIndex);
           return;
-        } else if (e.errorMessage.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
           this.tg[clientIndex].count = 0;
           // this.waitTime += 120000;
           if (e.seconds && e.seconds > 0) {

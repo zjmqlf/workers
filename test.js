@@ -726,7 +726,7 @@ export default {
       //         //     // if (button.text === "加入队列全部推送") {
       //         //     // if (button.text === "下一页 ➡️") {
       //         //     if (button.text === "▶️ 自动发送") {
-      //         //     // if (button.text.includes("➡️ 查看下一组 (") === true) {
+      //         //     // if (button.text?.includes("➡️ 查看下一组 (") === true) {
       //         //       // console.log(button.text);  //测试
       //         //       const result = await client[clientIndex].invoke(new Api.messages.GetBotCallbackAnswer({
       //         //         peer: fromPeer,

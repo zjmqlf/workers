@@ -1,17 +1,14 @@
 export const codeString = [
 
-  "paniang_bot_p:jEg8kGARvp2R60il2lfWUiatoVDxgRfQ",
-  "paniang_bot_v:X9BaP7dE2KzkGDQutZAErLDNoRl8xJLD",
-  "paniang_bot_p:7swz3Hrw4oLiYsnIhXW9Q0cAaiPm8oZH",
-  "paniang_bot_v:PhG7A6s9PaWj8jbCztN4nPX0AOvhdBC4",
-  "paniang_bot_p:9uB08dsqcws8Fc6OK9sXV22Ie1NQvnyj",
-  "paniang_bot_p:MWulNropZZaNuaXHvlgP5gDbRnXARU7N",
-  "paniang_bot_p:wYsOEsqIzAbNbEgDsJLlNJ3y4ETniuV8",
-  "paniang_bot_p:tN6uAuN6A6KZ6fzwFkRDPY0C012STujE",
-  "paniang_bot_p:DzmgsFa2MxVOgfoZY25zWJTliiisz3rk",
-  "paniang_bot_p:x7zaa6VPmGPDrPPuzJHYBn0PnRAF3new",
-  "paniang_bot_p:xC6QK8r91t7QSvGMwJ46S9SHwJxfqiSo",
-  "paniang_bot_p:LpKEwSDahiBTv6dMbqke94jtcX0AJv9E",
-  "paniang_bot_p:W7A6a7lWWxGTZ4vJswwYaS04srvZHLns",
-  "paniang_bot_p:IO0rJ6awourXcLeQBNMXhyvvq1wXExFi"
+  "paniang_bot_v:k4zQhf2jnUMLHJhRpcEE9HhOvMR5dJp5",
+  "paniang_bot_v:8CAkhhrjTefhWzmKUMNTCG077cqj1bWe",
+  "paniang_bot_p:V9NAE3YhGtaJaIo0kAcNi87cHDNCs3Tq",
+  "paniang_bot_v:USIeqQmKaqkfE7fxorrFCvVROKygYDKl",
+  "paniang_bot_v:w3uUnCAa1AioKf8QqpKF2puHQYjyaTaP",
+  "paniang_bot_v:Axl3hMCvDSwWfnc8ym9effDHrxo6ZHTu",
+  "paniang_bot_v:Pr3ClLNWuuTO6XYhLUV4M0lRx0gmkLgl",
+  "paniang_bot_v:aJT1q3v2nWGKNd0ngjjd8rGvgBfC1pbP",
+  "paniang_bot_p:ER4Km5pJZSTAvaL3pXOLp79Nsu8jQBaW",
+  "paniang_bot_v:kuwFceYJ0Al8hx8DAzymA30TkxIAyrYM",
+  "paniang_bot_v:m6CsxL49lQoOQW4hy1Oz67LKApwseyFc"
 ];
