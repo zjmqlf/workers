@@ -529,11 +529,13 @@ export class WebSocketServer extends DurableObject {
           this.codeIndex = this.codeLength + Cindex;
           await this.updateCode(1, Cindex, 1);
         } else {
+          await this.overClear("sendQuery");
           //console.log("(" + this.currentStep + ") 查询code出错");
           this.sendLog("sendQuery", "查询code出错", "error", true);
           return;
         }
       } else {
+        await this.overClear("sendQuery");
         //console.log("(" + this.currentStep + ") 查询codeResult出错");
         this.sendLog("sendQuery", "查询codeResult出错", "error", true);
         this.stop = 2;
@@ -623,6 +625,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       if (this.fromDB === true) {
+        await this.overClear("sendQuery");
         //console.log("(" + this.currentStep + ") 已经没有code了");
         this.sendLog("sendQuery", "已经没有code了", "error", true);
       } else {
@@ -1454,6 +1457,67 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async sendDB() {
+    const array = [];
+    const results = await this.ctx.storage.list({
+      // start: 0,
+      // startAfter: 0,
+      // end: 0,
+      // prefix: "",
+      // reverse : true,
+      // limit: 10,
+    });
+    for (const item of results) {
+      // console.log(item[0]);
+      array.push(item[0]);
+    }
+    this.broadcast({
+      "result": JSON.stringify(array),
+    });
+  }
+
+  async syncDB() {
+    // const ws = new WebSocket("wss://lockhive.19422s.xyz/ws");
+    const ws = new WebSocket("wss://lockhive.zjmqlf2023.workers.dev/ws");
+    ws.addEventListener("open", async () => {
+      // server.send("server open");
+      //console.log("sync server open");
+      this.sendLog("syncDB", "sync server open", null, false);
+      await scheduler.wait(5000);
+      server.send({
+        "command": "sendDB",
+      });
+    });
+    ws.addEventListener("message", async ({ data }) => {
+      // server.ssend("server message");
+      if (data) {
+        let message = null;
+        try {
+          message = JSON.parse(data);
+        } catch (e) {
+          //console.log("解析JSON失败");  //测试
+          this.sendLog("syncDB", "解析JSON失败", null, true);
+        }
+        if (message) {
+          message = message.result;
+          const length = message.length;
+          if (length && length > 0) {
+            for (let index = 0; index < length; index++) {
+              await this.ctx.storage.put(message[index], 1);
+              this.sendLog("syncDB", index + " : " + message[index], null, false);
+            }
+          }
+        }
+      }
+      // ws.close();
+    });
+    ws.addEventListener("close", () => {
+      // server.send("server close");
+      //console.log("sync server close");
+      this.sendLog("syncDB", "sync server close", null, false);
+    });
+  }
+
   async webSocketMessage(ws, data) {
     let command = "";
     let option = null;
@@ -1494,6 +1558,10 @@ export class WebSocketServer extends DurableObject {
         "error": true,
         "date": new Date().getTime(),
       });
+    } else if (command === "syncDB") {
+      await this.syncDB();
+    } else if (command === "sendDB") {
+      await this.sendDB();
     } else if (command === "compress") {
       this.compress = true;
     } else if (command === "noCompress") {

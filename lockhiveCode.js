@@ -415,17 +415,6 @@ export class WebSocketServer extends DurableObject {
         if (message) {
           const messageId = message.id;
           const entities = message.entities;
-          this.broadcast({
-            "step": this.currentStep,
-            "operate": "nextMessage",
-            // "messageLength": messageLength,
-            // "messageIndex": messageIndex,
-            "chatId": this.chatId,
-            "offsetId": this.offsetId,
-            "messageId": messageId,
-            "status": "add",
-            "date": new Date().getTime(),
-          });
           if (entities) {
             for (const item of entities) {
               const url = item?.url?.trim();

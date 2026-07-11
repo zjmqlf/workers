@@ -37,5 +37,11 @@
   "MessengerIIbot_3GHT-R0Z0_0P1V0D",
   "MessengerIIbot_5PWG-00F3_0P1V0D",
   "MessengerIIbot_Q3FZ-CBKP_0P1V0D",
-  "MessengerIIbot_25UI-0BPF_0P1V0D"
+  "MessengerIIbot_25UI-0BPF_0P1V0D",
+  "MessengerIIbot_99DW-RL0O_0P15V0D",
+  "MessengerIIbot_9S1Y-BBW1_0P0V1D",
+  "MessengerIIbot_Z328-091W_0P10V0D",
+  "MessengerIIbot_0OW0-8ITR_0P1V0D",
+  "MessengerIIbot_29IB-LRP7_0P19V0D",
+  "MessengerIIbot_QBFX-IEGT_0P1V0D"
 ]

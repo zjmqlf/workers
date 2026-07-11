@@ -135,10 +135,21 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
+  async countMedia() {
+    const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
+    //console.log("mediaResult : " + mediaResult["COUNT(id)"]);  //测试
+    if (mediaResult.success === true) {
+      if (mediaResult.results && mediaResult.results.length > 0) {
+        return mediaResult.results[0]["COUNT(id)"];
+      }
+    }
+    return -1;
+  }
+
   async selectMediaIndex(id) {
     let mediaResult = {};
     try {
-      mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= 0 ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
+      mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= ? ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
     } catch (e) {
       console.log("selectMediaIndex出错 : " + e);
       return;
@@ -153,10 +164,21 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async countPhoto() {
+    const photoResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
+    //console.log("photoResult : " + photoResult["COUNT(id)"]);  //测试
+    if (photoResult.success === true) {
+      if (photoResult.results && photoResult.results.length > 0) {
+        return photoResult.results[0]["COUNT(id)"];
+      }
+    }
+    return -1;
+  }
+
   async selectPhotoIndex(id) {
     let photoResult = {};
     try {
-      photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= 0 ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
+      photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
     } catch (e) {
       console.log("selectPhotoIndex出错 : " + e);
       return;
@@ -172,11 +194,11 @@ export class WebSocketServer extends DurableObject {
   }
 
   async countMessage() {
-    const messageResult = await env.MEDIADB.prepare("SELECT COUNT(MESSAGE) FROM `MESSAGE` WHERE 1 = 1;").run();
-    //console.log("messageResult : " + messageResult["COUNT(MESSAGE)"]);  //测试
+    const messageResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MESSAGE` WHERE 1 = 1;").run();
+    //console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
-        return messageResult.results[0]["COUNT(MESSAGE)"];
+        return messageResult.results[0]["COUNT(id)"];
       }
     }
     return -1;
@@ -264,19 +286,23 @@ export class WebSocketServer extends DurableObject {
     // // const size = this.sql.databaseSize;
     // const resultsArray = await this.sql.exec("SELECT * FROM artist ORDER BY artistname ASC;").toArray();
     // const length = resultsArray.length;
-    // console.log("length : " + length);
+    // console.log("length : " + length);  //测试
     // for (let index = 0; index < length; index++) {
-    //   console.log(JSON.stringify(resultsArray[index]));
+    //   console.log(JSON.stringify(resultsArray[index]));  //测试
     // }
     // const oneRow = await this.sql.exec("SELECT * FROM artist WHERE artistname = ?;", "Alice").one();
 
+    // const array = [];
     // await this.ctx.storage.deleteAll();
     // await this.ctx.storage.put("1", "111");
     // await this.ctx.storage.put("2", "222");
     // await this.ctx.storage.put("3", "333");
+    // await this.ctx.storage.put("4", "444");
+    // await this.ctx.storage.put("5", "555");
     // // await this.ctx.storage.get();
     // // await this.ctx.storage.delete();
-    // console.log(await this.ctx.storage.get("1"));
+    // const result = await this.ctx.storage.get("2");
+    // console.log(" result : " + result);  //测试
     // const results = await this.ctx.storage.list({
     //   // start: 0,
     //   // startAfter: 0,
@@ -286,33 +312,74 @@ export class WebSocketServer extends DurableObject {
     //   // limit: 10,
     // });
     // for (const item of results) {
-    //   // console.log(JSON.stringify(item));
-    //   console.log(item[0] + " - " + item[1]);
+    //   // console.log(JSON.stringify(item));  //测试
+    //   array.push(item[0]);
+    //   console.log(item[0] + " - " + item[1]);  //测试
     // }
-    // // console.log(JSON.stringify(results));
+    // // console.log(JSON.stringify(array));  //测试
+    // return new Response(JSON.stringify(array));
+
+    // let id = 0;
+    // const count = await this.countMessage();
+    // console.log("messageCount : " + count);  //测试
+    // if (count < 0) {
+    //   while (id < count) {
+    //     const results = await this.selectMessage(id);
+    //     const length = results.length;
+    //     console.log("id - " + length);  //测试
+    //     for (let index = 0; index < length; index++) {
+    //       // console.log(JSON.stringify(results[index]));  //测试
+    //       const exist = await this.selectMessageIndex(results[index].id);
+    //       if (!exist || exist === 0) {
+    //         await this.insertMessageIndex(results[index]);
+    //       // } else if (exist > 0) {
+    //       //   await this.deleteMessage(results[index].Mindex);
+    //       }
+    //     }
+    //     // await scheduler.wait(5000);  //测试
+    //     id += 100;
+    //   }
+    // } else {
+    //   console.log("count小于0");
+    // }
 
     let id = 0;
-    const count = await this.countMessage();
-    console.log("count : " + count);
+    const count = await this.countMedia();
+    console.log("mediaCount : " + count);  //测试
     if (count < 0) {
       while (id < count) {
-        const results = await this.selectMessage(id);
+        const results = await this.selectMediaIndex(id);
         const length = results.length;
-        console.log("id - " + length);
+        console.log("id - " + length);  //测试
         for (let index = 0; index < length; index++) {
           // console.log(JSON.stringify(results[index]));
-          const exist = await this.selectMessageIndex(results[index].id);
-          if (!exist || exist === 0) {
-            await this.insertMessageIndex(results[index]);
-          // } else if (exist > 0) {
-          //   await this.deleteMessage(results[index].Mindex);
-          }
+          await this.ctx.storage.put(results[index].id, results[index].accessHash);
         }
+        // await scheduler.wait(5000);  //测试
         id += 100;
       }
     } else {
-      console.log("count小于0");
+      console.log("mediaCount小于0");
     }
+
+    // let id = 0;
+    // const count = await this.countPhoto();
+    // console.log("PhotoCount : " + count);  //测试
+    // if (count < 0) {
+    //   while (id < count) {
+    //     const results = await this.selectPhotoIndex(id);
+    //     const length = results.length;
+    //     console.log("id - " + length);  //测试
+    //     for (let index = 0; index < length; index++) {
+    //       // console.log(JSON.stringify(results[index]));
+    //       await this.ctx.storage.put(results[index].id, results[index].accessHash);
+    //     }
+    //     // await scheduler.wait(5000);  //测试
+    //     id += 100;
+    //   }
+    // } else {
+    //   console.log("PhotoCount小于0");
+    // }
 
     // const client = this.client;
     // async function* fetchData() {

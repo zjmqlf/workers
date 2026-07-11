@@ -472,12 +472,12 @@ export class WebSocketServer extends DurableObject {
   }
 
   async close() {
-    // if (this.client) {
-    //   await this.client.destroy();
-    //   this.client = null;
-    //   //console.log("断开服务器成功");
-    //   this.sendLog("close", "断开服务器成功", null, false);
-    // }
+    if (this.client) {
+      await this.client.destroy();
+      this.client = null;
+      //console.log("断开服务器成功");
+      this.sendLog("close", "断开服务器成功", null, false);
+    }
     this.stop = 0;
     this.ws.close();
     this.ctx.abort("reset");

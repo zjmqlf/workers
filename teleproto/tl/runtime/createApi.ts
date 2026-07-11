@@ -106,10 +106,24 @@ function argToBytes(
     argName: string,
     requestName?: string
 ): Buffer {
-    if (value == null && type !== "true" && type !== "Bool") {
-        throw new Error(
-            `Required field "${argName}" of ${requestName || "request"} is missing`
-        );
+    if (value == null) {
+        switch (type as PrimitiveArgType) {
+            case "int":
+            case "long":
+            case "int128":
+            case "int256":
+            case "double":
+            case "date":
+                value = 0;
+                break;
+            case "true":
+            case "Bool":
+                break;
+            default:
+                throw new Error(
+                    `Required field "${argName}" of ${requestName || "request"} is missing`
+                );
+        }
     }
     switch (type as PrimitiveArgType) {
         case "int": {
@@ -272,7 +286,7 @@ function createClasses(
                 Cls = candidates[0];
             } else if (candidates && candidates.length > 1) {
                 throw new Error(
-                    `Ambiguous type "${expectedType}" ¡ª add "_" to pick a constructor ` +
+                    `Ambiguous type "${expectedType}" — add "_" to pick a constructor ` +
                         `(one of: ${candidates
                             .map((c) => (c as { className?: string }).className)
                             .join(", ")})`

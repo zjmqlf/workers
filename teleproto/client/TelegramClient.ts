@@ -12,6 +12,7 @@ import type { Entity, EntityLike, MessageIDLike } from "../define";
 import { Api } from "../tl";
 import { createApiProxy } from "../tl/runtime/apiProxy";
 import { MTProtoSender } from "../network";
+import type { SessionLease } from "../network/Network";
 import { LAYER } from "../tl/runtime/registry";
 import { Session } from "../sessions";
 
@@ -99,9 +100,10 @@ export class TelegramClient extends TelegramBaseClient {
     ): Promise<R["__response"]> {
         return userMethods.invoke(this, request, dcId);
     }
+    
     invokeWithSender<R extends Api.AnyRequest>(
         request: R,
-        sender?: MTProtoSender
+        sender?: MTProtoSender | SessionLease
     ): Promise<R["__response"]> {
         return userMethods.invoke(this, request, undefined, sender);
     }

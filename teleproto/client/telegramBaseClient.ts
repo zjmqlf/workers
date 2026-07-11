@@ -75,6 +75,8 @@ export interface TelegramClientParams {
         inflightPerDc?: number;
         maxSessions?: number;
         sessions?: number;
+        idleTimeoutMs?: number;
+        sessionStartupDelayMs?: number;
     };
     entityCache?: EntityCacheOptions;
 }
@@ -218,8 +220,12 @@ export abstract class TelegramBaseClient {
         this._connectedDeferred = new Deferred();
         this._parseMode = MarkdownParser;
         this._network = new Network(this, {
-            idleTimeoutMs: SESSION_IDLE_TIMEOUT_MS,
-            sessionStartupDelayMs: SESSION_STARTUP_DELAY_MS,
+            idleTimeoutMs:
+                clientParams.downloadPool?.idleTimeoutMs ??
+                SESSION_IDLE_TIMEOUT_MS,
+            sessionStartupDelayMs:
+                clientParams.downloadPool?.sessionStartupDelayMs ??
+                SESSION_STARTUP_DELAY_MS,
         });
         this._media = new MediaScheduler(
             this,
@@ -409,7 +415,13 @@ export abstract class TelegramBaseClient {
         });
     }
 
-    getSender(dcId: number): Promise<SessionLease> {
+    getSender(dcId: number): Promise<MTProtoSender> {
+        return dcId
+            ? this._network.getSession(dcId).ensureConnected()
+            : Promise.resolve(this._sender!);
+    }
+
+    _leaseSender(dcId: number): Promise<SessionLease> {
         return dcId
             ? this._network.lease(dcId)
             : Promise.resolve({ sender: this._sender!, release: () => {} });
