@@ -28,4 +28,5 @@ export const botString = {
   "25": "xiumi",
   "26": "wenjianji",
   "27": "zyxfiles",
+  // "28": "test",
 };

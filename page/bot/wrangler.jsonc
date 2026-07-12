@@ -113,11 +113,11 @@
         "script_name": "lockhivecode",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "messenger_WebSocketServer",
-        "script_name": "messenger",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "messenger_WebSocketServer",
+      //   "script_name": "messenger",
+      //   "class_name": "WebSocketServer"
+      // },
       {
         "name": "palucode_WebSocketServer",
         "script_name": "palucode",
@@ -128,11 +128,11 @@
         "script_name": "siren",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "tebiejie_WebSocketServer",
-        "script_name": "tebiejie",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "tebiejie_WebSocketServer",
+      //   "script_name": "tebiejie",
+      //   "class_name": "WebSocketServer"
+      // },
       {
         "name": "xiumi_WebSocketServer",
         "script_name": "xiumi",
@@ -148,6 +148,11 @@
         "script_name": "zyxfiles",
         "class_name": "WebSocketServer"
       },
+      // {
+      //   "name": "test_WebSocketServer",
+      //   "script_name": "test",
+      //   "class_name": "WebSocketServer"
+      // },
     ]
   }
 }

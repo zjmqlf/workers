@@ -39,13 +39,14 @@ export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params 
     "18": env.kfcmnb_WebSocketServer,
     "19": env.lockhive_WebSocketServer,
     "20": env.lockhivecode_WebSocketServer,
-    "21": env.messenger_WebSocketServer,
+    // "21": env.messenger_WebSocketServer,
     "22": env.palucode_WebSocketServer,
     "23": env.siren_WebSocketServer,
-    "24": env.tebiejie_WebSocketServer,
+    // "24": env.tebiejie_WebSocketServer,
     "25": env.xiumi_WebSocketServer,
     "26": env.wenjianji_WebSocketServer,
     "27": env.zyxfiles_WebSocketServer,
+    // "28": env.test_WebSocketServer,
   };
   // const bot:string = context.params.bot;
   const bot:string = params.bot;

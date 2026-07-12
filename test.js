@@ -381,6 +381,13 @@ export class WebSocketServer extends DurableObject {
     //   console.log("PhotoCount小于0");
     // }
 
+    // try {
+    //   const result = await this.ctx.storage.get("2");
+    //   console.log(result);  //测试
+    // } catch (e) {
+    //   console.log("出错 : " + e);  //测试
+    // }
+
     // const client = this.client;
     // async function* fetchData() {
     //   // const messages = [];
