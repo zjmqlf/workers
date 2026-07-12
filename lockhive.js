@@ -330,7 +330,14 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       } else {
         await scheduler.wait(30000);
-        await this.open(tryCount + 1);
+        if (this.stop === 1) {
+          await this.open(tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -416,7 +423,14 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         } else {
           await scheduler.wait(10000);
-          await this.getMessage(tryCount + 1);
+          if (this.stop === 1) {
+            await this.getMessage(tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -431,7 +445,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectCode(tryCount + 1);
+      if (this.stop === 1) {
+        await this.selectCode(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -472,7 +493,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.updateCode(tryCount + 1, Cindex, status);
+      if (this.stop === 1) {
+        await this.updateCode(tryCount + 1, Cindex, status);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -513,7 +541,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.sendQuery(tryCount + 1);
+      if (this.stop === 1) {
+        await this.sendQuery(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1126,7 +1161,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.getBotr(tryCount + 1);
+      if (this.stop === 1) {
+        await this.getBotr(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1164,7 +1206,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.getUser(tryCount + 1);
+      if (this.stop === 1) {
+        await this.getUser(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1458,7 +1507,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async sendDB() {
-    const array = [];
+    let array = [];
     const results = await this.ctx.storage.list({
       // start: 0,
       // startAfter: 0,
@@ -1471,40 +1520,44 @@ export class WebSocketServer extends DurableObject {
       // console.log(item[0]);
       array.push(item[0]);
     }
+    array = [...new Set(array)];
     this.broadcast({
       "result": JSON.stringify(array),
     });
   }
 
   async syncDB() {
-    // const ws = new WebSocket("wss://lockhive.19422s.xyz/ws");
-    const ws = new WebSocket("wss://lockhive.zjmqlf2023.workers.dev/ws");
+    // const ws = new WebSocket("wss://lockhive.zjmqlf2022.workers.dev/ws");
+    const ws = new WebSocket("wss://lockhive.19422.xyz/ws");
     ws.addEventListener("open", async () => {
-      // server.send("server open");
       //console.log("sync server open");
       this.sendLog("syncDB", "sync server open", null, false);
       await scheduler.wait(5000);
-      server.send({
+      ws.send(JSON.stringify({
         "command": "sendDB",
-      });
+      }));
     });
     ws.addEventListener("message", async ({ data }) => {
-      // server.ssend("server message");
       if (data) {
         let message = null;
         try {
           message = JSON.parse(data);
         } catch (e) {
-          //console.log("解析JSON失败");  //测试
+          //console.log("解析JSON失败");
           this.sendLog("syncDB", "解析JSON失败", null, true);
         }
         if (message) {
           message = message.result;
-          const length = message.length;
-          if (length && length > 0) {
-            for (let index = 0; index < length; index++) {
-              await this.ctx.storage.put(message[index], 1);
-              this.sendLog("syncDB", index + " : " + message[index], null, false);
+          if (message) {
+            message = [...new Set(message)];  //测试
+            // this.sendLog("syncDB", JSON.stringify(message), null, true);  //测试
+            const length = message.length;
+            this.sendLog("syncDB", "length : " + length, null, true);  //测试
+            if (length && length > 0) {
+              for (let index = 0; index < length; index++) {
+                await this.ctx.storage.put(message[index], 1);
+                this.sendLog("syncDB", index + " : " + message[index], null, false);
+              }
             }
           }
         }
@@ -1512,7 +1565,6 @@ export class WebSocketServer extends DurableObject {
       // ws.close();
     });
     ws.addEventListener("close", () => {
-      // server.send("server close");
       //console.log("sync server close");
       this.sendLog("syncDB", "sync server close", null, false);
     });
@@ -1536,7 +1588,8 @@ export class WebSocketServer extends DurableObject {
       }
     // }
     if (command === "start") {
-      await this.start(option);
+      // await this.start(option);
+      await this.syncDB();
     } else if (command === "pause") {
       this.stop = 2;
     } else if (command === "close") {

@@ -6,23 +6,24 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./bot/build"
-  },
-  "routes": [
-    {
-      "pattern": "lockhivecode.19422.xyz/*",
-      "zone_name": "19422.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./bot/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "lockhivecode.19422.xyz/*",
+  //     "zone_name": "19422.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [
     {
       "binding": "MAINDB",
       "database_name": "maindb",
-      "database_id": "aec6fc9f-94b9-4d8f-8c27-d9e730a0f5c7"
+      // "database_id": "aec6fc9f-94b9-4d8f-8c27-d9e730a0f5c7"
+      "database_id": "0a603387-bd38-4fa7-9938-2931ddad233a"
     }
   ],
   "durable_objects": {

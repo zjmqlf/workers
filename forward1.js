@@ -538,7 +538,14 @@ export class WebSocketServer extends DurableObject {
         await this.close(clientIndex);
       } else {
         await scheduler.wait(30000);
-        await this.open(clientIndex, tryCount + 1);
+        if (this.stop === 1) {
+          await this.open(clientIndex, tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -564,7 +571,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.insertConfig(clientIndex, tryCount + 1);
+      if (this.stop === 1) {
+        await this.insertConfig(clientIndex, tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -646,7 +660,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.getConfig(clientIndex, tryCount + 1, option);
+      if (this.stop === 1) {
+        await this.getConfig(clientIndex, tryCount + 1, option);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -726,7 +747,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.updateConfig(clientIndex, tryCount + 1);
+      if (this.stop === 1) {
+        await this.updateConfig(clientIndex, tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -785,7 +813,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.noExistChat(clientIndex, tryCount + 1, Cindex);
+      if (this.stop === 1) {
+        await this.noExistChat(clientIndex, tryCount + 1, Cindex);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -826,7 +861,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.noforwardChat(clientIndex, tryCount + 1, Cindex);
+      if (this.stop === 1) {
+        await this.noforwardChat(clientIndex, tryCount + 1, Cindex);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -901,7 +943,14 @@ export class WebSocketServer extends DurableObject {
             await this.close(clientIndex);
           } else {
             await scheduler.wait(10000);
-            await this.checkChat(clientIndex, tryCount + 1, chatResult);
+            if (this.stop === 1) {
+              await this.checkChat(clientIndex, tryCount + 1, chatResult);
+            } else if (this.stop === 2) {
+              this.broadcast({
+                "result": "pause",
+              });
+              await this.close();
+            }
           }
         }
         return;
@@ -981,7 +1030,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.nextChat(clientIndex, tryCount + 1, check);
+      if (this.stop === 1) {
+        await this.nextChat(clientIndex, tryCount + 1, check);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1163,7 +1219,14 @@ export class WebSocketServer extends DurableObject {
           await this.close(clientIndex);
         } else {
           await scheduler.wait(10000);
-          await this.getMessage(clientIndex, tryCount + 1);
+          if (this.stop === 1) {
+            await this.getMessage(clientIndex, tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -1177,7 +1240,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.updateChat(clientIndex, tryCount + 1, messageLength);
+      if (this.stop === 1) {
+        await this.updateChat(clientIndex, tryCount + 1, messageLength);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1990,7 +2060,14 @@ export class WebSocketServer extends DurableObject {
         await this.close(clientIndex);
       } else {
         await scheduler.wait(10000);
-        await this.getDialog(clientIndex, tryCount + 1);
+        if (this.stop === 1) {
+          await this.getDialog(clientIndex, tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -2003,7 +2080,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.selectChat(clientIndex, tryCount + 1, channelId, accessHash);
+      if (this.stop === 1) {
+        await this.selectChat(clientIndex, tryCount + 1, channelId, accessHash);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -2043,7 +2127,14 @@ export class WebSocketServer extends DurableObject {
       await this.close(clientIndex);
     } else {
       await scheduler.wait(10000);
-      await this.insertChat(clientIndex, tryCount + 1, channelId, accessHash, username, title, noforwards);
+      if (this.stop === 1) {
+        await this.insertChat(clientIndex, tryCount + 1, channelId, accessHash, username, title, noforwards);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 

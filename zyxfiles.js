@@ -326,7 +326,14 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       } else {
         await scheduler.wait(30000);
-        await this.open(tryCount + 1);
+        if (this.stop === 1) {
+          await this.open(tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -412,7 +419,14 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         } else {
           await scheduler.wait(10000);
-          await this.getMessage(tryCount + 1);
+          if (this.stop === 1) {
+            await this.getMessage(tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -426,7 +440,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.sendQuery(tryCount + 1);
+      if (this.stop === 1) {
+        await this.sendQuery(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -883,7 +904,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.getBotr(tryCount + 1);
+      if (this.stop === 1) {
+        await this.getBotr(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -894,8 +922,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8877633492"),
-              accessHash: bigInt("4268112599861320874"),
+              userId: bigInt("8849349827"),
+              accessHash: bigInt("4044878039218126691"),
             }),
           ],
         })
@@ -921,7 +949,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.getUser(tryCount + 1);
+      if (this.stop === 1) {
+        await this.getUser(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 

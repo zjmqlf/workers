@@ -267,7 +267,7 @@ export const apiString = [
     "phone": "+12024760134",
     "apiId": 19251839,
     "apiHash": "601bc804c1e71efe698588c24ca3ba4f",
-    "sessionString": "1BQANOTEuMTA4LjU2LjEyOABQqFZlkxggG9g8nQjTsU1Yu23Xrfr9SY4hR+UbLS3vRm1L1A7n+miDT6/y9VztIzcuj7ZXY2sRCQ0dFnb2CJuriFa7H3v6TMmiXQ/Ul/Rma8bX0228pyWLxP5d0ucASWr3lPl1zZqAfKBuV2e/iF6y8Zhaqx4fTwruuR05ZVkF4LzZRcIMtd9pzhj2ofMMLQXgnUCSJ8d2hhI8pMfAPuC28VYQfLpPCjTUL6oDWx2DXEXCQFcZLOObG5jjfGMlwdL33+KxiBMq0npEYh63J5hSJVE3+2AvzcZncnawaEDmIwKf0oMKyvjBACE+PbTCopE69Wbs8v9iFWNgsompxSAcww==",
+    "sessionString": "1BQANOTEuMTA4LjU2LjE0NwG7DXeY7gIihaeTr71qFVdRP/wm892uxbt5FGtvvcp4EODrd1MXr3MmLrL6H7ffXSSJwNWo/8DatgsW4R+gG84qxnpObceq3TsYTT4j8JLKUZx+o+nESio85SAga5YgNzesYjE9SD1mfkqJjWGswKi2kCP/57O83XgCDYqTutN8Cw+y7b66/KeGHrckBWcb0Ldw+leWVozt3F3FYjVzPZmYHp4najA3nH8VBAS5NsSa+g5HkwBazhbWFVN8jxojQkY1LULs3a9Dys2mLcS5q8JzFEhBYnOThZkZOesFhlsnRuE1uNKVg4LN3Y3t+WPDp7BzUGDbyxypEjhOGWGMm1TNUw==",
   },
   {
     "id": 28,
@@ -378,16 +378,6 @@ export const apiString = [
     "apiId": 11529789,
     "apiHash": "18f9b0abbeb32c902a3717662e1bf991",
     "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTUBu1CHJjb2tIoVCzGYporqFhl5BywINE7BlEo2MM52iAjXAC2zrQa6FJcImTQZjzMALiRm4+R9gcE5k42iYYUUn8XjPZnUjCSHpnSvV9cou68yC/MRGojHwiT/CxIDqeRGD56BbYjxeZqtXyFLcj/N9ivs2aryODkm7msrUK0olehPSEySFWptvS3XRQ/tV6yXBhx4CgibpjGRQgV+qNUu7WhdYaw1/1SZGGsZvslYR1UJW4pyHUMe8/i84C5e3Wqh00F+AYEFLw4qVm5ewG2Bleo+7ZSbvuLOBwS0Kn+wU16CVNvWbSN3xepTmY1jhSg1L1VE4FchVv3HhzBObhh9cEE=",
-  },
-  {
-    "id": 39,
-    "pc": 75,
-    "dc": 5,
-    "name": "zjm2244",
-    "phone": "+37066154513",
-    "apiId": 19988259,
-    "apiHash": "3cd5347f2f5c8cdfc7d4ff89af2f8a57",
-    "sessionString": "1BQANOTEuMTA4LjU2LjEyOABQDMofmsQMVwdjcxJ42pPrB5j7WFrvn6H7LBD8NN6H3z4NlIR68lduR0tRwuMnqcunra/Y+hIFj4kiC1b0ZlXb3w3lWkIf+gxImENPwMlWeq7KmvU9VKTw7LyaFJ61k8MkPUWXaeeMxc3OoSK0JTamDh75VReJeYxJuWdnMepi59vlyBjmaxuhK1Mk1FLEc91lDteMQ1VbztIA09hHNVIqwhq7nGMNNOpZoX7Y8u1pKWUAva7Jk/luY1koczY2Esn/QxF1FnX4LqX9EUKa+vC/E/m7wSHLi63F62qZjly4CSaiQTfx0eRmTVh+d0Cx3DZvswUWP19gXpIlwmHRTHnIdA==",
   },
   {
     "id": 40,

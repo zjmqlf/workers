@@ -326,7 +326,14 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       } else {
         await scheduler.wait(30000);
-        await this.open(tryCount + 1);
+        if (this.stop === 1) {
+          await this.open(tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -345,7 +352,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.getConfig(tryCount + 1, option);
+      if (this.stop === 1) {
+        await this.getConfig(tryCount + 1, option);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -412,7 +426,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.updateConfig(tryCount + 1);
+      if (this.stop === 1) {
+        await this.updateConfig(tryCount + 1);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -523,7 +544,14 @@ export class WebSocketServer extends DurableObject {
                 await this.close();
               } else {
                 await scheduler.wait(10000);
-                await this.getChat(tryCount + 1);
+                if (this.stop === 1) {
+                  await this.getChat(tryCount + 1);
+                } else if (this.stop === 2) {
+                  this.broadcast({
+                    "result": "pause",
+                  });
+                  await this.close();
+                }
               }
             }
             return;
@@ -582,7 +610,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.updateChat(tryCount + 1, messageLength);
+      if (this.stop === 1) {
+        await this.updateChat(tryCount + 1, messageLength);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -697,7 +732,14 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         } else {
           await scheduler.wait(10000);
-          await this.getMessage(tryCount + 1);
+          if (this.stop === 1) {
+            await this.getMessage(tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -753,7 +795,14 @@ export class WebSocketServer extends DurableObject {
   //     await this.close();
   //   } else {
   //     await scheduler.wait(10000);
-  //     await this.selectMediaIndex(tryCount + 1, id, accessHash);
+  //     if (this.stop === 1) {
+  //       await this.selectMediaIndex(tryCount + 1, id, accessHash);
+  //     } else if (this.stop === 2) {
+  //       this.broadcast({
+  //         "result": "pause",
+  //       });
+  //       await this.close();
+  //     }
   //   }
   // }
 
@@ -794,7 +843,14 @@ export class WebSocketServer extends DurableObject {
   //     await this.close();
   //   } else {
   //     await scheduler.wait(10000);
-  //     await this.insertMediaIndex(tryCount + 1, Vindex, id, accessHash);
+  //     if (this.stop === 1) {
+  //       await this.insertMediaIndex(tryCount + 1, Vindex, id, accessHash);
+  //     } else if (this.stop === 2) {
+  //       this.broadcast({
+  //         "result": "pause",
+  //       });
+  //       await this.close();
+  //     }
   //   }
   // }
 
@@ -836,7 +892,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectMedia(tryCount + 1, id, accessHash);
+      if (this.stop === 1) {
+        await this.selectMedia(tryCount + 1, id, accessHash);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -877,7 +940,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertMedia(tryCount + 1, id, accessHash, dcId, fileName, mimeType, size, duration, width, height);
+      if (this.stop === 1) {
+        await this.insertMedia(tryCount + 1, id, accessHash, dcId, fileName, mimeType, size, duration, width, height);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -937,7 +1007,14 @@ export class WebSocketServer extends DurableObject {
   //     await this.close();
   //   } else {
   //     await scheduler.wait(10000);
-  //     await this.selectPhotoIndex(tryCount + 1, id, accessHash, type);
+  //     if (this.stop === 1) {
+  //       await this.selectPhotoIndex(tryCount + 1, id, accessHash, type);
+  //     } else if (this.stop === 2) {
+  //       this.broadcast({
+  //         "result": "pause",
+  //       });
+  //       await this.close();
+  //     }
   //   }
   // }
 
@@ -978,7 +1055,14 @@ export class WebSocketServer extends DurableObject {
   //     await this.close();
   //   } else {
   //     await scheduler.wait(10000);
-  //     await this.insertPhotoIndex(tryCount + 1, Pindex, id, accessHash, type);
+  //     if (this.stop === 1) {
+  //       await this.insertPhotoIndex(tryCount + 1, Pindex, id, accessHash, type);
+  //     } else if (this.stop === 2) {
+  //       this.broadcast({
+  //         "result": "pause",
+  //       });
+  //       await this.close();
+  //     }
   //   }
   // }
 
@@ -1020,7 +1104,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectPhoto(tryCount + 1, id, accessHash, type);
+      if (this.stop === 1) {
+        await this.selectPhoto(tryCount + 1, id, accessHash, type);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1061,7 +1152,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertPhoto(tryCount + 1, id, accessHash, dcId, photoIndex, type, size);
+      if (this.stop === 1) {
+        await this.insertPhoto(tryCount + 1, id, accessHash, dcId, photoIndex, type, size);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1121,7 +1219,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectMediaMessage(tryCount + 1, messageId);
+      if (this.stop === 1) {
+        await this.selectMediaMessage(tryCount + 1, messageId);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1162,7 +1267,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectPhotoMessage(tryCount + 1, messageId, type);
+      if (this.stop === 1) {
+        await this.selectPhotoMessage(tryCount + 1, messageId, type);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -1203,7 +1315,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertMessage(tryCount + 1, messageId, category, type, mid, id, accessHash, txt);
+      if (this.stop === 1) {
+        await this.insertMessage(tryCount + 1, messageId, category, type, mid, id, accessHash, txt);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -2174,7 +2293,14 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       } else {
         await scheduler.wait(10000);
-        await this.getDialog(tryCount + 1);
+        if (this.stop === 1) {
+          await this.getDialog(tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -2188,7 +2314,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectChat(tryCount + 1, channelId, accessHash);
+      if (this.stop === 1) {
+        await this.selectChat(tryCount + 1, channelId, accessHash);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -2229,7 +2362,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertChat(tryCount + 1, channelId, accessHash, chatType, username, title, noforwards);
+      if (this.stop === 1) {
+        await this.insertChat(tryCount + 1, channelId, accessHash, chatType, username, title, noforwards);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 

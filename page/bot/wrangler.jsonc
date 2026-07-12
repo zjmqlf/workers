@@ -104,6 +104,16 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "lockhive_WebSocketServer",
+        "script_name": "lockhive",
+        "class_name": "WebSocketServer"
+      },
+      {
+        "name": "lockhivecode_WebSocketServer",
+        "script_name": "lockhivecode",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "messenger_WebSocketServer",
         "script_name": "messenger",
         "class_name": "WebSocketServer"

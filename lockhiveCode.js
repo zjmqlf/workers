@@ -229,7 +229,14 @@ export class WebSocketServer extends DurableObject {
         await this.close();
       } else {
         await scheduler.wait(30000);
-        await this.open(tryCount + 1);
+        if (this.stop === 1) {
+          await this.open(tryCount + 1);
+        } else if (this.stop === 2) {
+          this.broadcast({
+            "result": "pause",
+          });
+          await this.close();
+        }
       }
       return;
     }
@@ -265,7 +272,14 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         } else {
           await scheduler.wait(10000);
-          await this.getChat(tryCount + 1);
+          if (this.stop === 1) {
+            await this.getChat(tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -319,7 +333,14 @@ export class WebSocketServer extends DurableObject {
           await this.close();
         } else {
           await scheduler.wait(10000);
-          await this.getMessage(tryCount + 1);
+          if (this.stop === 1) {
+            await this.getMessage(tryCount + 1);
+          } else if (this.stop === 2) {
+            this.broadcast({
+              "result": "pause",
+            });
+            await this.close();
+          }
         }
       }
       return;
@@ -334,7 +355,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.selectCode(tryCount + 1, code);
+      if (this.stop === 1) {
+        await this.selectCode(tryCount + 1, code);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 
@@ -375,7 +403,14 @@ export class WebSocketServer extends DurableObject {
       await this.close();
     } else {
       await scheduler.wait(10000);
-      await this.insertCode(tryCount + 1, code);
+      if (this.stop === 1) {
+        await this.insertCode(tryCount + 1, code);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
     }
   }
 

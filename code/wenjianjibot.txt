@@ -31,5 +31,8 @@
   "wenjianjibot_1v_rN0VelGqkbujREvM",
   "wenjianjibot_1v_k5w1iRkwmsN5kDvH",
   "wenjianjibot_1v_cFj3nTZxprPlrj4z",
-  "wenjianjibot_6p_Di2vZmTgL7S8WTa6"
+  "wenjianjibot_6p_Di2vZmTgL7S8WTa6",
+  "wenjianjibot_1v_bJ7M10Ei3xxNeWMX",
+  "wenjianjibot_1v_rpST0WGaqSzezKRI",
+  "wenjianjibot_3v_KQUVHJvuYDe3ILjq"
 ]
