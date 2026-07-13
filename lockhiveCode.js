@@ -20,6 +20,7 @@ export class WebSocketServer extends DurableObject {
   messageArray = [];
   cacheMessage = null;
   batchMessage = [];
+  successCount = 0;
 
   constructor(ctx, env) {
     super(ctx, env);
@@ -91,6 +92,7 @@ export class WebSocketServer extends DurableObject {
       this.messageArray = [];
       this.cacheMessage = null;
       this.batchMessage = [];
+      this.successCount = 0;
     }
   }
 
@@ -435,6 +437,7 @@ export class WebSocketServer extends DurableObject {
     }
     //console.log(codeResult);  //测试
     if (codeResult.success === true) {
+      this.successCount += 1;
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据成功");
       this.sendLog("insertCode", "插入code数据成功", "success", false);
     } else {
@@ -460,6 +463,7 @@ export class WebSocketServer extends DurableObject {
                   if (code) {
                     const codeCount = await this.selectCode(1, code);
                     if (parseInt(codeCount) === 0) {
+                      // this.successCount += 1;
                       await this.insertCode(1, code);
                     } else {
                       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
@@ -521,6 +525,9 @@ export class WebSocketServer extends DurableObject {
             await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
             // this.offsetId += 1;
           }
+          //console.log("(" + this.currentStep + ")successCount : " + this.successCount);
+          this.sendLog("nextStep", "successCount : " + this.successCount, null, false);
+          this.successCount = 0;
           if (this.stop === 1) {
             if (this.apiCount < 900) {
               await this.nextStep();
@@ -610,6 +617,9 @@ export class WebSocketServer extends DurableObject {
             await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
             // this.offsetId += 1;
           }
+          //console.log("(" + this.currentStep + ")successCount : " + this.successCount);
+          this.sendLog("start", "successCount : " + this.successCount, null, false);
+          this.successCount = 0;
           if (this.stop === 1) {
             if (this.apiCount < 900) {
               await this.nextStep();
