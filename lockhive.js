@@ -1522,7 +1522,7 @@ export class WebSocketServer extends DurableObject {
     }
     array = [...new Set(array)];
     this.broadcast({
-      "result": JSON.stringify(array),
+      "result": array,
     });
   }
 
@@ -1549,7 +1549,7 @@ export class WebSocketServer extends DurableObject {
         if (message) {
           message = message.result;
           if (message) {
-            message = [...new Set(message)];  //测试
+            // message = [...new Set(message)];  //测试
             // this.sendLog("syncDB", JSON.stringify(message), null, true);  //测试
             const length = message.length;
             this.sendLog("syncDB", "length : " + length, null, true);  //测试
@@ -1588,8 +1588,7 @@ export class WebSocketServer extends DurableObject {
       }
     // }
     if (command === "start") {
-      // await this.start(option);
-      await this.syncDB();
+      await this.start(option);
     } else if (command === "pause") {
       this.stop = 2;
     } else if (command === "close") {

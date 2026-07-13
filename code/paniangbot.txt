@@ -513,5 +513,6 @@
   "paniang_bot_col:aLkahlpGVf7brE42lZroNdJyKCZZBWxZ",
   "paniang_bot_col:xUDrxXDB9xH81QURkig2aeqVev7OTbYS",
   "paniang_bot_col:hyu7bvATu0kPJn3y4uau4wFzHK9zZal5",
-  "paniang_bot_col:czDyynGDjuas2LFPszNS68MhEE0ESceK"
+  "paniang_bot_col:czDyynGDjuas2LFPszNS68MhEE0ESceK",
+  "paniang_bot_v:iV7jUoiwennssvmDTPpfEdJyKHxTQR8S"
 ]

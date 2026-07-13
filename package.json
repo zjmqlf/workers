@@ -57,6 +57,8 @@
     "deploy-massfilesstore": "wrangler deploy -c ./wrangler-massfilesstore.jsonc",
     "build-steviarchiver": "wrangler deploy -c ./wrangler-steviarchiver.jsonc --dry-run --outdir=./bot/dist",
     "deploy-steviarchiver": "wrangler deploy -c ./wrangler-steviarchiver.jsonc",
+    "build-fileleak": "wrangler deploy -c ./wrangler-fileleak.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-fileleak": "wrangler deploy -c ./wrangler-fileleak.jsonc",
     "build-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc --dry-run --outdir=./bot/dist",
     "deploy-fileport": "wrangler deploy -c ./wrangler-fileport.jsonc",
     "build-jsfile": "wrangler deploy -c ./wrangler-jsfile.jsonc --dry-run --outdir=./bot/dist",

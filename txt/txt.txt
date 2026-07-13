@@ -94,6 +94,9 @@ npm run deploy-massfilesstore
 npm run build-steviarchiver
 npm run deploy-steviarchiver
 
+npm run build-fileleak
+npm run deploy-fileleak
+
 npm run build-fileport
 npm run deploy-fileport
 

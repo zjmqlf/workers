@@ -26,6 +26,10 @@ npx wrangler d1 execute message --remote --file=./sql/MESSAGE3.sql
 npx wrangler d1 execute maindb --remote --file=./sql/MAINDB3.sql
 
 
+zjmqlf2024:
+npx wrangler d1 export maindb --remote --table=CODE --output=./CODE.sql
+
+
 zjmqlf2025:
 npx wrangler d1 export media20 --remote --output=./MEDIA20.sql
 npx wrangler d1 export photo1 --remote --output=./PHOTO1.sql

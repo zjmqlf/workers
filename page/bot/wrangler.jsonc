@@ -13,11 +13,6 @@
         "script_name": "qqfile",
         "class_name": "WebSocketServer"
       },
-      // {
-      //   "name": "lockhive_WebSocketServer",
-      //   "script_name": "lockhive",
-      //   "class_name": "WebSocketServer"
-      // },
       {
         "name": "aotem_WebSocketServer",
         "script_name": "aotem",
@@ -83,9 +78,14 @@
         "script_name": "massfilesstore",
         "class_name": "WebSocketServer"
       },
+      // {
+      //   "name": "steviarchiver_WebSocketServer",
+      //   "script_name": "steviarchiver",
+      //   "class_name": "WebSocketServer"
+      // },
       {
-        "name": "steviarchiver_WebSocketServer",
-        "script_name": "steviarchiver",
+        "name": "fileleak_WebSocketServer",
+        "script_name": "fileleak",
         "class_name": "WebSocketServer"
       },
       {
@@ -143,11 +143,11 @@
         "script_name": "wenjianji",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "zyxfiles_WebSocketServer",
-        "script_name": "zyxfiles",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "zyxfiles_WebSocketServer",
+      //   "script_name": "zyxfiles",
+      //   "class_name": "WebSocketServer"
+      // },
       // {
       //   "name": "test_WebSocketServer",
       //   "script_name": "test",

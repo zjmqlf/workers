@@ -291,6 +291,11 @@ QQtj1m_bot
 8963384698
 -4824464584655908019
 
+QQ解码器2oek
+QQ2oek_bot
+8654286699
+2927913726745171695
+
 𝖱𝖤𝖣𝖣 𝖥𝖨𝖫𝖤
 REDDFILEBOT
 7907874608
@@ -310,6 +315,11 @@ Steviarchiver_bot
 Steviadecoderbot
 7976723565
 7150432689627043683
+
+𝚂𝚝𝚎𝚟𝚒𝚊 𝙴𝚗𝚌𝚘𝚍𝚎𝚛 ☬
+Steviaencoderbot
+8686929797
+-2740764425526714041
 
 tebiejie1
 tebiejie1bot

@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
 import { LogLevel } from "./teleproto/extensions";
-import { codeString } from "./string/fileLeakString";
+import { codeString } from "./string/fileleakString";
 import bigInt from "big-integer";
 
 export class WebSocketServer extends DurableObject {
@@ -1092,8 +1092,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8554859780"),
-              accessHash: bigInt("-6753499946272396397"),
+              userId: bigInt("7966817749"),
+              accessHash: bigInt("-4550341619102338380"),
             }),
           ],
         })
@@ -1575,7 +1575,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("fileLeak");
+      const id = env.WEBSOCKET_SERVER.idFromName("fileleak");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

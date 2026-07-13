@@ -88,5 +88,10 @@
   "MessengerIIbot_0RJC-ELWI_0P0V1D",
   "MessengerIIbot_9Z6K-O963_0P1V0D",
   "MessengerIIbot_BDY1-DP4J_0P1V0D",
-  "MessengerIIbot_1LDQ-N0LK_0P1V0D"
+  "MessengerIIbot_1LDQ-N0LK_0P1V0D",
+  "MessengerIIbot_1M6V-0YYD_0P2V0D",
+  "MessengerIIbot_XHAQ-A0OL_0P1V0D",
+  "MessengerIIbot_UG64-EJ8H_1P5V0D",
+  "MessengerIIbot_DY1H-8ITI_37P2V0D",
+  "MessengerIIbot_00VU-M50M_12P14V0D"
 ]
