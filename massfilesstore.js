@@ -810,7 +810,7 @@ export class WebSocketServer extends DurableObject {
                 } else {
                   const message = messageArray[messageIndex].message?.trim();
                   if (message) {
-                    if (message?.substr(0, 21) === "Mass_Files_Store_Bot_") {
+                    if (message?.substr(0, 21) === "Mass_Files_Store_Bot_" || message?.substr(0, 20) === "Mass_FilesStore_Bot_") {
                       await this.ctx.storage.put(message, 1);
                       //console.log("(" + this.currentStep + ") 代码入库完毕");
                       this.sendForward("nextStep", "代码入库完毕", "", "add", false);
@@ -1049,7 +1049,7 @@ export class WebSocketServer extends DurableObject {
                   } else {
                     const message = messageArray[messageIndex].message?.trim();
                     if (message) {
-                      if (message?.substr(0, 21) === "Mass_Files_Store_Bot_") {
+                      if (message?.substr(0, 21) === "Mass_Files_Store_Bot_" || message?.substr(0, 20) === "Mass_FilesStore_Bot_") {
                         await this.ctx.storage.put(message, 1);
                         //console.log("(" + this.currentStep + ") 代码入库完毕");
                         this.sendForward("start", "代码入库完毕", "", "add", false);

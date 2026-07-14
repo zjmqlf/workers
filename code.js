@@ -70,7 +70,7 @@ const tgjmq3botRegexp = /(tgjmq3bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjm
 const tgjmq5botRegexp = /(tgjmq5bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq5bot
 const tgjmq01botRegexp = /(tgjmq01bot_\d*p*\d*v*\d*d*_[A-Za-z0-9]{16})/g;   //tgjmq01bot
 const blgjlqbotRegexp = /(blgjlqbot_\d+p\d+v\d+d_[A-Za-z0-9]{16})/g;   //blgjlqbot
-const fileLeakBotRegexp = /(fileLeakBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //fileLeakBot
+const fileLeakBotRegexp = /(FileLeakBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //fileLeakBot
 const nnfilebotRegexp = /(nnfilebot_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]*_[A-Za-z0-9]{12})/g;   //nnfilebot
 const tangBRebotRegexp = /(TangBRebot_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tangBRebot
 const decoderrobotRegexp = /(files_\d+v_\d+p_\d+d_[a-z0-9]{12})/g;   //decoderrobot
@@ -155,7 +155,8 @@ const HijautebalbotRegexp = /(Hijautebal_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}
 const filespanindobotRegexp = /(filespanindobot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //filespanindobot
 const KodeXChatsINDbotRegexp = /(KodeXChatsINDbot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //KodeXChatsINDbot
 const FilesHubRobotRegexp = /(FilesHub_Robot_[a-z0-9]{20})/g;   //FilesHubRobot
-const MassFilesStoreBotRegexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/g;   //MassFilesStoreBot
+const MassFilesStoreBot1Regexp = /(Mass_Files_Store_Bot_[A-Za-z0-9_]{16})/g;   //MassFilesStoreBot
+const MassFilesStoreBot2Regexp = /(Mass_FilesStore_Bot_[A-Za-z0-9_]{16})/g;   //MassFilesStoreBot
 const betapahatitakbahagiabotRegexp = /(betapahatitakbahagia_bot:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/g;   //betapahatitakbahagiabot
 const QQfilebotRegexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3})/g;   //QQfilebot
 // const QQfilebot1Regexp = /(QQfile_bot:[0-9]{5}_[0-9]{5,6}_[0-9]{3}-\d*P_\d*V_\d*D)/g;   //QQfilebot
@@ -1728,15 +1729,29 @@ try {
           }
         }
 
-        const MassFilesStoreBotMatches = str.match(MassFilesStoreBotRegexp);
-        // console.log(MassFilesStoreBotMatches);  //测试
-        if (MassFilesStoreBotMatches) {
-          const MassFilesStoreBotMatchesLength = MassFilesStoreBotMatches.length;
-          // console.log("MassFilesStoreBotMatchesLength : " + MassFilesStoreBotMatchesLength);  //测试
-          if (MassFilesStoreBotMatchesLength > 0) {
-            for (let j = 0; j < MassFilesStoreBotMatchesLength; j++) {
-              if (MassFilesStoreBotMatches[j]) {
-                MassFilesStoreBot.push(MassFilesStoreBotMatches[j]);
+        const MassFilesStoreBot1Matches = str.match(MassFilesStoreBot1Regexp);
+        // console.log(MassFilesStoreBot1Matches);  //测试
+        if (MassFilesStoreBot1Matches) {
+          const MassFilesStoreBot1MatchesLength = MassFilesStoreBot1Matches.length;
+          // console.log("MassFilesStoreBot1MatchesLength : " + MassFilesStoreBot1MatchesLength);  //测试
+          if (MassFilesStoreBot1MatchesLength > 0) {
+            for (let j = 0; j < MassFilesStoreBot1MatchesLength; j++) {
+              if (MassFilesStoreBot1Matches[j]) {
+                MassFilesStoreBot.push(MassFilesStoreBot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const MassFilesStoreBot2Matches = str.match(MassFilesStoreBot2Regexp);
+        // console.log(MassFilesStoreBot2Matches);  //测试
+        if (MassFilesStoreBot2Matches) {
+          const MassFilesStoreBot2MatchesLength = MassFilesStoreBot2Matches.length;
+          // console.log("MassFilesStoreBot2MatchesLength : " + MassFilesStoreBot2MatchesLength);  //测试
+          if (MassFilesStoreBot2MatchesLength > 0) {
+            for (let j = 0; j < MassFilesStoreBot2MatchesLength; j++) {
+              if (MassFilesStoreBot2Matches[j]) {
+                MassFilesStoreBot.push(MassFilesStoreBot2Matches[j]);
               }
             }
           }

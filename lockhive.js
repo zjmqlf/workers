@@ -460,7 +460,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let codeResult = {};
     try {
-      codeResult = await this.env.MAINDB.prepare("SELECT * FROM `CODE` WHERE `status` = 0 ORDER BY `Cindex` ASC LIMIT 1;").run();
+      codeResult = await this.env.MAINDB.prepare("SELECT * FROM `CODE` WHERE `status` = 0 AND `chatId` = 1 ORDER BY `Cindex` ASC LIMIT 1;").run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
       this.sendGrid("selectCode", "出错 : " + e.message, "try", true);

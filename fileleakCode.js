@@ -55,7 +55,7 @@ export class WebSocketServer extends DurableObject {
     );
   }
 
-  init(option) {
+  async init(option) {
     if (!this.client || !this.stop || this.stop === 0) {
     // if (!this.stop || this.stop === 0) {
       if (option) {
@@ -79,7 +79,7 @@ export class WebSocketServer extends DurableObject {
         this.batch = false;
         this.reverse = true;
         this.limit = 100;
-        this.offsetId = 0;
+        this.offsetId = await this.ctx.storage.get("offsetId") || 0;
       }
       // this.ws = null;
       // this.client = null;
@@ -255,8 +255,8 @@ export class WebSocketServer extends DurableObject {
       result = await this.client.invoke(
         new Api.channels.GetChannels({
           id: [new Api.InputChannel({
-            channelId: bigInt(3982534960),   //蜂巢热门密钥
-            accessHash: bigInt(6100294192930071508),
+            channelId: bigInt(3275590319),   //🌸 FileLeak Share Code 🌸
+            accessHash: bigInt(-805824121978118664),
           })],
         })
       );
@@ -372,7 +372,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let codeResult = {};
     try {
-      codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? AND `chatId` = 1 LIMIT 1;").bind(code).run();
+      codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? AND `chatId` = 2 LIMIT 1;").bind(code).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
       this.sendLog("selectCode", "出错 : " + e.message, "try", true);
@@ -420,7 +420,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let codeResult = {};
     try {
-      codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, status) VALUES (?, ?, ?);").bind(1, code, 0).run();
+      codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, status) VALUES (?, ?, ?);").bind(2, code, 0).run();
     } catch (e) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode出错 : " + e);;
       this.sendLog("insertCode", "出错 : " + e.message, "try", true);
@@ -452,41 +452,54 @@ export class WebSocketServer extends DurableObject {
       if (this.apiCount < 900) {
         if (message) {
           const messageId = message.id;
-          const entities = message.entities;
-          if (entities) {
-            for (const item of entities) {
-              const url = item?.url?.trim();
-              if (url) {
-                const string = url?.split("https://t.me/Turnautobot?start=");
-                if (string.length === 2) {
-                  const code = string[1].replace("f_", "LH_").replace("F_", "LH_");
-                  if (code) {
-                    const codeCount = await this.selectCode(1, code);
+          const txt = message.message;
+          if (txt) {
+            const regexp = /(FileLeakBot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;
+            const matches = txt.match(regexp);
+            // console.log(matches);  //测试
+            // this.sendLog("nextMessage", JSON.stringify(matches), "", false);  //测试
+            if (matches) {
+              const matchesLength = matches.length;
+              // console.log("matchesLength : " + matchesLength);  //测试
+              // this.sendLog("nextMessage", "matchesLength : " + matchesLength, "", false);  //测试
+              if (matchesLength > 0) {
+                for (let j = 0; j < matchesLength; j++) {
+                  if (matches[j]) {
+                    const codeCount = await this.selectCode(1, matches[j]);
                     if (parseInt(codeCount) === 0) {
                       // this.successCount += 1;
-                      await this.insertCode(1, code);
+                      await this.insertCode(1, matches[j]);
                     } else {
-                      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                      this.sendLog("nextMessage", "message已在数据库中", "exist", false);
+                      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : code已在数据库中");
+                      this.sendLog("nextMessage", "code已在数据库中", "exist", false);
                     }
                   } else {
                     //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : code为空");
                     this.sendLog("nextMessage", "code为空", "error", true);
+                    this.offsetId += 1;
+                    // await this.ctx.storage.put("offsetId", this.offsetId);
                   }
-                  break;
                 }
+                this.offsetId += 1;
+                // await this.ctx.storage.put("offsetId", this.offsetId);
+              } else {
+                //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : matchesLength为0");
+                this.sendLog("nextMessage", "matchesLength为0", "error", true);
+                this.offsetId += 1;
+                // await this.ctx.storage.put("offsetId", this.offsetId);
               }
             }
-            this.offsetId += 1;
           } else {
-            //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
+            //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : txt为空");
             this.sendLog("nextMessage", "txt为空", "error", true);
             this.offsetId += 1;
+            // await this.ctx.storage.put("offsetId", this.offsetId);
           }
         } else {
           //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
           this.sendLog("nextMessage", "错误的消息", "error", true);
           this.offsetId += 1;
+          // await this.ctx.storage.put("offsetId", this.offsetId);
         }
       } else {
         this.stop = 2;
@@ -524,7 +537,9 @@ export class WebSocketServer extends DurableObject {
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
             // this.offsetId += 1;
+            // await this.ctx.storage.put("offsetId", this.offsetId);
           }
+          await this.ctx.storage.put("offsetId", this.offsetId);
           //console.log("(" + this.currentStep + ")successCount : " + this.successCount);
           this.sendLog("nextStep", "successCount : " + this.successCount, null, false);
           this.successCount = 0;
@@ -594,7 +609,7 @@ export class WebSocketServer extends DurableObject {
       }));
       return;
     }
-    this.init(option);
+    await this.init(option);
     // this.stop = 1;
     await this.open(1);
     await this.getChat(1);
@@ -616,7 +631,9 @@ export class WebSocketServer extends DurableObject {
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
             // this.offsetId += 1;
+            // await this.ctx.storage.put("offsetId", this.offsetId);
           }
+          await this.ctx.storage.put("offsetId", this.offsetId);
           //console.log("(" + this.currentStep + ")successCount : " + this.successCount);
           this.sendLog("start", "successCount : " + this.successCount, null, false);
           this.successCount = 0;
@@ -706,6 +723,17 @@ export class WebSocketServer extends DurableObject {
       if (data.offsetId && data.offsetId >= 0 && this.offsetId !== data.offsetId) {
         this.offsetId = data.offsetId;
       }
+    } else if (command === "offset") {
+      this.offsetId = 0;
+      await this.ctx.storage.put("offsetId", 0);
+      //console.log("重置offset序号成功");
+      this.broadcast({
+        "operate": "resetOffset",
+        "step": this.currentStep,
+        "message": "重置offset序号成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
     } else {
       this.broadcast({
         "operate": "webSocketMessage",
@@ -735,7 +763,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("lockhivecode");
+      const id = env.WEBSOCKET_SERVER.idFromName("fileleakcode");
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

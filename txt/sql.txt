@@ -45,7 +45,19 @@ SELECT `txt` FROM `PANMESSAGE` WHERE `chatId` = 417;
 SELECT * FROM `FORWARDCHAT` WHERE `title` = "test110";
 
 UPDATE `FORWARDCHAT` SET `exist` = 0 WHERE `title` = "test110";
-UPDATE `FORWARDCHAT` SET `video` = 0 WHERE 1;
+
+
+删除列:
+ALTER TABLE table_name DROP COLUMN FilesHub_Robot;
+
+修改列的数据类型:
+ALTER TABLE table_name ALTER COLUMN column_name new_datatype;
+
+重命名列:
+ALTER TABLE table_name RENAME COLUMNFilesHub_Robot TO new_column_name;
+
+重命名:
+ALTER TABLE old_table_name RENAME TO new_table_name;
 
 
 

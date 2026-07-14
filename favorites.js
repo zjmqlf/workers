@@ -319,7 +319,7 @@ export class WebSocketServer extends DurableObject {
     } catch (e) {
       //console.log("login出错 : " + e);
       this.sendLog("open", "login出错 : " + e, null, true);
-      if (tryCount === 20) {
+      if (tryCount === 5) {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")open超出tryCount限制");
         this.sendLog("open", "超出tryCount限制", null, true);
@@ -345,7 +345,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async getConfigError(tryCount, option) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")getConfig超出tryCount限制");
       this.sendLog("getConfig", "超出tryCount限制", null, true);
@@ -419,7 +419,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async updateConfigError(tryCount) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")updateConfig超出tryCount限制");
       this.sendLog("updateConfig", "超出tryCount限制", null, true);
@@ -537,7 +537,7 @@ export class WebSocketServer extends DurableObject {
               });
               await this.close();
             } else {
-              if (tryCount === 20) {
+              if (tryCount === 5) {
                 this.stop = 2;
                 //console.log("(" + this.currentStep + ")getChat超出tryCount限制");
                 this.sendLog("getChat", "超出tryCount限制", null, true);
@@ -603,7 +603,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async updateChatError(tryCount, messageLength) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")updateChat超出tryCount限制");
       this.sendLog("updateChat", "超出tryCount限制", null, true);
@@ -725,7 +725,7 @@ export class WebSocketServer extends DurableObject {
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
       } else {
-        if (tryCount === 20) {
+        if (tryCount === 5) {
           this.stop = 2;
           //console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
           this.sendLog("getMessage", "超出tryCount限制", null, true);
@@ -788,7 +788,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   // async selectMediaIndexError(tryCount, id, accessHash) {
-  //   if (tryCount === 20) {
+  //   if (tryCount === 5) {
   //     this.stop = 2;
   //     //console.log("(" + this.currentStep + ")selectMediaIndex超出tryCount限制");
   //     this.sendLog("selectMediaIndex", "超出tryCount限制", null, true);
@@ -836,7 +836,7 @@ export class WebSocketServer extends DurableObject {
   // }
 
   // async insertMediaIndexError(tryCount, Vindex, id, accessHash) {
-  //   if (tryCount === 20) {
+  //   if (tryCount === 5) {
   //     this.stop = 2;
   //     //console.log("(" + this.currentStep + ")insertMediaIndex超出tryCount限制");
   //     this.sendLog("insertMediaIndex", "超出tryCount限制", null, true);
@@ -885,7 +885,7 @@ export class WebSocketServer extends DurableObject {
   // }
 
   async selectMediaError(tryCount, id, accessHash) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectMedia超出tryCount限制");
       this.sendLog("selectMedia", "超出tryCount限制", null, true);
@@ -933,7 +933,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async insertMediaError(tryCount, id, accessHash, dcId, fileName, mimeType, size, duration, width, height) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")insertMedia超出tryCount限制");
       this.sendLog("insertMedia", "超出tryCount限制", null, true);
@@ -1000,7 +1000,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   // async selectPhotoIndexError(tryCount, id, accessHash, type) {
-  //   if (tryCount === 20) {
+  //   if (tryCount === 5) {
   //     this.stop = 2;
   //     //console.log("(" + this.currentStep + ")selectPhotoIndex超出tryCount限制");
   //     this.sendLog("selectPhotoIndex", "超出tryCount限制", null, true);
@@ -1048,7 +1048,7 @@ export class WebSocketServer extends DurableObject {
   // }
 
   // async insertPhotoIndexError(tryCount, Pindex, id, accessHash, type) {
-  //   if (tryCount === 20) {
+  //   if (tryCount === 5) {
   //     this.stop = 2;
   //     //console.log("(" + this.currentStep + ")insertPhotoIndex超出tryCount限制");
   //     this.sendLog("insertPhotoIndex", "超出tryCount限制", null, true);
@@ -1097,7 +1097,7 @@ export class WebSocketServer extends DurableObject {
   // }
 
   async selectPhotoError(tryCount, id, accessHash, type) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectPhoto超出tryCount限制");
       this.sendLog("selectPhoto", "超出tryCount限制", null, true);
@@ -1145,7 +1145,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async insertPhotoError(tryCount, id, accessHash, dcId, photoIndex, type, size) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")insertPhoto超出tryCount限制");
       this.sendLog("insertPhoto", "超出tryCount限制", null, true);
@@ -1212,7 +1212,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async selectMediaMessageError(tryCount, messageId) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectMediaMessage超出tryCount限制");
       this.sendLog("selectMediaMessage", "超出tryCount限制", null, true);
@@ -1260,7 +1260,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async selectPhotoMessageError(tryCount, messageId, type) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectPhotoMessage超出tryCount限制");
       this.sendLog("selectPhotoMessage", "超出tryCount限制", null, true);
@@ -1308,7 +1308,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async insertMessageError(tryCount, messageId, category, type, mid, id, accessHash, txt) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")insertMessage超出tryCount限制");
       this.sendLog("insertMessage", "超出tryCount限制", null, true);
@@ -2286,7 +2286,7 @@ export class WebSocketServer extends DurableObject {
       this.dialogArray = [];
       //console.log("(" + this.currentStep + ")getDialog出错 : " + e);
       this.sendLog("getDialog", "出错 : " + JSON.stringify(e), null, true);
-      if (tryCount === 20) {
+      if (tryCount === 5) {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")getDialog超出tryCount限制");
         this.sendLog("getDialog", "超出tryCount限制", null, true);
@@ -2307,7 +2307,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async selectChatError(tryCount, channelId, accessHash) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("selectChat超出tryCount限制");
       this.sendLog("selectChat", "超出tryCount限制", null, true);
@@ -2355,7 +2355,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async insertChatError(tryCount, channelId, accessHash, chatType, username, title, noforwards) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("insertChat超出tryCount限制");
       this.sendLog("insertChat", "超出tryCount限制", null, true);

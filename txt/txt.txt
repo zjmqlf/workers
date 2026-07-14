@@ -40,12 +40,6 @@ zjmqlf2023:
 npm run build-user
 npm run deploy-user
 
-npm run build-lockhive
-npm run deploy-lockhive
-
-npm run build-lockhivecode
-npm run deploy-lockhivecode
-
 
 zjmqlf2024:
 
@@ -76,9 +70,6 @@ npm run deploy-paniang
 npm run build-ryumasepongmilku
 npm run deploy-ryumasepongmilku
 
-npm run build-fileshubro
-npm run deploy-fileshubro
-
 npm run build-filespanindo
 npm run deploy-filespanindo
 
@@ -91,11 +82,11 @@ npm run deploy-kodexchatsind
 npm run build-massfilesstore
 npm run deploy-massfilesstore
 
-npm run build-steviarchiver
-npm run deploy-steviarchiver
-
 npm run build-fileleak
 npm run deploy-fileleak
+
+npm run build-fileleakcode
+npm run deploy-fileleakcode
 
 npm run build-fileport
 npm run deploy-fileport
@@ -106,8 +97,11 @@ npm run deploy-jsfile
 npm run build-kfcmnb
 npm run deploy-kfcmnb
 
-npm run build-messenger
-npm run deploy-messenger
+npm run build-lockhive
+npm run deploy-lockhive
+
+npm run build-lockhivecode
+npm run deploy-lockhivecode
 
 npm run build-palucode
 npm run deploy-palucode
@@ -115,17 +109,11 @@ npm run deploy-palucode
 npm run build-siren
 npm run deploy-siren
 
-npm run build-tebiejie
-npm run deploy-tebiejie
-
 npm run build-xiumi
 npm run deploy-xiumi
 
 npm run build-wenjianji
 npm run deploy-wenjianji
-
-npm run build-zyxfiles
-npm run deploy-zyxfiles
 
 
 zjmqlf2025:

@@ -59,11 +59,6 @@
         "class_name": "WebSocketServer"
       },
       {
-        "name": "fileshubro_WebSocketServer",
-        "script_name": "fileshubro",
-        "class_name": "WebSocketServer"
-      },
-      {
         "name": "filespanindo_WebSocketServer",
         "script_name": "filespanindo",
         "class_name": "WebSocketServer"
@@ -89,15 +84,20 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "fileleakcode_WebSocketServer",
+        "script_name": "fileleakcode",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "fileport_WebSocketServer",
         "script_name": "fileport",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "jsfile_WebSocketServer",
-        "script_name": "jsfile",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "jsfile_WebSocketServer",
+      //   "script_name": "jsfile",
+      //   "class_name": "WebSocketServer"
+      // },
       {
         "name": "kfcmnb_WebSocketServer",
         "script_name": "kfcmnb",
