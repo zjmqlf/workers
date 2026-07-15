@@ -1,7 +1,6 @@
 import { Api } from "../tl";
-import { CustomError } from "ts-custom-error";
 
-export class RPCError extends CustomError {
+export class RPCError extends Error {
     public code: number | undefined;
     public errorMessage: string;
 
@@ -12,6 +11,7 @@ export class RPCError extends CustomError {
                 .replace("{1}", message || "")
                 .replace("{2}", RPCError._fmtRequest(request))
         );
+        this.name = this.constructor.name;
         this.code = code;
         this.errorMessage = message;
     }

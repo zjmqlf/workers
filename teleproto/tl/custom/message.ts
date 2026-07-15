@@ -1,11 +1,17 @@
 import { SenderGetter } from "./senderGetter";
 import type { Entity, EntityLike } from "../../define";
-import { Api } from "../";
-import type { TelegramClient } from "../../client";
+import { Api } from "../api";
+import type { TelegramClient } from "../../client/TelegramClient";
 import { ChatGetter } from "./chatGetter";
 import * as utils from "../../Utils";
 import { Forward } from "./forward";
 import { File } from "./file";
+import {
+    EditMessageParams,
+    SendMessageParams,
+    UpdatePinMessageParams,
+} from "../../client/messages";
+import { DownloadMediaInterface } from "../../client/downloads";
 import { returnBigInt } from "../../Helpers";
 import bigInt, { BigInteger } from "big-integer";
 import { MessageButton } from "./messageButton";
@@ -44,6 +50,17 @@ interface MessageBaseInterface {
     reactions?: any;
     noforwards?: any;
     _entities?: Map<string, Entity>;
+}
+
+export interface ButtonClickParam {
+    i?: number | number[];
+    j?: number;
+    text?: string | Function;
+    filter?: Function;
+    data?: Buffer;
+    sharePhone?: boolean | string | Api.InputMediaContact;
+    shareGeo?: [number, number] | Api.InputMediaGeoPoint;
+    password?: string;
 }
 
 export class CustomMessage extends SenderGetter {
@@ -87,6 +104,9 @@ export class CustomMessage extends SenderGetter {
     _text?: string;
     _file?: File;
     _replyMessage?: Api.Message;
+    _buttons?: MessageButton[][];
+    _buttonsFlat?: MessageButton[];
+    _buttonsCount?: number;
     _viaBot?: EntityLike;
     _viaInputBot?: EntityLike;
     _inputSender?: any;
@@ -178,6 +198,9 @@ export class CustomMessage extends SenderGetter {
         this._text = undefined;
         this._file = undefined;
         this._replyMessage = undefined;
+        this._buttons = undefined;
+        this._buttonsFlat = undefined;
+        this._buttonsCount = 0;
         this._viaBot = undefined;
         this._viaInputBot = undefined;
         this._actionEntities = undefined;
@@ -313,6 +336,93 @@ export class CustomMessage extends SenderGetter {
 
     async _refetchSender() {
         await this._reloadMessage();
+    }
+
+    async _reloadMessage() {
+        if (!this._client) return;
+        let msg: CustomMessage | undefined = undefined;
+        try {
+            const chat = this.isChannel ? await this.getInputChat() : undefined;
+            let temp = await this._client.getMessages(chat, { ids: this.id });
+            if (temp) {
+                msg = temp[0] as CustomMessage;
+            }
+        } catch (e) {
+            this._client._log.error(
+                "Got error while trying to finish init message with id " +
+                    this.id,
+                e
+            );
+            if (this._client._errorHandler) {
+                await this._client._errorHandler(e as Error);
+            }
+        }
+        if (msg == undefined) return;
+
+        this._sender = msg._sender;
+        this._inputSender = msg._inputSender;
+        this._chat = msg._chat;
+        this._inputChat = msg._inputChat;
+        this._viaBot = msg._viaBot;
+        this._viaInputBot = msg._viaInputBot;
+        this._forward = msg._forward;
+        this._actionEntities = msg._actionEntities;
+    }
+
+    get buttons() {
+        if (!this._buttons && this.replyMarkup) {
+            if (!this.inputChat) {
+                return;
+            }
+            try {
+                const bot = this._neededMarkupBot();
+                this._setButtons(this.inputChat, bot);
+            } catch (e) {
+                return;
+            }
+        }
+        return this._buttons;
+    }
+
+    async getButtons() {
+        if (!this.buttons && this.replyMarkup) {
+            const chat = await this.getInputChat();
+            if (!chat) return;
+            let bot;
+            try {
+                bot = this._neededMarkupBot();
+            } catch (e) {
+                await this._reloadMessage();
+                try {
+                    bot = this._neededMarkupBot();
+                } catch (err) {
+                    bot = this.viaBotId
+                        ? await this.client!.getInputEntity(this.viaBotId)
+                        : await this.getInputSender();
+                    if (!bot) throw err;
+                }
+            }
+            this._setButtons(chat, bot);
+        }
+        return this._buttons;
+    }
+
+    get buttonCount() {
+        if (!this._buttonsCount) {
+            if (
+                this.replyMarkup instanceof Api.ReplyInlineMarkup ||
+                this.replyMarkup instanceof Api.ReplyKeyboardMarkup
+            ) {
+                this._buttonsCount = this.replyMarkup.rows
+                    .map((r) => r.buttons.length)
+                    .reduce(function (a, b) {
+                        return a + b;
+                    }, 0);
+            } else {
+                this._buttonsCount = 0;
+            }
+        }
+        return this._buttonsCount;
     }
 
     get file() {
@@ -477,6 +587,51 @@ export class CustomMessage extends SenderGetter {
         return zip([ent, texts]);
     }
 
+    async getReplyMessage(): Promise<Api.Message | undefined> {
+        if (!this._replyMessage && this._client) {
+            if (!this.replyTo) return undefined;
+            this._replyMessage = (
+                await this._client.getMessages(
+                    this.isChannel ? await this.getInputChat() : undefined,
+                    {
+                        ids: new Api.InputMessageReplyTo({ id: this.id }),
+                    }
+                )
+            )[0];
+
+            if (!this._replyMessage) {
+                this._replyMessage = (
+                    await this._client.getMessages(
+                        this.isChannel ? this._inputChat : undefined,
+                        {
+                            ids: this.replyToMsgId,
+                        }
+                    )
+                )[0];
+            }
+        }
+        return this._replyMessage;
+    }
+
+    async respond(params: SendMessageParams) {
+        if (this._client) {
+            return this._client.sendMessage(
+                (await this.getInputChat())!,
+                params
+            );
+        }
+    }
+
+    async reply(params: SendMessageParams) {
+        if (this._client) {
+            params.replyTo = this.id;
+            return this._client.sendMessage(
+                (await this.getInputChat())!,
+                params
+            );
+        }
+    }
+
     async forwardTo(entity: EntityLike) {
         if (this._client) {
             entity = await this._client.getInputEntity(entity);
@@ -485,6 +640,340 @@ export class CustomMessage extends SenderGetter {
                 fromPeer: (await this.getInputChat())!,
             };
             return this._client.forwardMessages(entity, params);
+        }
+    }
+
+    async edit(params: Omit<EditMessageParams, "message">) {
+        const param = params as EditMessageParams;
+        if (this.fwdFrom || !this._client) return undefined;
+        if (param.linkPreview == undefined) {
+            param.linkPreview = !!this.webPreview;
+        }
+        if (param.buttons == undefined) {
+            param.buttons = this.replyMarkup;
+        }
+        param.message = this.id;
+        return this._client.editMessage((await this.getInputChat())!, param);
+    }
+
+    async delete({ revoke } = { revoke: false }) {
+        if (this._client) {
+            return this._client.deleteMessages(
+                await this.getInputChat(),
+                [this.id],
+                {
+                    revoke,
+                }
+            );
+        }
+    }
+
+    async pin(params?: UpdatePinMessageParams) {
+        if (this._client) {
+            const entity = await this.getInputChat();
+            if (entity === undefined) {
+                throw Error(
+                    "Failed to pin message due to cannot get input chat."
+                );
+            }
+            return this._client.pinMessage(entity, this.id, params);
+        }
+    }
+
+    async unpin(params?: UpdatePinMessageParams) {
+        if (this._client) {
+            const entity = await this.getInputChat();
+            if (entity === undefined) {
+                throw Error(
+                    "Failed to unpin message due to cannot get input chat."
+                );
+            }
+            return this._client.unpinMessage(entity, this.id, params);
+        }
+    }
+
+    async downloadMedia(params?: DownloadMediaInterface) {
+        if (this._client)
+            return this._client.downloadMedia(this as any, params || {});
+    }
+
+    async markAsRead() {
+        if (this._client) {
+            const entity = await this.getInputChat();
+            if (entity === undefined) {
+                throw Error(
+                    `Failed to mark message id ${this.id} as read due to cannot get input chat.`
+                );
+            }
+            return this._client.markAsRead(entity, this.id);
+        }
+    }
+
+    async react(
+        reaction?:
+            | string
+            | BigInteger
+            | Api.TypeReaction
+            | (string | BigInteger | Api.TypeReaction)[],
+        big?: boolean
+    ) {
+        if (!this._client) return;
+
+        function toReaction(
+            r: string | BigInteger | Api.TypeReaction
+        ): Api.TypeReaction {
+            if (typeof r === "string") {
+                return new Api.ReactionEmoji({ emoticon: r });
+            }
+            if (
+                r instanceof Api.ReactionEmoji ||
+                r instanceof Api.ReactionCustomEmoji ||
+                r instanceof Api.ReactionPaid ||
+                r instanceof Api.ReactionEmpty
+            ) {
+                return r;
+            }
+            return new Api.ReactionCustomEmoji({
+                documentId: returnBigInt(r),
+            });
+        }
+
+        let reactionList: Api.TypeReaction[];
+        if (reaction == undefined) {
+            reactionList = [];
+        } else if (Array.isArray(reaction)) {
+            reactionList = reaction.map(toReaction);
+        } else {
+            reactionList = [toReaction(reaction)];
+        }
+
+        return this._client.sendReaction(
+            (await this.getInputChat())!,
+            this.id,
+            reactionList,
+            big
+        );
+    }
+
+    async getReactions(limit?: number, reaction?: string) {
+        if (!this._client) return;
+        return this._client.getReactionUsers(
+            (await this.getInputChat())!,
+            this.id,
+            { limit, reaction }
+        );
+    }
+
+    async copy(entity: EntityLike) {
+        if (!this._client) return;
+        entity = await this._client.getInputEntity(entity);
+        const request = new Api.messages.ForwardMessages({
+            fromPeer: (await this.getInputChat())!,
+            id: [this.id],
+            toPeer: entity,
+            dropAuthor: true,
+            randomId: [bigInt(Math.floor(Math.random() * 1e15))],
+        });
+        const result = await this._client.invoke(request);
+        return this._client._getResponseMessage(request, result, entity);
+    }
+
+    async click({
+        i,
+        j,
+        text,
+        filter,
+        data,
+        sharePhone,
+        shareGeo,
+        password,
+    }: ButtonClickParam) {
+        if (!this.client) {
+            return;
+        }
+        if (data) {
+            const chat = await this.getInputChat();
+            if (!chat) {
+                return;
+            }
+
+            const button = new Api.KeyboardButtonCallback({
+                text: "",
+                data: data,
+            });
+            return await new MessageButton(
+                this.client,
+                button,
+                chat,
+                undefined,
+                this.id
+            ).click({
+                sharePhone: sharePhone,
+                shareGeo: shareGeo,
+                password: password,
+            });
+        }
+        if (this.poll) {
+            function findPoll(answers: Api.PollAnswer[]) {
+                if (i != undefined) {
+                    if (Array.isArray(i)) {
+                        const corrects = [];
+                        for (let x = 0; x < i.length; x++) {
+                            corrects.push(answers[x].option);
+                        }
+                        return corrects;
+                    }
+                    return [answers[i].option];
+                }
+                if (text != undefined) {
+                    if (typeof text == "function") {
+                        for (const answer of answers) {
+                            if (text(answer.text)) {
+                                return [answer.option];
+                            }
+                        }
+                    } else {
+                        for (const answer of answers) {
+                            if (answer.text.text == text) {
+                                return [answer.option];
+                            }
+                        }
+                    }
+                    return;
+                }
+                if (filter != undefined) {
+                    for (const answer of answers) {
+                        if (filter(answer)) {
+                            return [answer.option];
+                        }
+                    }
+                    return;
+                }
+            }
+
+            const options = findPoll(this.poll.poll.answers as Api.PollAnswer[]) || [];
+            const chat = await this.getInputChat();
+            if (!chat) {
+                return;
+            }
+            return await this.client.invoke(
+                new Api.messages.SendVote({
+                    peer: chat,
+                    msgId: this.id,
+                    options: options,
+                })
+            );
+        }
+
+        if (!(await this.getButtons())) {
+            return;
+        }
+
+        function findButton(self: CustomMessage) {
+            if (!self._buttonsFlat || !self._buttons) {
+                return;
+            }
+            if (Array.isArray(i)) {
+                i = i[0];
+            }
+            if (text != undefined) {
+                if (typeof text == "function") {
+                    for (const button of self._buttonsFlat) {
+                        if (text(button.text)) {
+                            return button;
+                        }
+                    }
+                } else {
+                    for (const button of self._buttonsFlat) {
+                        if (button.text == text) {
+                            return button;
+                        }
+                    }
+                }
+                return;
+            }
+            if (filter != undefined) {
+                for (const button of self._buttonsFlat) {
+                    if (filter(button)) {
+                        return button;
+                    }
+                }
+                return;
+            }
+            if (i == undefined) {
+                i = 0;
+            }
+            if (j == undefined) {
+                return self._buttonsFlat[i];
+            } else {
+                return self._buttons[i][j];
+            }
+        }
+
+        const button = findButton(this);
+        if (button) {
+            return await button.click({
+                sharePhone: sharePhone,
+                shareGeo: shareGeo,
+                password: password,
+            });
+        }
+    }
+
+    _setButtons(chat: EntityLike, bot?: EntityLike) {
+        if (
+            this.client &&
+            (this.replyMarkup instanceof Api.ReplyInlineMarkup ||
+                this.replyMarkup instanceof Api.ReplyKeyboardMarkup)
+        ) {
+            this._buttons = [];
+            this._buttonsFlat = [];
+            for (const row of this.replyMarkup.rows) {
+                const tmp = [];
+                for (const button of row.buttons) {
+                    const btn = new MessageButton(
+                        this.client,
+                        button,
+                        chat,
+                        bot,
+                        this.id
+                    );
+                    tmp.push(btn);
+                    this._buttonsFlat.push(btn);
+                }
+                this._buttons.push(tmp);
+            }
+        }
+    }
+
+    _neededMarkupBot() {
+        if (!this.client || this.replyMarkup == undefined) {
+            return;
+        }
+        if (
+            !(
+                this.replyMarkup instanceof Api.ReplyInlineMarkup ||
+                this.replyMarkup instanceof Api.ReplyKeyboardMarkup
+            )
+        ) {
+            return;
+        }
+        for (const row of this.replyMarkup.rows) {
+            for (const button of row.buttons) {
+                if (button instanceof Api.KeyboardButtonSwitchInline) {
+                    if (button.samePeer || !this.viaBotId) {
+                        const bot = this._inputSender;
+                        if (!bot) throw new Error("No input sender");
+                        return bot;
+                    } else {
+                        const ent = this.client!._entityCache.get(
+                            this.viaBotId
+                        );
+                        if (!ent) throw new Error("No input sender");
+                        return ent;
+                    }
+                }
+            }
         }
     }
 

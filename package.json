@@ -41,6 +41,8 @@
     "deploy-paniang": "wrangler deploy -c ./wrangler-paniang.jsonc",
     "build-ryumasepongmilku": "wrangler deploy -c ./wrangler-ryumasepongmilku.jsonc --dry-run --outdir=./bot/dist",
     "deploy-ryumasepongmilku": "wrangler deploy -c ./wrangler-ryumasepongmilku.jsonc",
+    "build-fileshubro": "wrangler deploy -c ./wrangler-fileshubro.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-fileshubro": "wrangler deploy -c ./wrangler-fileshubro.jsonc",
     "build-filespanindo": "wrangler deploy -c ./wrangler-filespanindo.jsonc --dry-run --outdir=./bot/dist",
     "deploy-filespanindo": "wrangler deploy -c ./wrangler-filespanindo.jsonc",
     "build-hijautebal": "wrangler deploy -c ./wrangler-hijautebal.jsonc --dry-run --outdir=./bot/dist",

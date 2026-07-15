@@ -1,4 +1,4 @@
-import { Api } from "../";
+import { Api } from "../api";
 import type { BinaryReader } from "../../extensions";
 import { GZIPPacked } from "./GZIPPacked";
 import bigInt from "big-integer";

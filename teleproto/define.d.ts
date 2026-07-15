@@ -1,3 +1,4 @@
+import type { Button } from "./tl/custom/button";
 import { Api } from "./tl";
 import type { CustomFile } from "./client/uploads";
 import TypeUser = Api.TypeUser;
@@ -5,6 +6,7 @@ import TypeChat = Api.TypeChat;
 import TypeInputUser = Api.TypeInputUser;
 import TypeInputChannel = Api.TypeInputChannel;
 import bigInt from "big-integer";
+import { WriteStream } from "node:fs";
 import { Buffer } from "node:buffer";
 
 type ValueOf<T> = T[keyof T];
@@ -60,10 +62,17 @@ type FileLike =
 type OutFile =
     | string
     | Buffer
+    | WriteStream
     | { write: Function; close?: Function };
 type ProgressCallback = (
     downloaded: bigInt.BigInteger,
     total: bigInt.BigInteger
 ) => void;
+type ButtonLike = Api.TypeKeyboardButton | Button;
 
+type MarkupLike =
+    | Api.TypeReplyMarkup
+    | ButtonLike
+    | ButtonLike[]
+    | ButtonLike[][];
 type DateLike = number;

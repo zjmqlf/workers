@@ -1,7 +1,8 @@
 import { MessageContainer } from "../tl/core";
 import { TLMessage } from "../tl/core";
 import { BinaryWriter } from "./BinaryWriter";
-import type { MTProtoState, RequestState } from "../network";
+import type { MTProtoState } from "../network/MTProtoState";
+import type { RequestState } from "../network/RequestState";
 const USE_INVOKE_AFTER_WITH = new Set([
     "messages.SendMessage",
     "messages.SendMedia",
@@ -166,7 +167,7 @@ export class MessagePacker {
                     state.request.className || state.request.constructor.name
                 } is too long ${state.data.length} and cannot be sent`
             );
-            state.promise.reject("Request Payload is too big");
+            state.reject(new Error("Request payload is too big"));
             size = 0;
         }
         if (!batch.length) {

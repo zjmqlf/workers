@@ -1,7 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "forward2",
-  "main": "forward2.js",
+  "main": "forward1.js",
+  "vars": {
+    "BEGIN_INDEX": 19,
+    "END_INDEX": 37,
+    "ID_NAME": "forward2"
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

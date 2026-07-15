@@ -1,5 +1,5 @@
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
-import { LogLevel } from "./teleproto/extensions";
+import { LogLevel } from "./teleproto/extensions/Logger";
 import bigInt from "big-integer";
 
 export default {

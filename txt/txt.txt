@@ -70,6 +70,9 @@ npm run deploy-paniang
 npm run build-ryumasepongmilku
 npm run deploy-ryumasepongmilku
 
+npm run build-fileshubro
+npm run deploy-fileshubro
+
 npm run build-filespanindo
 npm run deploy-filespanindo
 

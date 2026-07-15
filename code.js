@@ -432,6 +432,7 @@ try {
   // data = fs.readFileSync("./source/1.txt", "utf-8");
   // data = fs.readFileSync("./source/message.txt", "utf-8");
   // data = fs.readFileSync("./source/messages.txt", "utf-8");
+  // data = fs.readFileSync("./source/FileLeakBot Code.txt", "utf-8");
   data = fs.readFileSync("./source/messages.html", "utf-8");
   const array = data.split("\n");
   const length = array.length;
@@ -3976,14 +3977,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/showfilesbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -3999,14 +4000,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tgjmqbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4022,14 +4023,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/blgjlqbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4045,14 +4046,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/fileLeakBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4068,14 +4069,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/nnfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4091,14 +4092,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tangBRebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4114,14 +4115,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/decoderrobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4137,14 +4138,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tebiejiebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4160,14 +4161,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mmyzybot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4183,14 +4184,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/MessengerIIbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4206,14 +4207,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/paniangbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4229,14 +4230,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/kkjmqmbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4252,14 +4253,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/KodeXFilesbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4275,14 +4276,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/kodexfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4298,14 +4299,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/KodeXMedia1bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4321,14 +4322,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/AllXFilesbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4344,14 +4345,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/MediaXFilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4367,14 +4368,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/KodeXFiles2bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4390,14 +4391,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/DEANIgniteNationsbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4413,14 +4414,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/RyumaSepongMilkubot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4436,14 +4437,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/HikkiTusbolPaijobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4459,14 +4460,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/LunindiaCipokSuprettobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4482,14 +4483,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/PaijoKontolBurikbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4505,14 +4506,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/Steviarchiverbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4528,14 +4529,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/DghuddvhiBOT.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4551,14 +4552,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/Hijautebalbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4574,14 +4575,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/FilesHubRobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4597,14 +4598,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/filespanindobot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4620,14 +4621,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/KodeXChatsINDbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4643,14 +4644,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/MassFilesStoreBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4666,14 +4667,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/betapahatitakbahagiabot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4689,14 +4690,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/QQfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4712,14 +4713,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/aotembot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4735,14 +4736,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/jiematopbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4758,14 +4759,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/safsadfbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4781,14 +4782,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/sirenbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4804,14 +4805,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/UUjiebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4827,14 +4828,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/Zhuahihaibot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4850,14 +4851,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/REDDFILEBOT.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4873,14 +4874,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/KFCMNBbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4896,14 +4897,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/JSfilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4919,14 +4920,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/wenjianjibot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4942,14 +4943,14 @@ try {
   //     if (uniqueArr.length > oldLength) {
   //       fs.writeFile("./code/amumujiemabot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
   //         if (err) {
-  //           console.log(err);
+  //           console.log(err instanceof Error ? err.message : err);
   //         }
   //       });
   //     // } else {
   //     //   console.log("没有新加数据");
   //     }
-  //   } catch (e) {
-  //     console.log(e);
+  //   } catch (err) {
+  //     console.log(err instanceof Error ? err.message : err);
   //   }
   // }
 
@@ -4965,14 +4966,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/parludecodingBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -4988,14 +4989,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/teestpanbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5011,14 +5012,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/atfileslinksbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5034,14 +5035,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/lockHivebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5057,14 +5058,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tgdecoderbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5080,14 +5081,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/xiumi1bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5103,14 +5104,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/ZYXFilesBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5126,14 +5127,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/ntmjmqbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5149,14 +5150,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/newjmqbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5172,14 +5173,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/filepanbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5195,14 +5196,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/myseseXBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5218,14 +5219,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/save2BoxBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5241,14 +5242,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mtfxqbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5264,14 +5265,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mtfxq2bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5287,14 +5288,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mediaBK2Bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5310,14 +5311,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/mouseFilebot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5333,14 +5334,14 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/dataPanBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
@@ -5356,20 +5357,20 @@ try {
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/filesPan1Bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
-            console.log(err);
+            console.log(err instanceof Error ? err.message : err);
           }
         });
       // } else {
       //   console.log("没有新加数据");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }
 
   console.log("all : " + all);  //测试
-} catch (e) {
-  console.log(e);
+} catch (err) {
+  console.log(err instanceof Error ? err.message : err);
 }
 
 

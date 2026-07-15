@@ -1,5 +1,5 @@
 import bigInt from "big-integer";
-import { Deferred } from "../extensions";
+import { Deferred } from "../extensions/Deferred";
 import { Api } from "../tl";
 import { Buffer } from "node:buffer";
 
@@ -10,7 +10,6 @@ export class RequestState {
     public request: any;
     public data: Buffer;
     public after: any;
-    public result: undefined;
     public finished: Deferred;
     public promise: Promise<unknown> | undefined;
     public acknowledged: boolean;
@@ -18,6 +17,7 @@ export class RequestState {
     public resolve: (value?: any) => void;
     // @ts-ignore
     public reject: (reason?: any) => void;
+    private _settled = true;
 
     constructor(request: Api.AnyRequest | Api.MsgsAck | Api.MsgsStateInfo) {
         this.containerId = undefined;
@@ -25,7 +25,6 @@ export class RequestState {
         this.request = request;
         this.data = request.getBytes();
         this.after = undefined;
-        this.result = undefined;
         this.acknowledged = false;
         this.finished = new Deferred();
         this.resetPromise();
@@ -40,10 +39,19 @@ export class RequestState {
     }
 
     resetPromise() {
-        this.reject?.();
+        if (this.promise && !this._settled) {
+            return;
+        }
+        this._settled = false;
         this.promise = new Promise((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
+            this.resolve = (value?: any) => {
+                this._settled = true;
+                resolve(value);
+            };
+            this.reject = (reason?: any) => {
+                this._settled = true;
+                reject(reason);
+            };
         });
     }
 }

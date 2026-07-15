@@ -1,20 +1,42 @@
 import {
     PROD_DC_IPV4,
     PROD_DC_IPV6,
+    TEST_DC_IPV4,
+    TEST_DC_IPV6,
     TelegramBaseClient,
     TelegramClientParams,
 } from "./telegramBaseClient";
+
+import * as authMethods from "./auth";
+import * as botMethods from "./bots";
+import * as buttonsMethods from "./buttons";
+import * as downloadMethods from "./downloads";
 import * as parseMethods from "./messageParse";
 import * as messageMethods from "./messages";
+import * as updateMethods from "./updates";
+import * as uploadMethods from "./uploads";
 import * as userMethods from "./users";
+import * as chatMethods from "./chats";
 import * as dialogMethods from "./dialogs";
-import type { Entity, EntityLike, MessageIDLike } from "../define";
+import * as twoFA from "./2fa";
+import type { ButtonLike, Entity, EntityLike, MessageIDLike } from "../define";
 import { Api } from "../tl";
 import { createApiProxy } from "../tl/runtime/apiProxy";
+import { HTMLParser } from "../extensions/html";
+import { MarkdownParser } from "../extensions/markdown";
+import { MarkdownV2Parser } from "../extensions/markdownv2";
+import type { EventBuilder } from "../events/common";
 import { MTProtoSender } from "../network";
 import type { SessionLease } from "../network/Network";
 import { LAYER } from "../tl/runtime/registry";
+import { DownloadMediaInterface } from "./downloads";
+import { NewMessage, NewMessageEvent } from "../events";
+import { _handleUpdate, _updateLoop, catchUp } from "./updates";
 import { Session } from "../sessions";
+import { Album, AlbumEvent } from "../events/Album";
+import { CallbackQuery, CallbackQueryEvent } from "../events/CallbackQuery";
+import { EditedMessage, EditedMessageEvent } from "../events/EditedMessage";
+import { DeletedMessage, DeletedMessageEvent } from "../events/DeletedMessage";
 
 export class TelegramClient extends TelegramBaseClient {
     constructor(
@@ -24,6 +46,192 @@ export class TelegramClient extends TelegramBaseClient {
         clientParams: TelegramClientParams
     ) {
         super(session, apiId, apiHash, clientParams);
+    }
+
+    start(authParams?: authMethods.UserAuthParams | authMethods.BotAuthParams) {
+        return authMethods.start(this, authParams);
+    }
+
+    checkAuthorization() {
+        return authMethods.checkAuthorization(this);
+    }
+
+    logOut() {
+        return authMethods.logOut(this);
+    }
+
+    signInUser(
+        apiCredentials: authMethods.ApiCredentials,
+        authParams: authMethods.UserAuthParams
+    ) {
+        return authMethods.signInUser(this, apiCredentials, authParams);
+    }
+
+    signInUserWithQrCode(
+        apiCredentials: authMethods.ApiCredentials,
+        authParams: authMethods.QrCodeAuthParams
+    ) {
+        return authMethods.signInUserWithQrCode(
+            this,
+            apiCredentials,
+            authParams
+        );
+    }
+
+    sendCode(
+        apiCredentials: authMethods.ApiCredentials,
+        phoneNumber: string,
+        forceSMS = false,
+        reCaptchaCallback?: (siteKey: string) => Promise<string>
+    ) {
+        return authMethods.sendCode(
+            this,
+            apiCredentials,
+            phoneNumber,
+            forceSMS,
+            reCaptchaCallback
+        );
+    }
+
+
+    sendVerifyEmailCode(
+        phoneNumber: string,
+        phoneCodeHash: string,
+        email: string
+    ) {
+        return authMethods.sendVerifyEmailCode(
+            this,
+            phoneNumber,
+            phoneCodeHash,
+            email
+        );
+    }
+
+    verifyEmail(
+        phoneNumber: string,
+        phoneCodeHash: string,
+        verification: authMethods.EmailVerificationResult
+    ) {
+        return authMethods.verifyEmail(
+            this,
+            phoneNumber,
+            phoneCodeHash,
+            verification
+        );
+    }
+
+    resetLoginEmail(phoneNumber: string, phoneCodeHash: string) {
+        return authMethods.resetLoginEmail(this, phoneNumber, phoneCodeHash);
+    }
+
+    signInWithPassword(
+        apiCredentials: authMethods.ApiCredentials,
+        authParams: authMethods.UserPasswordAuthParams
+    ) {
+        return authMethods.signInWithPassword(this, apiCredentials, authParams);
+    }
+
+    signInBot(
+        apiCredentials: authMethods.ApiCredentials,
+        authParams: authMethods.BotAuthParams
+    ) {
+        return authMethods.signInBot(this, apiCredentials, authParams);
+    }
+
+    async updateTwoFaSettings({
+        isCheckPassword,
+        currentPassword,
+        newPassword,
+        hint = "",
+        email,
+        emailCodeCallback,
+        onEmailCodeError,
+    }: twoFA.TwoFaParams) {
+        return twoFA.updateTwoFaSettings(this, {
+            isCheckPassword,
+            currentPassword,
+            newPassword,
+            hint,
+            email,
+            emailCodeCallback,
+            onEmailCodeError,
+        });
+    }
+
+    inlineQuery(
+        bot: EntityLike,
+        query: string,
+        entity?: Api.InputPeerSelf,
+        offset?: string,
+        geoPoint?: Api.TypeInputGeoPoint
+    ) {
+        return botMethods.inlineQuery(
+            this,
+            bot,
+            query,
+            entity,
+            offset,
+            geoPoint
+        );
+    }
+
+    buildReplyMarkup(
+        buttons:
+            | Api.TypeReplyMarkup
+            | undefined
+            | ButtonLike
+            | ButtonLike[]
+            | ButtonLike[][],
+        inlineOnly: boolean = false
+    ) {
+        return buttonsMethods.buildReplyMarkup(buttons, inlineOnly);
+    }
+
+    downloadFile(
+        inputLocation: Api.TypeInputFileLocation,
+        fileParams: downloadMethods.DownloadFileParams = {}
+    ) {
+        return downloadMethods.downloadFile(this, inputLocation, fileParams);
+    }
+
+    downloadProfilePhoto(
+        entity: EntityLike,
+        downloadProfilePhotoParams:
+            | downloadMethods.DownloadProfilePhotoParams
+            | string = {
+            isBig: false,
+        }
+    ) {
+        if (typeof downloadProfilePhotoParams === "string") {
+            downloadProfilePhotoParams = {
+                outputFile: downloadProfilePhotoParams,
+            };
+        }
+        return downloadMethods.downloadProfilePhoto(
+            this,
+            entity,
+            downloadProfilePhotoParams
+        );
+    }
+
+    downloadMedia(
+        messageOrMedia: Api.Message | Api.TypeMessageMedia,
+        downloadParams?: DownloadMediaInterface | string
+    ) {
+        if (typeof downloadParams === "string") {
+            downloadParams = { outputFile: downloadParams };
+        }
+        return downloadMethods.downloadMedia(
+            this,
+            messageOrMedia,
+            downloadParams?.outputFile,
+            downloadParams?.thumb,
+            downloadParams?.progressCallback,
+            {
+                signal: downloadParams?.signal,
+                requestTimeout: downloadParams?.requestTimeout,
+            }
+        );
     }
 
     get parseMode() {
@@ -79,6 +287,17 @@ export class TelegramClient extends TelegramBaseClient {
         return messageMethods.getMessages(this, entity, getMessagesParams);
     }
 
+    getCommentData(entity: EntityLike, message: number | Api.Message) {
+        return messageMethods.getCommentData(this, entity, message);
+    }
+
+    sendMessage(
+        entity: EntityLike,
+        sendMessageParams: messageMethods.SendMessageParams = {}
+    ) {
+        return messageMethods.sendMessage(this, entity, sendMessageParams);
+    }
+
     forwardMessages(
         entity: EntityLike,
         forwardMessagesParams: messageMethods.ForwardMessagesParams
@@ -90,8 +309,195 @@ export class TelegramClient extends TelegramBaseClient {
         );
     }
 
+    editMessage(
+        entity: EntityLike,
+        editMessageParams: messageMethods.EditMessageParams
+    ) {
+        return messageMethods.editMessage(this, entity, editMessageParams);
+    }
+
+    deleteMessages(
+        entity: EntityLike | undefined,
+        messageIds: MessageIDLike[],
+        { revoke = true }
+    ) {
+        return messageMethods.deleteMessages(this, entity, messageIds, {
+            revoke: revoke,
+        });
+    }
+
+    pinMessage(
+        entity: EntityLike,
+        message?: undefined,
+        pinMessageParams?: messageMethods.UpdatePinMessageParams
+    ): Promise<Api.messages.AffectedHistory>;
+    pinMessage(
+        entity: EntityLike,
+        message: MessageIDLike,
+        pinMessageParams?: messageMethods.UpdatePinMessageParams
+    ): Promise<Api.Message>;
+    pinMessage(
+        entity: EntityLike,
+        message?: any,
+        pinMessageParams?: messageMethods.UpdatePinMessageParams
+    ) {
+        return messageMethods.pinMessage(
+            this,
+            entity,
+            message,
+            pinMessageParams
+        );
+    }
+
+    unpinMessage(
+        entity: EntityLike,
+        message?: undefined,
+        pinMessageParams?: messageMethods.UpdatePinMessageParams
+    ): Promise<Api.messages.AffectedHistory>;
+    unpinMessage(
+        entity: EntityLike,
+        message: MessageIDLike,
+        pinMessageParams?: messageMethods.UpdatePinMessageParams
+    ): Promise<undefined>;
+    unpinMessage(
+        entity: EntityLike,
+        message?: any,
+        unpinMessageParams?: messageMethods.UpdatePinMessageParams
+    ) {
+        return messageMethods.unpinMessage(
+            this,
+            entity,
+            message,
+            unpinMessageParams
+        ) as Promise<Api.messages.AffectedHistory | undefined>;
+    }
+
+    markAsRead(
+        entity: EntityLike,
+        message?: MessageIDLike | MessageIDLike[],
+        markAsReadParams?: messageMethods.MarkAsReadParams
+    ) {
+        return messageMethods.markAsRead(
+            this,
+            entity,
+            message,
+            markAsReadParams
+        );
+    }
+
+    sendReaction(
+        entity: EntityLike,
+        messageId: number,
+        reaction?: Api.TypeReaction[],
+        big?: boolean
+    ) {
+        return messageMethods.sendReaction(
+            this,
+            entity,
+            messageId,
+            reaction,
+            big
+        );
+    }
+
+    getReactionUsers(
+        entity: EntityLike,
+        messageId: number,
+        params?: { reaction?: string; limit?: number; offset?: string }
+    ) {
+        return messageMethods.getReactionUsers(
+            this,
+            entity,
+            messageId,
+            params
+        );
+    }
+
     iterDialogs(iterDialogsParams: dialogMethods.IterDialogsParams = {}) {
         return dialogMethods.iterDialogs(this, iterDialogsParams);
+    }
+
+    getDialogs(params: dialogMethods.IterDialogsParams = {}) {
+        return dialogMethods.getDialogs(this, params);
+    }
+
+    iterParticipants(
+        entity: EntityLike,
+        params: chatMethods.IterParticipantsParams = {}
+    ) {
+        return chatMethods.iterParticipants(this, entity, params);
+    }
+
+    getParticipants(
+        entity: EntityLike,
+        params: chatMethods.IterParticipantsParams = {}
+    ) {
+        return chatMethods.getParticipants(this, entity, params);
+    }
+
+    kickParticipant(entity: EntityLike, participant: EntityLike) {
+        return chatMethods.kickParticipant(this, entity, participant);
+    }
+
+    on(event: NewMessage): (f: (event: NewMessageEvent) => void) => void;
+    on(event: CallbackQuery): (f: (event: CallbackQueryEvent) => void) => void;
+    on(event: Album): (f: (event: AlbumEvent) => void) => void;
+    on(event: EditedMessage): (f: (event: EditedMessageEvent) => void) => void;
+    on(event: DeletedMessage): (f: (event: DeletedMessageEvent) => void) => void;
+    on(event?: EventBuilder): (f: (event: any) => void) => void;
+    on(event?: EventBuilder) {
+        return updateMethods.on(this, event);
+    }
+
+    addEventHandler(
+        callback: { (event: NewMessageEvent): void },
+        event: NewMessage
+    ): void;
+    addEventHandler(
+        callback: { (event: CallbackQueryEvent): void },
+        event: CallbackQuery
+    ): void;
+    addEventHandler(
+        callback: { (event: AlbumEvent): void },
+        event: Album
+    ): void;
+    addEventHandler(
+        callback: { (event: EditedMessageEvent): void },
+        event: EditedMessage
+    ): void;
+    addEventHandler(
+        callback: { (event: DeletedMessageEvent): void },
+        event: DeletedMessage
+    ): void;
+    addEventHandler(
+        callback: { (event: any): void },
+        event?: EventBuilder
+    ): void;
+    addEventHandler(callback: { (event: any): void }, event?: EventBuilder) {
+        return updateMethods.addEventHandler(this, callback, event);
+    }
+
+    removeEventHandler(callback: CallableFunction, event: EventBuilder) {
+        return updateMethods.removeEventHandler(this, callback, event);
+    }
+
+    listEventHandlers() {
+        return updateMethods.listEventHandlers(this);
+    }
+
+    async catchUp() {
+        return catchUp(this);
+    }
+
+    uploadFile(fileParams: uploadMethods.UploadFileParams) {
+        return uploadMethods.uploadFile(this, fileParams);
+    }
+
+    sendFile(
+        entity: EntityLike,
+        sendFileParams: uploadMethods.SendFileInterface
+    ) {
+        return uploadMethods.sendFile(this, entity, sendFileParams);
     }
 
     invoke<R extends Api.AnyRequest>(
@@ -108,6 +514,8 @@ export class TelegramClient extends TelegramBaseClient {
         return userMethods.invoke(this, request, undefined, sender);
     }
 
+    private _apiProxy?: Api.ApiFacade;
+
     get api(): Api.ApiFacade {
         if (!this._apiProxy) {
             this._apiProxy = createApiProxy(
@@ -123,6 +531,14 @@ export class TelegramClient extends TelegramBaseClient {
     getMe(inputPeer?: false): Promise<Api.User>;
     getMe(inputPeer = false) {
         return userMethods.getMe(this, inputPeer);
+    }
+
+    isBot() {
+        return userMethods.isBot(this);
+    }
+
+    isUserAuthorized() {
+        return userMethods.isUserAuthorized(this);
     }
 
     getEntity(entity: EntityLike): Promise<Entity>;
@@ -152,10 +568,23 @@ export class TelegramClient extends TelegramBaseClient {
         try {
             const res = await this.getMe();
         } catch (e) {
+            if (this._sender?.userDisconnected) {
+                this._log.debug(
+                    `Reconnect probe cancelled by disconnect: ${
+                        e instanceof Error ? e.message : e
+                    }`
+                );
+                return;
+            }
             this._log.error(`Error while trying to reconnect`, e);
             if (this._errorHandler) {
                 await this._errorHandler(e as Error);
             }
+        }
+        if (!this._loopStarted && !this._destroyed) {
+            this._log.info("Restarting update loop after reconnect");
+            _updateLoop(this);
+            this._loopStarted = true;
         }
     }
 
@@ -170,6 +599,7 @@ export class TelegramClient extends TelegramBaseClient {
                 autoReconnect: this._autoReconnect,
                 connectTimeout: this._timeout,
                 authKeyCallback: this._authKeyCallback.bind(this),
+                updateCallback: _handleUpdate.bind(this),
                 isMainSender: true,
                 client: this,
                 securityChecks: this._securityChecks,
@@ -181,27 +611,32 @@ export class TelegramClient extends TelegramBaseClient {
                 ),
             });
         }
+
+        if (this._sender.isConnected()) {
+            if (!this._loopStarted) {
+                _updateLoop(this);
+                this._loopStarted = true;
+            }
+            return false;
+        }
+
         const connection = new this._connection({
             ip: this.session.serverAddress,
             port: this.session.port || 80,
             dcId: this.session.dcId,
             loggers: this._log,
             socket: this.networkSocket,
+            keepAliveInterval: this._keepAliveInterval,
         });
-        if (!(await this._sender.connect(connection, false))) {
-            return false;
-        }
+        this._log.info(`Using LAYER ${LAYER} for initial connect`);
+        await this._connectSender(this._sender, this.session.dcId, connection);
         this.session.setAuthKey(this._sender.authKey);
         this.session.save();
 
-        this._initRequest.query = new Api.help.GetConfig();
-        this._log.info(`Using LAYER ${LAYER} for initial connect`);
-        await this._sender.send(
-            new Api.InvokeWithLayer({
-                layer: LAYER,
-                query: this._initRequest,
-            })
-        );
+        if (!this._loopStarted) {
+            _updateLoop(this);
+            this._loopStarted = true;
+        }
         this._connectedDeferred.resolve();
         this._isSwitchingDc = false;
         return true;
@@ -240,8 +675,8 @@ export class TelegramClient extends TelegramBaseClient {
         if (lookup) {
             return lookup;
         }
-        const ipv4Table = PROD_DC_IPV4;
-        const ipv6Table = PROD_DC_IPV6;
+        const ipv4Table = this._testServers ? TEST_DC_IPV4 : PROD_DC_IPV4;
+        const ipv6Table = this._testServers ? TEST_DC_IPV6 : PROD_DC_IPV6;
         const ipAddress = (this._useIPV6 ? ipv6Table : ipv4Table)[dcId];
         if (ipAddress) {
             return { id: dcId, ipAddress, port: 443 };
@@ -266,10 +701,12 @@ export class TelegramClient extends TelegramBaseClient {
         if (mediaCluster && candidates.some((DC) => DC.mediaOnly)) {
             candidates = candidates.filter((DC) => DC.mediaOnly);
         }
-        if (candidates.some((DC) => DC.static)) {
-            candidates = candidates.filter((DC) => DC.static);
-        }
-        const chosen = candidates[0];
+        // if (this._proxy && candidates.some((DC) => DC.static)) {
+        //     candidates = candidates.filter((DC) => DC.static);
+        // }
+        const failures =
+            this._dcConnectFailures.get(`${dcId}:${mediaCluster}`) ?? 0;
+        const chosen = candidates[failures % candidates.length];
         return {
             id: chosen.id,
             ipAddress: chosen.ipAddress,
@@ -311,5 +748,9 @@ export class TelegramClient extends TelegramBaseClient {
 
     _getResponseMessage(req: any, result: any, inputChat: any) {
         return parseMethods._getResponseMessage(this, req, result, inputChat);
+    }
+
+    static get events() {
+        return require("../events");
     }
 }

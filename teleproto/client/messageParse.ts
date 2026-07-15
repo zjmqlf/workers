@@ -1,7 +1,7 @@
 import { getPeerId } from "../Utils";
 import { Api } from "../tl";
 import type { EntityLike } from "../define";
-import type { TelegramClient } from "./";
+import type { TelegramClient } from "./TelegramClient";
 import * as utils from "../Utils";
 import { _EntityType, _entityType, isArrayLike } from "../Helpers";
 import bigInt from "big-integer";

@@ -1,7 +1,7 @@
 import type { Entity, EntityLike } from "../../define";
-import type { TelegramClient } from "../../client";
+import type { TelegramClient } from "../../client/TelegramClient";
 import { getPeerId } from "../../Utils";
-import { Api } from "../";
+import { Api } from "../api";
 import { returnBigInt } from "../../Helpers";
 
 export interface ChatGetterConstructorParams {
@@ -83,7 +83,6 @@ export class ChatGetter {
                 }
             } catch (e) {
             }
-            return this._inputChat;
         }
         return this._inputChat;
     }

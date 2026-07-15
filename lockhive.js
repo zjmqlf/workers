@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions, utils } from "./teleproto";
-import { LogLevel } from "./teleproto/extensions";
+import { LogLevel } from "./teleproto/extensions/Logger";
 import { codeString } from "./string/lockhiveString";
 import bigInt from "big-integer";
 
@@ -219,7 +219,7 @@ export class WebSocketServer extends DurableObject {
         try {
           // ws.send(JSON.stringify(message));
           ws.send(message);
-        } catch (e) {
+        } catch (err) {
           // console.log(e);
           // const index = this.webSocket.findIndex(element => element === ws);
           // if (index > -1) {
@@ -320,10 +320,10 @@ export class WebSocketServer extends DurableObject {
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
-    } catch (e) {
+    } catch (err) {
       //console.log("login出错 : " + e);
       this.sendLog("open", "login出错 : " + e, null, true);
-      if (tryCount === 20) {
+      if (tryCount === 5) {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")open超出tryCount限制");
         this.sendLog("open", "超出tryCount限制", null, true);
@@ -393,7 +393,7 @@ export class WebSocketServer extends DurableObject {
       //   this.sendLog("getMessage", "messageCount比limit大", null, true);
       // }
       // return count;
-    } catch (e) {
+    } catch (err) {
       this.messageArray = [];
       // this.count = 0;
       if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
@@ -416,7 +416,7 @@ export class WebSocketServer extends DurableObject {
       } else {
         //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
         this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
-        if (tryCount === 20) {
+        if (tryCount === 5) {
           this.stop = 2;
           //console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
           this.sendLog("getMessage", "超出tryCount限制", null, true);
@@ -438,7 +438,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async selectCodeError(tryCount) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")selectCode超出tryCount限制");
       this.sendLog("selectCode", "超出tryCount限制", null, true);
@@ -461,7 +461,7 @@ export class WebSocketServer extends DurableObject {
     let codeResult = {};
     try {
       codeResult = await this.env.MAINDB.prepare("SELECT * FROM `CODE` WHERE `status` = 0 AND `chatId` = 1 ORDER BY `Cindex` ASC LIMIT 1;").run();
-    } catch (e) {
+    } catch (err) {
       //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode出错 : " + e);
       this.sendGrid("selectCode", "出错 : " + e.message, "try", true);
       if (e.message === this.errorMessage) {
@@ -486,7 +486,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async updateCodeError(tryCount, Cindex, status) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       this.stop = 2;
       //console.log("(" + this.currentStep + ")updateCode超出tryCount限制");
       this.sendLog("updateCode", "超出tryCount限制", null, true);
@@ -509,7 +509,7 @@ export class WebSocketServer extends DurableObject {
     let codeResult = {};
     try {
       codeResult = await this.env.MAINDB.prepare("UPDATE `CODE` SET `status` = ? WHERE `Cindex` = ?;").bind(status, Cindex).run();
-    } catch (e) {
+    } catch (err) {
       //console.log("updateCode出错 : " + e);
       this.sendLog("updateCode", "出错 : " + e.message, null, true);
       if (e.message === this.errorMessage) {
@@ -535,7 +535,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async sendQueryError(tryCount) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       //console.log("(" + this.currentStep + ")sendQuery超出tryCount限制");
       this.sendLog("sendQuery", "超出tryCount限制", null, true);
       await this.close();
@@ -624,7 +624,7 @@ export class WebSocketServer extends DurableObject {
               silent: true,
             })
           );
-        } catch (e) {
+        } catch (err) {
           if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
             if (this.fromDB === true) {
               await this.updateCode(1, Cindex, 0);
@@ -751,7 +751,7 @@ export class WebSocketServer extends DurableObject {
         }));
         //console.log(forwardResult);
         // this.sendLog("forwardMessage", JSON.stringify(forwardResult), null, false);
-      } catch (e) {
+      } catch (err) {
         if (e.errorMessage === "RANDOM_ID_DUPLICATE" || e.code === 500) {
           //console.log("(" + this.currentStep + ") " + e);
           this.sendLog("forwardMessage", JSON.stringify(e), "error", true);
@@ -1155,7 +1155,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async getBotrError(tryCount) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       //console.log("(" + this.currentStep + ")getBotr超出tryCount限制");
       this.sendLog("getBotr", "超出tryCount限制", null, true);
       await this.close();
@@ -1185,7 +1185,7 @@ export class WebSocketServer extends DurableObject {
           ],
         })
       );
-    } catch (e) {
+    } catch (err) {
       //console.log("getBot出错 : " + e);
       this.sendLog("getBot", "出错 : " + JSON.stringify(e), null, true);
       await this.getBotrError(tryCount);
@@ -1200,7 +1200,7 @@ export class WebSocketServer extends DurableObject {
   }
 
   async getUserError(tryCount) {
-    if (tryCount === 20) {
+    if (tryCount === 5) {
       //console.log("(" + this.currentStep + ")getUser超出tryCount限制");
       this.sendLog("getUser", "超出tryCount限制", null, true);
       await this.close();
@@ -1230,7 +1230,7 @@ export class WebSocketServer extends DurableObject {
           ],
         })
       );
-    } catch (e) {
+    } catch (err) {
       //console.log("getUser出错 : " + e);
       this.sendLog("getUser", "出错 : " + JSON.stringify(e), null, true);
       await this.getUserError(tryCount);
@@ -1542,7 +1542,7 @@ export class WebSocketServer extends DurableObject {
         let message = null;
         try {
           message = JSON.parse(data);
-        } catch (e) {
+        } catch (err) {
           //console.log("解析JSON失败");
           this.sendLog("syncDB", "解析JSON失败", null, true);
         }
@@ -1581,7 +1581,7 @@ export class WebSocketServer extends DurableObject {
         if (JSON.stringify(data) !== "{}") {
           option = data;
         }
-      } catch (e) {
+      } catch (err) {
         command = data;
         //console.log("parse出错 : " + e);
         this.sendLog("webSocketMessage", "parse出错 : " + e, null, true);

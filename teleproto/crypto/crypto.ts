@@ -1,143 +1,75 @@
-import { default as AES } from "@cryptography/aes";
-import { i2ab, ab2i } from "./converters";
-import { getWords } from "./words";
-import { Buffer } from "node:buffer";
-
-export class Counter {
-    _counter: Buffer;
-
-    constructor(initialValue: any) {
-        this._counter = Buffer.from(initialValue);
-    }
-
-    increment() {
-        for (let i = 15; i >= 0; i--) {
-            if (this._counter[i] === 255) {
-                this._counter[i] = 0;
-            } else {
-                this._counter[i]++;
-                break;
-            }
-        }
-    }
-}
+import {
+    createCipheriv as nodeCreateCipheriv,
+    createDecipheriv as nodeCreateDecipheriv,
+    createHash as nodeCreateHash,
+    randomBytes as nodeRandomBytes,
+    pbkdf2Sync as nodePbkdf2Sync,
+} from 'node:crypto';
 
 export class CTR {
-    private _counter: Counter;
-    private _remainingCounter?: Buffer;
-    private _remainingCounterIndex: number;
-    private _aes: AES;
+    private cipher: any;
+    private decipher: any;
 
-    constructor(key: Buffer, counter: any) {
-        if (!(counter instanceof Counter)) {
-            counter = new Counter(counter);
-        }
-
-        this._counter = counter;
-        this._remainingCounter = undefined;
-        this._remainingCounterIndex = 16;
-        this._aes = new AES(getWords(key));
+    constructor(key: Buffer, iv: Buffer, algorithm: string) {
+        this.cipher = nodeCreateCipheriv(algorithm, key, iv);
+        this.decipher = nodeCreateDecipheriv(algorithm, key, iv);
     }
 
-    update(plainText: any) {
+    update(plainText: Buffer) {
         return this.encrypt(plainText);
     }
 
-    encrypt(plainText: any) {
-        const encrypted = Buffer.from(plainText);
-        for (let i = 0; i < encrypted.length; i++) {
-            if (this._remainingCounterIndex === 16) {
-                this._remainingCounter = Buffer.from(
-                    i2ab(this._aes.encrypt(ab2i(this._counter._counter)))
-                );
-                this._remainingCounterIndex = 0;
-                this._counter.increment();
-            }
-            if (this._remainingCounter) {
-                encrypted[i] ^=
-                    this._remainingCounter[this._remainingCounterIndex++];
-            }
-        }
+    encrypt(plainText: Buffer) {
+        return this.cipher.update(plainText);
+    }
 
-        return encrypted;
+    decrypt(cipherText: Buffer) {
+        return this.decipher.update(cipherText);
     }
 }
 
-export function createDecipheriv(algorithm: string, key: Buffer, iv: Buffer) {
+export function createDecipher(algorithm: string, key: Buffer, iv: Buffer) {
     if (algorithm.includes("ECB")) {
-        throw new Error("Not supported");
-    } else {
-        return new CTR(key, iv);
+        throw new Error("ECB mode is not supported");
     }
+    return new CTR(key, iv, algorithm);
 }
 
-export function createCipheriv(algorithm: string, key: Buffer, iv: Buffer) {
+export function createCipher(algorithm: string, key: Buffer, iv: Buffer) {
     if (algorithm.includes("ECB")) {
-        throw new Error("Not supported");
-    } else {
-        return new CTR(key, iv);
+        throw new Error("ECB mode is not supported");
     }
+    return new CTR(key, iv, algorithm);
 }
 
 export function randomBytes(count: number) {
-    const bytes = new Uint8Array(count);
-    crypto.getRandomValues(bytes);
-    return bytes;
+    return nodeRandomBytes(count);
 }
 
 export class Hash {
-    private readonly algorithm: string;
-    private data?: Uint8Array;
+    private readonly hash: any;
 
     constructor(algorithm: string) {
-        this.algorithm = algorithm;
+        this.hash = nodeCreateHash(algorithm);
     }
 
     update(data: Buffer) {
-        this.data = new Uint8Array(data);
+        this.hash.update(data);
     }
 
-    async digest() {
-        if (this.data) {
-            if (this.algorithm === "sha1") {
-                return Buffer.from(
-                    await self.crypto.subtle.digest("SHA-1", this.data)
-                );
-            } else if (this.algorithm === "sha256") {
-                return Buffer.from(
-                    await self.crypto.subtle.digest("SHA-256", this.data)
-                );
-            }
-        }
-        return Buffer.alloc(0);
+    digest() {
+        return this.hash.digest();
     }
 }
 
-export async function pbkdf2Sync(
+export function pbkdf2Sync(
     password: any,
     salt: any,
     iterations: any,
-    ...args: any
+    keylen: any,
+    digest: any
 ) {
-    const passwordKey = await crypto.subtle.importKey(
-        "raw",
-        password,
-        { name: "PBKDF2" },
-        false,
-        ["deriveBits"]
-    );
-    return Buffer.from(
-        await crypto.subtle.deriveBits(
-            {
-                name: "PBKDF2",
-                hash: "SHA-512",
-                salt,
-                iterations,
-            },
-            passwordKey,
-            512
-        )
-    );
+    return nodePbkdf2Sync(password, salt, iterations, keylen, digest);
 }
 
 export function createHash(algorithm: string) {

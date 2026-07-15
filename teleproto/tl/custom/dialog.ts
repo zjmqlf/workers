@@ -1,5 +1,5 @@
-import type { TelegramClient } from "../../client";
-import { Api } from "../";
+import type { TelegramClient } from "../../client/TelegramClient";
+import { Api } from "../api";
 import type { Entity } from "../../define";
 import { getDisplayName, getInputPeer, getPeerId } from "../../Utils";
 import { Draft } from "./draft";

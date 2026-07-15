@@ -1,8 +1,7 @@
 import {
     Logger,
-    PromisedNetSockets
+    PromisedNetSockets,
 } from "../../extensions";
-import { AsyncQueue } from "../../extensions";
 import { AbridgedPacketCodec } from "./TCPAbridged";
 import { FullPacketCodec } from "./TCPFull";
 import { Buffer } from "node:buffer";
@@ -13,6 +12,7 @@ interface ConnectionInterfaceParams {
     dcId: number;
     loggers: Logger;
     socket: typeof PromisedNetSockets;
+    keepAliveInterval?: number;
 }
 
 class Connection {
@@ -21,15 +21,10 @@ class Connection {
     readonly _port: number;
     _dcId: number;
     _log: Logger;
+    _keepAliveInterval?: number;
     _connected: boolean;
-    private _sendTask?: Promise<void>;
-    private _recvTask?: Promise<void>;
     protected _codec: any;
     protected _obfuscation: any;
-    _sendArray: AsyncQueue;
-    _recvArray: AsyncQueue;
-    private _abortController: AbortController;
-    private _recvError?: Error;
     socket: PromisedNetSockets;
 
     constructor({
@@ -38,39 +33,26 @@ class Connection {
         dcId,
         loggers,
         socket,
+        keepAliveInterval,
     }: ConnectionInterfaceParams) {
         this._ip = ip;
         this._port = port;
         this._dcId = dcId;
         this._log = loggers;
+        this._keepAliveInterval = keepAliveInterval;
         this._connected = false;
-        this._sendTask = undefined;
-        this._recvTask = undefined;
         this._codec = undefined;
         this._obfuscation = undefined;
-        this._sendArray = new AsyncQueue();
-        this._recvArray = new AsyncQueue();
-        this._abortController = new AbortController();
-        this.socket = new socket();
+        this.socket = new socket(keepAliveInterval);
     }
 
-    async _connect() {
+    async connect() {
         this._log.debug("Connecting");
         this._codec = new this.PacketCodecClass!(this);
         await this.socket.connect(this._port, this._ip);
         this._log.debug("Finished connecting");
         await this._initConn();
-    }
-
-    async connect() {
-        this._abortController = new AbortController();
-        this._recvError = undefined;
-        await this._connect();
         this._connected = true;
-        if (!this._sendTask) {
-            this._sendTask = this._sendLoop();
-        }
-        this._recvTask = this._recvLoop();
     }
 
     async disconnect() {
@@ -78,8 +60,6 @@ class Connection {
             return;
         }
         this._connected = false;
-        this._abortController.abort();
-        void this._recvArray.push(undefined);
         await this.socket.close();
     }
 
@@ -87,54 +67,22 @@ class Connection {
         if (!this._connected) {
             throw new Error("Not connected");
         }
-        await this._sendArray.push(data);
+        await this._send(data);
     }
 
     async recv() {
-        while (this._connected) {
-            const result = await this._recvArray.pop();
-            if (result) {
-                return result;
-            }
+        if (!this._connected) {
+            throw new Error("Not connected");
         }
-        throw this._recvError ?? new Error("Not connected");
-    }
-
-    async _sendLoop() {
-        try {
-            while (this._connected) {
-                const data = await this._sendArray.pop();
-                if (!data) {
-                    this._sendTask = undefined;
-                    return;
-                }
-                await this._send(data);
-            }
-        } catch (e) {
-            this._log.info("The server closed the connection while sending");
+        const data = await this._recv();
+        if (!data || !data.length) {
+            throw new Error("No data received");
         }
+        return data;
     }
 
     isConnected() {
         return this._connected;
-    }
-
-    async _recvLoop() {
-        let data;
-        while (this._connected) {
-            try {
-                data = await this._recv();
-                if (!data) {
-                    throw new Error("no data received");
-                }
-            } catch (e) {
-                this._log.debug("connection closed");
-                this._recvError = e as Error;
-                this.disconnect();
-                return;
-            }
-            await this._recvArray.push(data);
-        }
     }
 
     async _initConn() {
@@ -179,9 +127,9 @@ class ObfuscatedConnection extends Connection {
 }
 
 class PacketCodec {
-    private _conn: Buffer;
+    private _conn: Connection;
 
-    constructor(connection: Buffer) {
+    constructor(connection: Connection) {
         this._conn = connection;
     }
 

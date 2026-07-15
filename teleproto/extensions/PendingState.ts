@@ -1,4 +1,4 @@
-import { RequestState } from "../network";
+import { RequestState } from "../network/RequestState";
 import bigInt from "big-integer";
 
 export class PendingState {

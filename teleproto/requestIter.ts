@@ -1,4 +1,4 @@
-import type { TelegramClient } from "./client";
+import type { TelegramClient } from "./client/TelegramClient";
 import { sleep, TotalList } from "./Helpers";
 
 interface BaseRequestIterInterface {

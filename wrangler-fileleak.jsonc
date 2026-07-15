@@ -18,6 +18,13 @@
   // ],
   "preview_urls": false,
   "workers_dev": false,
+  "d1_databases": [
+    {
+      "binding": "MAINDB",
+      "database_name": "maindb",
+      "database_id": "0a603387-bd38-4fa7-9938-2931ddad233a"
+    }
+  ],
   "durable_objects": {
     "bindings": [
       {

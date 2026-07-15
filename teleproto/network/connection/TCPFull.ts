@@ -29,7 +29,6 @@ export class FullPacketCodec extends PacketCodec {
     ): Promise<Buffer> {
         const lenBuf = await reader.readExactly(4);
         if (lenBuf === undefined) {
-            // Return empty buffer in case of issue
             return Buffer.alloc(0);
         }
         const packetLen = lenBuf.readInt32LE(0);

@@ -237,7 +237,7 @@ export async function doAuthentication(
         );
     }
     const authKey = new AuthKey();
-    await authKey.setKey(getByteArray(gab));
+    await authKey.setKey(readBufferFromBigInt(gab, 256, false, false));
     const nonceNumber = 1 + nonceTypesString.indexOf(dhGen.className);
     const newNonceHash = await authKey.calcNewNonceHash(newNonce, nonceNumber);
     // @ts-ignore

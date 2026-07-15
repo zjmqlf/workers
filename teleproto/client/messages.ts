@@ -3,6 +3,7 @@ import type {
     DateLike,
     EntityLike,
     FileLike,
+    MarkupLike,
     MessageIDLike,
     MessageLike,
 } from "../define";
@@ -16,11 +17,12 @@ import {
     generateRandomBigInt,
 } from "../Helpers";
 import { getInputMedia, getMessageId, getPeerId, parseID } from "../Utils";
-import type { TelegramClient } from "./";
+import type { TelegramClient } from "./TelegramClient";
 import * as utils from "../Utils";
 import { _parseMessageText } from "./messageParse";
 import { _getPeer } from "./users";
 import bigInt, { BigInteger } from "big-integer";
+import { _fileToMedia } from "./uploads";
 
 const _MAX_CHUNK_SIZE = 100;
 
@@ -416,6 +418,29 @@ const IterMessagesDefaults: IterMessagesParams = {
     scheduled: false,
 };
 
+export interface SendMessageParams {
+    message?: MessageLike;
+    replyTo?: number | Api.Message;
+    attributes?: Api.TypeDocumentAttribute[];
+    parseMode?: any;
+    formattingEntities?: Api.TypeMessageEntity[];
+    linkPreview?: boolean;
+    file?: FileLike | FileLike[];
+    thumb?: FileLike;
+    forceDocument?: false;
+    clearDraft?: false;
+    buttons?: MarkupLike;
+    silent?: boolean;
+    supportStreaming?: boolean;
+    schedule?: DateLike;
+    noforwards?: boolean;
+    commentTo?: number | Api.Message;
+    topMsgId?: number | Api.Message;
+    sendAs?: EntityLike;
+    effect?: BigInteger;
+    invertMedia?: boolean;
+}
+
 export interface ForwardMessagesParams {
     messages: MessageIDLike | MessageIDLike[];
     fromPeer: EntityLike;
@@ -428,6 +453,29 @@ export interface ForwardMessagesParams {
     effect?: BigInteger;
     dropMediaCaptions?: boolean;
     withMyScore?: boolean;
+}
+
+export interface EditMessageParams {
+    message: Api.Message | number;
+    text?: string;
+    parseMode?: any;
+    formattingEntities?: Api.TypeMessageEntity[];
+    linkPreview?: boolean;
+    file?: FileLike;
+    forceDocument?: false;
+    buttons?: MarkupLike;
+    schedule?: DateLike;
+    invertMedia?: boolean;
+}
+
+export interface UpdatePinMessageParams {
+    notify?: boolean;
+    pmOneSide?: boolean;
+}
+
+export interface MarkAsReadParams {
+    maxId?: number;
+    clearMentions?: boolean;
 }
 
 export function iterMessages(
@@ -516,6 +564,168 @@ export async function getMessages(
     return (await it.collect()) as TotalList<Api.Message>;
 }
 
+export async function sendMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    {
+        message,
+        replyTo,
+        attributes,
+        parseMode,
+        formattingEntities,
+        linkPreview = true,
+        file,
+        thumb,
+        forceDocument,
+        clearDraft,
+        buttons,
+        silent,
+        supportStreaming,
+        schedule,
+        noforwards,
+        commentTo,
+        topMsgId,
+        sendAs,
+        effect,
+        invertMedia,
+    }: SendMessageParams = {}
+) {
+    if (file) {
+        return client.sendFile(entity, {
+            file: file,
+            caption: message
+                ? typeof message == "string"
+                    ? message
+                    : message.message
+                : "",
+            forceDocument: forceDocument,
+            clearDraft: clearDraft,
+            replyTo: replyTo,
+            attributes: attributes,
+            thumb: thumb,
+            supportsStreaming: supportStreaming,
+            parseMode: parseMode,
+            formattingEntities: formattingEntities,
+            silent: silent,
+            scheduleDate: schedule,
+            buttons: buttons,
+            noforwards: noforwards,
+            commentTo: commentTo,
+            topMsgId: topMsgId,
+        });
+    }
+    entity = await client.getInputEntity(entity);
+    if (commentTo != undefined) {
+        const discussionData = await getCommentData(client, entity, commentTo);
+        entity = discussionData.entity;
+        replyTo = discussionData.replyTo;
+    }
+    let markup, request;
+    let replyObject: Api.InputReplyToMessage | undefined = undefined;
+    if (replyTo != undefined) {
+        replyObject = new Api.InputReplyToMessage({
+            replyToMsgId: getMessageId(replyTo)!,
+            topMsgId: getMessageId(topMsgId),
+        });
+    } else if (topMsgId != undefined) {
+        replyObject = new Api.InputReplyToMessage({
+            replyToMsgId: getMessageId(topMsgId)!,
+        });
+    }
+
+    if (message && message instanceof Api.Message) {
+        if (buttons == undefined) {
+            markup = message.replyMarkup;
+        } else {
+            markup = client.buildReplyMarkup(buttons);
+        }
+        if (silent == undefined) {
+            silent = message.silent;
+        }
+
+        if (
+            message.media &&
+            !(message.media instanceof Api.MessageMediaWebPage)
+        ) {
+            return client.sendFile(entity, {
+                file: message.media,
+                caption: message.message,
+                silent: silent,
+                replyTo: replyTo,
+                buttons: markup,
+                formattingEntities: message.entities,
+                scheduleDate: schedule,
+            });
+        }
+        request = new Api.messages.SendMessage({
+            peer: entity,
+            message: message.message || "",
+            silent: silent,
+            replyTo: replyObject,
+            replyMarkup: markup,
+            entities: message.entities,
+            clearDraft: clearDraft,
+            noWebpage: !(message.media instanceof Api.MessageMediaWebPage),
+            scheduleDate: schedule,
+            noforwards: noforwards,
+            sendAs: sendAs
+                ? await client.getInputEntity(sendAs)
+                : undefined,
+            effect: effect,
+            invertMedia: invertMedia,
+        });
+        message = message.message;
+    } else {
+        if (formattingEntities == undefined) {
+            [message, formattingEntities] = await _parseMessageText(
+                client,
+                message || "",
+                parseMode
+            );
+        }
+        if (!message) {
+            throw new Error(
+                "The message cannot be empty unless a file is provided"
+            );
+        }
+
+        request = new Api.messages.SendMessage({
+            peer: entity,
+            message: message.toString(),
+            entities: formattingEntities,
+            noWebpage: !linkPreview,
+            replyTo: replyObject,
+            clearDraft: clearDraft,
+            silent: silent,
+            replyMarkup: client.buildReplyMarkup(buttons),
+            scheduleDate: schedule,
+            noforwards: noforwards,
+            sendAs: sendAs
+                ? await client.getInputEntity(sendAs)
+                : undefined,
+            effect: effect,
+            invertMedia: invertMedia,
+        });
+    }
+    const result = await client.invoke(request);
+    if (result instanceof Api.UpdateShortSentMessage) {
+        const msg = new Api.Message({
+            id: result.id,
+            peerId: await _getPeer(client, entity),
+            message: message,
+            date: result.date,
+            out: result.out,
+            media: result.media,
+            entities: result.entities,
+            replyMarkup: request.replyMarkup,
+            ttlPeriod: result.ttlPeriod,
+        });
+        msg._finishInit(client, new Map(), entity);
+        return msg;
+    }
+    return client._getResponseMessage(request, result, entity) as Api.Message;
+}
+
 export async function forwardMessages(
     client: TelegramClient,
     entity: EntityLike,
@@ -598,4 +808,314 @@ export async function forwardMessages(
     }
 
     return sent;
+}
+
+export async function editMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    {
+        message,
+        text,
+        parseMode,
+        formattingEntities,
+        linkPreview = true,
+        file,
+        forceDocument,
+        buttons,
+        schedule,
+        invertMedia,
+    }: EditMessageParams
+) {
+    if (
+        typeof message === "number" &&
+        typeof text === "undefined" &&
+        !file &&
+        !schedule
+    ) {
+        throw Error(
+            "You have to provide either file or text or schedule property."
+        );
+    }
+    entity = await client.getInputEntity(entity);
+    let id: number | undefined;
+    let markup: Api.TypeReplyMarkup | undefined;
+    let entities: Api.TypeMessageEntity[] | undefined;
+    let inputMedia: Api.TypeInputMedia | undefined;
+    if (file) {
+        const { fileHandle, media, image } = await _fileToMedia(client, {
+            file,
+            forceDocument,
+        });
+        inputMedia = media;
+    }
+    if (message instanceof Api.Message) {
+        id = getMessageId(message);
+        text = message.message;
+        entities = message.entities;
+        if (buttons == undefined) {
+            markup = message.replyMarkup;
+        } else {
+            markup = client.buildReplyMarkup(buttons);
+        }
+        if (message.media) {
+            inputMedia = getInputMedia(message.media, { forceDocument });
+        }
+    } else {
+        if (typeof message !== "number") {
+            throw Error(
+                "editMessageParams.message must be either a number or a Api.Message type"
+            );
+        }
+        id = message;
+        if (formattingEntities == undefined) {
+            [text, entities] = await _parseMessageText(
+                client,
+                text || "",
+                parseMode
+            );
+        } else {
+            entities = formattingEntities;
+        }
+        markup = client.buildReplyMarkup(buttons);
+    }
+    const request = new Api.messages.EditMessage({
+        peer: entity,
+        id,
+        message: text,
+        noWebpage: !linkPreview,
+        entities,
+        media: inputMedia,
+        replyMarkup: markup,
+        scheduleDate: schedule,
+        invertMedia: invertMedia,
+    });
+    const result = await client.invoke(request);
+    return client._getResponseMessage(request, result, entity) as Api.Message;
+}
+
+export async function deleteMessages(
+    client: TelegramClient,
+    entity: EntityLike | undefined,
+    messageIds: MessageIDLike[],
+    { revoke = false }
+) {
+    let ty = _EntityType.USER;
+    if (entity) {
+        entity = await client.getInputEntity(entity);
+        ty = _entityType(entity);
+    }
+    const ids: number[] = [];
+    for (const messageId of messageIds) {
+        if (
+            messageId instanceof Api.Message ||
+            messageId instanceof Api.MessageService ||
+            messageId instanceof Api.MessageEmpty
+        ) {
+            ids.push(messageId.id);
+        } else if (typeof messageId === "number") {
+            ids.push(messageId);
+        } else {
+            throw new Error(`Cannot convert ${messageId} to an integer`);
+        }
+    }
+    const results = [];
+
+    if (ty == _EntityType.CHANNEL) {
+        for (const chunk of utils.chunks(ids)) {
+            results.push(
+                client.api.channels.deleteMessages({
+                    channel: entity!,
+                    id: chunk,
+                })
+            );
+        }
+    } else {
+        for (const chunk of utils.chunks(ids)) {
+            results.push(
+                client.api.messages.deleteMessages({
+                    id: chunk,
+                    revoke: revoke,
+                })
+            );
+        }
+    }
+    return Promise.all(results);
+}
+
+export async function pinMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    message?: MessageIDLike,
+    pinMessageParams?: UpdatePinMessageParams
+) {
+    return await _pin(
+        client,
+        entity,
+        message,
+        false,
+        pinMessageParams?.notify,
+        pinMessageParams?.pmOneSide
+    );
+}
+
+export async function unpinMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    message?: MessageIDLike,
+    unpinMessageParams?: UpdatePinMessageParams
+) {
+    return await _pin(
+        client,
+        entity,
+        message,
+        true,
+        unpinMessageParams?.notify,
+        unpinMessageParams?.pmOneSide
+    );
+}
+
+export async function _pin(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike | undefined,
+    unpin: boolean,
+    notify: boolean = false,
+    pmOneSide: boolean = false
+) {
+    message = utils.getMessageId(message) || 0;
+
+    if (message === 0) {
+        return await client.api.messages.unpinAllMessages({
+            peer: entity,
+        });
+    }
+
+    entity = await client.getInputEntity(entity);
+
+    const request = new Api.messages.UpdatePinnedMessage({
+        silent: !notify,
+        unpin,
+        pmOneside: pmOneSide,
+        peer: entity,
+        id: message,
+    });
+    const result = await client.invoke(request);
+
+    if (
+        unpin ||
+        !("updates" in result) ||
+        ("updates" in result && !result.updates)
+    ) {
+        return;
+    }
+
+    return client._getResponseMessage(request, result, entity) as Api.Message;
+}
+
+export async function markAsRead(
+    client: TelegramClient,
+    entity: EntityLike,
+    message?: MessageIDLike | MessageIDLike[],
+    markAsReadParams?: MarkAsReadParams
+): Promise<boolean> {
+    let maxId: number = markAsReadParams?.maxId || 0;
+    const maxIdIsUndefined = markAsReadParams?.maxId === undefined;
+    if (maxIdIsUndefined) {
+        if (message) {
+            if (Array.isArray(message)) {
+                maxId = Math.max(
+                    ...message.map((v) => utils.getMessageId(v) as number)
+                );
+            } else {
+                maxId = utils.getMessageId(message) as number;
+            }
+        }
+    }
+
+    entity = await client.getInputEntity(entity);
+    if (markAsReadParams && !markAsReadParams.clearMentions) {
+        await client.invoke(new Api.messages.ReadMentions({ peer: entity }));
+        if (maxIdIsUndefined && message === undefined) {
+            return true;
+        }
+    }
+
+    if (_entityType(entity) === _EntityType.CHANNEL) {
+        return await client.api.channels.readHistory({
+            channel: entity,
+            maxId,
+        });
+    } else {
+        await client.api.messages.readHistory({ peer: entity, maxId });
+        return true;
+    }
+}
+
+export async function getCommentData(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: number | Api.Message
+) {
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    const result = await client.api.messages.getDiscussionMessage({
+        peer: entity,
+        msgId,
+    });
+    const relevantMessage = result.messages.reduce(
+        (p: Api.TypeMessage, c: Api.TypeMessage) => (p && p.id < c.id ? p : c)
+    );
+    let chat;
+    for (const c of result.chats) {
+        if (
+            relevantMessage.peerId instanceof Api.PeerChannel &&
+            c.id.eq(relevantMessage.peerId.channelId)
+        ) {
+            chat = c;
+            break;
+        }
+    }
+    return {
+        entity: utils.getInputPeer(chat),
+        replyTo: relevantMessage.id,
+    };
+}
+
+export async function sendReaction(
+    client: TelegramClient,
+    entity: EntityLike,
+    messageId: number,
+    reaction?: Api.TypeReaction[],
+    big?: boolean
+) {
+    return client.invoke(
+        new Api.messages.SendReaction({
+            peer: entity,
+            msgId: messageId,
+            reaction: reaction || [],
+            big: big,
+        })
+    );
+}
+
+export async function getReactionUsers(
+    client: TelegramClient,
+    entity: EntityLike,
+    messageId: number,
+    params?: { reaction?: string; limit?: number; offset?: string }
+) {
+    const { reaction, limit = 100, offset = "" } = params || {};
+    return client.invoke(
+        new Api.messages.GetMessageReactionsList({
+            peer: entity,
+            id: messageId,
+            limit: limit,
+            offset: offset,
+            reaction: reaction
+                ? new Api.ReactionEmoji({ emoticon: reaction })
+                : undefined,
+        })
+    );
 }

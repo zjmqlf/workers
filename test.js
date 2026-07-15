@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 // import { TelegramClient, Api, sessions, utils } from "./teleproto";
-// import { LogLevel } from "./teleproto/extensions";
+// import { LogLevel } from "./teleproto/extensions/Logger";
 // import bigInt from "big-integer";
 // import { Buffer } from "node:buffer";
 // import * as crypto from "node:crypto";
@@ -150,7 +150,7 @@ export class WebSocketServer extends DurableObject {
     let mediaResult = {};
     try {
       mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= ? ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
-    } catch (e) {
+    } catch (err) {
       console.log("selectMediaIndex出错 : " + e);
       return;
     }
@@ -179,7 +179,7 @@ export class WebSocketServer extends DurableObject {
     let photoResult = {};
     try {
       photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
-    } catch (e) {
+    } catch (err) {
       console.log("selectPhotoIndex出错 : " + e);
       return;
     }
@@ -208,7 +208,7 @@ export class WebSocketServer extends DurableObject {
     let messageResult = null;
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(id).run();
-    } catch (e) {
+    } catch (err) {
       console.log("selectMessage出错 : " + e);
       return;
     }
@@ -227,7 +227,7 @@ export class WebSocketServer extends DurableObject {
     let messageResult = null;
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
-    } catch (e) {
+    } catch (err) {
       console.log("selectMessageIndex出错 : " + e);
       return;
     }
@@ -243,7 +243,7 @@ export class WebSocketServer extends DurableObject {
     let messageResult = {};
     try {
       messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?, ?);").bind(1, result.userId, result.Mindex, result.id).run();
-    } catch (e) {
+    } catch (err) {
       console.log("insertMessageIndex出错 : " + e);;
       return;
     }
@@ -259,7 +259,7 @@ export class WebSocketServer extends DurableObject {
     let messageResult = {};
     try {
       messageResult = await this.env.MAINDB.prepare("DELETE FROM `MESSAGE` WHERE `Mindex` = ?;").bind(Mindex).run();
-    } catch (e) {
+    } catch (err) {
       console.log("deleteMessage出错 : " + e);;
       return;
     }
@@ -384,7 +384,7 @@ export class WebSocketServer extends DurableObject {
     // try {
     //   const result = await this.ctx.storage.get("2");
     //   console.log(result);  //测试
-    // } catch (e) {
+    // } catch (err) {
     //   console.log("出错 : " + e);  //测试
     // }
 
@@ -492,7 +492,7 @@ export default {
     //   let messageResult = null;
     //   try {
     //     messageResult = await env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
-    //   } catch (e) {
+    //   } catch (err) {
     //     console.log(messageId + " : selectMessage出错 : " + e);  //测试
     //   }
     //   console.log("messageResult : ");  //测试
@@ -536,7 +536,7 @@ export default {
     //   let mediaResult = {};
     //   try {
     //     mediaResult = await db.prepare("SELECT * FROM `MEDIA` WHERE `Vindex` = ? LIMIT 1;").bind(Vindex).run();
-    //   } catch (e) {
+    //   } catch (err) {
     //     console.log("selectMedia出错 : " + e);
     //   }
     //   console.log("mediaResult : ");  //测试
@@ -851,8 +851,8 @@ export default {
       //     //         // invertMedia: invertMedia,
       //     //       }));
       //     //       console.log(result);  //测试
-      //     //     } catch (e) {
-      //     //       console.log(e);  //测试
+      //     //     } catch (err) {
+      //     //       console.log(err);  //测试
       //     //     }
       //     //     // try {
       //     //     //   const forwardResult = await client[clientIndex].invoke(new Api.messages.ForwardMessages({
@@ -870,7 +870,7 @@ export default {
       //     //     //     // sendAs: "username",
       //     //     //   }));
       //     //     //   console.log(forwardResult);  //测试
-      //     //     // } catch (e) {
+      //     //     // } catch (err) {
       //     //     //   console.log(e);  //测试
       //     //     // }
       //     //     // const messageId = message.id;
@@ -903,7 +903,7 @@ export default {
       //     //     //             }),
       //     //     //             sender
       //     //     //           );
-      //     //     //         } catch (e) {
+      //     //     //         } catch (err) {
       //     //     //         }
       //     //     //         if (result) {
       //     //     //           const buffer = result.bytes;

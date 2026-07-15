@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import { TelegramClient, Api, sessions } from "./teleproto";
-import { LogLevel } from "./teleproto/extensions";
+import { LogLevel } from "./teleproto/extensions/Logger";
 import bigInt from "big-integer";
 
 async function countMessage(env) {
@@ -298,8 +298,8 @@ export class WebSocketServer extends DurableObject {
         try {
           // ws.send(JSON.stringify(message));
           ws.send(message);
-        } catch (e) {
-          // console.log(e);
+        } catch (err) {
+          // console.log(err);
           // const index = this.webSocket.findIndex(element => element === ws);
           // if (index > -1) {
           //   this.webSocket.splice(index, 1);
@@ -380,9 +380,9 @@ export class WebSocketServer extends DurableObject {
       this.client.session.setDC(5, "91.108.56.128", 80);
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
-    } catch (e) {
-      //console.log("login出错 : " + e);
-      this.sendLog("open", "login出错 : " + e, null, true);
+    } catch (err) {
+      //console.log(err instanceof Error ? err.message : err);
+      this.sendLog("open", err instanceof Error ? err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")open超出tryCount限制");
@@ -432,10 +432,10 @@ export class WebSocketServer extends DurableObject {
     let configResult = {};
     try {
       configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'pansou' LIMIT 1;").run();
-    } catch (e) {
-      //console.log("getConfig出错 : " + e);
-      this.sendLog("getConfig", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("getConfig : " + err instanceof Error ? err.message : err);
+      this.sendLog("getConfig", err instanceof Error ? err.message : err, null, true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -501,10 +501,10 @@ export class WebSocketServer extends DurableObject {
     let chatResult = {};
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `PANCHAT` SET `exist` = 0 WHERE `Cindex` = ?;").bind(Cindex).run();
-    } catch (e) {
-      //console.log("noExistChat出错 : " + e);
-      this.sendLog("noExistChat", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("noExistChat : " + err instanceof Error ? err.message : err);
+      this.sendLog("noExistChat", err instanceof Error ? err.message : err, null, true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -536,10 +536,10 @@ export class WebSocketServer extends DurableObject {
             accessHash: bigInt(chatResult.accessHash),
           })],
         }));
-      } catch (e) {
-        //console.log("(" + this.currentStep + ")出错 : " + e);
-        this.sendLog("checkChat", "出错 : " + JSON.stringify(e), null, true);
-        if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
+      } catch (err) {
+        //console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
+        this.sendLog("checkChat", err instanceof Error ? err.message : err, null, true);
+        if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
           await this.noExistChat(1, chatResult.Cindex);
           this.chatId += 1;
           if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
@@ -643,10 +643,10 @@ export class WebSocketServer extends DurableObject {
     let chatResult = {};
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `Cindex` >= ? AND `exist` = 1 LIMIT 1;").bind(this.chatId).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")出错 : " + e);
-      this.sendLog("nextChat", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
+      this.sendLog("nextChat", err instanceof Error ? err.message : err, null, true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -686,11 +686,11 @@ export class WebSocketServer extends DurableObject {
         let chatResult = {};
         try {
           chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `Cindex` = 0 LIMIT 1;").run();
-        } catch (e) {
+        } catch (err) {
           tryCount += 1;
-          //console.log("(" + this.currentStep + ")getChat出错 : " + e);
-          this.sendLog("getChat", "出错 : " + e.message, null, true);
-          if (e.message === this.errorMessage) {
+          //console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? err.message : err);
+          this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
+          if (err.message === this.errorMessage) {
             this.stop = 2;
             this.broadcast({
               "result": "pause",
@@ -726,10 +726,10 @@ export class WebSocketServer extends DurableObject {
           let chatResult = {};
           try {
             chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `current` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").run();
-          } catch (e) {
+          } catch (err) {
             tryCount += 1;
-            //console.log("(" + this.currentStep + ")getChat出错 : " + e);
-            this.sendLog("getChat", "出错 : " + JSON.stringify(e), null, true);
+            //console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? err.message : err);
+            this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
             await scheduler.wait(10000);
             return;
           }
@@ -779,10 +779,10 @@ export class WebSocketServer extends DurableObject {
     let configResult = {};
     try {
       configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'pansou';").bind(this.chatId).run();
-    } catch (e) {
-      //console.log("updateConfig出错 : " + e);
-      this.sendLog("updateConfig", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("updateConfig : " + err instanceof Error ? err.message : err);
+      this.sendLog("updateConfig", err instanceof Error ? err.message : err, null, true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -825,11 +825,11 @@ export class WebSocketServer extends DurableObject {
         // }
         this.messageArray.push(message);
       }
-    } catch (e) {
+    } catch (err) {
       this.messageArray = [];
-      //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
-      this.sendLog("getMessage", "出错 : " + JSON.stringify(e), null, true);
-      if (e.errorMessage === "CHANNEL_INVALID" || e.errorMessage === "CHANNEL_PRIVATE" || e.code === 400) {
+      //console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
+      this.sendLog("getMessage", err instanceof Error ? err.message : err, null, true);
+      if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         await this.noExistChat(1, this.chatId);
         this.fromPeer = null;
         this.chatId += 1;
@@ -841,9 +841,9 @@ export class WebSocketServer extends DurableObject {
           //console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
-      } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
+      } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
-        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + JSON.stringify(e), "flood", true);
+        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
       } else {
         if (tryCount === 5) {
           this.stop = 2;
@@ -875,9 +875,9 @@ export class WebSocketServer extends DurableObject {
   //   // let cacheResult = {};
   //   // try {
   //   //   cacheResult = await fetch(`https://index.zjmqlf2022.workers.dev/getDB?chatId=${this.chatId}&id=${messageId}`);
-  //   // } catch (e) {
-  //   //   //console.log("出错 : " + JSON.stringify(e));
-  //   //   this.sendLog("selectMessageIndex", "出错 : " + JSON.stringify(e), null, true);
+  //   // } catch (err) {
+  //   //   //console.log(err instanceof Error ? err.message : err);
+  //   //   this.sendLog("selectMessageIndex", err instanceof Error ? err.message : err, null, true);
   //   //   if (tryCount === 5) {
   //   //     this.stop = 2;
   //   //     //console.log("(" + this.currentStep + ")selectMessageIndex超出tryCount限制");
@@ -933,10 +933,10 @@ export class WebSocketServer extends DurableObject {
     let messageResult = {};
     try {
       messageResult = await this.env.PANSOUDB.prepare("SELECT COUNT(id) FROM `PANMESSAGE` WHERE `chatId` = ? AND  `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage出错 : " + e);
-      this.sendGrid("selectMessage", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage : " + err instanceof Error ? err.message : err);
+      this.sendGrid("selectMessage", err instanceof Error ? err.message : err, "try", true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -981,10 +981,10 @@ export class WebSocketServer extends DurableObject {
     let messageResult = {};
     try {
       messageResult = await this.env.PANSOUDB.prepare("INSERT INTO `PANMESSAGE` (chatId, id, txt, webpage, url) VALUES (?, ?, ?, ?, ?);").bind(this.chatId, messageId, txt, id, url).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage出错 : " + e);;
-      this.sendGrid("insertMessage", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage : " + err instanceof Error ? err.message : err);;
+      this.sendGrid("insertMessage", err instanceof Error ? err.message : err, "try", true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1014,9 +1014,9 @@ export class WebSocketServer extends DurableObject {
   //   // try {
   //   //   // cacheResult = await this.env.SERVERS.fetch(`https://test.zjmqlf2022.workers.dev/put?chatId=${this.chatId}&id=${messageId}&dbId=1`);
   //   //   cacheResult = await fetch(`https://index.zjmqlf2022.workers.dev/put?chatId=${this.chatId}&id=${messageId}&dbId=1`);
-  //   // } catch (e) {
-  //   //   //console.log("出错 : " + JSON.stringify(e));
-  //   //   this.sendLog("insertMessageIndex", "出错 : " + JSON.stringify(e), null, true);
+  //   // } catch (err) {
+  //   //   //console.log(err instanceof Error ? err.message : err);
+  //   //   this.sendLog("insertMessageIndex", err instanceof Error ? err.message : err, null, true);
   //   //   if (tryCount === 5) {
   //   //     this.stop = 2;
   //   //     //console.log("(" + this.currentStep + ")insertMessageIndex超出tryCount限制");
@@ -1075,10 +1075,10 @@ export class WebSocketServer extends DurableObject {
     let chatResult = {};
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `PANCHAT` SET `current` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
-    } catch (e) {
-      //console.log("(" + this.currentStep + ")updateChat出错 : " + e);
-      this.sendLog("updateChat", "出错 : " + e.message, null, true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? err.message : err);
+      this.sendLog("updateChat", err instanceof Error ? err.message : err, null, true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1398,10 +1398,10 @@ export class WebSocketServer extends DurableObject {
           this.dialogArray.push(dialog);
         }
       }
-    } catch (e) {
+    } catch (err) {
       this.dialogArray = [];
-      //console.log("(" + this.currentStep + ")getDialog出错 : " + e);
-      this.sendLog("getDialog", "出错 : " + JSON.stringify(e), null, true);
+      //console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? err.message : err);
+      this.sendLog("getDialog", err instanceof Error ? err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         //console.log("(" + this.currentStep + ")getDialog超出tryCount限制");
@@ -1446,10 +1446,10 @@ export class WebSocketServer extends DurableObject {
     let chatResult = {};
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT COUNT(Cindex) FROM `PANCHAT` WHERE `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
-    } catch (e) {
-      //console.log("selectChat出错 : " + e);
-      this.sendLog("selectChat", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("selectChat : " + err instanceof Error ? err.message : err);
+      this.sendLog("selectChat", err instanceof Error ? err.message : err, "try", true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1494,10 +1494,10 @@ export class WebSocketServer extends DurableObject {
     let chatResult = {};
     try {
       chatResult = await this.env.MAINDB.prepare("INSERT INTO `PANCHAT` (channelId, accessHash, username, title, current, exist) VALUES (?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, username, title, 0, 1).run();
-    } catch (e) {
-      //console.log("insertChat出错 : " + e);;
-      this.sendLog("insertChat", "出错 : " + e.message, "try", true);
-      if (e.message === this.errorMessage) {
+    } catch (err) {
+      //console.log("insertChat : " + err instanceof Error ? err.message : err);;
+      this.sendLog("insertChat", err instanceof Error ? err.message : err, "try", true);
+      if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
@@ -1608,10 +1608,10 @@ export class WebSocketServer extends DurableObject {
       this.chatId = 131;  //测试
       try {
         messageResult = await this.env.PANSOUDB.prepare("SELECT `Mindex`,`id` FROM `PANMESSAGE` WHERE `chatId` = ? AND  `Mindex` >= ? ORDER BY Mindex ASC LIMIT 0,20;").bind(this.chatId, this.offsetId).run();
-      } catch (e) {
-        //console.log("(" + this.currentStep + ")cache出错 : " + e);
-        this.sendLog("cache", "出错 : " + e.message, "try", true);
-        if (e.message === this.errorMessage) {
+      } catch (err) {
+        //console.log("(" + this.currentStep + ")cache : " + err instanceof Error ? err.message : err);
+        this.sendLog("cache", err instanceof Error ? err.message : err, "try", true);
+        if (err.message === this.errorMessage) {
           this.stop = 2;
           this.broadcast({
             "result": "pause",
@@ -1693,10 +1693,10 @@ export class WebSocketServer extends DurableObject {
         if (JSON.stringify(data) !== "{}") {
           option = data;
         }
-      } catch (e) {
+      } catch (err) {
         command = data;
-        //console.log("parse出错 : " + e);
-        this.sendLog("webSocketMessage", "parse出错 : " + e, null, true);
+        //console.log("parse : " + err instanceof Error ? err.message : err);
+        this.sendLog("webSocketMessage", "parse : " + err instanceof Error ? err.message : err, null, true);
       }
     // }
     if (command === "start") {

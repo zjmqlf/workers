@@ -7,6 +7,13 @@ export abstract class Session {
     abstract get dcId(): number;
     abstract get serverAddress(): string;
     abstract get port(): number;
+    private __testServers = false;
+    get testServers(): boolean {
+        return this.__testServers;
+    }
+    set testServers(value: boolean) {
+        this.__testServers = value;
+    }
     abstract get authKey(): AuthKey | undefined;
     abstract set authKey(value: AuthKey | undefined);
     abstract load(): Promise<void>;

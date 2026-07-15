@@ -20,13 +20,13 @@ import { Buffer } from "node:buffer";
 const ONE_MB = 1024 * 1024;
 const MIN_CHUNK = 4096;
 
-const REQUEST_DEADLINE_MS = 15_000;
-
 export interface MediaSchedulerOptions {
 
     partSize: number;
 
     requestRetries: number;
+
+    requestDeadlineMs: number;
 
     cdnSupported: boolean;
 
@@ -38,6 +38,7 @@ export interface MediaSchedulerOptions {
 export const DEFAULT_MEDIA_SCHEDULER_OPTIONS: MediaSchedulerOptions = {
     partSize: 512 * 1024,
     requestRetries: 5,
+    requestDeadlineMs: 15_000,
     cdnSupported: false,
     download: DOWNLOAD_BALANCE,
     upload: UPLOAD_BALANCE,
@@ -306,7 +307,7 @@ export class MediaScheduler {
                         signal
                     );
                 })(),
-                REQUEST_DEADLINE_MS
+                this.opts.requestDeadlineMs,
             );
             const { addedSession, addedId } = b.policy.succeed(
                 id,
@@ -384,7 +385,8 @@ async function raceWithSlotDeath<T>(
     const death = new Promise<never>((_, reject) => {
         unsub = slot.onDeath((reason) => reject(new SlotRemovedError(reason)));
     });
-    const races: Promise<any>[] = [req, death];
+
+    const races: Promise<any>[] = [death, req];
     if (signal) {
         races.push(
             new Promise<never>((_, reject) => {

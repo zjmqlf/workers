@@ -1,6 +1,6 @@
-import type { TelegramClient } from "../../client";
+import type { TelegramClient } from "../../client/TelegramClient";
 import type { EntityLike } from "../../define";
-import { Api } from "../";
+import { Api } from "../api";
 import { InlineResult } from "./inlineResult";
 
 export class InlineResults extends Array<InlineResult> {

@@ -1,7 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "favorites2",
-  "main": "favorites2.js",
+  "main": "favorites1.js",
+  "vars": {
+    "BEGIN_INDEX": 19,
+    "END_INDEX": 38,
+    "ID_NAME": "favorites2"
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

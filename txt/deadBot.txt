@@ -20,7 +20,6 @@ Decodeindobot
 8673761754
 1699576921072986961
 
-
 Fggggggg
 DghuddvhiBOT
 7899777576
@@ -35,6 +34,11 @@ Files Store Bot🫆
 Mass_Files_Store_Bot
 7868389234
 -6332400564262192270
+
+FilesHub_Robot
+FilesHub_Robot
+8616465213
+4032707820616795457
 
 FileLeakBot - Official
 FileLeak6Bot

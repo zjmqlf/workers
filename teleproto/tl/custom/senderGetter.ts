@@ -1,6 +1,6 @@
 import type { Entity } from "../../define";
-import type { TelegramClient } from "../../client";
-import { Api } from "../";
+import type { TelegramClient } from "../../client/TelegramClient";
+import { Api } from "../api";
 import { ChatGetter } from "./chatGetter";
 import bigInt from "big-integer";
 

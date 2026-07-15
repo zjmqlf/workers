@@ -58,12 +58,14 @@ export class BoundedSemaphore {
             return;
         }
         await new Promise<void>((resolve) => this._waiters.push(resolve));
-        this._available--;
     }
 
     release(): void {
-        this._available++;
         const next = this._waiters.shift();
-        if (next) next();
+        if (next) {
+            next();
+            return;
+        }
+        this._available++;
     }
 }
