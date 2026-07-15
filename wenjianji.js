@@ -216,7 +216,7 @@ export class WebSocketServer extends DurableObject {
           // ws.send(JSON.stringify(message));
           ws.send(message);
         } catch (err) {
-          // console.log(e);
+          // console.log(err);
           // const index = this.webSocket.findIndex(element => element === ws);
           // if (index > -1) {
           //   this.webSocket.splice(index, 1);
@@ -317,7 +317,7 @@ export class WebSocketServer extends DurableObject {
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
     } catch (err) {
-      //console.log(err instanceof Error ? err.message : err);
+      //console.log("open : " + err instanceof Error ? err.message : err);
       this.sendLog("open", err instanceof Error ? err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
@@ -392,17 +392,17 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       this.messageArray = [];
       // this.count = 0;
-      if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
+      if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // this.waitTime += 120000;
-        if (e.seconds && e.seconds > 0) {
-          this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+        if (err.seconds && err.seconds > 0) {
+          this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
           await this.ctx.storage.put("client", this.flood);
         }
-        //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+        //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
-      } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+      } else if (err.errorMessage === "INPUT_USER_DEACTIVATED") {
         await this.overStep();
-        //console.log("(" + this.currentStep + ") 用户已注销" + e);
+        //console.log("(" + this.currentStep + ") 用户已注销 : " + err instanceof Error ? err.message : err);
         this.sendLog("getMessage", "用户已注销 : " + err instanceof Error ? err.message : err, "error", true);
         this.stop = 2;
         this.broadcast({
@@ -410,7 +410,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        //console.log("(" + this.currentStep + ")getMessage出错 : " + e);
+        //console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
         this.sendLog("getMessage", err instanceof Error ? err.message : err, null, true);
         if (tryCount === 5) {
           this.stop = 2;
@@ -481,19 +481,19 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (err) {
-            if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
+            if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
-              if (e.seconds && e.seconds > 0) {
-                this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+              if (err.seconds && err.seconds > 0) {
+                this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
                 await this.ctx.storage.put("client", this.flood);
               }
-              //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+              //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
               this.sendLog("sendQuery", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
-            } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+            } else if (err.errorMessage === "INPUT_USER_DEACTIVATED") {
               await this.overStep();
-              //console.log("(" + this.currentStep + ") 用户已注销" + e);
+              //console.log("(" + this.currentStep + ") 用户已注销 : " + err instanceof Error ? err.message : err);
               this.sendLog("sendQuery", "用户已注销 : " + err instanceof Error ? err.message : err, "error", true);
               this.stop = 2;
               this.broadcast({
@@ -501,7 +501,7 @@ export class WebSocketServer extends DurableObject {
               });
               await this.close();
             } else {
-              //console.log("sendQuery出错 : " + e);
+              //console.log("sendQuery : " + err instanceof Error ? err.message : err);
               this.sendLog("sendQuery", err instanceof Error ? err.message : err, "error", true);
               await this.sendQueryError(tryCount);
             }
@@ -603,14 +603,14 @@ export class WebSocketServer extends DurableObject {
         //console.log(forwardResult);
         // this.sendLog("forwardMessage", JSON.stringify(forwardResult), null, false);
       } catch (err) {
-        if (e.errorMessage === "RANDOM_ID_DUPLICATE" || e.code === 500) {
-          //console.log("(" + this.currentStep + ") " + e);
+        if (err.errorMessage === "RANDOM_ID_DUPLICATE" || err.code === 500) {
+          //console.log("(" + this.currentStep + ") " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", err instanceof Error ? err.message : err, "error", true);
           this.time = new Date().getTime();
           return true;
-        } else if (e.errorMessage === "INPUT_USER_DEACTIVATED") {
+        } else if (err.errorMessage === "INPUT_USER_DEACTIVATED") {
           await this.overStep();
-          //console.log("(" + this.currentStep + ") 用户已注销" + e);
+          //console.log("(" + this.currentStep + ") 用户已注销 : " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", "用户已注销 : " + err instanceof Error ? err.message : err, "error", true);
           this.stop = 2;
           this.broadcast({
@@ -618,26 +618,26 @@ export class WebSocketServer extends DurableObject {
           });
           await this.close();
           return false;
-        } else if (e.errorMessage === "CHAT_FORWARDS_RESTRICTED" || e.code === 400) {
+        } else if (err.errorMessage === "CHAT_FORWARDS_RESTRICTED" || err.code === 400) {
           // this.offsetId += this.count;
           // this.count = 0;
           // await this.ctx.storage.put("offsetId", this.offsetId);
-          // //console.log("(" + this.currentStep + ") 消息不允许转发" + e);
+          // //console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, "error", true);
           return false;
-        } else if (e.errorMessage?.includes("FLOOD_WAIT_") === true || e.code === 420) {
+        } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
-          if (e.seconds && e.seconds > 0) {
-            this.flood = new Date().getTime() + 60000 + e.seconds * 1000;
+          if (err.seconds && err.seconds > 0) {
+            this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
             await this.ctx.storage.put("client", this.flood);
           }
-          //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁" + e);
+          //console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
           return false;
         } else {
           this.count = 0;
-          //console.log("(" + this.currentStep + ") 转发消息时发生错误" + e);
+          //console.log("(" + this.currentStep + ") 转发消息时发生错误 : " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", "转发消息时发生错误 : " + err instanceof Error ? err.message : err, "error", true);
           return false;
         }
@@ -910,7 +910,7 @@ export class WebSocketServer extends DurableObject {
         })
       );
     } catch (err) {
-      //console.log("getBot出错 : " + e);
+      //console.log("getBot : " + err instanceof Error ? err.message : err);
       this.sendLog("getBot", err instanceof Error ? err.message : err, null, true);
       await this.getBotrError(tryCount);
       return;
@@ -955,7 +955,7 @@ export class WebSocketServer extends DurableObject {
         })
       );
     } catch (err) {
-      //console.log("getUser出错 : " + e);
+      //console.log("getUser : " + err instanceof Error ? err.message : err);
       this.sendLog("getUser", err instanceof Error ? err.message : err, null, true);
       await this.getUserError(tryCount);
       return;
@@ -1124,8 +1124,8 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        //console.log("parse出错 : " + e);
-        this.sendLog("webSocketMessage", "parse出错 : " + e, null, true);
+        //console.log("parse : " + err instanceof Error ? err.message : err);
+        this.sendLog("webSocketMessage", err instanceof Error ? err.message : err, null, true);
       }
     // }
     if (command === "start") {

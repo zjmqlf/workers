@@ -200,8 +200,8 @@ const App = () => {
       // const newList = prevState.slice();
       // //newList.push(newItem);
       // newList.unshift(newItem);
-      // //console.log(newList.length);  //测试
-      // //console.log(newList);  //测试
+      // // console.log(newList.length);  //测试
+      // // console.log(newList);  //测试
       // return newList;
       // return [...prevState, newItem];
       // return [newItem, ...prevState];
@@ -237,7 +237,7 @@ const App = () => {
     // console.log(res);  //测试
     if (res.add && res.add.length > 0) {
       lastRow.current = res.add[0];
-      //console.log(lastRow.current);  //测试
+      // console.log(lastRow.current);  //测试
       lastId.current = lastRow.current.data.chatId;
     } else {
       lastRow.current = null;
@@ -246,7 +246,7 @@ const App = () => {
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>> 添加row失败",
       });
-      //console.log(items);  //测试
+      // console.log(items);  //测试
     }
     if (gridRef.current.api.getDisplayedRowCount() === 0) {
       setClearGridBtnDisabled(true);
@@ -266,8 +266,8 @@ const App = () => {
       }
     }
     for (const name in items) {
-      //console.log(name);  //测试
-      //console.log(items[name]);  //测试
+      // console.log(name);  //测试
+      // console.log(items[name]);  //测试
       if (name === "error") {
         if (items[name] === true) {
           if (lastRow.current.data.error > 0) {
@@ -304,11 +304,11 @@ const App = () => {
   }, [updateLastRow, addItems]);
 
   const updateItems = useCallback((data) => {
-    //console.log(lastRow.current);  //测试
+    // console.log(lastRow.current);  //测试
     const {chatId, ...items} = data;
     if (lastRow.current) {
-      //console.log(chatId);  //测试
-      //console.log(items);  //测试
+      // console.log(chatId);  //测试
+      // console.log(items);  //测试
       if (lastId.current === chatId) {
         updateLastRow(items);
       } else {
@@ -366,7 +366,7 @@ const App = () => {
     // setLogData(() => {
     //   return [];
     // });
-    //console.log("远程websocket连续" + errorCount.current + "次断开了连接");  //测试
+    // console.log("远程websocket连续" + errorCount.current + "次断开了连接");  //测试
     addNewEvent({
       "error": true,
       "message": renderTime(Date.now()) + "  >>> 远程websocket连续" + errorCount.current + "次断开了连接",
@@ -377,7 +377,7 @@ const App = () => {
     if (message.result === "ping") {
       // console.log("ping");  //测试
     } else if (message.result === "pause") {
-      //console.log("远程websocket已停止完毕");  //测试
+      // console.log("远程websocket已停止完毕");  //测试
       addNewEvent({
         "error": true,
         "message": renderTime(Date.now()) + "  >>> 远程websocket已停止完毕",
@@ -393,7 +393,7 @@ const App = () => {
       //   return [];
       // });
       // setClearLogBtnDisabled(true);
-      //console.log("当前chat采集完毕");  //测试
+      // console.log("当前chat采集完毕");  //测试
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>>当前chat采集完毕",
         // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
@@ -401,7 +401,7 @@ const App = () => {
     } else if (message.result === "over") {
       over.current = true;
       clearTimeout(timeOut.current);
-      //console.log("全部chat采集完毕");  //测试
+      // console.log("全部chat采集完毕");  //测试
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>>全部chat采集完毕",
         // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
@@ -430,7 +430,7 @@ const App = () => {
               // } else if (message.status === "error") {
               // } else if (message.status === "wait") {
               } else {
-                //console.log("未知消息");
+                // console.log("未知消息");
                 addNewEvent({
                   "error": message.error,
                   "message": renderTime(message.date) + " " + (message.step ? "  (" + message.step + ")" : " ") + " " + message.operate + " - " + message.message,
@@ -448,7 +448,7 @@ const App = () => {
                 } = message;
                 addItems(temp);
               } else {
-                //console.log("未知消息");
+                // console.log("未知消息");
                 addNewEvent({
                   "error": message.error,
                   "message": renderTime(message.date) + " " + (message.step ? "  (" + message.step + ")" : " ") + " " + (message.clientId ? "  [" + message.clientCount + "|" + message.clientIndex + "-" + message.clientId + "]" : " ") + message.operate + " - " + message.message,
@@ -456,7 +456,7 @@ const App = () => {
               }
               break;
             default:
-              //console.log("未知消息");
+              // console.log("未知消息");
               addNewEvent({
                 "error": message.error,
                 "message": renderTime(message.date) + " " + (message.step ? "  (" + message.step + ")" : " ") + " " + message.operate + " - " + message.message,
@@ -498,7 +498,7 @@ const App = () => {
           // handlerClose();
         }
       } else {
-        //console.log("停止采集，不再继续send");  //测试
+        // console.log("停止采集，不再继续send");  //测试
         addNewEvent({
           "error": true,
           "message": renderTime(Date.now()) + "  >>> 停止采集，不再继续send",
@@ -526,7 +526,7 @@ const App = () => {
 
     ws.current.addEventListener("open", () => {
       stop.current = false;
-      //console.log("连接远程websocket成功，准备send");  //测试
+      // console.log("连接远程websocket成功，准备send");  //测试
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>> 连接远程websocket成功，准备send",
       });
@@ -563,7 +563,7 @@ const App = () => {
           // }), waitTime.current);
         }
       } else {
-        //console.log(command + "失败");  //测试
+        // console.log(command + "失败");  //测试
         addNewEvent({
           "error": true,
           "message": renderTime(Date.now()) + "  >>> " + command + "失败",
@@ -577,7 +577,7 @@ const App = () => {
         try {
           message = JSON.parse(data);
         } catch (e) {
-          //console.log("解析JSON失败");  //测试
+          // console.log("解析JSON失败");  //测试
           addNewEvent({
             "error": true,
             "message": renderTime(Date.now()) + "  >>> 解析JSON失败",
@@ -593,7 +593,7 @@ const App = () => {
             parseMessage(message);
           }
         } else {
-          //console.log("message错误");  //测试
+          // console.log("message错误");  //测试
           addNewEvent({
             "error": true,
             "message": renderTime(Date.now()) + "  >>> message错误",
@@ -630,7 +630,7 @@ const App = () => {
     setTimeout(function() {
       if (over.current === false) {
         handlerBtnEnable();
-        //console.log("连接远程websocket");  //测试
+        // console.log("连接远程websocket");  //测试
         addNewEvent({
           "message": renderTime(Date.now()) + "  >>> 连接远程websocket",
         });
@@ -638,7 +638,7 @@ const App = () => {
           collectWS(command);
         } catch (e) {
           handlerBtnUnable();
-          //console.log("连接远程websocket失败");  //测试
+          // console.log("连接远程websocket失败");  //测试
           addNewEvent({
             "error": true,
             "message": renderTime(Date.now()) + "  >>> 连接远程websocket失败",
@@ -646,7 +646,7 @@ const App = () => {
           waitReconnect(command, time);
         }
       } else {
-        //console.log("停止采集，不再继续send");  //测试
+        // console.log("停止采集，不再继续send");  //测试
         addNewEvent({
           "error": true,
           "message": renderTime(Date.now()) + "  >>> 停止采集，不再继续send",
@@ -668,11 +668,11 @@ const App = () => {
   }, [addNewEvent, renderTime]);
 
   const handlerPauseBtnClick = useCallback(() => {
-    //console.log(pauseBtnText);  //测试
+    // console.log(pauseBtnText);  //测试
     if (pauseBtnText === "暂停") {
       setPauseBtnText("开始");
       handlerBtn(true);
-      //console.log(ws.current);  //测试
+      // console.log(ws.current);  //测试
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         try {
           ws.current.send(JSON.stringify({

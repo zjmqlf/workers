@@ -39,7 +39,7 @@ async function pollImport(bookmark) {
 
 async function uploadToD1() {
   const hashStr = crypto.createHash("md5").update(sqlInsert).digest("hex").toString();
-  //console.log("hashStr : " + hashStr);  //测试
+  // console.log("hashStr : " + hashStr);  //测试
   try {
     const initResponse = await fetch(d1Url, {
       method: "POST",
@@ -49,22 +49,22 @@ async function uploadToD1() {
         etag: hashStr,
       }),
     });
-    //console.log(initResponse);  //测试
+    // console.log(initResponse);  //测试
     const { result : uploadData } = await initResponse.json();
-    //console.log(uploadData);  //测试
+    // console.log(uploadData);  //测试
     const uploadUrl = uploadData.upload_url;
-    //console.log("uploadUrl : " + uploadUrl);  //测试
+    // console.log("uploadUrl : " + uploadUrl);  //测试
     const filename = uploadData.filename;
-    //console.log("filename : " + filename);  //测试
+    // console.log("filename : " + filename);  //测试
     if (uploadUrl && filename) {
       const r2Response = await fetch(uploadUrl, {
         method: "PUT",
         body: sqlInsert,
       });
-      //console.log(r2Response);  //测试
-      //console.log("ETag : " + r2Response.headers.get("ETag"));  //测试
+      // console.log(r2Response);  //测试
+      // console.log("ETag : " + r2Response.headers.get("ETag"));  //测试
       const r2Etag = r2Response.headers.get("ETag").replace(/"/g, "");
-      //console.log("ETag : " + r2Etag);  //测试
+      // console.log("ETag : " + r2Etag);  //测试
       if (r2Etag === hashStr) {
         const ingestResponse = await fetch(d1Url, {
           method: "POST",
@@ -75,7 +75,7 @@ async function uploadToD1() {
             filename,
           }),
         });
-        //console.log(ingestResponse);  //测试
+        // console.log(ingestResponse);  //测试
         const { result : ingestData } = await ingestResponse.json();
         console.log("ingestData : ", ingestData);  //测试
         if (ingestData.success) {
@@ -105,7 +105,7 @@ async function importDB() {
   if (exists) {
     //sqlInsert = fs.readFileSync(fileName, "utf-8");
     sqlInsert = fs.readFileSync(fileName);
-    //console.log("sqlInsert : " + sqlInsert);  //测试
+    // console.log("sqlInsert : " + sqlInsert);  //测试
     if (sqlInsert) {
       const result = await uploadToD1();
       console.log(result);

@@ -44,7 +44,7 @@ export default {
       client[index].setLogLevel("error");
       await client[index].connect();
       console.log("连接服务器" + (index + 1) + "成功");  //测试
-      //console.log(client[index]);  //测试
+      // console.log(client[index]);  //测试
       await scheduler.wait(2000);
     }
 
@@ -99,7 +99,7 @@ export default {
         // console.log(dialog.username);  //测试
         // console.log(JSON.stringify(dialog));  //测试
         //id = dialog.id;
-        //console.log(id);  //测试
+        // console.log(id);  //测试
         // channelId = dialog.inputEntity.channelId;
         // // channelId = dialog.draft._peer.channelId;
         // // channelId = dialog.draft._entity.id;
@@ -176,7 +176,7 @@ export default {
         // // console.log(JSON.stringify(forwardResult));  //测试
         // console.log("-------------------------------------------------------------");  //测试
         // break;
-        // //console.log(forwardResult);  //测试
+        // // console.log(forwardResult);  //测试
         console.log(message);  //测试
         // const regexp = /^\d+$/i;
         // if (message.replyMarkup) {

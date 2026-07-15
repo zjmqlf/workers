@@ -9,12 +9,12 @@ const handleSession = async (websocket, env) => {
   websocket.addEventListener("message", async ({ data }) => {
     count += 1;
     //await env.KV.put('count', count);
-    //console.log(data);
+    // console.log(data);
     websocket.send('count : ' + count);
   })
 
   websocket.addEventListener("close", async evt => {
-    //console.log(evt);
+    // console.log(evt);
     //count = 0;
   })
 }
@@ -123,7 +123,7 @@ export default {
             }
           });
         case "/ws":
-          //console.log("ws");
+          // console.log("ws");
           return await websocketHandler(request, env);
         default:
           return new Response("Not found", { status: 404 });

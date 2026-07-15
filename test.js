@@ -44,7 +44,7 @@ import { DurableObject } from "cloudflare:workers";
 //   client[index].setLogLevel("error");
 //   await client[index].connect();
 //   console.log("连接服务器" + (index + 1) + "成功");  //测试
-//   //console.log(client[index]);  //测试
+//   // console.log(client[index]);  //测试
 //   // await scheduler.wait(2000);
 // }
 
@@ -104,7 +104,7 @@ export class WebSocketServer extends DurableObject {
   //   this.client.setLogLevel("error");
   //   await this.client.connect();
   //   console.log("连接服务器成功");  //测试
-  //   //console.log(this.client);  //测试
+  //   // console.log(this.client);  //测试
   //   await scheduler.wait(2000);
   // }
 
@@ -137,7 +137,7 @@ export class WebSocketServer extends DurableObject {
 
   async countMedia() {
     const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
-    //console.log("mediaResult : " + mediaResult["COUNT(id)"]);  //测试
+    // console.log("mediaResult : " + mediaResult["COUNT(id)"]);  //测试
     if (mediaResult.success === true) {
       if (mediaResult.results && mediaResult.results.length > 0) {
         return mediaResult.results[0]["COUNT(id)"];
@@ -151,10 +151,10 @@ export class WebSocketServer extends DurableObject {
     try {
       mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= ? ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectMediaIndex出错 : " + e);
+      console.log("selectMediaIndex : " + err instanceof Error ? err.message : err);
       return;
     }
-    //console.log("mediaResult : " + mediaResult);  //测试
+    // console.log("mediaResult : " + mediaResult);  //测试
     if (mediaResult.success === true) {
       if (mediaResult.results && mediaResult.results.length > 0) {
         return mediaResult.results;
@@ -166,7 +166,7 @@ export class WebSocketServer extends DurableObject {
 
   async countPhoto() {
     const photoResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
-    //console.log("photoResult : " + photoResult["COUNT(id)"]);  //测试
+    // console.log("photoResult : " + photoResult["COUNT(id)"]);  //测试
     if (photoResult.success === true) {
       if (photoResult.results && photoResult.results.length > 0) {
         return photoResult.results[0]["COUNT(id)"];
@@ -180,10 +180,10 @@ export class WebSocketServer extends DurableObject {
     try {
       photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectPhotoIndex出错 : " + e);
+      console.log("selectPhotoIndex : " + err instanceof Error ? err.message : err);
       return;
     }
-    //console.log("photoResult : " + photoResult);  //测试
+    // console.log("photoResult : " + photoResult);  //测试
     if (photoResult.success === true) {
       if (photoResult.results && photoResult.results.length > 0) {
         return photoResult.results;
@@ -195,7 +195,7 @@ export class WebSocketServer extends DurableObject {
 
   async countMessage() {
     const messageResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MESSAGE` WHERE 1 = 1;").run();
-    //console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
+    // console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
         return messageResult.results[0]["COUNT(id)"];
@@ -209,10 +209,10 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectMessage出错 : " + e);
+      console.log("selectMessage : " + err instanceof Error ? err.message : err);
       return;
     }
-    //console.log("messageResult : " + messageResult);  //测试
+    // console.log("messageResult : " + messageResult);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
         return messageResult.results;
@@ -228,10 +228,10 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
     } catch (err) {
-      console.log("selectMessageIndex出错 : " + e);
+      console.log("selectMessageIndex : " + err instanceof Error ? err.message : err);
       return;
     }
-    //console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
+    // console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
         return messageResult.results[0]["COUNT(id)"];
@@ -244,10 +244,10 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?, ?);").bind(1, result.userId, result.Mindex, result.id).run();
     } catch (err) {
-      console.log("insertMessageIndex出错 : " + e);;
+      console.log("insertMessageIndex : " + err instanceof Error ? err.message : err);;
       return;
     }
-    //console.log(messageResult);  //测试
+    // console.log(messageResult);  //测试
     if (messageResult.success === true) {
       // console.log("插入messageIndex数据成功");
     } else {
@@ -260,10 +260,10 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("DELETE FROM `MESSAGE` WHERE `Mindex` = ?;").bind(Mindex).run();
     } catch (err) {
-      console.log("deleteMessage出错 : " + e);;
+      console.log("deleteMessage : " + err instanceof Error ? err.message : err);;
       return;
     }
-    //console.log(messageResult);  //测试
+    // console.log(messageResult);  //测试
     if (messageResult.success === true) {
       // console.log("删除message数据成功");
     } else {
@@ -385,7 +385,7 @@ export class WebSocketServer extends DurableObject {
     //   const result = await this.ctx.storage.get("2");
     //   console.log(result);  //测试
     // } catch (err) {
-    //   console.log("出错 : " + e);  //测试
+    //   console.log(err instanceof Error ? err.message : err);  //测试
     // }
 
     // const client = this.client;
@@ -493,7 +493,7 @@ export default {
     //   try {
     //     messageResult = await env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
     //   } catch (err) {
-    //     console.log(messageId + " : selectMessage出错 : " + e);  //测试
+    //     console.log(messageId + " : selectMessage : " + err instanceof Error ? err.message : err);  //测试
     //   }
     //   console.log("messageResult : ");  //测试
     //   console.log(messageResult);  //测试
@@ -537,7 +537,7 @@ export default {
     //   try {
     //     mediaResult = await db.prepare("SELECT * FROM `MEDIA` WHERE `Vindex` = ? LIMIT 1;").bind(Vindex).run();
     //   } catch (err) {
-    //     console.log("selectMedia出错 : " + e);
+    //     console.log("selectMedia : " + err instanceof Error ? err.message : err);
     //   }
     //   console.log("mediaResult : ");  //测试
     //   console.log(mediaResult);  //测试
@@ -559,7 +559,7 @@ export default {
     // }
 
     // async function uploadFile(accessToken, drive, filename, sign, index) {
-    //   //console.log("正准备异步上传");  //测试
+    //   // console.log("正准备异步上传");  //测试
     //   const filePath = getPath(md5Result.substring(8, 24));
     //   // console.log("filePath : " + filePath);  //测试
     //   oneDriveAPI.items.uploadSimple({
@@ -572,7 +572,7 @@ export default {
     //     // prefix: "",
     //     index: index,
     //   }).then(async (item) => {
-    //     //console.log(item);  //测试
+    //     // console.log(item);  //测试
     //     if (item.id && item.webUrl) {
     //       console.log("itemId : " + item.id);  //测试
     //       console.log("webUrl : " + item.webUrl);  //测试
@@ -631,7 +631,7 @@ export default {
     //     // console.log(dialog.username);  //测试
     //     // console.log(JSON.stringify(dialog));  //测试
     //     //id = dialog.id;
-    //     //console.log(id);  //测试
+    //     // console.log(id);  //测试
     //     // channelId = dialog.inputEntity.channelId;
     //     // // channelId = dialog.draft._peer.channelId;
     //     // // channelId = dialog.draft._entity.id;
@@ -741,7 +741,7 @@ export default {
     //   //     accessHash: accessHash,
     //   //   })],
     //   // }));
-    //   // //console.log(result);  //测试
+    //   // // console.log(result);  //测试
     //   // console.log(result.chats.length);  //测试
     //   // console.log(result.chats[0]);  //测试
 
@@ -749,7 +749,7 @@ export default {
     //   // for await (const dialog of client[2].iterDialogs({})) {
     //   //   // console.log(dialog);  //测试
     //   //   //id = dialog.id;
-    //   //   //console.log(id);  //测试
+    //   //   // console.log(id);  //测试
     //   //   channelId = dialog.inputEntity.channelId;
     //   //   accessHash = dialog.inputEntity.accessHash;
     //   //   console.log({"channelId2" : channelId});  //测试
@@ -787,7 +787,7 @@ export default {
       //     // // console.log(JSON.stringify(forwardResult));  //测试
       //     // console.log("-------------------------------------------------------------");  //测试
       //     // break;
-      //     // //console.log(forwardResult);  //测试
+      //     // // console.log(forwardResult);  //测试
       //     // console.log(message);  //测试
       //     // const regexp = /^\d+$/i;
       //     if (message.replyMarkup) {
@@ -967,13 +967,13 @@ export default {
       //     //     // // console.log(accessHash);  //测试
       //     //     // // console.log(fileReference);  //测试
       //     //     // // const mediaInfo = await env.DB.prepare("INSERT INTO `MEDIA` (id, accessHash, dcId, fileReference) VALUES (?, ?, ?, ?);").bind(id, accessHash, dcId, fileReference).run();
-      //     //     // // //console.log(mediaInfo);  //测试
+      //     //     // // // console.log(mediaInfo);  //测试
       //     //     // // if (mediaInfo.success === true) {
       //     //     // //   console.log("插入media数据成功");
       //     //     // // } else {
       //     //     // //   console.log("插入media数据失败");
       //     //     // // }
-      //     //     // //console.log(JSON.stringify(message));  //测试
+      //     //     // // console.log(JSON.stringify(message));  //测试
       //     //     // // id = message.id;
       //     //     // // channelId = message.savedPeerId.channelId.toString();
       //     //     // // if (message.savedPeerId.accessHash) {
@@ -984,8 +984,8 @@ export default {
       //     //     // //   id: [new Api.InputMessageID({ id: id })],
       //     //     // // }));
       //     //     // // console.log(result);  //测试
-      //     //     // // //console.log(result.chats.length);  //测试
-      //     //     // // //console.log(result.chats[0]);  //测试
+      //     //     // // // console.log(result.chats.length);  //测试
+      //     //     // // // console.log(result.chats[0]);  //测试
       //     //     // // console.log(result.messages.length);  //测试
       //     //     // // console.log(result.messages[0]);  //测试
       //     //     // const info = utils.getFileInfo(message.media);
@@ -1004,11 +1004,11 @@ export default {
       //     //     //     hash.push(hashes[i].hash.toString("hex"));
       //     //     //   }
       //     //     // }
-      //     //     // //console.log(hash);  //测试
+      //     //     // // console.log(hash);  //测试
       //     //     // console.log(JSON.stringify(hash));  //测试
 
       //     //     // const mediaResult = await env.DB.prepare("SELECT * FROM `MEDIA` WHERE `id` = ? AND `accessHash` = ?;").bind(id, accessHash).first();
-      //     //     // //console.log(mediaResult);  //测试
+      //     //     // // console.log(mediaResult);  //测试
       //     //     // if (mediaResult) {
       //     //     //   dcId = mediaResult.dcId;
       //     //     //   id = mediaResult.id;
@@ -1041,7 +1041,7 @@ export default {
       //     //     //       hash.push(hashes[i].hash.toString("hex"));
       //     //     //     }
       //     //     //   }
-      //     //     //   //console.log(hash);  //测试
+      //     //     //   // console.log(hash);  //测试
       //     //     //   console.log(JSON.stringify(hash));  //测试
       //     //     // }
       //     //     // console.log("-------------------------------------------------------------");  //测试
@@ -1104,7 +1104,7 @@ export default {
       //     hash.push(hashes[i].hash.toString("hex"));
       //   }
       // }
-      // //console.log(hash);  //测试
+      // // console.log(hash);  //测试
       // console.log(JSON.stringify(hash));  //测试
 
       // // const result = await client[2].invoke(new Api.messages.GetMessages({

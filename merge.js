@@ -3,7 +3,7 @@ const fs = require("fs");
 
 try {
   let data = fs.readFileSync("./source/1/message.txt", "utf-8");
-  //console.log(data);
+  // console.log(data);
   if (data) {
     const result = [];
     data = data.split("\r\n")
@@ -12,7 +12,7 @@ try {
     for (let i = 0; i < length; i++) {
       result.push(data[i]);
     }
-    //console.log(result);
+    // console.log(result);
     console.log("length : " + result.length);
     fs.writeFile("./source/message.txt", JSON.stringify(result, null, 2), function(err) {
     // fs.writeFile("./source/message.txt", JSON.stringify(result), function(err) {
