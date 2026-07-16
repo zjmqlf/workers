@@ -3,7 +3,7 @@
   "name": "forward2",
   "main": "forward1.js",
   "vars": {
-    "BEGIN_INDEX": 19,
+    "BEGIN_INDEX": 18,
     "END_INDEX": 37,
     "ID_NAME": "forward2"
   },

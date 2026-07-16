@@ -187,7 +187,7 @@ export function getInputPeer(
     ) {
         return new Api.InputPeerChat({ chatId: entity.id });
     }
-    if (entity instanceof Api.Channel) {
+    if (entity instanceof Api.Channel || entity instanceof Api.Community) {
         if ((entity.accessHash !== undefined && !entity.min) || !checkHash) {
             return new Api.InputPeerChannel({
                 channelId: entity.id,
@@ -199,10 +199,13 @@ export function getInputPeer(
             );
         }
     }
-    if (entity instanceof Api.ChannelForbidden) {
+    if (
+        entity instanceof Api.ChannelForbidden ||
+        entity instanceof Api.CommunityForbidden
+    ) {
         return new Api.InputPeerChannel({
             channelId: entity.id,
-            accessHash: entity.accessHash,
+            accessHash: entity.accessHash || bigInt(0),
         });
     }
     if (entity instanceof Api.InputUser) {
@@ -299,7 +302,9 @@ export function getInputChannel(entity: EntityLike) {
     }
     if (
         entity instanceof Api.Channel ||
-        entity instanceof Api.ChannelForbidden
+        entity instanceof Api.ChannelForbidden ||
+        entity instanceof Api.Community ||
+        entity instanceof Api.CommunityForbidden
     ) {
         return new Api.InputChannel({
             channelId: entity.id,
@@ -453,7 +458,8 @@ export function getInputPhoto(photo: any): Api.TypeInputPhoto {
             if (
                 photo instanceof Api.Channel ||
                 photo instanceof Api.Chat ||
-                photo instanceof Api.User
+                photo instanceof Api.User ||
+                photo instanceof Api.Community
             ) {
                 return getInputPhoto(photo.photo);
             }
@@ -463,7 +469,8 @@ export function getInputPhoto(photo: any): Api.TypeInputPhoto {
         photo instanceof Api.UserEmpty ||
         photo instanceof Api.ChatEmpty ||
         photo instanceof Api.ChatForbidden ||
-        photo instanceof Api.ChannelForbidden
+        photo instanceof Api.ChannelForbidden ||
+        photo instanceof Api.CommunityForbidden
     ) {
         return new Api.InputPhotoEmpty();
     }
@@ -1100,7 +1107,12 @@ export function getDisplayName(entity: EntityLike) {
         } else {
             return "";
         }
-    } else if (entity instanceof Api.Chat || entity instanceof Api.Channel) {
+    } else if (
+        entity instanceof Api.Chat ||
+        entity instanceof Api.Channel ||
+        entity instanceof Api.Community ||
+        entity instanceof Api.CommunityForbidden
+    ) {
         return entity.title;
     }
     return "";

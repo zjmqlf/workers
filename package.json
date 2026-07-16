@@ -33,6 +33,8 @@
     "deploy-uujie": "wrangler deploy -c ./wrangler-uujie.jsonc",
     "build-safsadf": "wrangler deploy -c ./wrangler-safsadf.jsonc --dry-run --outdir=./bot/dist",
     "deploy-safsadf": "wrangler deploy -c ./wrangler-safsadf.jsonc",
+    "build-deanignitenations": "wrangler deploy -c ./wrangler-deanignitenations.jsonc --dry-run --outdir=./bot/dist",
+    "deploy-deanignitenations": "wrangler deploy -c ./wrangler-deanignitenations.jsonc",
     "build-kodexfiles2": "wrangler deploy -c ./wrangler-kodexfiles2.jsonc --dry-run --outdir=./bot/dist",
     "deploy-kodexfiles2": "wrangler deploy -c ./wrangler-kodexfiles2.jsonc",
     "build-lunindiacipoksupretto": "wrangler deploy -c ./wrangler-lunindiacipoksupretto.jsonc --dry-run --outdir=./bot/dist",

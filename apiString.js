@@ -70,16 +70,6 @@ export const apiString = [
     "sessionString": "1BQANOTEuMTA4LjU2LjEyOABQQCX34zbrBFR/5z5cKA5qHiAcyyjxf2/P3JY3JE0X/SkXRkGzwraFBu48W5WG9K1NermNVpAf7p7x+vkpg61kYLhr7XZ055rDrifvi2AFXSRvMZNICh1gOzKQ7zVEZIz8H+BRVmhOxu1bS4u3XzmHgwSp68je8zLWFFJbzkiyLu1XWOUss8De3w7OdmV0Aa/0nD+68jb0UNHzYhFv1ygJTv40Y3vDU0PUZGgde7nibwdfScKwCix4ssXcV5Ek7qdEnz9oJPGnkgCitTY7edisxYP7Rg7lo+jEQvdvF4EV95ZqrRPykHYc8C0VRHd6TJ9+HLyF66iCL8pPI1DcKKICqA==",
   },
   {
-    "id": 7,
-    "pc": 7,
-    "dc": 4,
-    "name": "zjm2039",
-    "phone": "+351920491460",
-    "apiId": 14936309,
-    "apiHash": "02bc2490824d8ae6e111dc8d9f5730cc",
-    "sessionString": "1BAAOMTQ5LjE1NC4xNjcuOTEBuz33uycB9StxhcngNZmaBbf/IfRL2ZPTbs5BYc5BWGKeJSp/AbCJYl+FF4pbO+WhU84XMHhmVsxFIsR7b1AYaH+LYmdV+6n0C6PJrUOXrjBiEV9172SXftw+ZFF0SQo3fbbpy51K5LPCM34vysT4kmoAgX/Y2klLhcouhMPJZpy8XNaX6nIG9b1JedDR5a94IULPFue98sUs3Hi6SEt9blMPnKwyyeVDL2YbWJh1D70SxLaIPi0eThI/NZ/Y5iDSlpA9KReUm+ImDi243g3i17YNbZOyL9jnh7PoSI/FNyymIEzA/2s2605x7qXuOjfaQasAAfjHAtj7MbSLZC1VXpM=",
-  },
-  {
     "id": 9,
     "pc": 10,
     "dc": 5,
@@ -227,7 +217,7 @@ export const apiString = [
     "phone": "+12023788637",
     "apiId": 14267011,
     "apiHash": "9ef3ca1ed8a157f59587021fd0a389f8",
-    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTEBu4BEo/AsBGUHq/hKq6f45FZlO8I1taHOhPV/zFUH6NyZQCAc1+Kbof43UzWNMTkka3YdlR/yRoIirsXq/kYw4Ghwn4RwUwPtN/z0gjE3CzyPq//4Qu/gG3Nv1ajr3VLZdWMgLNC7kfTxZwPC/OZQsvKlvL3mqPZNnXE0QNaKN2FhXTZ4ontL9UEeEK3e6QamPvZqFjkaymosCDRa8RzP81TMbPr9GfQUxpRteiM8L9Vw9WzTKmnRU9dBKwcZNQRpiK7Jvgjy5Ws8a0RnQNV+5tddQieEnGNCPDqsxz+ssmeswXPLkLEL+I5ye1lZn/VY8jT7NKMDW2yq12QLNu7C8Rk=",
+    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTABu3DYulgzbXBAgMaxYNNIeIZzwbhIlJzA40ZpXAEBGV6FXCnLbtIjJfM0vwXE1H88x5iK5d44AupQ7sC4kYzHWJeOyVCGIlhn4qResSCNbB268owAqjwSPiyQuU4B/F6Fr14ko/6jSLxx/LOtm7mDCu28OWMZFtjGcqiigQkZLmoRhdXQLsy+H502EhJt7GgRJ3bKRV8jT5EQsbgqslZxTOeBzWmDZv1PFyPlzDWqTZIjcvHBYAfNk1rmzpqODMr1LlHgxOIkftz8X7wQJvr/MSy5K8VxFEP76dK6Gcbaiju44tt0TPD3nyHbixiGalWLm7ftMI+A9UKVScSd/jzVtOg=",
   },
   {
     "id": 26,
@@ -317,7 +307,7 @@ export const apiString = [
     "phone": "+12404214295",
     "apiId": 9046850,
     "apiHash": "bc86cc2ebd1c45002c40da29e1a1d746",
-    "sessionString": "1BQANOTEuMTA4LjU2LjEyOABQXCrrwGFqh0fZr7fQpyJ9xS54ydK+Ld0j71pUJsi2z72zbvJyGkcF0o/YTRQBWX8ZSgz3Dctt47QhYDZexRcfpSh62I4WDnAzVs09Q3Uu7cTwc1kqCs+Rkb+8fZxlq2u3xLD8LbCMLHPG2vOL+1sCf0ahYRAZ68f7JuBwBMebZv8kN1bgDFmTZ/F7vcT/IaoidmCS6xO9swdPq2LCvHWnKr+bhhKQWiU/8M6wvNFVr4FeXKKj3JaO+BeyPoMrzxomeTN23vSiZzeyYrlW8NTbDfWmWbnk5dVySkDF5Z59LCp/7Wv7u8ClMVOV7Sju4C0YapmPYsOirRKUgtuwd7Fpvw==",
+    "sessionString": "1BQANOTEuMTA4LjU2LjE1MQG7tsDvGeMignygg2ohV5A3S4rHp0i7syMJA/np0vRj5mmuDAJ2tDc8lNXNSvgzZMib+dAKVKkBzZN0hmgLH2Out0QLSn5hhaNmXcDcnm4UbQSzWTzGFdRgTAq4alT6zf1PKhMSuoCnMJYzqoL6EuPBJZGe9hgw8M7vd7NORVshR6KMEuFmvxxkKGv+DrJSiL95GIqIRckcyMN8Po4QQqYbJZYzS9RuX5kGVaAdDDGxqx0/0ec3e2afEw0uztFCAHmnxaaqzD2i+IOEljPbCqP1EmkQ9pZBUD0NuZH7PH2CzuH4h9nJNt0g3RCOhS4XhTJp5Od/owGgxqo0OjQQYlsN2A==",
   },
   {
     "id": 37,
@@ -337,7 +327,7 @@ export const apiString = [
     "phone": "+13522179773",
     "apiId": 11529789,
     "apiHash": "18f9b0abbeb32c902a3717662e1bf991",
-    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTUBu1CHJjb2tIoVCzGYporqFhl5BywINE7BlEo2MM52iAjXAC2zrQa6FJcImTQZjzMALiRm4+R9gcE5k42iYYUUn8XjPZnUjCSHpnSvV9cou68yC/MRGojHwiT/CxIDqeRGD56BbYjxeZqtXyFLcj/N9ivs2aryODkm7msrUK0olehPSEySFWptvS3XRQ/tV6yXBhx4CgibpjGRQgV+qNUu7WhdYaw1/1SZGGsZvslYR1UJW4pyHUMe8/i84C5e3Wqh00F+AYEFLw4qVm5ewG2Bleo+7ZSbvuLOBwS0Kn+wU16CVNvWbSN3xepTmY1jhSg1L1VE4FchVv3HhzBObhh9cEE=",
+    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTUBu22GE+64HeNbNHxMLxL0Nirc9jGofaRuDTiGbM92sd0kKQdZPf2mR9VfXl9+UmUnXKbj2Mteo4WBhWOj6foJwhSOjCfAFT93tzxtZNRMhfpcTAXa9AUKMH2ChHNWyLUymYASxIZpbopxOR5lWdjDpulOUTEhPgeE1TTieQZ6xxB4IBIgtItxnT69Pdage2qRW7vl3WpKLysz6nzYg4ZYqi14C1a83n0XJl3PPNNmN/M9uDBm+o6T4bg2epU9TdMW8vi4W+KTWaFwurkyhqaeJmYCdi8VZbfeiZ6qgJyj5H6vcnslBeSErD3QdjBVaxXgmeyq6Pv1vlgr9eMFGp0NB2M=",
   },
   {
     "id": 40,

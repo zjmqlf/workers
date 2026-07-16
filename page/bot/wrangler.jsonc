@@ -34,6 +34,11 @@
         "class_name": "WebSocketServer"
       },
       {
+        "name": "deanignitenations_WebSocketServer",
+        "script_name": "deanignitenations",
+        "class_name": "WebSocketServer"
+      },
+      {
         "name": "kodexfiles2_WebSocketServer",
         "script_name": "kodexfiles2",
         "class_name": "WebSocketServer"
@@ -148,11 +153,11 @@
         "script_name": "wenjianji",
         "class_name": "WebSocketServer"
       },
-      // {
-      //   "name": "zyxfiles_WebSocketServer",
-      //   "script_name": "zyxfiles",
-      //   "class_name": "WebSocketServer"
-      // },
+      {
+        "name": "zyxfiles_WebSocketServer",
+        "script_name": "zyxfiles",
+        "class_name": "WebSocketServer"
+      },
       // {
       //   "name": "test_WebSocketServer",
       //   "script_name": "test",

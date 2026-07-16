@@ -228,8 +228,7 @@ export async function _updateLoop(client: TelegramClient) {
         await client.updateManager.recoverIfStale();
         if (Date.now() - (client._lastRequest || 0) > 30 * 60 * 1000) {
             try {
-                const state = await client.api.updates.getState();
-                client.updateManager.refreshFromState(state);
+                await client.updateManager.catchUp();
             } catch {
             }
             lastPongAt = undefined;

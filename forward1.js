@@ -1613,39 +1613,39 @@ export class WebSocketServer extends DurableObject {
                     });
                     await this.closeAll();
                   }
-                } else {
-                  if (this.clientCount === 1) {
-                    // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
-                    this.sendLog(clientIndex, "nextStep", "全部client的chat采集完毕", null, false);
-                    this.tg[clientIndex].filterType += 1;
-                    if (this.tg[clientIndex].filterType > 4) {
-                      this.tg[clientIndex].filterType = 1;
-                      // this.broadcast({
-                      //   "result": "over",
-                      // });
-                      // await this.close(clientIndex);
-                      // this.api.splice(clientIndex, 1);
-                      // this.tg.splice(clientIndex, 1);
-                      // this.clientCount--;
-                      // clientIndex--;
-                    }
-                    this.tg[clientIndex].chatId = 0;
-                    await this.getChat(clientIndex);
-                  } else {
-                    // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
-                    this.sendLog(clientIndex, "nextStep", "当前client的全部chat采集完毕", null, false);
-                      this.tg[clientIndex].filterType += 1;
-                    if (this.tg[clientIndex].filterType > 4) {
-                      this.tg[clientIndex].filterType = 1;
-                      // await this.close(clientIndex);
-                      // this.api.splice(clientIndex, 1);
-                      // this.tg.splice(clientIndex, 1);
-                      // this.clientCount--;
-                      // clientIndex--;
-                    }
-                    this.tg[clientIndex].chatId = 0;
-                    await this.getChat(clientIndex);
-                  }
+                // } else {
+                //   if (this.clientCount === 1) {
+                //     // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
+                //     this.sendLog(clientIndex, "nextStep", "全部client的chat采集完毕", null, false);
+                //     this.tg[clientIndex].filterType += 1;
+                //     if (this.tg[clientIndex].filterType > 4) {
+                //       this.tg[clientIndex].filterType = 1;
+                //       // this.broadcast({
+                //       //   "result": "over",
+                //       // });
+                //       // await this.close(clientIndex);
+                //       // this.api.splice(clientIndex, 1);
+                //       // this.tg.splice(clientIndex, 1);
+                //       // this.clientCount--;
+                //       // clientIndex--;
+                //     }
+                //     this.tg[clientIndex].chatId = 0;
+                //     await this.getChat(clientIndex);
+                //   } else {
+                //     // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
+                //     this.sendLog(clientIndex, "nextStep", "当前client的全部chat采集完毕", null, false);
+                //       this.tg[clientIndex].filterType += 1;
+                //     if (this.tg[clientIndex].filterType > 4) {
+                //       this.tg[clientIndex].filterType = 1;
+                //       // await this.close(clientIndex);
+                //       // this.api.splice(clientIndex, 1);
+                //       // this.tg.splice(clientIndex, 1);
+                //       // this.clientCount--;
+                //       // clientIndex--;
+                //     }
+                //     this.tg[clientIndex].chatId = 0;
+                //     await this.getChat(clientIndex);
+                //   }
                 }
               } else {
                 // console.log(this.tg[clientIndex].endChat + " : 超过最大chat了");  //测试
@@ -1936,39 +1936,39 @@ export class WebSocketServer extends DurableObject {
                       });
                       await this.closeAll();
                     }
-                  } else {
-                    if (this.clientCount === 1) {
-                      // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
-                      this.sendLog(clientIndex, "start", "全部client的chat采集完毕", null, false);
-                      this.tg[clientIndex].filterType += 1;
-                      if (this.tg[clientIndex].filterType > 4) {
-                        this.tg[clientIndex].filterType = 1;
-                        // this.broadcast({
-                        //   "result": "over",
-                        // });
-                        // await this.close(clientIndex);
-                        // this.api.splice(clientIndex, 1);
-                        // this.tg.splice(clientIndex, 1);
-                        // this.clientCount--;
-                        // clientIndex--;
-                      }
-                      this.tg[clientIndex].chatId = 0;
-                      await this.getChat(clientIndex);
-                    } else {
-                      // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
-                      this.sendLog(clientIndex, "start", "当前client的全部chat采集完毕", null, false);
-                      this.tg[clientIndex].filterType += 1;
-                      if (this.tg[clientIndex].filterType > 4) {
-                        this.tg[clientIndex].filterType = 1;
-                        // await this.close(clientIndex);
-                        // this.api.splice(clientIndex, 1);
-                        // this.tg.splice(clientIndex, 1);
-                        // this.clientCount--;
-                        // clientIndex--;
-                      }
-                      this.tg[clientIndex].chatId = 0;
-                      await this.getChat(clientIndex);
-                    }
+                  // } else {
+                  //   if (this.clientCount === 1) {
+                  //     // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
+                  //     this.sendLog(clientIndex, "start", "全部client的chat采集完毕", null, false);
+                  //     this.tg[clientIndex].filterType += 1;
+                  //     if (this.tg[clientIndex].filterType > 4) {
+                  //       this.tg[clientIndex].filterType = 1;
+                  //       // this.broadcast({
+                  //       //   "result": "over",
+                  //       // });
+                  //       // await this.close(clientIndex);
+                  //       // this.api.splice(clientIndex, 1);
+                  //       // this.tg.splice(clientIndex, 1);
+                  //       // this.clientCount--;
+                  //       // clientIndex--;
+                  //     }
+                  //     this.tg[clientIndex].chatId = 0;
+                  //     await this.getChat(clientIndex);
+                  //   } else {
+                  //     // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
+                  //     this.sendLog(clientIndex, "start", "当前client的全部chat采集完毕", null, false);
+                  //     this.tg[clientIndex].filterType += 1;
+                  //     if (this.tg[clientIndex].filterType > 4) {
+                  //       this.tg[clientIndex].filterType = 1;
+                  //       // await this.close(clientIndex);
+                  //       // this.api.splice(clientIndex, 1);
+                  //       // this.tg.splice(clientIndex, 1);
+                  //       // this.clientCount--;
+                  //       // clientIndex--;
+                  //     }
+                  //     this.tg[clientIndex].chatId = 0;
+                  //     await this.getChat(clientIndex);
+                  //   }
                   }
                 } else {
                   // console.log(this.tg[clientIndex].endChat + " : 超过最大chat了");  //测试
@@ -1992,29 +1992,29 @@ export class WebSocketServer extends DurableObject {
               });
               await this.closeAll();
             }
-          } else {
-            this.tg[clientIndex].count = 0;
-            if (this.clientCount === 1) {
-              // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
-              this.sendLog(clientIndex, "start", "全部client的chat采集完毕", null, false);
-              this.broadcast({
-                "result": "over",
-              });
-            } else {
-              // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
-              this.sendLog(clientIndex, "start", "当前client的全部chat采集完毕", null, false);
-            }
-            this.tg[clientIndex].filterType += 1;
-            if (this.tg[clientIndex].filterType > 4) {
-              this.tg[clientIndex].filterType = 1;
-              // await this.close(clientIndex);
-              // this.api.splice(clientIndex, 1);
-              // this.tg.splice(clientIndex, 1);
-              // this.clientCount--;
-              // clientIndex--;
-            }
-            this.tg[clientIndex].chatId = 0;
-            await this.getChat(clientIndex);
+          // } else {
+          //   this.tg[clientIndex].count = 0;
+          //   if (this.clientCount === 1) {
+          //     // console.log("(" + this.currentStep + ")全部client的chat采集完毕");
+          //     this.sendLog(clientIndex, "start", "全部client的chat采集完毕", null, false);
+          //     this.broadcast({
+          //       "result": "over",
+          //     });
+          //   } else {
+          //     // console.log("(" + this.currentStep + ")当前client的全部chat采集完毕");
+          //     this.sendLog(clientIndex, "start", "当前client的全部chat采集完毕", null, false);
+          //   }
+          //   this.tg[clientIndex].filterType += 1;
+          //   if (this.tg[clientIndex].filterType > 4) {
+          //     this.tg[clientIndex].filterType = 1;
+          //     // await this.close(clientIndex);
+          //     // this.api.splice(clientIndex, 1);
+          //     // this.tg.splice(clientIndex, 1);
+          //     // this.clientCount--;
+          //     // clientIndex--;
+          //   }
+          //   this.tg[clientIndex].chatId = 0;
+          //   await this.getChat(clientIndex);
           }
         } else {
           // console.log("获取toPeer出错");

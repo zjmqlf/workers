@@ -1,4 +1,4 @@
-[
+export const codeString = [
   "DEANIgniteNations_bot_v:rVB0uTgbQ96vmxwufNsFhFet3smpB309",
   "DEANIgniteNations_bot_v:ChY9XJtOlhFBYkQyTwuRsDFzthGh4kAu",
   "DEANIgniteNations_bot_v:61LfKNwEADRb2i87xIAyH3NVnL464oEX",
@@ -395,4 +395,4 @@
   "DEANIgniteNations_bot_v:TMv3ClFKfQhPrY7kTQgKLGLx7gl2zYlI",
   "DEANIgniteNations_bot_p:RmDMpzNavSWUtPApfcRR3OW5iWoD0f08",
   "DEANIgniteNations_bot_v:HmXwbsxWXhWnfUGWsVFZoHHIND9CfScX"
-]
+];
