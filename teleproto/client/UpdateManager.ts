@@ -182,11 +182,39 @@ export class UpdateManager {
             update.ptsCount,
             { tag: "update", update: update as unknown as Api.TypeUpdate },
             () => {
-                if (this.state) this.state.pts = update.pts;
+                if (this.state) this.state.pts = this.globalPts.current();
             },
             () => {},
         );
         this.state.date = update.date;
+    }
+
+    applyAffected(pts: number, ptsCount: number, channelId?: string): void {
+        if (!this.running || !this.state || this.fetchingDifference) return;
+        if (channelId) {
+            const tracker = this.getOrCreateChannel(channelId);
+            if (tracker.pts.requesting()) return;
+            if (!tracker.pts.inited()) {
+                tracker.pts.init(pts);
+                return;
+            }
+            tracker.pts.updateAndApply(
+                pts,
+                ptsCount,
+                { tag: "update" },
+                () => {},
+                () => {},
+            );
+            return;
+        }
+        this.globalPts.updateAndApply(
+            pts,
+            ptsCount,
+            { tag: "update" },
+            () => {},
+            () => {},
+        );
+        this.state.pts = this.globalPts.current();
     }
 
     async catchUp(): Promise<void> {
@@ -289,7 +317,7 @@ export class UpdateManager {
             update.ptsCount,
             { tag: "update", update: update as unknown as Api.TypeUpdate },
             (u) => {
-                if (this.state) this.state.pts = update.pts;
+                if (this.state) this.state.pts = this.globalPts.current();
                 this.dispatch(u, { others: null });
             },
             () => {
@@ -328,7 +356,7 @@ export class UpdateManager {
                 u.ptsCount,
                 { tag: "update", update },
                 (applied) => {
-                    if (this.state) this.state.pts = u.pts;
+                    if (this.state) this.state.pts = this.globalPts.current();
                     this.dispatch(applied, payload);
                 },
                 () => {},

@@ -306,7 +306,7 @@ export class WebSocketServer extends DurableObject {
   async open(tryCount) {
     const apiId = 1334621;
     const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE4MwG7fSQgdP0tvStjwu1TUuEVEl3sEmB2EO5PuecwwiMxt+0RvcN0jQv9SiIuqEP4aV5EAgIg7GB/Br8wdWckqoAeuC2nXsnqkJoBhfbUFtX8xbE3BKmnGLUScrs1ci4Hq47qvA2+5S/tFo8rt/dJCKm64s0X9IyZ1O5eIxDqkdiMy5YBQZYLTwWsi7OaO9TBS0AhIySD9OgkLB7EcaqyVbTxyt9HLGWsrQGanjn7YSE98ELDr284xdOIDDBMWYJR0Poe79Eu3twi4JihP56jZz85uvIdv2PMWp2AK79GUK4FC5gqiobuQGHIUsbxEVGEzOL9t1Ie9a2C6+bJmSGfevxFQw==";
+    const sessionString = "1BQANOTEuMTA4LjU2LjE4MwG7Z0LfnWK4lcMo1tLbUFexNiRcLpw4OT0SDUozmmKADV6Gpn0RgQWFM1h70A9NmKUSsBRBC0+9Kkh7HfDu1sBCmO2u4Pux0twWFWsZpw8x6/HaqAqmcu6TspJOoLg1LV2MovX2Bikiu/QQI/MpSay+p7HnvhWW3gRbzkkErL1eBnjw7/C/sGh8yeRyInHJIkeGw80ZYCW2/zKp87D99PJBZQrB70A7Y7iUL4RF1zkpuK28yxpGicGL60gVCBmB0rXS7QnS3TNPxLYMau9SkitXzVsQFKRt9VG7eWJU9fdhqSFy8gmulewn+rsbt+IGU8Z2yTWXSSEWoX/rvlgQcrugQg==";
     try {
       this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
         timeout: 5,
@@ -827,13 +827,17 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async overClear(operate) {
+  async clearQueue() {
     await this.forwardMessage(this.idArray, this.fileIdArray);
     await this.ctx.storage.put("offsetId", this.offsetId);
     await this.ctx.storage.put("idArray", "[]");
     await this.ctx.storage.put("fileIdArray", "[]");
-    // this.idArray = [];
-    // this.fileIdArray = [];
+    this.idArray = [];
+    this.fileIdArray = [];
+  }
+
+  async overClear(operate) {
+    await this.clearQueue();
     // console.log("(" + this.currentStep + ") 当前bot采集完毕");
     this.sendLog(operate, "当前bot采集完毕", null, false);
     this.broadcast({
@@ -1165,8 +1169,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8923871942"),
-              accessHash: bigInt("-1969575554994178802"),
+              userId: bigInt("8719640944"),
+              accessHash: bigInt("-1061688979060195364"),
             }),
           ],
         })
@@ -1630,6 +1634,16 @@ export class WebSocketServer extends DurableObject {
         "operate": "resetQueue",
         "step": this.currentStep,
         "message": "重置queue状态成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
+    } else if (command === "send") {
+      await this.clearQueue();
+      // console.log("发送队列缓存成功");
+      this.broadcast({
+        "operate": "sendQueue",
+        "step": this.currentStep,
+        "message": "发送队列缓存成功",
         "error": true,
         "date": new Date().getTime(),
       });

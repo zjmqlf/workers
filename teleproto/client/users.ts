@@ -7,6 +7,7 @@ import {
     sleep,
     isArrayLike,
     returnBigInt,
+    unionId,
 } from "../Helpers";
 import * as errors from "../errors";
 import * as utils from "../Utils";
@@ -205,16 +206,34 @@ export async function invoke<R extends Api.AnyRequest>(
                 }
                 client._entityCache.add(result);
 
-                if (
-                    !dcId &&
-                    !otherSender &&
-                    (result as { SUBCLASS_OF_ID?: number })?.SUBCLASS_OF_ID ===
-                        0x8af52aac // Updates
-                ) {
-                    client.updateManager.onUpdates(
-                        result as Api.TypeUpdates,
-                        true
-                    );
+                if (!dcId && !otherSender) {
+                    const sub = (result as { SUBCLASS_OF_ID?: number })
+                        ?.SUBCLASS_OF_ID;
+                    if (sub === unionId("Updates")) {
+                        client.updateManager.onUpdates(
+                            result as Api.TypeUpdates,
+                            true
+                        );
+                    } else if (
+                        sub === unionId("messages.AffectedMessages") ||
+                        sub === unionId("messages.AffectedHistory") ||
+                        sub === unionId("messages.AffectedFoundMessages")
+                    ) {
+                        const affected = result as {
+                            pts: number;
+                            ptsCount: number;
+                        };
+                        const channel = (
+                            request as unknown as {
+                                channel?: { channelId?: bigInt.BigInteger };
+                            }
+                        ).channel;
+                        client.updateManager.applyAffected(
+                            affected.pts,
+                            affected.ptsCount,
+                            channel?.channelId?.toString()
+                        );
+                    }
                 }
 
                 return result;
@@ -330,9 +349,7 @@ export async function getEntity(
         chats = (await client.api.messages.getChats({ id: chatIds })).chats;
     }
     if (channels.length) {
-        channels = (
-            await client.api.channels.getChannels({ id: channels })
-        ).chats;
+        channels = await _getChannelsWithCommunityFallback(client, channels);
     }
     const idEntity = new Map<string, any>();
     for (const user of users) {
@@ -360,6 +377,36 @@ export async function getEntity(
         }
     }
     return single ? result[0] : result;
+}
+
+async function _getChannelsWithCommunityFallback(
+    client: TelegramClient,
+    inputs: Api.TypeInputChannel[]
+): Promise<Api.TypeChat[]> {
+    try {
+        return (await client.api.channels.getChannels({ id: inputs })).chats;
+    } catch (e: any) {
+        if (e?.errorMessage !== "COMMUNITY_ID_INVALID") throw e;
+    }
+    const joined = await client.api.communities.getJoinedCommunities();
+    const byId = new Map<string, Api.TypeChat>();
+    for (const chat of joined.chats) {
+        byId.set(chat.id.toString(), chat);
+    }
+    const resolved: Api.TypeChat[] = [];
+    const rest: Api.TypeInputChannel[] = [];
+    for (const input of inputs) {
+        const id = (input as { channelId?: bigInt.BigInteger }).channelId;
+        const hit = id && byId.get(id.toString());
+        if (hit) resolved.push(hit);
+        else rest.push(input);
+    }
+    if (rest.length) {
+        resolved.push(
+            ...(await client.api.channels.getChannels({ id: rest })).chats
+        );
+    }
+    return resolved;
 }
 
 export async function getInputEntity(
@@ -393,7 +440,7 @@ export async function getInputEntity(
         if (
             typeof peer == "object" &&
             !bigInt.isInstance(peer) &&
-            peer.SUBCLASS_OF_ID === 0x2d45687
+            peer.SUBCLASS_OF_ID === unionId("Peer")
         ) {
             const res = client._entityCache.get(utils.getPeerId(peer));
             if (res) {
@@ -559,7 +606,7 @@ export async function getPeerId(
     ) {
         return utils.getPeerId(peer, addMark);
     }
-    if (peer.SUBCLASS_OF_ID == 0x2d45687 || peer.SUBCLASS_OF_ID == 0xc91c90b6) {
+    if (peer.SUBCLASS_OF_ID == unionId("Peer") || peer.SUBCLASS_OF_ID == unionId("InputPeer")) {
         peer = await client.getInputEntity(peer);
     }
     if (peer instanceof Api.InputPeerSelf) {
@@ -584,10 +631,12 @@ export async function _getPeer(client: TelegramClient, peer: EntityLike) {
 
 export async function _getInputDialog(client: TelegramClient, dialog: any) {
     try {
-        if (dialog.SUBCLASS_OF_ID == 0xa21c9795) {
+        if (dialog.SUBCLASS_OF_ID == unionId("InputDialogPeer")) {
+
             dialog.peer = await client.getInputEntity(dialog.peer);
             return dialog;
-        } else if (dialog.SUBCLASS_OF_ID == 0xc91c90b6) {
+        } else if (dialog.SUBCLASS_OF_ID == unionId("InputPeer")) {
+
             return new Api.InputDialogPeer({
                 peer: dialog,
             });
@@ -600,7 +649,7 @@ export async function _getInputDialog(client: TelegramClient, dialog: any) {
 
 export async function _getInputNotify(client: TelegramClient, notify: any) {
     try {
-        if (notify.SUBCLASS_OF_ID == 0x58981615) {
+        if (notify.SUBCLASS_OF_ID == unionId("InputNotifyPeer")) {
             if (notify instanceof Api.InputNotifyPeer) {
                 notify.peer = await client.getInputEntity(notify.peer);
             }

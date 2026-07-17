@@ -35,7 +35,7 @@ export const onRequest: PagesFunction<PagesEnv> = async ({ request, env, params 
     "15": env.massfilesstore_WebSocketServer,
     // "14": env.steviarchiver_WebSocketServer,
     "16": env.fileleak_WebSocketServer,
-    "17": env.fileleakcode_WebSocketServer,
+    // "17": env.fileleakcode_WebSocketServer,
     "18": env.fileport_WebSocketServer,
     // "18": env.jsfile_WebSocketServer,
     "19": env.kfcmnb_WebSocketServer,

@@ -251,7 +251,7 @@ const App = () => {
   // }, []);
 
   const addNewEvent = useCallback((newItem) => {
-    // if (logData.length >= 200) {
+    // if (logData.length >= 1000) {
     //   setLogData([]);
     //   console.log("删除log成功");  //测试
     // }
@@ -734,7 +734,7 @@ const App = () => {
       if (over.current === false) {
         // console.log(documentValue);  //测试
         if (lastClient.current > 0) {
-          waitTime.current = 240000 - (lastClient.current * 3000);
+          waitTime.current = 600000 - (lastClient.current * 3000);
         }
         if (waitTime.current < 30000) {
           waitTime.current = 30000;
@@ -1007,7 +1007,7 @@ const App = () => {
   useEffect(() => {
     if (logData.length === 0) {
       setClearLogBtnDisabled(true);
-    } else if (logData.length >= 200) {
+    } else if (logData.length >= 1000) {
       setLogData(() => {
         return [];
       });

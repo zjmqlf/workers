@@ -234,7 +234,7 @@ const App = () => {
   // }, []);
 
   const addNewEvent = useCallback((newItem) => {
-    // if (logData.length >= 200) {
+    // if (logData.length >= 1000) {
     //   setLogData([]);
     //   console.log("删除log成功");  //测试
     // }
@@ -866,6 +866,21 @@ const App = () => {
     setClearLogBtnDisabled(true);
   }, [setLogData, setClearLogBtnDisabled]);
 
+  const handlerSendQueueBtnClick = useCallback(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({
+          "command": "send",
+        }));
+      } catch (e) {
+        // console.log(e);  //测试
+        handlerMessageError("  >>> send queue失败");
+      }
+    } else {
+      handlerMessageError("  >>> 没有连接ws");
+    }
+  }, [handlerMessageError]);
+
   const handlerCompressChange = useCallback(() => {
     const isCompress = isCompressChecked;
     setCompressChecked(!isCompress);
@@ -953,7 +968,7 @@ const App = () => {
   useEffect(() => {
     if (logData.length === 0) {
       setClearLogBtnDisabled(true);
-    } else if (logData.length >= 200) {
+    } else if (logData.length >= 1000) {
       setLogData(() => {
         return [];
       });
@@ -1020,6 +1035,7 @@ const App = () => {
             <button onClick={handlerResetQueueBtnClick}>重置queue</button>
             <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
             <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
+            <button onClick={handlerSendQueueBtnClick}>发送队列</button>
             <label>
               <input type="checkbox" checked={isCompressChecked} onChange={handlerCompressChange} />
               压缩

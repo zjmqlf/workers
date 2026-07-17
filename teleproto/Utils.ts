@@ -3,7 +3,7 @@ import mime from "mime";
 import { CustomFile } from "./client/uploads";
 import type { Entity, EntityLike, MessageIDLike } from "./define";
 import { EntityCache } from "./entityCache";
-import { returnBigInt } from "./Helpers";
+import { returnBigInt, unionId } from "./Helpers";
 import { Api } from "./tl";
 import { Buffer } from "node:buffer";
 
@@ -21,10 +21,10 @@ export function getFileInfo(
     if (!fileLocation || !fileLocation.SUBCLASS_OF_ID) {
         _raiseCastFail(fileLocation, "InputFileLocation");
     }
-    if (fileLocation.SUBCLASS_OF_ID == 354669666) {
+    if (fileLocation.SUBCLASS_OF_ID == unionId("InputFileLocation")) {
         return {
             dcId: undefined,
-            location: fileLocation,
+            location: fileLocation as Api.TypeInputFileLocation,
             size: undefined,
         };
     }
@@ -162,7 +162,7 @@ export function getInputPeer(
             _raiseCastFail(entity, "InputPeer");
         }
     }
-    if (entity.SUBCLASS_OF_ID === 0xc91c90b6) {
+    if (entity.SUBCLASS_OF_ID === unionId("InputPeer")) {
         return entity;
     }
     if (entity instanceof Api.User) {
@@ -297,7 +297,7 @@ export function getInputChannel(entity: EntityLike) {
     if (entity.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(entity, "InputChannel");
     }
-    if (entity.SUBCLASS_OF_ID === 0x40f202fd) {
+    if (entity.SUBCLASS_OF_ID === unionId("InputChannel")) {
         return entity;
     }
     if (
@@ -332,8 +332,8 @@ export function getInputUser(entity: EntityLike): Api.TypeInputUser {
     if (entity.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(entity, "InputUser");
     }
-    if (entity.SUBCLASS_OF_ID === 0xe669bf46) {
-        return entity;
+    if (entity.SUBCLASS_OF_ID === unionId("InputUser")) {
+        return entity as unknown as Api.TypeInputUser;
     }
     if (entity instanceof Api.User) {
         if (entity.self) {
@@ -380,9 +380,9 @@ export function getInputMessage(message: any): Api.InputMessageID {
     if (message === undefined || message.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(message, "InputMessage");
     }
-    if (message.SUBCLASS_OF_ID === 0x54b6bcc5) {
+    if (message.SUBCLASS_OF_ID === unionId("InputMessage")) {
         return message;
-    } else if (message.SUBCLASS_OF_ID === 0x790009e3) {
+    } else if (message.SUBCLASS_OF_ID === unionId("Message")) {
         return new Api.InputMessageID({ id: message.id });
     }
     _raiseCastFail(message, "InputMessage");
@@ -392,9 +392,9 @@ export function getInputChatPhoto(photo: any): Api.TypeInputChatPhoto {
     if (photo === undefined || photo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(photo, "InputChatPhoto");
     }
-    if (photo.SUBCLASS_OF_ID === 0xd4eb2d74) {
+    if (photo.SUBCLASS_OF_ID === unionId("InputChatPhoto")) {
         return photo;
-    } else if (photo.SUBCLASS_OF_ID === 0xe7655f1f) {
+    } else if (photo.SUBCLASS_OF_ID === unionId("InputFile")) {
         return new Api.InputChatUploadedPhoto({
             file: photo,
         });
@@ -424,7 +424,7 @@ export function getInputPhoto(photo: any): Api.TypeInputPhoto {
     if (photo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(photo, "InputPhoto");
     }
-    if (photo.SUBCLASS_OF_ID === 2221106144) {
+    if (photo.SUBCLASS_OF_ID === unionId("InputPhoto")) {
         return photo;
     }
     if (photo instanceof Api.Message) {
@@ -483,7 +483,7 @@ export function getInputDocument(
     if (document.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(document, "InputDocument");
     }
-    if (document.SUBCLASS_OF_ID === 0xf33fdb68) {
+    if (document.SUBCLASS_OF_ID === unionId("InputDocument")) {
         return document;
     }
     if (document instanceof Api.Document) {
@@ -684,7 +684,7 @@ export function getInputGeo(geo: any): Api.TypeInputGeoPoint {
     if (geo === undefined || geo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(geo, "InputGeoPoint");
     }
-    if (geo.SUBCLASS_OF_ID === 0x430d225) {
+    if (geo.SUBCLASS_OF_ID === unionId("InputGeoPoint")) {
         return geo;
     }
     if (geo instanceof Api.GeoPoint) {
@@ -725,13 +725,13 @@ export function getInputMedia(
     if (media.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(media, "InputMedia");
     }
-    if (media.SUBCLASS_OF_ID === 0xfaf846f4) {
+    if (media.SUBCLASS_OF_ID === unionId("InputMedia")) {
         return media;
     } else {
-        if (media.SUBCLASS_OF_ID === 2221106144) {
+        if (media.SUBCLASS_OF_ID === unionId("InputPhoto")) {
             return new Api.InputMediaPhoto({ id: media });
         } else {
-            if (media.SUBCLASS_OF_ID === 4081048424) {
+            if (media.SUBCLASS_OF_ID === unionId("InputDocument")) {
                 return new Api.InputMediaDocument({ id: media });
             }
         }
@@ -928,7 +928,7 @@ export function getPeer(peer: EntityLike | any) {
         if (peer.SUBCLASS_OF_ID === undefined) {
             throw new Error();
         }
-        if (peer.SUBCLASS_OF_ID === 0x2d45687) {
+        if (peer.SUBCLASS_OF_ID === unionId("Peer")) {
             return peer;
         } else if (
             peer instanceof Api.contacts.ResolvedPeer ||
@@ -942,8 +942,8 @@ export function getPeer(peer: EntityLike | any) {
             return new Api.PeerChannel({ channelId: peer.id });
         }
         if (
-            peer.SUBCLASS_OF_ID === 0x7d7c6f86 ||
-            peer.SUBCLASS_OF_ID === 0xd9c7fc18
+            peer.SUBCLASS_OF_ID === unionId("ChatParticipant") ||
+            peer.SUBCLASS_OF_ID === unionId("ChannelParticipant")
         ) {
             if ("userId" in peer) {
                 return new Api.PeerUser({ userId: peer.userId });
@@ -1016,8 +1016,8 @@ export function getMessageId(
         return undefined;
     } else if (typeof message === "number") {
         return message;
-    } else if (message.SUBCLASS_OF_ID === 0x790009e3 || "id" in message) {
-        return message.id;
+    } else if (message.SUBCLASS_OF_ID === unionId("Message") || "id" in message) {
+        return (message as { id: number }).id;
     } else {
         throw new Error(`Invalid message type: ${message.constructor.name}`);
     }
@@ -1242,10 +1242,10 @@ export function getInputDialog(dialog: any): Api.TypeInputDialogPeer {
     if (dialog.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(dialog, "InputDialogPeer");
     }
-    if (dialog.SUBCLASS_OF_ID === 0xa21c9795) {
+    if (dialog.SUBCLASS_OF_ID === unionId("InputDialogPeer")) {
         return dialog;
     }
-    if (dialog.SUBCLASS_OF_ID === 0xc91c90b6) {
+    if (dialog.SUBCLASS_OF_ID === unionId("InputPeer")) {
         return new Api.InputDialogPeer({ peer: dialog });
     }
 

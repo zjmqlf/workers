@@ -733,13 +733,17 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async overClear(operate) {
+  async clearQueue() {
     await this.forwardMessage(this.idArray, this.fileIdArray);
     await this.ctx.storage.put("offsetId", this.offsetId);
     await this.ctx.storage.put("idArray", "[]");
     await this.ctx.storage.put("fileIdArray", "[]");
-    // this.idArray = [];
-    // this.fileIdArray = [];
+    this.idArray = [];
+    this.fileIdArray = [];
+  }
+
+  async overClear(operate) {
+    await this.clearQueue();
     // console.log("(" + this.currentStep + ") 当前bot采集完毕");
     this.sendLog(operate, "当前bot采集完毕", null, false);
     this.broadcast({
@@ -1335,6 +1339,16 @@ export class WebSocketServer extends DurableObject {
         "operate": "resetQueue",
         "step": this.currentStep,
         "message": "重置queue状态成功",
+        "error": true,
+        "date": new Date().getTime(),
+      });
+    } else if (command === "send") {
+      await this.clearQueue();
+      // console.log("发送队列缓存成功");
+      this.broadcast({
+        "operate": "sendQueue",
+        "step": this.currentStep,
+        "message": "发送队列缓存成功",
         "error": true,
         "date": new Date().getTime(),
       });

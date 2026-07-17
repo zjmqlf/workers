@@ -17,7 +17,7 @@ export const botString = {
   "15": "massfilesstore",
   // "14": "steviarchiver",
   "16": "fileleak",
-  "17": "fileleakcode",
+  // "17": "fileleakcode",
   "18": "fileport",
   // "18": "jsfile",
   "19": "kfcmnb",

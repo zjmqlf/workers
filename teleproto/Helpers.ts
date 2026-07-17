@@ -325,8 +325,20 @@ export function crc32(buf: Buffer | string) {
     return (crc ^ -1) >>> 0;
 }
 
+const unionIdCache = new Map<string, number>();
+
+export function unionId(name: string): number {
+    let id = unionIdCache.get(name);
+    if (id === undefined) {
+        id = crc32(name) >>> 0;
+        unionIdCache.set(name, id);
+    }
+    return id;
+}
+
 export class TotalList<T> extends Array<T> {
     public total?: number;
+
     constructor() {
         super();
         this.total = 0;
@@ -348,14 +360,14 @@ export function _entityType(entity: EntityLike) {
     }
     if (
         ![
-            0x2d45687,
-            0xc91c90b6,
-            0xe669bf46,
-            0x40f202fd,
-            0x2da17977,
-            0xc5af5d94,
-            0x1f4661b9,
-            0xd49a2697,
+            unionId("Peer"),
+            unionId("InputPeer"),
+            unionId("InputUser"),
+            unionId("InputChannel"),
+            unionId("User"),
+            unionId("Chat"),
+            unionId("UserFull"),
+            unionId("ChatFull"),
         ].includes(entity.SUBCLASS_OF_ID)
     ) {
         throw new Error(`${entity} does not have any entity type`);

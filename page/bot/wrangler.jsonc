@@ -93,11 +93,11 @@
         "script_name": "fileleak",
         "class_name": "WebSocketServer"
       },
-      {
-        "name": "fileleakcode_WebSocketServer",
-        "script_name": "fileleakcode",
-        "class_name": "WebSocketServer"
-      },
+      // {
+      //   "name": "fileleakcode_WebSocketServer",
+      //   "script_name": "fileleakcode",
+      //   "class_name": "WebSocketServer"
+      // },
       {
         "name": "fileport_WebSocketServer",
         "script_name": "fileport",

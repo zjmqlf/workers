@@ -9,6 +9,7 @@ import {
     TypeNotFoundError,
 } from "../errors";
 import { PendingState } from "../extensions/PendingState";
+import { unionId } from "../Helpers";
 import { MTProtoState } from "./MTProtoState";
 import { Dcenter } from "./Dcenter";
 import { RequestState } from "./RequestState";
@@ -181,7 +182,7 @@ export class MtpDispatcher {
     }
 
     private handleUpdate(message: TLMessage) {
-        if (message.obj.SUBCLASS_OF_ID !== 0x8af52aac) {
+        if (message.obj.SUBCLASS_OF_ID !== unionId("Updates")) {
             this.sender.log.warn(
                 `Note: ${message.obj.className} is not an update, not dispatching it`
             );
