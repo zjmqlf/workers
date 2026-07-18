@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "siren",
   "main": "siren.js",
+  "vars": {
+    "BOT_ID": "7779623516",
+    "BOT_HASH": "-155601061109810553",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

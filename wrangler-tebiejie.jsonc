@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tebiejie",
   "main": "tebiejie.js",
+  "vars": {
+    "BOT_ID": "8468014882",
+    "BOT_HASH": "-1717425434517032221",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "lunindiacipoksupretto",
   "main": "lunindiacipoksupretto.js",
+  "vars": {
+    "BOT_ID": "8554653830",
+    "BOT_HASH": "-3683149469932305016",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

@@ -1,10 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "kodexchatsind",
-  "main": "kodexchatsind.js",
+  "name": "hikkitusbolpaijo",
+  "main": "hikkitusbolpaijo.js",
   "vars": {
-    "BOT_ID": "8983376881",
-    "BOT_HASH": "2798403794734196826",
+    "BOT_ID": "8718756852",
+    "BOT_HASH": "2206641291710006927",
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
@@ -16,7 +16,7 @@
   // },
   // "routes": [
   //   {
-  //     "pattern": "kodexchatsind.19422.xyz/*",
+  //     "pattern": "hikkitusbolpaijo.19422.xyz/*",
   //     "zone_name": "19422.xyz"
   //   }
   // ],
@@ -26,7 +26,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "kodexchatsind",
+        "script_name": "hikkitusbolpaijo",
         "class_name": "WebSocketServer"
       }
     ]

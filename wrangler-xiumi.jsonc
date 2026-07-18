@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "xiumi",
   "main": "xiumi.js",
+  "vars": {
+    "BOT_ID": "8622209325",
+    "BOT_HASH": "4492215106351351048",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

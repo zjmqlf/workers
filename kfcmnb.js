@@ -100,6 +100,8 @@ export class WebSocketServer extends DurableObject {
       // this.client = null;
       // this.stop = 0;
       // this.webSocket = [];
+      this.botID = bigInt(this.env.BOT_ID);
+      this.botHash = bigInt(this.env.BOT_HASH);
       this.currentStep = 0;
       this.codes = codeString.slice();
       this.codeLength = this.codes.length;
@@ -1012,8 +1014,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("7256426551"),
-              accessHash: bigInt("240051746403759768"),
+              userId: this.botID,
+              accessHash: this.botHash,
             }),
           ],
         })

@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kfcmnb",
   "main": "kfcmnb.js",
+  "vars": {
+    "BOT_ID": "7256426551",
+    "BOT_HASH": "240051746403759768",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

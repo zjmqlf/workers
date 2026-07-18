@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "palucode",
   "main": "palucode.js",
+  "vars": {
+    "BOT_ID": "8772491357",
+    "BOT_HASH": "-7873211848926890576",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

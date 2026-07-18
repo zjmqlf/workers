@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "lockhive",
   "main": "lockhive.js",
+  "vars": {
+    "BOT_ID": "8971565760",
+    "BOT_HASH": "-5452475782277061610",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

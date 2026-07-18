@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hijautebal",
   "main": "hijautebal.js",
+  "vars": {
+    "BOT_ID": "8632371588",
+    "BOT_HASH": "-8571086684013652876",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

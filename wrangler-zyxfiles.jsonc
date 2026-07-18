@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zyxfiles",
   "main": "zyxfiles.js",
+  "vars": {
+    "BOT_ID": "8940981331",
+    "BOT_HASH": "-7378534624115653976",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

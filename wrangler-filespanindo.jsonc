@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "filespanindo",
   "main": "filespanindo.js",
+  "vars": {
+    "BOT_ID": "8547046053",
+    "BOT_HASH": "-3684405776559152057",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

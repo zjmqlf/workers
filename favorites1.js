@@ -1678,13 +1678,13 @@ export class WebSocketServer extends DurableObject {
                   await this.getConfig(clientIndex, 1, option);
                   await this.getNext(clientIndex);
                 } else {
-                  // console.log("连接TG服务" + clientIndex + "失败");
-                  this.sendLog(clientIndex, "nextStep", "连接TG服务" + clientIndex + "失败", null, true);
+                  // console.log("连接TG服务" + (clientIndex + 1) + "失败");
+                  this.sendLog(clientIndex, "nextStep", "连接TG服务" + (clientIndex + 1) + "失败", null, true);
                 }
               }
             } else {
-              // console.log("连接TG服务" + clientIndex + "失败");
-              this.sendLog(clientIndex, "nextStep", "连接TG服务" + clientIndex + "失败", null, true);
+              // console.log("连接TG服务" + (clientIndex + 1) + "失败");
+              this.sendLog(clientIndex, "nextStep", "连接TG服务" + (clientIndex + 1) + "失败", null, true);
             }
           }
         }
@@ -1989,8 +1989,8 @@ export class WebSocketServer extends DurableObject {
           await this.getChat(clientIndex);
         }
       } else {
-        // console.log("连接TG服务" + clientIndex + "失败");
-        this.sendLog(clientIndex, "start", "连接TG服务" + clientIndex + "失败", null, true);
+        // console.log("连接TG服务" + (clientIndex + 1) + "失败");
+        this.sendLog(clientIndex, "start", "连接TG服务" + (clientIndex + 1) + "失败", null, true);
       }
     }
     if (this.stop === 1) {
@@ -2226,8 +2226,8 @@ export class WebSocketServer extends DurableObject {
               break;
             }
           } else {
-            // console.log("连接TG服务" + clientIndex + "失败");
-            this.sendLog(clientIndex, "chat", this.tg[clientIndex].clientId + " - 连接TG服务" + clientIndex + "失败", null, true);
+            // console.log("连接TG服务" + (clientIndex + 1) + "失败");
+            this.sendLog(clientIndex, "chat", this.tg[clientIndex].clientId + " - 连接TG服务" + (clientIndex + 1) + "失败", null, true);
           }
         } else {
           this.stop = 2;

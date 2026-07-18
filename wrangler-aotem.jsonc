@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aotem",
   "main": "aotem.js",
+  "vars": {
+    "BOT_ID": "8938703432",
+    "BOT_HASH": "-1693611293010661294",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

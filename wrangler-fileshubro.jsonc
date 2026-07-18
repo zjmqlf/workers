@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fileshubro",
   "main": "fileshubro.js",
+  "vars": {
+    "BOT_ID": "8917447973",
+    "BOT_HASH": "-5762012854124752780",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

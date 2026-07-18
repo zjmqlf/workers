@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "wenjianji",
   "main": "wenjianji.js",
+  "vars": {
+    "BOT_ID": "8953811087",
+    "BOT_HASH": "7292771759830065884",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

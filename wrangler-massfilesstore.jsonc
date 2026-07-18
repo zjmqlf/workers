@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "massfilesstore",
   "main": "massfilesstore.js",
+  "vars": {
+    "BOT_ID": "8971285637",
+    "BOT_HASH": "-8124017191415174598",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

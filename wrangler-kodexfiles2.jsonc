@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kodexfiles2",
   "main": "kodexfiles2.js",
+  "vars": {
+    "BOT_ID": "8508964084",
+    "BOT_HASH": "8777468622410567541",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

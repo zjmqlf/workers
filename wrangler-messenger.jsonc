@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "messenger",
   "main": "messenger.js",
+  "vars": {
+    "BOT_ID": "8606449723",
+    "BOT_HASH": "-3189013076091883541",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

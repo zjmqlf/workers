@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ryumasepongmilku",
   "main": "ryumasepongmilku.js",
+  "vars": {
+    "BOT_ID": "8613570788",
+    "BOT_HASH": "7003533048444817742",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

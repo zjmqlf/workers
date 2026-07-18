@@ -3,8 +3,8 @@
   "name": "forward2",
   "main": "forward1.js",
   "vars": {
-    "BEGIN_INDEX": 18,
-    "END_INDEX": 37,
+    "BEGIN_INDEX": 20,
+    "END_INDEX": 40,
     "ID_NAME": "forward2"
   },
   "compatibility_date": "2026-04-21",

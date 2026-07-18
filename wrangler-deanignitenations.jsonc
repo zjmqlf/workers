@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "deanignitenations",
   "main": "deanignitenations.js",
+  "vars": {
+    "BOT_ID": "8737186679",
+    "BOT_HASH": "1024528739420182834",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

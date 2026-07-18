@@ -7,6 +7,8 @@ import bigInt from "big-integer";
 export class WebSocketServer extends DurableObject {
   // webSocket = [];
   ws = null;
+  botID = bigInt(this.env.BOT_ID);
+  botHash = bigInt(this.env.BOT_HASH);
   stop = 0;
   currentStep = 0;
   compress = false;
@@ -100,6 +102,8 @@ export class WebSocketServer extends DurableObject {
       // this.client = null;
       // this.stop = 0;
       // this.webSocket = [];
+      this.botID = bigInt(this.env.BOT_ID);
+      this.botHash = bigInt(this.env.BOT_HASH);
       this.currentStep = 0;
       this.codes = codeString.slice();
       this.codeLength = this.codes.length;
@@ -969,8 +973,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: bigInt("8613570788"),
-              accessHash: bigInt("7003533048444817742"),
+              userId: this.botID,
+              accessHash: this.botHash,
             }),
           ],
         })

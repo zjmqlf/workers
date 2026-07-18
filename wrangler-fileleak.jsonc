@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fileleak",
   "main": "fileleak.js",
+  "vars": {
+    "BOT_ID": "7966817749",
+    "BOT_HASH": "-4550341619102338380",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

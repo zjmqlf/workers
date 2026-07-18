@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fileport",
   "main": "fileport.js",
+  "vars": {
+    "BOT_ID": "8317350694",
+    "BOT_HASH": "-2347633684448902773",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

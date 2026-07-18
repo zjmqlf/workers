@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jiematop",
   "main": "jiematop.js",
+  "vars": {
+    "BOT_ID": "8908766090",
+    "BOT_HASH": "4697995986322785712",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

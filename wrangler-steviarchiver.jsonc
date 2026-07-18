@@ -2,6 +2,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "steviarchiver",
   "main": "steviarchiver.js",
+  "vars": {
+    "BOT_ID": "8686929797",
+    "BOT_HASH": "-2740764425526714041",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
