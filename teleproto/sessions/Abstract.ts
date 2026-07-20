@@ -21,7 +21,7 @@ export abstract class Session {
     abstract getAuthKey(dcId?: number): AuthKey | undefined;
     abstract getInputEntity(key: EntityLike): Api.TypeInputPeer | Promise<Api.TypeInputPeer>;
     abstract close(): void;
-    abstract save(): void;
+    abstract save(): void | string;
     abstract delete(): void | Promise<void>;
     abstract processEntities(tlo: any): void | Promise<void>;
 }

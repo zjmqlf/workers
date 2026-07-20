@@ -5,6 +5,7 @@ import {
     TEST_DC_IPV6,
     TelegramBaseClient,
     TelegramClientParams,
+    webSocketDcAddress,
 } from "./telegramBaseClient";
 
 import * as authMethods from "./auth";
@@ -38,9 +39,11 @@ import { CallbackQuery, CallbackQueryEvent } from "../events/CallbackQuery";
 import { EditedMessage, EditedMessageEvent } from "../events/EditedMessage";
 import { DeletedMessage, DeletedMessageEvent } from "../events/DeletedMessage";
 
-export class TelegramClient extends TelegramBaseClient {
+export class TelegramClient<
+    S extends Session = Session
+> extends TelegramBaseClient<S> {
     constructor(
-        session: string | Session,
+        session: string | S,
         apiId: number,
         apiHash: string,
         clientParams: TelegramClientParams

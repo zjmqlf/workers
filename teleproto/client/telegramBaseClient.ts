@@ -6,6 +6,7 @@ import {
 } from "../network/connection";
 import { Session, StoreSession } from "../sessions";
 import { Logger, PromisedNetSockets } from "../extensions";
+import type { SocketFactory } from "../extensions/SocketInterface";
 import { Api } from "../tl";
 import type { AuthKey } from "../crypto/AuthKey";
 import { EntityCache } from "../entityCache";
@@ -62,6 +63,23 @@ export const TEST_DC_IPV6: { readonly [id: number]: string } = {
 };
 const DC_PORT = 443;
 
+export const WEBSOCKET_DC_HOSTS: { readonly [id: number]: string } = {
+    1: "pluto",
+    2: "venus",
+    3: "aurora",
+    4: "vesta",
+    5: "flora",
+};
+
+export function webSocketDcAddress(
+    dcId: number,
+    mediaCluster = false
+): string | undefined {
+    const host = WEBSOCKET_DC_HOSTS[dcId];
+    if (!host) return undefined;
+    return `${host}${mediaCluster ? "-1" : ""}.web.telegram.org`;
+}
+
 function inferSessionEnv(address: string): boolean | undefined {
     for (const ip of Object.values(TEST_DC_IPV4)) if (ip === address) return true;
     for (const ip of Object.values(TEST_DC_IPV6)) if (ip === address) return true;
@@ -91,7 +109,7 @@ export interface TelegramClientParams {
     baseLogger?: Logger;
     maxConcurrentDownloads?: number;
     securityChecks?: boolean;
-    networkSocket?: typeof PromisedNetSockets;
+    networkSocket?: SocketFactory;
     keepAliveInterval?: number;
     reCaptchaCallback?: (siteKey: string) => Promise<string>;
     downloadPool?: Partial<MediaSchedulerOptions> & {
@@ -126,12 +144,12 @@ const clientParamsDefault = {
     _securityChecks: true,
 };
 
-export abstract class TelegramBaseClient {
+export abstract class TelegramBaseClient<S extends Session = Session> {
     _config?: Api.Config;
     _appConfig?: { [key: string]: any };
     public _log: Logger;
     public _floodSleepThreshold: number;
-    public session: Session;
+    public session: S;
     public apiHash: string;
     public apiId: number;
     public _requestRetries: number;
@@ -172,17 +190,18 @@ export abstract class TelegramBaseClient {
     _isSwitchingDc: boolean;
     _maxConcurrentDownloads: number;
     _securityChecks: boolean;
-    public networkSocket: typeof PromisedNetSockets;
+    public networkSocket: SocketFactory;
     public _keepAliveInterval?: number;
     _connectedDeferred: Deferred<void>;
     public updateManager!: UpdateManager;
 
     constructor(
-        session: string | Session,
+        session: string | S,
         apiId: number,
         apiHash: string,
         clientParams: TelegramClientParams
     ) {
+        const explicitConnection = clientParams.connection !== undefined;
         clientParams = { ...clientParamsDefault, ...clientParams };
         if (!apiId || !apiHash) {
             throw new Error("Your API ID or Hash cannot be empty or undefined");
@@ -194,7 +213,7 @@ export abstract class TelegramBaseClient {
         }
         this._log.info("Running teleproto");
         if (session && typeof session == "string") {
-            session = new StoreSession(session);
+            session = new StoreSession(session) as unknown as S;
         }
         if (!(session instanceof Session)) {
             throw new Error(
@@ -222,6 +241,9 @@ export abstract class TelegramBaseClient {
             throw new Error("Connection should be a class not an instance");
         }
         this._connection = clientParams.connection;
+        if (!explicitConnection && this.networkSocket.isWebSocket) {
+            this._connection = ConnectionTCPObfuscated;
+        }
         this._initRequest = new Api.InitConnection({
             apiId: this.apiId,
             deviceModel:
@@ -307,6 +329,23 @@ export abstract class TelegramBaseClient {
             }
             this.session.testServers = this._testServers;
             this._useIPV6 = this.session.serverAddress.includes(":");
+        }
+        if (this.networkSocket.isWebSocket) {
+            if (!this.session.serverAddress.endsWith(".web.telegram.org")) {
+                const address = webSocketDcAddress(this.session.dcId);
+                if (address) {
+                    this.session.setDC(this.session.dcId, address, DC_PORT);
+                }
+            }
+        } else if (this.session.serverAddress.endsWith(".web.telegram.org")) {
+            const ipv4Table = this._testServers ? TEST_DC_IPV4 : PROD_DC_IPV4;
+            const ipv6Table = this._testServers ? TEST_DC_IPV6 : PROD_DC_IPV6;
+            const ip = (this._useIPV6 ? ipv6Table : ipv4Table)[
+                this.session.dcId
+            ];
+            if (ip) {
+                this.session.setDC(this.session.dcId, ip, DC_PORT);
+            }
         }
     }
 

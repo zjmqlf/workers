@@ -1,7 +1,11 @@
 import {
     Logger,
-    PromisedNetSockets,
 } from "../../extensions";
+import type {
+    PacketReader,
+    SocketFactory,
+    SocketInterface,
+} from "../../extensions/SocketInterface";
 import { AbridgedPacketCodec } from "./TCPAbridged";
 import { FullPacketCodec } from "./TCPFull";
 import { Buffer } from "node:buffer";
@@ -11,7 +15,7 @@ interface ConnectionInterfaceParams {
     port: number;
     dcId: number;
     loggers: Logger;
-    socket: typeof PromisedNetSockets;
+    socket: SocketFactory;
     keepAliveInterval?: number;
 }
 
@@ -25,7 +29,7 @@ class Connection {
     _connected: boolean;
     protected _codec: any;
     protected _obfuscation: any;
-    socket: PromisedNetSockets;
+    socket: SocketInterface;
 
     constructor({
         ip,
@@ -138,7 +142,7 @@ class PacketCodec {
     }
 
     async readPacket(
-        reader: PromisedNetSockets
+        reader: PacketReader
     ): Promise<Buffer> {
         throw new Error("Not Implemented");
     }

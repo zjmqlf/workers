@@ -1,7 +1,7 @@
 import { Connection, PacketCodec } from "./Connection";
 import { crc32 } from "../../Helpers";
 import { InvalidBufferError, InvalidChecksumError } from "../../errors";
-import type { PromisedNetSockets } from "../../extensions";
+import type { PacketReader } from "../../extensions/SocketInterface";
 import { Buffer } from "node:buffer";
 
 export class FullPacketCodec extends PacketCodec {
@@ -25,7 +25,7 @@ export class FullPacketCodec extends PacketCodec {
     }
 
     async readPacket(
-        reader: PromisedNetSockets
+        reader: PacketReader
     ): Promise<Buffer> {
         const lenBuf = await reader.readExactly(4);
         if (lenBuf === undefined) {
