@@ -3,6 +3,10 @@
   "name": "lockhive",
   "main": "lockhive.js",
   "vars": {
+    "APP_NAME": "lockhive",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8971565760",
     "BOT_HASH": "-5452475782277061610",
   },

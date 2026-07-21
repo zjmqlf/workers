@@ -3,6 +3,10 @@
   "name": "uujie",
   "main": "uujie.js",
   "vars": {
+    "APP_NAME": "uujie",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8818094610",
     "BOT_HASH": "4220181957029002783",
   },

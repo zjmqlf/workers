@@ -1204,7 +1204,7 @@ export class WebSocketServer extends DurableObject {
           this.sendLog(clientIndex, "getMessage", this.tg[clientIndex].endChat + " : 超过最大chat了", null, true);
           await this.nextFilter(clientIndex);
         }
-      } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+      } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // this.waitTime += 120000;
         if (err.seconds && err.seconds > 0) {
           this.tg[clientIndex].flood = new Date().getTime() + 60000 + err.seconds * 1000;
@@ -1430,7 +1430,7 @@ export class WebSocketServer extends DurableObject {
           this.sendForward(clientIndex, "forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, 0, "error", true);
           await this.getNext(clientIndex);
           return;
-        } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+        } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
           this.tg[clientIndex].count = 0;
           // this.waitTime += 120000;
           if (err.seconds && err.seconds > 0) {
@@ -2410,7 +2410,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName(env.ID_NAME);
+      const id = env.WEBSOCKET_SERVER.idFromName(env.APP_NAME);
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }

@@ -3,6 +3,10 @@
   "name": "jiematop",
   "main": "jiematop.js",
   "vars": {
+    "APP_NAME": "jiematop",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8908766090",
     "BOT_HASH": "4697995986322785712",
   },

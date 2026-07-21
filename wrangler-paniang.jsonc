@@ -3,6 +3,10 @@
   "name": "paniang",
   "main": "paniang.js",
   "vars": {
+    "APP_NAME": "paniang",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8750402925",
     "BOT_HASH": "-7157880297278168937",
   },

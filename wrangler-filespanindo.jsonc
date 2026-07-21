@@ -3,6 +3,10 @@
   "name": "filespanindo",
   "main": "filespanindo.js",
   "vars": {
+    "APP_NAME": "filespanindo",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8547046053",
     "BOT_HASH": "-3684405776559152057",
   },

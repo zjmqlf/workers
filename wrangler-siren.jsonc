@@ -3,6 +3,10 @@
   "name": "siren",
   "main": "siren.js",
   "vars": {
+    "APP_NAME": "siren",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "7779623516",
     "BOT_HASH": "-155601061109810553",
   },

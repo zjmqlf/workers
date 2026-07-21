@@ -3,6 +3,10 @@
   "name": "tebiejie",
   "main": "tebiejie.js",
   "vars": {
+    "APP_NAME": "tebiejie",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8468014882",
     "BOT_HASH": "-1717425434517032221",
   },

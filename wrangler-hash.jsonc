@@ -3,6 +3,10 @@
   "name": "hash",
   "main": "hash.js",
   "vars": {
+    "APP_NAME": "hash",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "MEDIA_DB_INDEX": 21,
     "PHOTO_DB_INDEX": 1,
   },

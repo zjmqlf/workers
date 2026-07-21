@@ -3,6 +3,10 @@
   "name": "hikkitusbolpaijo",
   "main": "hikkitusbolpaijo.js",
   "vars": {
+    "APP_NAME": "hikkitusbolpaijo",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8718756852",
     "BOT_HASH": "2206641291710006927",
   },

@@ -484,11 +484,8 @@ export class WebSocketServer extends DurableObject {
   }
 
   async open(tryCount) {
-    const apiId = 1334621;
-    const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7f4mxXoaNQUpf9BBT1+W86HfUeE1amMhwy/C48BYf8CMxuRZndMKz9GlJCMzLJCXksxFWF8SFm1O1WwqrXdjuuKe4+2bYTH1nx0VvNFC5He857JO39sb4ruDsdXHwESXqFB5HUUFCbKdCwMce5jenU7Yf2NJwQkKAX2lQ0x+lElh5+rzcA/SYbiwtHly1sVvpgMdjAxD24nY50Og9ouAcMVeZqBsgSlA9wxwfu8wXPomx0rkcAYD4yYSyH0qj5BSxf3/F8nOcLaMiCBd6WUAJBjxd4lnhIwGVFlqpNdl9ntlNG4JM+VkbsgnRnA9wz6rsuEep5tjZrXrOwb34UcTowg==";
     try {
-      this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
+      this.client = new TelegramClient(new sessions.StringSession(this.env.SESSION_STRING), this.env.API_ID, this.env.API_HASH, {
         connectionRetries: Number.MAX_VALUE,
         autoReconnect: true,
         deviceModel: "Desktop",
@@ -1194,7 +1191,7 @@ export class WebSocketServer extends DurableObject {
           // console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
-      } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+      } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
       } else {
@@ -1247,7 +1244,7 @@ export class WebSocketServer extends DurableObject {
         );
         return results;
       } catch (err) {
-        if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+        if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
           // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
           this.sendLog("getHash", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
         }
@@ -3027,7 +3024,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("tg");
+      const id = env.WEBSOCKET_SERVER.idFromName(env.APP_NAME);
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     // } else if (pathname === "/clear") {

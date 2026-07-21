@@ -394,5 +394,8 @@
   "DEANIgniteNations_bot_col:lEQdn5OpVYgYhcqM6Gtp0cO8pNGpxIIU",
   "DEANIgniteNations_bot_v:TMv3ClFKfQhPrY7kTQgKLGLx7gl2zYlI",
   "DEANIgniteNations_bot_p:RmDMpzNavSWUtPApfcRR3OW5iWoD0f08",
-  "DEANIgniteNations_bot_v:HmXwbsxWXhWnfUGWsVFZoHHIND9CfScX"
+  "DEANIgniteNations_bot_v:HmXwbsxWXhWnfUGWsVFZoHHIND9CfScX",
+  "DEANIgniteNations_bot_v:JYMlbTO4VprXyubuZCq4p2netBQFKVtY",
+  "DEANIgniteNations_bot_v:qqOSl19YcWgcS5IJ1bwiAxt9YjKtT7GU",
+  "DEANIgniteNations_bot_col:07e4Hr3bNC53HxX0eAgURVi6leQUpPPH"
 ]

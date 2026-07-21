@@ -3,6 +3,10 @@
   "name": "kfcmnb",
   "main": "kfcmnb.js",
   "vars": {
+    "APP_NAME": "kfcmnb",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "7256426551",
     "BOT_HASH": "240051746403759768",
   },

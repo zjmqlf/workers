@@ -3,6 +3,10 @@
   "name": "massfilesstore",
   "main": "massfilesstore.js",
   "vars": {
+    "APP_NAME": "massfilesstore",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8971285637",
     "BOT_HASH": "-8124017191415174598",
   },

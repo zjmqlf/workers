@@ -7,8 +7,6 @@ import bigInt from "big-integer";
 export class WebSocketServer extends DurableObject {
   // webSocket = [];
   ws = null;
-  botID = bigInt(this.env.BOT_ID);
-  botHash = bigInt(this.env.BOT_HASH);
   stop = 0;
   currentStep = 0;
   compress = false;
@@ -102,8 +100,6 @@ export class WebSocketServer extends DurableObject {
       // this.client = null;
       // this.stop = 0;
       // this.webSocket = [];
-      this.botID = bigInt(this.env.BOT_ID);
-      this.botHash = bigInt(this.env.BOT_HASH);
       this.currentStep = 0;
       this.codes = codeString.slice();
       this.codeLength = this.codes.length;
@@ -302,11 +298,8 @@ export class WebSocketServer extends DurableObject {
   }
 
   async open(tryCount) {
-    const apiId = 1334621;
-    const apiHash = "2bc36173f487ece3052a00068be59e7b";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE0NwG7BOSn4tw5dznEmJS7Z58vPhNf6Oi9oHukQBdWc+bAGh/UKzkp+DAa+OJCDQ2Pt/DYmsPN+xNe6TvnlQFlhGMp1lvMfedMcOWP/ZKU+M7xVizs57ZKk0lGIq0pbdaRwavH7CSdqPyDhLQSLaQs/HRv2ESqxY+SqNB16C0ZBT28vvOEqb3/3MJzbhimVL3ccPiAeEv4vOsc6E0Y+h1d+fM7QuhtwW9wSyD1Jsl5f/kcPK5wahRVV3+ZbCWA6XFaQXZ5pDfDevFKDn/zyOhmwdvqbOKk9rbKU8fqhVnC+5XsVDeZQEqidyOmf6nTF8mJm4P2kR6wrftOXL2Y+nEgOclPNw==";
     try {
-      this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
+      this.client = new TelegramClient(new sessions.StringSession(this.env.SESSION_STRING), this.env.API_ID, this.env.API_HASH, {
         timeout: 5,
         retryDelay: 1000,
         connectionRetries: 5,
@@ -396,7 +389,7 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       this.messageArray = [];
       // this.count = 0;
-      if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+      if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // this.waitTime += 120000;
         if (err.seconds && err.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
@@ -487,7 +480,7 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (err) {
-            if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+            if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
               this.codeIndex -= 1;
               await this.ctx.storage.put("codeIndex", this.codeIndex);
               // this.waitTime += 120000;
@@ -631,7 +624,7 @@ export class WebSocketServer extends DurableObject {
           // // console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? err.message : err);
           this.sendLog("forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, "error", true);
           return false;
-        } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+        } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
           this.count = 0;
           // this.waitTime += 120000;
           if (err.seconds && err.seconds > 0) {
@@ -1018,8 +1011,8 @@ export class WebSocketServer extends DurableObject {
         new Api.users.GetUsers({
           id: [
             new Api.InputUser({
-              userId: this.botID,
-              accessHash: this.botHash,
+              userId: bigInt(this.env.BOT_ID),
+              accessHash: bigInt(this.env.BOT_HASH),
             }),
           ],
         })

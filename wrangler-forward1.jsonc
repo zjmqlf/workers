@@ -3,9 +3,9 @@
   "name": "forward1",
   "main": "forward1.js",
   "vars": {
+    "APP_NAME": "forward1",
     "BEGIN_INDEX": 0,
     "END_INDEX": 20,
-    "ID_NAME": "forward1"
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [

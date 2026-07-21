@@ -361,11 +361,8 @@ export class WebSocketServer extends DurableObject {
   }
 
   async open(tryCount) {
-    const apiId = 25429403;
-    const apiHash = "2bb9a1bfd8f598da6cb5c511f0e5fbdf";
-    const sessionString = "1BQANOTEuMTA4LjU2LjEyMgG7h1nJaYxO7n+3NCoCyKO5Z3vgtybsINQpGDYnqHEbJ70FagSAuISGTvujWlBeLT4f/bSAXS0pthzdO1SWdk8fWyKKL2IH9byAl0ztazHDMHn4ABwk7Cki8D8Qme87EPLORX4lU955yDbe5dpCrWvOgE8V79mdf7YC/2jBWGwUW35pDRYI+6vm6koDDC8lO2LJ1RPr3pux5sOMliaxMKuqNN/XOEFDCCdHfwphu5SHHeSGRxd0ChNbo3xQwwn5PvVx4quTPHaw0eAKZRh/wTs6woBr5Bbf3NfZKX80Oqrk024II8iXNhamHELlPvIG5iJ1fPI6kIn2oXFwmi7gWNsoMw==";
     try {
-      this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
+      this.client = new TelegramClient(new sessions.StringSession(this.env.SESSION_STRING), this.env.API_ID, this.env.API_HASH, {
         connectionRetries: Number.MAX_VALUE,
         autoReconnect: true,
         deviceModel: "Desktop",
@@ -841,7 +838,7 @@ export class WebSocketServer extends DurableObject {
           // console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
-      } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+      } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
         this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
       } else {
@@ -1810,7 +1807,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("pansou");
+      const id = env.WEBSOCKET_SERVER.idFromName(env.APP_NAME);
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     } else if (pathname === "/count") {

@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pansou",
   "main": "pansou.js",
+  "vars": {
+    "APP_NAME": "pansou",
+    "API_ID": 25429403,
+    "API_HASH": "2bb9a1bfd8f598da6cb5c511f0e5fbdf",
+    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjEyMgG7h1nJaYxO7n+3NCoCyKO5Z3vgtybsINQpGDYnqHEbJ70FagSAuISGTvujWlBeLT4f/bSAXS0pthzdO1SWdk8fWyKKL2IH9byAl0ztazHDMHn4ABwk7Cki8D8Qme87EPLORX4lU955yDbe5dpCrWvOgE8V79mdf7YC/2jBWGwUW35pDRYI+6vm6koDDC8lO2LJ1RPr3pux5sOMliaxMKuqNN/XOEFDCCdHfwphu5SHHeSGRxd0ChNbo3xQwwn5PvVx4quTPHaw0eAKZRh/wTs6woBr5Bbf3NfZKX80Oqrk024II8iXNhamHELlPvIG5iJ1fPI6kIn2oXFwmi7gWNsoMw==",
+  },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"

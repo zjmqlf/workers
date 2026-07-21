@@ -3,6 +3,11 @@
   "name": "ryumasepongmilku",
   "main": "ryumasepongmilku.js",
   "vars": {
+  "vars": {
+    "APP_NAME": "ryumasepongmilku",
+    "API_ID": 1334621,
+    "API_HASH": "2bc36173f487ece3052a00068be59e7b",
+    "SESSION_STRING": "",
     "BOT_ID": "8613570788",
     "BOT_HASH": "7003533048444817742",
   },

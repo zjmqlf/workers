@@ -299,11 +299,8 @@ export class WebSocketServer extends DurableObject {
   }
 
   async open(tryCount) {
-    const apiId = 25429403;
-    const apiHash = "2bb9a1bfd8f598da6cb5c511f0e5fbdf";
-    const sessionString = "1BQANOTEuMTA4LjU2LjE4MwG7IWvEvkNunR7nJsoQNgDYFZaO6cBXfvp9aj4uVcOna4S5rIXy8TcFdi2+K0nZSUT6XqW3Hpa192FO5fc1To5tBA+LdfjhiTHJy6wk5/VnO3pBK6FziQBRz3xvjgkDDdnq1WaaBTTDOCepfHI+3GRIkXaI7BA+nZHW68q2PDJ87cXFKQ/zDT/pw/MLQ2waiVvClL+fC/cDKorcsAN0AiCNC7GfGVHHnm4bn+nTzz0Wt8eFrk8uySsFIdvrw0pCGTI49zc72XPz5J7zJDxhTP+4ysmUTpy+uJ/NpSfngU+3vqNKbUI8Qs94NMKFXdwIgcoakw96419P88TNxHaxNI9kIg==";
     try {
-      this.client = new TelegramClient(new sessions.StringSession(sessionString), apiId, apiHash, {
+      this.client = new TelegramClient(new sessions.StringSession(this.env.SESSION_STRING), this.env.API_ID, this.env.API_HASH, {
         connectionRetries: Number.MAX_VALUE,
         autoReconnect: true,
         deviceModel: "Desktop",
@@ -716,7 +713,7 @@ export class WebSocketServer extends DurableObject {
           // console.log(this.endChat + " : 超过最大chat了");  //测试
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
-      } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+      } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
         // this.waitTime += 120000;
         if (err.seconds && err.seconds > 0) {
           this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
@@ -1734,7 +1731,7 @@ export class WebSocketServer extends DurableObject {
           this.sendForward("forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, 0, "error", true);
           await this.getNext();
           return;
-        } else if (err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
+        } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
           this.offsetId -= this.count;
           this.count = 0;
           // this.waitTime += 120000;
@@ -2585,7 +2582,7 @@ export default {
           status: 426,
         });
       }
-      const id = env.WEBSOCKET_SERVER.idFromName("favorites");
+      const id = env.WEBSOCKET_SERVER.idFromName(env.APP_NAME);
       const stub = env.WEBSOCKET_SERVER.get(id);
       return stub.fetch(request);
     }
