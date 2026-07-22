@@ -320,8 +320,8 @@ export class WebSocketServer extends DurableObject {
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
     } catch (err) {
-      // console.log(err instanceof Error ? err.message : err);
-      this.sendLog("open", err instanceof Error ? err.message : err, null, true);
+      // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
@@ -372,8 +372,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'user' AND `tgId` = 999 LIMIT 1;").run();
     } catch (err) {
-      // console.log("getClient : " + err instanceof Error ? err.message : err);
-      this.sendLog("getClient", err instanceof Error ? err.message : err, null, true);
+      // console.log("getClient : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getClient", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -429,8 +429,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'user' AND `tgId` = 999;").bind(this.chatId).run();
     } catch (err) {
-      // console.log("updateClient : " + err instanceof Error ? err.message : err);
-      this.sendLog("updateClient", err instanceof Error ? err.message : err, null, true);
+      // console.log("updateClient : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("updateClient", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -478,8 +478,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'user' AND `tgId` = ? LIMIT 1;").bind(this.chatId).run();
     } catch (err) {
-      // console.log("getConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog("getConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("getConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -553,8 +553,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'user' AND `tgId` = ?;").bind(this.offsetId, this.chatId).run();
     } catch (err) {
-      // console.log("updateConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog("updateConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("updateConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("updateConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -638,8 +638,8 @@ export class WebSocketServer extends DurableObject {
               })
             );
           } catch (err) {
-            // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-            this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
+            // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+            this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
             if (err.message === this.errorMessage) {
               this.stop = 2;
               this.broadcast({
@@ -760,8 +760,8 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       this.messageArray = [];
       // this.count = 0;
-      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
-      this.sendLog("getMessage", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         this.fromPeer = null;
         this.chatId += 1;
@@ -785,8 +785,8 @@ export class WebSocketServer extends DurableObject {
           this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
           await this.ctx.storage.put("client", this.flood);
         }
-        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
-        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
+        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "flood", true);
       } else {
         if (tryCount === 5) {
           this.stop = 2;
@@ -875,8 +875,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(id) FROM `MEDIAINDEX` WHERE `id` = ? AND `accessHash` = ? LIMIT 1;").bind(id, accessHash).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") selectMediaIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("selectMediaIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") selectMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("selectMediaIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -923,8 +923,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     indexResult = await this.env.MEDIADB.prepare("INSERT INTO `MEDIAINDEX` (Vindex, id, accessHash) VALUES (?, ?, ?);").bind(Vindex, id, accessHash).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") insertMediaIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("insertMediaIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") insertMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("insertMediaIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -972,8 +972,8 @@ export class WebSocketServer extends DurableObject {
     try {
       mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(id) FROM `MEDIA` WHERE `id` = ? AND `accessHash` = ? LIMIT 1;").bind(id, accessHash).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") selectMedia : " + err instanceof Error ? err.message : err);
-      this.sendGrid("selectMedia", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") selectMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendGrid("selectMedia", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1020,8 +1020,8 @@ export class WebSocketServer extends DurableObject {
     try {
       mediaResult = await this.env.MEDIADB.prepare("INSERT INTO `MEDIA` (id, accessHash, dcId, fileName, mimeType, size, duration, width, height) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(id, accessHash, dcId, fileName, mimeType, size, duration, width, height).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") insertMedia : " + err instanceof Error ? err.message : err);;
-      this.sendGrid("insertMedia", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") insertMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendGrid("insertMedia", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1087,8 +1087,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(id) FROM `PHOTOINDEX` WHERE `id` = ? AND `accessHash` = ? AND `sizeType` = ? LIMIT 1;").bind(id, accessHash, type).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") selectPhotoIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("selectPhotoIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") selectPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("selectPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -1135,8 +1135,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     photoResult = await this.env.PHOTODB.prepare("INSERT INTO `PHOTOINDEX` (Pindex, id, accessHash, sizeType) VALUES (?, ?, ?, ?);").bind(Pindex, id, accessHash, type).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") insertPhotoIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("insertPhotoIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") insertPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("insertPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -1184,8 +1184,8 @@ export class WebSocketServer extends DurableObject {
     try {
       photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(id) FROM `PHOTO` WHERE `id` = ? AND `accessHash` = ? AND `sizeType` = ? LIMIT 1;").bind(id, accessHash, type).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") selectPhoto : " + err instanceof Error ? err.message : err);
-      this.sendGrid("selectPhoto", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") selectPhoto : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendGrid("selectPhoto", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1232,8 +1232,8 @@ export class WebSocketServer extends DurableObject {
     try {
       photoResult = await this.env.PHOTODB.prepare("INSERT INTO `PHOTO` (id, accessHash, dcId, sizeType, size) VALUES (?, ?, ?, ?, ?);").bind(id, accessHash, dcId, type, size).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") (" + photoLength +"/" + photoIndex + ") insertPhoto : " + err instanceof Error ? err.message : err);
-      this.sendPhoto("insertPhoto", err instanceof Error ? err.message : err, photoIndex, "try", true);
+      // console.log("(" + this.currentStep + ") (" + photoLength +"/" + photoIndex + ") insertPhoto : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendPhoto("insertPhoto", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, photoIndex, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1299,8 +1299,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `userId` = ? AND `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") selectMediaMessageIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("selectMediaMessageIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") selectMediaMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("selectMediaMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -1347,8 +1347,8 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MESSAGEDB.prepare("SELECT `Mindex`, COUNT(id) FROM `MESSAGE` WHERE `userId` = ? AND `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") selectMediaMessage : " + err instanceof Error ? err.message : err);
-      this.sendGrid("selectMediaMessage", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") selectMediaMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendGrid("selectMediaMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1395,8 +1395,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `userId` = ? AND `id` = ? AND `sizeType` = ? LIMIT 1;").bind(this.chatId, messageId, type).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") selectPhotoMessageIndex : " + err instanceof Error ? err.message : err);
-  //     this.sendGrid("selectPhotoMessageIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") selectPhotoMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //     this.sendGrid("selectPhotoMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -1443,8 +1443,8 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MESSAGEDB.prepare("SELECT `Mindex`, COUNT(id) FROM `MESSAGE` WHERE `userId` = ? AND `id` = ? AND `sizeType` = ? LIMIT 1;").bind(this.chatId, messageId, type).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") selectPhotoMessage : " + err instanceof Error ? err.message : err);
-      this.sendGrid("selectPhotoMessage", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") selectPhotoMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendGrid("selectPhotoMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1491,8 +1491,8 @@ export class WebSocketServer extends DurableObject {
   //   try {
   //     messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?);").bind(this.messageDBIndex, this.chatId, Mindex, id).run();
   //   } catch (err) {
-  //     // console.log("(" + this.currentStep + ") insertMessageIndex : " + err instanceof Error ? err.message : err);;
-  //     this.sendGrid("insertMessageIndex", err instanceof Error ? err.message : err, "try", true);
+  //     // console.log("(" + this.currentStep + ") insertMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+  //     this.sendGrid("insertMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
   //     if (err.message === this.errorMessage) {
   //       this.stop = 2;
   //       this.broadcast({
@@ -1540,8 +1540,8 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MESSAGEDB.prepare("INSERT INTO `MESSAGE` (userId, id, category, sizeType, mid, accessId, accessHash, txt) VALUES (?, ?, ?, ?, ?, ?, ?, ?);").bind(this.chatId, messageId, category, type, mid, id, accessHash, txt).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") insertMessage : " + err instanceof Error ? err.message : err);;
-      this.sendGrid("insertMessage", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ") insertMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendGrid("insertMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1975,13 +1975,13 @@ export class WebSocketServer extends DurableObject {
         // this.sendLog("forwardMessage", JSON.stringify(forwardResult), null, false);
       } catch (err) {
         if (err.errorMessage === "RANDOM_ID_DUPLICATE" || err.code === 500) {
-          // console.log("(" + this.currentStep + ") " + err instanceof Error ? err.message : err);
-          this.sendForward("forwardMessage", err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward("forwardMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
         } else if (err.errorMessage === "CHAT_FORWARDS_RESTRICTED" || err.code === 400) {
           // this.offsetId += this.count;
           this.count = 0;
-          // console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? err.message : err);
-          this.sendForward("forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward("forwardMessage", "消息不允许转发 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
           await this.getNext();
           return;
         } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
@@ -1992,13 +1992,13 @@ export class WebSocketServer extends DurableObject {
             this.flood = new Date().getTime() + 60000 + err.seconds * 1000;
             await this.ctx.storage.put("client", this.flood);
           }
-          // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
-          this.sendForward("forwardMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, 0, "flood", true);
+          // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward("forwardMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "flood", true);
           return;
         } else {
           this.count = 0;
-          // console.log("(" + this.currentStep + ") 转发消息时发生错误 : " + err instanceof Error ? err.message : err);
-          this.sendForward("forwardMessage", "转发消息时发生错误 : " + err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") 转发消息时发生错误 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward("forwardMessage", "转发消息时发生错误 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
           return;
         }
       }
@@ -2536,8 +2536,8 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (err) {
       this.dialogArray = [];
-      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? err.message : err);
-      this.sendLog("getDialog", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getDialog", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")getDialog超出tryCount限制");
@@ -2583,8 +2583,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT COUNT(Cindex) FROM `FORWARDCHAT` WHERE `tgId` = 0 AND `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
     } catch (err) {
-      // console.log("selectChat : " + err instanceof Error ? err.message : err);
-      this.sendLog("selectChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -2631,8 +2631,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("INSERT INTO `FORWARDCHAT` (tgId, channelId, accessHash, chatType, username, title, noforwards, current, photo, video, document, gif, currentForward, photoForward, videoForward, documentForward, gifForward, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(0, channelId, accessHash, chatType, username, title, noforwards, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1).run();
     } catch (err) {
-      // console.log("insertChat : " + err instanceof Error ? err.message : err);;
-      this.sendLog("insertChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("insertChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendLog("insertChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -2756,8 +2756,8 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        // console.log("parse : " + err instanceof Error ? err.message : err);
-        this.sendLog("webSocketMessage", err instanceof Error ? err.message : err, null, true);
+        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("webSocketMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       }
     // }
     if (command === "start") {

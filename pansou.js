@@ -378,8 +378,8 @@ export class WebSocketServer extends DurableObject {
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
     } catch (err) {
-      // console.log(err instanceof Error ? err.message : err);
-      this.sendLog("open", err instanceof Error ? err.message : err, null, true);
+      // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
@@ -430,8 +430,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `name` = 'pansou' LIMIT 1;").run();
     } catch (err) {
-      // console.log("getConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog("getConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("getConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -499,8 +499,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `PANCHAT` SET `exist` = 0 WHERE `Cindex` = ?;").bind(Cindex).run();
     } catch (err) {
-      // console.log("noExistChat : " + err instanceof Error ? err.message : err);
-      this.sendLog("noExistChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("noExistChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("noExistChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -534,8 +534,8 @@ export class WebSocketServer extends DurableObject {
           })],
         }));
       } catch (err) {
-        // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-        this.sendLog("checkChat", err instanceof Error ? err.message : err, null, true);
+        // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("checkChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
         if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
           await this.noExistChat(1, chatResult.Cindex);
           this.chatId += 1;
@@ -641,8 +641,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `Cindex` >= ? AND `exist` = 1 LIMIT 1;").bind(this.chatId).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-      this.sendLog("nextChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("nextChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -685,8 +685,8 @@ export class WebSocketServer extends DurableObject {
           chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `Cindex` = 0 LIMIT 1;").run();
         } catch (err) {
           tryCount += 1;
-          // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? err.message : err);
-          this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
+          // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
           if (err.message === this.errorMessage) {
             this.stop = 2;
             this.broadcast({
@@ -725,8 +725,8 @@ export class WebSocketServer extends DurableObject {
             chatResult = await this.env.MAINDB.prepare("SELECT * FROM `PANCHAT` WHERE `current` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").run();
           } catch (err) {
             tryCount += 1;
-            // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? err.message : err);
-            this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
+            // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+            this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
             await scheduler.wait(10000);
             return;
           }
@@ -777,8 +777,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ? WHERE `name` = 'pansou';").bind(this.chatId).run();
     } catch (err) {
-      // console.log("updateConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog("updateConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("updateConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("updateConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -824,8 +824,8 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (err) {
       this.messageArray = [];
-      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
-      this.sendLog("getMessage", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         await this.noExistChat(1, this.chatId);
         this.fromPeer = null;
@@ -839,8 +839,8 @@ export class WebSocketServer extends DurableObject {
           this.sendLog("getMessage", this.endChat + " : 超过最大chat了", null, true);
         }
       } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
-        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
-        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
+        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "flood", true);
       } else {
         if (tryCount === 5) {
           this.stop = 2;
@@ -873,8 +873,8 @@ export class WebSocketServer extends DurableObject {
   //   // try {
   //   //   cacheResult = await fetch(`https://index.zjmqlf2022.workers.dev/getDB?chatId=${this.chatId}&id=${messageId}`);
   //   // } catch (err) {
-  //   //   // console.log(err instanceof Error ? err.message : err);
-  //   //   this.sendLog("selectMessageIndex", err instanceof Error ? err.message : err, null, true);
+  //   //   // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //   //   this.sendLog("selectMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
   //   //   if (tryCount === 5) {
   //   //     this.stop = 2;
   //   //     // console.log("(" + this.currentStep + ")selectMessageIndex超出tryCount限制");
@@ -931,8 +931,8 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.PANSOUDB.prepare("SELECT COUNT(id) FROM `PANMESSAGE` WHERE `chatId` = ? AND  `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage : " + err instanceof Error ? err.message : err);
-      this.sendGrid("selectMessage", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendGrid("selectMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -979,8 +979,8 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.PANSOUDB.prepare("INSERT INTO `PANMESSAGE` (chatId, id, txt, webpage, url) VALUES (?, ?, ?, ?, ?);").bind(this.chatId, messageId, txt, id, url).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage : " + err instanceof Error ? err.message : err);;
-      this.sendGrid("insertMessage", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendGrid("insertMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1012,8 +1012,8 @@ export class WebSocketServer extends DurableObject {
   //   //   // cacheResult = await this.env.SERVERS.fetch(`https://test.zjmqlf2022.workers.dev/put?chatId=${this.chatId}&id=${messageId}&dbId=1`);
   //   //   cacheResult = await fetch(`https://index.zjmqlf2022.workers.dev/put?chatId=${this.chatId}&id=${messageId}&dbId=1`);
   //   // } catch (err) {
-  //   //   // console.log(err instanceof Error ? err.message : err);
-  //   //   this.sendLog("insertMessageIndex", err instanceof Error ? err.message : err, null, true);
+  //   //   // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+  //   //   this.sendLog("insertMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
   //   //   if (tryCount === 5) {
   //   //     this.stop = 2;
   //   //     // console.log("(" + this.currentStep + ")insertMessageIndex超出tryCount限制");
@@ -1073,8 +1073,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `PANCHAT` SET `current` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.offsetId, new Date().getTime(), this.chatId).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? err.message : err);
-      this.sendLog("updateChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("updateChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1397,8 +1397,8 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (err) {
       this.dialogArray = [];
-      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? err.message : err);
-      this.sendLog("getDialog", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getDialog", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")getDialog超出tryCount限制");
@@ -1444,8 +1444,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT COUNT(Cindex) FROM `PANCHAT` WHERE `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
     } catch (err) {
-      // console.log("selectChat : " + err instanceof Error ? err.message : err);
-      this.sendLog("selectChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1492,8 +1492,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("INSERT INTO `PANCHAT` (channelId, accessHash, username, title, current, exist) VALUES (?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, username, title, 0, 1).run();
     } catch (err) {
-      // console.log("insertChat : " + err instanceof Error ? err.message : err);;
-      this.sendLog("insertChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("insertChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendLog("insertChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1606,8 +1606,8 @@ export class WebSocketServer extends DurableObject {
       try {
         messageResult = await this.env.PANSOUDB.prepare("SELECT `Mindex`,`id` FROM `PANMESSAGE` WHERE `chatId` = ? AND  `Mindex` >= ? ORDER BY Mindex ASC LIMIT 0,20;").bind(this.chatId, this.offsetId).run();
       } catch (err) {
-        // console.log("(" + this.currentStep + ")cache : " + err instanceof Error ? err.message : err);
-        this.sendLog("cache", err instanceof Error ? err.message : err, "try", true);
+        // console.log("(" + this.currentStep + ")cache : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("cache", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
         if (err.message === this.errorMessage) {
           this.stop = 2;
           this.broadcast({
@@ -1692,8 +1692,8 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        // console.log("parse : " + err instanceof Error ? err.message : err);
-        this.sendLog("webSocketMessage", err instanceof Error ? err.message : err, null, true);
+        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("webSocketMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       }
     // }
     if (command === "start") {

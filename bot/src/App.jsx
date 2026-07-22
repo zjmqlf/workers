@@ -57,7 +57,7 @@ const App = () => {
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ width: "65%", height: "95%" }), []);
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
-  const [isCollectBtnDisabled, setCollectBtnDisabled] = useState(true);
+  const [isConnectBtnDisabled, setConnectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
   const [isClearGridBtnDisabled, setClearGridBtnDisabled] = useState(true);
   const [isClearLogBtnDisabled, setClearLogBtnDisabled] = useState(true);
@@ -227,7 +227,7 @@ const App = () => {
   //   const rowNodeIndex = event.node?.rowIndex;
   //   // console.log(rowNodeIndex);  //测试
   //   if (rowNodeIndex > 0) {
-  //     gridRef.current.api.ensureIndexVisible(rowNodeIndex, 'middle');
+  //     gridRef.current.api.ensureIndexVisible(rowNodeIndex, "middle");
   //   }
   // }, []);
 
@@ -351,15 +351,16 @@ const App = () => {
   }, [updateLastRow, getLastRow]);
 
   const handleBeforeUnload = useCallback((event) => {
-    event.preventDefault();
-    event.returnValue = '程序正在运行中，确定要关闭吗？';
+    if (!confirm("程序正在运行中，确定要关闭吗？")) {
+      event.preventDefault();
+    }
   }, []);
 
   const handlerBtn = useCallback((status) => {
-    setCollectBtnDisabled(status);
+    setConnectBtnDisabled(status);
     setCloseBtnDisabled(status);
     setNextBtnDisabled(status);
-  }, [setCollectBtnDisabled, setCloseBtnDisabled, setNextBtnDisabled]);
+  }, [setConnectBtnDisabled, setCloseBtnDisabled, setNextBtnDisabled]);
 
   const handlerBtnUnable = useCallback(() => {
     handlerBtn(true);
@@ -386,8 +387,8 @@ const App = () => {
     if (errorCount.current === 10) {
       waitTime.current = 300000;
     }
-    window.removeEventListener('beforeunload', handleBeforeUnload);
-    window.removeEventListener('popstate', handleBeforeUnload);
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.removeEventListener("popstate", handleBeforeUnload);
     if (lastRow.current) {
       gridRef.current.api.redrawRows({
         rowNodes: [lastRow.current],
@@ -521,7 +522,7 @@ const App = () => {
     }, 60000);
  }, [addNewEvent, renderTime]);
 
-  const collectWS = useCallback((command) => {
+  const connectWS = useCallback((command) => {
     //const url = "wss://bot.19425.xyz/ws";  //测试
     const url = new URL(window.location);
     url.protocol = "wss";
@@ -547,8 +548,8 @@ const App = () => {
           waitTime.current = 30000;
         }
       }
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      window.addEventListener('popstate', handleBeforeUnload);
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("popstate", handleBeforeUnload);
       if (lastRow.current) {
         gridRef.current.api.redrawRows({
           rowNodes: [lastRow.current],
@@ -639,7 +640,7 @@ const App = () => {
           "message": renderTime(Date.now()) + "  >>> 连接远程websocket",
         });
         try {
-          collectWS(command);
+          connectWS(command);
         } catch (e) {
           handlerBtnUnable();
           // console.log("连接远程websocket失败");  //测试
@@ -657,7 +658,7 @@ const App = () => {
         });
       }
     }, time);
-  }, [addNewEvent, renderTime, handlerBtnEnable, collectWS, handlerBtnUnable, waitReconnect]);
+  }, [addNewEvent, renderTime, handlerBtnEnable, connectWS, handlerBtnUnable, waitReconnect]);
 
   const handlerMessageError = useCallback((message) => {
     addNewEvent({
@@ -697,7 +698,7 @@ const App = () => {
     }
   }, [setPauseBtnText, handlerBtn, handlerBtnEnable, handlerMessageError, waitReconnect, pauseBtnText]);
 
-  const handlerCollectBtnClick = useCallback(() => {
+  const handlerConnectBtnClick = useCallback(() => {
     handlerBtnUnable();
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -706,7 +707,7 @@ const App = () => {
       } catch (e) {
         // console.log(e);  //测试
         handlerBtnEnable();
-        handlerMessageError("  >>> collect失败");
+        handlerMessageError("  >>> connect失败");
       }
     } else {
       handlerBtnEnable();
@@ -966,12 +967,13 @@ const App = () => {
 
   // useEffect(() => {
   //   const handleBeforeUnload = (event) => {
-  //     //event.preventDefault();
-  //     event.returnValue = '程序正在运行，确定要关闭吗？';
+  //     if (!confirm("程序正在运行中，确定要关闭吗？")) {
+  //       event.preventDefault();
+  //     }
   //   };
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
   //   return () => {
-  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
   //   };
   // }, []);
 
@@ -995,7 +997,7 @@ const App = () => {
           />
           <div style={{ width: "100%", height: "5%" }}>
             <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
-            <button onClick={handlerCollectBtnClick} disabled={isCollectBtnDisabled}>断开</button>
+            <button onClick={handlerConnectBtnClick} disabled={isConnectBtnDisabled}>断开</button>
             <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
             <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
             <button onClick={handlerClearCacheBtnClick}>清空cache</button>

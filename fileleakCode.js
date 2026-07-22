@@ -216,8 +216,8 @@ export class WebSocketServer extends DurableObject {
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
     } catch (err) {
-      // console.log("open : " + err instanceof Error ? err.message : err);
-      this.sendLog("open", err instanceof Error ? err.message : err, null, true);
+      // console.log("open : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
@@ -255,8 +255,8 @@ export class WebSocketServer extends DurableObject {
         })
       );
     } catch (err) {
-      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-      this.sendLog("getChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         // console.log("chat已不存在了");  //测试
         this.sendLog("getChat", "chat已不存在了", null, true);
@@ -320,8 +320,8 @@ export class WebSocketServer extends DurableObject {
         // console.log("chat已不存在了");  //测试
         this.sendLog("getMessage", "chat已不存在了", null, true);
       } else {
-        // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
-        this.sendLog("getMessage", err instanceof Error ? err.message : err, null, true);
+        // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
         if (tryCount === 5) {
           this.stop = 2;
           // console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
@@ -368,8 +368,8 @@ export class WebSocketServer extends DurableObject {
     try {
       codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? AND `chatId` = 2 LIMIT 1;").bind(code).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode : " + err instanceof Error ? err.message : err);
-      this.sendLog("selectCode", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("selectCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -416,8 +416,8 @@ export class WebSocketServer extends DurableObject {
     try {
       codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, status) VALUES (?, ?, ?);").bind(2, code, 0).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode : " + err instanceof Error ? err.message : err);;
-      this.sendLog("insertCode", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendLog("insertCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -688,8 +688,8 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        // console.log("parse : " + err instanceof Error ? err.message : err);
-        this.sendLog("webSocketMessage", err instanceof Error ? err.message : err, null, true);
+        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog("webSocketMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       }
     // }
     if (command === "start") {

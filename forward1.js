@@ -530,8 +530,8 @@ export class WebSocketServer extends DurableObject {
       this.tg[clientIndex].client.setLogLevel(LogLevel.ERROR);
       await this.tg[clientIndex].client.connect();
     } catch (err) {
-      // console.log(err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "open", err instanceof Error ? err.message : err, null, true);
+      // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
         this.sendLog(clientIndex, "open", "超出tryCount限制", null, true);
@@ -629,8 +629,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("INSERT INTO `CONFIG` (tgId, name, chatId, reverse, limited) VALUES (?, ?, ?, ?, ?);").bind(this.tg[clientIndex].clientId, 'forward', this.tg[clientIndex].chatId, this.tg[clientIndex].reverse, this.tg[clientIndex].limit).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] insertConfig : " + err instanceof Error ? err.message : err);;
-      this.sendLog(clientIndex, "insertConfig", err instanceof Error ? err.message : err, "try", true);
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] insertConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendLog(clientIndex, "insertConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -677,8 +677,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("SELECT * FROM `CONFIG` WHERE `tgId` = ? AND `name` = 'forward' LIMIT 1;").bind(this.tg[clientIndex].clientId).run();
     } catch (err) {
-      // console.log("getConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "getConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("getConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "getConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -764,8 +764,8 @@ export class WebSocketServer extends DurableObject {
     try {
       configResult = await this.env.MAINDB.prepare("UPDATE `CONFIG` SET `chatId` = ?, `filterType` = ? WHERE `tgId` = ? AND `name` = 'forward';").bind(this.tg[clientIndex].chatId, this.tg[clientIndex].filterType, this.tg[clientIndex].clientId).run();
     } catch (err) {
-      // console.log("updateConfig : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "updateConfig", err instanceof Error ? err.message : err, null, true);
+      // console.log("updateConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "updateConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -830,8 +830,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `exist` = 0 WHERE `Cindex` = ?;").bind(Cindex).run();
     } catch (err) {
-      // console.log("noExistChat : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "noExistChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("noExistChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "noExistChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -878,8 +878,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `noforwards` = 1 WHERE `Cindex` = ?;").bind(Cindex).run();
     } catch (err) {
-      // console.log("noforwardChat : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "noforwardChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("noforwardChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "noforwardChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -922,8 +922,8 @@ export class WebSocketServer extends DurableObject {
           })],
         }));
       } catch (err) {
-        // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-        this.sendLog(clientIndex, "checkChat", err instanceof Error ? err.message : err, null, true);
+        // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog(clientIndex, "checkChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
         if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
           await this.noExistChat(clientIndex, 1, chatResult.Cindex);
           this.tg[clientIndex].chatId += 1;
@@ -1047,8 +1047,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT * FROM `FORWARDCHAT` WHERE `tgId` = ? AND `Cindex` >= ? AND `noforwards` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").bind(this.tg[clientIndex].clientId, this.tg[clientIndex].chatId).run();
     } catch (err) {
-      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "nextChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "nextChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1112,8 +1112,8 @@ export class WebSocketServer extends DurableObject {
             chatResult = await this.env.MAINDB.prepare("SELECT * FROM `FORWARDCHAT` WHERE `tgId` = ? AND `Cindex` > ? AND `noforwards` = 0 AND `exist` = 1 ORDER BY `Cindex` ASC LIMIT 1;").bind(this.tg[clientIndex].clientId, this.tg[clientIndex].chatId).run();
           } catch (err) {
             tryCount += 1;
-            // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? err.message : err);
-            this.sendLog(clientIndex, "getChat", err instanceof Error ? err.message : err, null, true);
+            // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+            this.sendLog(clientIndex, "getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
             if (err.message === this.errorMessage) {
               this.stop = 2;
               this.broadcast({
@@ -1189,8 +1189,8 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       this.messageArray = [];
       // this.tg[clientIndex].count = 0;
-      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "getMessage", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         await this.noExistChat(clientIndex, 1, this.tg[clientIndex].chatId);
         this.tg[clientIndex].fromPeer = null;
@@ -1210,8 +1210,8 @@ export class WebSocketServer extends DurableObject {
           this.tg[clientIndex].flood = new Date().getTime() + 60000 + err.seconds * 1000;
           await this.ctx.storage.put("client" + this.tg[clientIndex].clientId, this.tg[clientIndex].flood);
         }
-        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
-        this.sendLog(clientIndex, "getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, "flood", true);
+        // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendLog(clientIndex, "getMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "flood", true);
       } else {
         if (tryCount === 5) {
           // console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
@@ -1267,8 +1267,8 @@ export class WebSocketServer extends DurableObject {
         chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `gifForward` = ?, `updated` = ? WHERE `Cindex` = ?;").bind(this.tg[clientIndex].offsetId, new Date().getTime(), this.tg[clientIndex].chatId).run();
       }
     } catch (err) {
-      // console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "updateChat", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "updateChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -1421,13 +1421,13 @@ export class WebSocketServer extends DurableObject {
         // this.sendLog(clientIndex, "forwardMessage", JSON.stringify(forwardResult), null, false);
       } catch (err) {
         if (err.errorMessage === "RANDOM_ID_DUPLICATE" || err.code === 500) {
-          // console.log("(" + this.currentStep + ") " + err instanceof Error ? err.message : err);
-          this.sendForward(clientIndex, "forwardMessage", err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward(clientIndex, "forwardMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
         } else if (err.errorMessage === "CHAT_FORWARDS_RESTRICTED" || err.code === 400) {
           this.tg[clientIndex].offsetId += this.tg[clientIndex].count;
           this.tg[clientIndex].count = 0;
-          // console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? err.message : err);
-          this.sendForward(clientIndex, "forwardMessage", "消息不允许转发 : " + err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") 消息不允许转发 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward(clientIndex, "forwardMessage", "消息不允许转发 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
           await this.getNext(clientIndex);
           return;
         } else if (err.name === "FloodWaitError" || err.errorMessage?.includes("FLOOD_WAIT_") === true || err.code === 420) {
@@ -1437,13 +1437,13 @@ export class WebSocketServer extends DurableObject {
             this.tg[clientIndex].flood = new Date().getTime() + 60000 + err.seconds * 1000;
             await this.ctx.storage.put("client" + this.tg[clientIndex].clientId, this.tg[clientIndex].flood);
           }
-          // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err);
-          this.sendForward(clientIndex, "forwardMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? err.message : err, 0, "flood", true);
+          // console.log("(" + this.currentStep + ") 触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward(clientIndex, "forwardMessage", "触发了洪水警告，请求太频繁 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "flood", true);
           return;
         } else {
           this.tg[clientIndex].count = 0;
-          // console.log("(" + this.currentStep + ") 转发消息时发生错误 : " + err instanceof Error ? err.message : err);
-          this.sendForward(clientIndex, "forwardMessage", "转发消息时发生错误 : " + err instanceof Error ? err.message : err, 0, "error", true);
+          // console.log("(" + this.currentStep + ") 转发消息时发生错误 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+          this.sendForward(clientIndex, "forwardMessage", "转发消息时发生错误 : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, 0, "error", true);
           return;
         }
       }
@@ -2052,8 +2052,8 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (err) {
       this.dialogArray = [];
-      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "getDialog", err instanceof Error ? err.message : err, null, true);
+      // console.log("(" + this.currentStep + ")getDialog : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "getDialog", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         // console.log("(" + this.currentStep + ")getDialog超出tryCount限制");
         this.sendLog(clientIndex, "getDialog", "超出tryCount限制", null, true);
@@ -2097,8 +2097,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("SELECT COUNT(Cindex) FROM `FORWARDCHAT` WHERE `tgId` = ? AND `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(this.tg[clientIndex].clientId, channelId, accessHash).run();
     } catch (err) {
-      // console.log("selectChat : " + err instanceof Error ? err.message : err);
-      this.sendLog(clientIndex, "selectChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog(clientIndex, "selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -2144,8 +2144,8 @@ export class WebSocketServer extends DurableObject {
     try {
       chatResult = await this.env.MAINDB.prepare("INSERT INTO `FORWARDCHAT` (tgId, channelId, accessHash, username, title, noforwards, current, photo, video, document, gif, currentForward, photoForward, videoForward, documentForward, gifForward, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(this.tg[clientIndex].clientId, channelId, accessHash, username, title, noforwards, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1).run();
     } catch (err) {
-      // console.log("insertChat : " + err instanceof Error ? err.message : err);;
-      this.sendLog(clientIndex, "insertChat", err instanceof Error ? err.message : err, "try", true);
+      // console.log("insertChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendLog(clientIndex, "insertChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -2292,12 +2292,12 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        // console.log("parse : " + err instanceof Error ? err.message : err);
+        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
         this.broadcast({
           "step": this.currentStep,
           "clientCount": this.clientCount,
           "operate": "webSocketMessage",
-          "message": err instanceof Error ? err.message : err,
+          "message": err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err,
           "error": true,
           "date": new Date().getTime(),
         });

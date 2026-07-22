@@ -151,7 +151,7 @@ export class WebSocketServer extends DurableObject {
     try {
       mediaResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `MEDIAINDEX` WHERE `Vindex` >= ? ORDER BY `Vindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectMediaIndex : " + err instanceof Error ? err.message : err);
+      console.log("selectMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       return;
     }
     // console.log("mediaResult : " + mediaResult);  //测试
@@ -180,7 +180,7 @@ export class WebSocketServer extends DurableObject {
     try {
       photoResult = await this.env.MAINDB.prepare("SELECT `id`, `accessHash` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectPhotoIndex : " + err instanceof Error ? err.message : err);
+      console.log("selectPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       return;
     }
     // console.log("photoResult : " + photoResult);  //测试
@@ -209,7 +209,7 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(id).run();
     } catch (err) {
-      console.log("selectMessage : " + err instanceof Error ? err.message : err);
+      console.log("selectMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       return;
     }
     // console.log("messageResult : " + messageResult);  //测试
@@ -228,7 +228,7 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
     } catch (err) {
-      console.log("selectMessageIndex : " + err instanceof Error ? err.message : err);
+      console.log("selectMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       return;
     }
     // console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
@@ -244,7 +244,7 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("INSERT INTO `MESSAGEINDEX` (dbIndex, userId, Mindex, id) VALUES (?, ?, ?, ?, ?);").bind(1, result.userId, result.Mindex, result.id).run();
     } catch (err) {
-      console.log("insertMessageIndex : " + err instanceof Error ? err.message : err);;
+      console.log("insertMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       return;
     }
     // console.log(messageResult);  //测试
@@ -260,7 +260,7 @@ export class WebSocketServer extends DurableObject {
     try {
       messageResult = await this.env.MAINDB.prepare("DELETE FROM `MESSAGE` WHERE `Mindex` = ?;").bind(Mindex).run();
     } catch (err) {
-      console.log("deleteMessage : " + err instanceof Error ? err.message : err);;
+      console.log("deleteMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       return;
     }
     // console.log(messageResult);  //测试
@@ -385,7 +385,7 @@ export class WebSocketServer extends DurableObject {
     //   const result = await this.ctx.storage.get("2");
     //   console.log(result);  //测试
     // } catch (err) {
-    //   console.log(err instanceof Error ? err.message : err);  //测试
+    //   console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);  //测试
     // }
 
     // const client = this.client;
@@ -493,7 +493,7 @@ export default {
     //   try {
     //     messageResult = await env.MAINDB.prepare("SELECT * FROM `MESSAGE` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
     //   } catch (err) {
-    //     console.log(messageId + " : selectMessage : " + err instanceof Error ? err.message : err);  //测试
+    //     console.log(messageId + " : selectMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);  //测试
     //   }
     //   console.log("messageResult : ");  //测试
     //   console.log(messageResult);  //测试
@@ -537,7 +537,7 @@ export default {
     //   try {
     //     mediaResult = await db.prepare("SELECT * FROM `MEDIA` WHERE `Vindex` = ? LIMIT 1;").bind(Vindex).run();
     //   } catch (err) {
-    //     console.log("selectMedia : " + err instanceof Error ? err.message : err);
+    //     console.log("selectMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
     //   }
     //   console.log("mediaResult : ");  //测试
     //   console.log(mediaResult);  //测试
