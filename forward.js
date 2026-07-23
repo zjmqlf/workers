@@ -524,7 +524,7 @@ export class WebSocketServer extends DurableObject {
         } catch (err) {
           // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
           this.sendLog("checkChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-          if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
+          if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
             await this.noExistChat(1, chatResult.Cindex);
             this.chatId += 1;
             if (!this.endChat || this.endChat === 0 || (this.endChat > 0 && this.chatId <= this.endChat)) {
@@ -938,7 +938,7 @@ export class WebSocketServer extends DurableObject {
       // this.count = 0;
       // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
+      if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         await this.noExistChat(1, this.chatId);
         this.fromPeer = null;
         this.chatId += 1;
@@ -1698,7 +1698,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let chatResult = {};
     try {
-      chatResult = await this.env.MAINDB.prepare("SELECT COUNT(Cindex) FROM `FORWARDCHAT` WHERE `tgId` = 0 AND `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
+      chatResult = await this.env.MAINDB.prepare("SELECT Cindex, username, title, COUNT(*) FROM `FORWARDCHAT` WHERE `tgId` = 0 AND `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
     } catch (err) {
       // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1713,10 +1713,10 @@ export class WebSocketServer extends DurableObject {
       }
       return;
     }
-    // console.log("chatResult : " + chatResult["COUNT(Cindex)"]);  //测试
+    // console.log("chatResult : " + chatResult);  //测试
     if (chatResult.success === true) {
       if (chatResult.results && chatResult.results.length > 0) {
-        return chatResult.results[0]["COUNT(Cindex)"];
+        return chatResult.results[0];
       }
     } else {
       await this.selectChatError(tryCount, channelId, accessHash);
@@ -1772,6 +1772,65 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async setChatError(tryCount, Cindex, username, title) {
+    if (tryCount === 5) {
+      this.stop = 2;
+      // console.log("(" + this.currentStep + ")setChat超出tryCount限制");
+      this.sendLog("setChat", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      if (this.stop === 1) {
+        await this.setChat(tryCount + 1, Cindex, username, title);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
+    }
+  }
+
+  async setChat(tryCount, Cindex, username, title) {
+    this.apiCount += 1;
+    let chatResult = {};
+    try {
+      if (username) {
+        if (title) {
+          chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `username` = ?, `title` = ? WHERE `Cindex` = ?;").bind(username, title, Cindex).run();
+        } else {
+          chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `username` = ? WHERE `Cindex` = ?;").bind(username, Cindex).run();
+        }
+      } else {
+        if (title) {
+          chatResult = await this.env.MAINDB.prepare("UPDATE `FORWARDCHAT` SET `title` = ? WHERE `Cindex` = ?;").bind(title, Cindex).run();
+        }
+      }
+    } catch (err) {
+      // console.log("(" + this.currentStep + ")setChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendLog("setChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
+      if (err.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.setChatError(tryCount, Cindex, username, title);
+      }
+      return;
+    }
+    // console.log(chatResult);  //测试
+    if (chatResult.success === true) {
+      // console.log("(" + this.currentStep + ")更新chat数据成功");
+      this.sendLog("setChat", "更新chat数据成功", null, false);
+    } else {
+      // console.log("(" + this.currentStep + ")更新chat数据失败");
+      this.sendLog("setChat", "更新chat数据失败", null, true);
+      await this.setChatError(tryCount, Cindex, username, title);
+    }
+  }
+
   async chat() {
     // if (this.client || this.stop === 1) {
     // // if (this.stop === 1) {
@@ -1795,9 +1854,10 @@ export class WebSocketServer extends DurableObject {
     this.dialogArray = [];
     // for (let dialogIndex = 0; dialogIndex < dialogLength; dialogIndex++) {
     for await (const dialog of dialogArray) {
+      const title = dialog.title;
       if (this.stop === 1) {
         if (this.apiCount < 900) {
-          if (dialog.title === "test110") {
+          if (title === "test110") {
           } else {
             let channelId = "";
             let accessHash = "";
@@ -1821,22 +1881,38 @@ export class WebSocketServer extends DurableObject {
             }
             // console.log(channelId + " : " + accessHash);  //测试
             if (channelId && accessHash) {
-              const chatCount = await this.selectChat(1, channelId, accessHash);
-              // console.log("chatCount : " + chatCount);  //测试
-              if (parseInt(chatCount) === 0) {
-                count += 1;
+              const chatResult = await this.selectChat(1, channelId, accessHash);
+              // console.log("chatResult : " + chatResult);  //测试
+              if (chatResult) {
                 const username = dialog.entity.username || dialog.draft._entity.username || "";
-                const noforwards = (dialog.entity.noforwards === true || dialog.draft._entity.noforwards === true) ? 1 : 0;
-                await this.insertChat(1, channelId, accessHash, chatType, username, dialog.title, noforwards);
-                // console.log("chat - 新插入chat了 : " + dialog.title);
-                this.sendLog("chat", "新插入chat了 : " + dialog.title, null, false);
+                if (parseInt(chatResult["COUNT(*)"]) === 0) {
+                  count += 1;
+                  const noforwards = (dialog.entity.noforwards === true || dialog.draft._entity.noforwards === true) ? 1 : 0;
+                  await this.insertChat(1, channelId, accessHash, chatType, username, title, noforwards);
+                  // console.log("chat - 新插入chat了 : " + title);
+                  this.sendLog("chat", "新插入chat了 : " + title, null, false);
+                } else {
+                  if (chatResult.title !== title) {
+                    if (chatResult.username !== username) {
+                      await this.setChat(tryCount, chatResult.Cindex, username, title);
+                    } else {
+                      await this.setChat(tryCount, chatResult.Cindex, "", title);
+                    }
+                  } else {
+                    if (chatResult.username !== username) {
+                      await this.setChat(tryCount, chatResult.Cindex, username, "");
+                    }
+                  }
+                  // console.log("chat - " + count + " : chat已在数据库中 - " + title);
+                  this.sendLog("chat", "chat已在数据库中 - " + title, null, false);
+                }
               } else {
-                // console.log("chat - " + count + " : chat已在数据库中 - " + dialog.title);
-                this.sendLog("chat", "chat已在数据库中 - " + dialog.title, null, false);
+                // console.log("chat - chatResult错误 : " + title);
+                this.sendLog("chat", "chatResult错误 : " + title, null, true);
               }
             } else {
-              // console.log("chat - channelId或accessHash错误 : " + dialog.title);
-              this.sendLog("chat", "channelId或accessHash错误 : " + dialog.title, null, true);
+              // console.log("chat - channelId或accessHash错误 : " + title);
+              this.sendLog("chat", "channelId或accessHash错误 : " + title, null, true);
             }
           }
         } else {

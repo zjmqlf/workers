@@ -24,7 +24,7 @@ import { DurableObject } from "cloudflare:workers";
 //   "1BQANOTEuMTA4LjU2LjE4MwG7hRgdaJwLQk6Z3MtsGp1GpAt7DMmmevLD8PvAMyH7B2tj7AM2j0fFAdtDywbosx8DK1rDuRnOcYbaIqAcvysfutIUm1G5AHRjhh5P6RYQB0AsN/uWCriKte4Pm1TXAH/9xhdP/JNqWj4r6eQTdzsezRv2c7fhya1j/7ZcfnImp6EnzmziDxB1tbXu/FOjOpjPRwNmO9qZqfCdTxRHyvL8zNZEzJrAcfJiud3ysF649DikJOx7hDEacc6rR3oQCkSk7rkCw2LzXJtMFIVDd8QIdZ7zd3IpnBxXBOnTUU+bNCmvcaOxxgpHtmuukw/6Q/zJGGraOte3IZhkTNPyDqbzmQ==",
 //   "1BQANOTEuMTA4LjU2LjEyOABQLHDMD4nttp5nlyYavCPWP5Mu6WVqx7EprUCty5ZofNENdyWJn6FsczIjIQ95L/qNm5v3Z/pCBJ7kC25NdWudkeIAKXQBrE37b16VObxHq+0oXQk/ySOspHUPJSFy3E1UDPQjFdWS0lbKiAs4Fhd1/P7FYFNpXeGobfi9lfWY8TZlbS0m5+7s2L6bxj/JGWbNFtPL+0B+F0QbhGW9pFdmpdw/eEAiw7ZENCZxY0hJ74KNiPRqunDHXQRiXLPlXU/NoxygvOizxKFsCduCKrcloIrjZTLnbeF26SmNR3EdC8MmC1emxoPyfxd1KpQyWUPRmx+nZBV4NRDZPS3Y8JetHw==",
 //   "1BQAWZmxvcmEud2ViLnRlbGVncmFtLm9yZwG7be+PddSzlPTzgS/mbCsxeZYLhE9ohnesT10Ntv+pdypA3wfrAUdXGXBLb2uturgLlkO49XMxAsIoELAdi8OprHkYfeEWZrQPF9RqjucdgWviAVd3oy/JIHk6lbB6NCS06US2CMdLZMxAsLFLu2JTgWiI07Xm2tpCIaaYED9mmH7NiROvqBx+jpB2GoFM4xzqaoB3y43BURo/ZYPEM3uUB4AVsS7IwdK0/j8pJL/ChB3buNnNtyVADe8wFvEAcbMn/385Xz53T21BdYqanzMuZX2O9cv4UNCpA9P6HoEYRn0D9XsljY6xJFNdR/RRKGHBqlVLK/Xt6PagRm321YBAvw==",
-//   "1AQAOMTQ5LjE1NC4xNzUuNTEBuy4sBpNWS3AGvzOzpaxdcW/u15EswUdbFZimjS+y+EyJzgU+mfNZnvDBUGUz57eY85qmRUYgMTduQi1OPS2j8pZOmLVWkigkyUVRsfAUZ/IY9cWdIwjzNfZXDyE0wMEqn66NrBx/oSQauJEpsyljZfb99tdQUW+P6Zg4FDMltO3uxqrWyMu9OKJLf6tgup47dALQDSCsHBuZR+RVHRFdvUbzVye7sBM5NwyYdRBlxGig/aAbpqO9jiUYPqKwrSDWLuH5uVRtOK4Dr9ukhcpXOZcfq9qzwtdDlt6t9c6w7svQiYB6drg6YjEfkaBnr2yibFpPkHIlUCsKvuIpCtrcYa0="
+//   "1AQAOMTQ5LjE1NC4xNzUuNTIBu39JSkLGLhxMxV1cDu+FAOoWkI3GXJuYqPGSES/D+ysXQQp5Q/aA6mj0vLBNnGM058a3z2DN2OboRooX1QF877gSCY9a+T2xytDo0QaOZqC5AAbKXaGSL2vvguLpmY3Ch+cv3o1zQ3u1wok70NTf1URqCddd7x8zUtSb4gTByZ8frVU7NPjGfBgcN3aUFFO2A+SmheqEt8Uq5Q8MJ6Rha45PocWsM4UkuSc7Cxa5Cun7s2+SjWH2g/eTT+zYssy3eaeC9qW5u5UoSsH148e1tXOmOoY+yeySU5zTr3uP7YYOvh2q30mmWuW6gmVMOvF/foXGp0h5kK1LooLeOCXGafg="
 // ];
 
 // async function open(index) {
@@ -136,11 +136,11 @@ export class WebSocketServer extends DurableObject {
   // }
 
   async countMedia() {
-    const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
-    // console.log("mediaResult : " + mediaResult["COUNT(id)"]);  //测试
+    const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
+    // console.log("mediaResult : " + mediaResult["COUNT(*)"]);  //测试
     if (mediaResult.success === true) {
       if (mediaResult.results && mediaResult.results.length > 0) {
-        return mediaResult.results[0]["COUNT(id)"];
+        return mediaResult.results[0]["COUNT(*)"];
       }
     }
     return -1;
@@ -165,11 +165,11 @@ export class WebSocketServer extends DurableObject {
   }
 
   async countPhoto() {
-    const photoResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
-    // console.log("photoResult : " + photoResult["COUNT(id)"]);  //测试
+    const photoResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
+    // console.log("photoResult : " + photoResult["COUNT(*)"]);  //测试
     if (photoResult.success === true) {
       if (photoResult.results && photoResult.results.length > 0) {
-        return photoResult.results[0]["COUNT(id)"];
+        return photoResult.results[0]["COUNT(*)"];
       }
     }
     return -1;
@@ -194,11 +194,11 @@ export class WebSocketServer extends DurableObject {
   }
 
   async countMessage() {
-    const messageResult = await env.MEDIADB.prepare("SELECT COUNT(id) FROM `MESSAGE` WHERE 1 = 1;").run();
-    // console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
+    const messageResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `MESSAGE` WHERE 1 = 1;").run();
+    // console.log("messageResult : " + messageResult["COUNT(*)"]);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
-        return messageResult.results[0]["COUNT(id)"];
+        return messageResult.results[0]["COUNT(*)"];
       }
     }
     return -1;
@@ -226,15 +226,15 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = null;
     try {
-      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(id) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
+      messageResult = await this.env.MAINDB.prepare("SELECT COUNT(*) FROM `MESSAGEINDEX` WHERE `id` = ? LIMIT 1;").bind(messageId).run();
     } catch (err) {
       console.log("selectMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       return;
     }
-    // console.log("messageResult : " + messageResult["COUNT(id)"]);  //测试
+    // console.log("messageResult : " + messageResult["COUNT(*)"]);  //测试
     if (messageResult.success === true) {
       if (messageResult.results && messageResult.results.length > 0) {
-        return messageResult.results[0]["COUNT(id)"];
+        return messageResult.results[0]["COUNT(*)"];
       }
     }
   }

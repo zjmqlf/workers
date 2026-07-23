@@ -4,8 +4,8 @@
   "main": "favorites1.js",
   "vars": {
     "APP_NAME": "favorites2",
-    "BEGIN_INDEX": 18,
-    "END_INDEX": 38,
+    "BEGIN_INDEX": 36,
+    "END_INDEX": 37,
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [

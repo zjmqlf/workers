@@ -427,6 +427,6 @@ export const apiString = [
     "phone": "+16092977082",
     "apiId": 33043873,
     "apiHash": "770d14fcd25ebebc574c5d2a6358a0b3",
-    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTEBuy4sBpNWS3AGvzOzpaxdcW/u15EswUdbFZimjS+y+EyJzgU+mfNZnvDBUGUz57eY85qmRUYgMTduQi1OPS2j8pZOmLVWkigkyUVRsfAUZ/IY9cWdIwjzNfZXDyE0wMEqn66NrBx/oSQauJEpsyljZfb99tdQUW+P6Zg4FDMltO3uxqrWyMu9OKJLf6tgup47dALQDSCsHBuZR+RVHRFdvUbzVye7sBM5NwyYdRBlxGig/aAbpqO9jiUYPqKwrSDWLuH5uVRtOK4Dr9ukhcpXOZcfq9qzwtdDlt6t9c6w7svQiYB6drg6YjEfkaBnr2yibFpPkHIlUCsKvuIpCtrcYa0=",
+    "sessionString": "1AQAOMTQ5LjE1NC4xNzUuNTIBu39JSkLGLhxMxV1cDu+FAOoWkI3GXJuYqPGSES/D+ysXQQp5Q/aA6mj0vLBNnGM058a3z2DN2OboRooX1QF877gSCY9a+T2xytDo0QaOZqC5AAbKXaGSL2vvguLpmY3Ch+cv3o1zQ3u1wok70NTf1URqCddd7x8zUtSb4gTByZ8frVU7NPjGfBgcN3aUFFO2A+SmheqEt8Uq5Q8MJ6Rha45PocWsM4UkuSc7Cxa5Cun7s2+SjWH2g/eTT+zYssy3eaeC9qW5u5UoSsH148e1tXOmOoY+yeySU5zTr3uP7YYOvh2q30mmWuW6gmVMOvF/foXGp0h5kK1LooLeOCXGafg=",
   },
 ];

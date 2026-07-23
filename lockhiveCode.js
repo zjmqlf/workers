@@ -257,7 +257,7 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
+      if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         // console.log("chat已不存在了");  //测试
         this.sendLog("getChat", "chat已不存在了", null, true);
       } else {
@@ -315,7 +315,7 @@ export class WebSocketServer extends DurableObject {
       }
     } catch (err) {
       this.messageArray = [];
-      if (err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
+      if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         this.fromPeer = null;
         // console.log("chat已不存在了");  //测试
         this.sendLog("getMessage", "chat已不存在了", null, true);
@@ -366,7 +366,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let codeResult = {};
     try {
-      codeResult = await this.env.MAINDB.prepare("SELECT COUNT(code) FROM `CODE` WHERE `code` = ? AND `chatId` = 1 LIMIT 1;").bind(code).run();
+      codeResult = await this.env.MAINDB.prepare("SELECT COUNT(*) FROM `CODE` WHERE `code` = ? AND `chatId` = 1 LIMIT 1;").bind(code).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("selectCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -381,10 +381,10 @@ export class WebSocketServer extends DurableObject {
       }
       return;
     }
-    // console.log("codeResult : " + codeResult["COUNT(code)"]);  //测试
+    // console.log("codeResult : " + codeResult["COUNT(*)"]);  //测试
     if (codeResult.success === true) {
       if (codeResult.results && codeResult.results.length > 0) {
-        return codeResult.results[0]["COUNT(code)"];
+        return codeResult.results[0]["COUNT(*)"];
       }
     } else {
       await this.selectCodeError(tryCount, code);
