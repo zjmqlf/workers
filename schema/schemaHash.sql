@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS CACHE (
   hash TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_cache_id_accessHash ON CACHE(id, accessHash);
+CREATE INDEX IF NOT EXISTS idx_cache_id ON CACHE(id);
 
 
 DROP TABLE IF EXISTS CHAT;
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS CHAT (
   updated DATE
 );
 
-CREATE INDEX IF NOT EXISTS idx_chat_id_accessHash ON CHAT(channelId, accessHash);
+CREATE INDEX IF NOT EXISTS idx_chat_id ON CHAT(channelId);
 CREATE INDEX IF NOT EXISTS idx_chat_index_exist ON CHAT(Cindex, exist);
 CREATE INDEX IF NOT EXISTS idx_chat_current_exist ON CHAT(current, exist);
 CREATE INDEX IF NOT EXISTS idx_chat_photo_exist ON CHAT(photo, exist);
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS MEDIA (
   hash TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_media_id_accessHash ON MEDIA(id, accessHash);
+CREATE INDEX IF NOT EXISTS idx_media_id ON MEDIA(id);
 
 
 DROP TABLE IF EXISTS MEDIAINDEX;
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS MEDIAINDEX (
   accessHash TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_mediaIndex_id_accessHash ON MEDIAINDEX(id, accessHash);
+CREATE INDEX IF NOT EXISTS idx_mediaIndex_id ON MEDIAINDEX(id);
 
 
 DROP TABLE IF EXISTS PHOTO;
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS PHOTO (
   hash TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_photo_id_accessHash_sizeType ON PHOTO(id, accessHash, sizeType);
+CREATE INDEX IF NOT EXISTS idx_photo_id_sizeType ON PHOTO(id, sizeType);
 
 
 DROP TABLE IF EXISTS PHOTOINDEX;
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS PHOTOINDEX (
   sizeType TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_photoIndex_id_accessHash_sizeType ON PHOTOINDEX(id, accessHash, sizeType);
+CREATE INDEX IF NOT EXISTS idx_photoIndex_id_sizeType ON PHOTOINDEX(id, sizeType);
 
 
 

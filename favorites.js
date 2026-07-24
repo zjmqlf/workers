@@ -785,7 +785,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  // async selectMediaIndexError(tryCount, id, accessHash) {
+  // async selectMediaIndexError(tryCount, id) {
   //   if (tryCount === 5) {
   //     this.stop = 2;
   //     // console.log("(" + this.currentStep + ")selectMediaIndex超出tryCount限制");
@@ -794,7 +794,7 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     await scheduler.wait(10000);
   //     if (this.stop === 1) {
-  //       await this.selectMediaIndex(tryCount + 1, id, accessHash);
+  //       await this.selectMediaIndex(tryCount + 1, id);
   //     } else if (this.stop === 2) {
   //       this.broadcast({
   //         "result": "pause",
@@ -804,11 +804,11 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
-  // async selectMediaIndex(tryCount, id, accessHash) {
+  // async selectMediaIndex(tryCount, id) {
   //   this.apiCount += 1;
   //   let mediaResult = {};
   //   try {
-  //     mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(*) FROM `MEDIAINDEX` WHERE `id` = ? AND `accessHash` = ? LIMIT 1;").bind(id, accessHash).run();
+  //     mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(*) FROM `MEDIAINDEX` WHERE `id` = ? LIMIT 1;").bind(id).run();
   //   } catch (err) {
   //     // console.log("(" + this.currentStep + ") selectMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
   //     this.sendGrid("selectMediaIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -819,7 +819,7 @@ export class WebSocketServer extends DurableObject {
   //       });
   //       await this.close();
   //     } else {
-  //       await this.selectMediaIndexError(tryCount, id, accessHash);
+  //       await this.selectMediaIndexError(tryCount, id);
   //     }
   //     return;
   //   }
@@ -829,11 +829,11 @@ export class WebSocketServer extends DurableObject {
   //       return mediaResult.results[0];
   //     }
   //   } else {
-  //     await this.selectMediaIndexError(tryCount, id, accessHash);
+  //     await this.selectMediaIndexError(tryCount, id);
   //   }
   // }
 
-  // async insertMediaIndexError(tryCount, Vindex, id, accessHash) {
+  // async insertMediaIndexError(tryCount, Vindex, id) {
   //   if (tryCount === 5) {
   //     this.stop = 2;
   //     // console.log("(" + this.currentStep + ")insertMediaIndex超出tryCount限制");
@@ -842,7 +842,7 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     await scheduler.wait(10000);
   //     if (this.stop === 1) {
-  //       await this.insertMediaIndex(tryCount + 1, Vindex, id, accessHash);
+  //       await this.insertMediaIndex(tryCount + 1, Vindex, id);
   //     } else if (this.stop === 2) {
   //       this.broadcast({
   //         "result": "pause",
@@ -852,11 +852,11 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
-  // async insertMediaIndex(tryCount, Vindex, id, accessHash) {
+  // async insertMediaIndex(tryCount, Vindex, id) {
   //   this.apiCount += 1;
   //   let indexResult = {};
   //   try {
-  //     indexResult = await this.env.MEDIADB.prepare("INSERT INTO `MEDIAINDEX` (Vindex, id, accessHash) VALUES (?, ?, ?);").bind(Vindex, id, accessHash).run();
+  //     indexResult = await this.env.MEDIADB.prepare("INSERT INTO `MEDIAINDEX` (Vindex, id) VALUES (?, ?);").bind(Vindex, id).run();
   //   } catch (err) {
   //     // console.log("(" + this.currentStep + ") insertMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
   //     this.sendGrid("insertMediaIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -867,7 +867,7 @@ export class WebSocketServer extends DurableObject {
   //       });
   //       await this.close();
   //     } else {
-  //       await this.insertMediaIndexError(tryCount, Vindex, id, accessHash);
+  //       await this.insertMediaIndexError(tryCount, Vindex, id);
   //     }
   //     return;
   //   }
@@ -878,11 +878,11 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     // console.log("(" + this.currentStep + ") 插入mediaIndex数据失败");
   //     this.sendGrid("insertMediaIndex", "插入mediaIndex数据失败", "error", true);
-  //     await this.insertMediaIndexError(tryCount, Vindex, id, accessHash);
+  //     await this.insertMediaIndexError(tryCount, Vindex, id);
   //   }
   // }
 
-  async selectMediaError(tryCount, id, accessHash) {
+  async selectMediaError(tryCount, id) {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("(" + this.currentStep + ")selectMedia超出tryCount限制");
@@ -891,7 +891,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       await scheduler.wait(10000);
       if (this.stop === 1) {
-        await this.selectMedia(tryCount + 1, id, accessHash);
+        await this.selectMedia(tryCount + 1, id);
       } else if (this.stop === 2) {
         this.broadcast({
           "result": "pause",
@@ -901,11 +901,11 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectMedia(tryCount, id, accessHash) {
+  async selectMedia(tryCount, id) {
     this.apiCount += 1;
     let mediaResult = {};
     try {
-      mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(*) FROM `MEDIA` WHERE `id` = ? AND `accessHash` = ? LIMIT 1;").bind(id, accessHash).run();
+      mediaResult = await this.env.MEDIADB.prepare("SELECT `Vindex`, COUNT(*) FROM `MEDIA` WHERE `id` = ? LIMIT 1;").bind(id).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ") selectMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendGrid("selectMedia", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -916,7 +916,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.selectMediaError(tryCount, id, accessHash);
+        await this.selectMediaError(tryCount, id);
       }
       return;
     }
@@ -926,7 +926,7 @@ export class WebSocketServer extends DurableObject {
         return mediaResult.results[0];
       }
     } else {
-      await this.selectMediaError(tryCount, id, accessHash);
+      await this.selectMediaError(tryCount, id);
     }
   }
 
@@ -985,7 +985,7 @@ export class WebSocketServer extends DurableObject {
     if (this.stop === 1) {
       const index = await this.insertMedia(1, id, accessHash, dcId, fileName, mimeType, size, duration, width, height);
       // if (index > 0) {
-      //   await this.insertMediaIndex(1, index, id, accessHash);
+      //   await this.insertMediaIndex(1, index, id);
       // }
       return index;
     } else if (this.stop === 2) {
@@ -997,7 +997,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  // async selectPhotoIndexError(tryCount, id, accessHash, type) {
+  // async selectPhotoIndexError(tryCount, id, type) {
   //   if (tryCount === 5) {
   //     this.stop = 2;
   //     // console.log("(" + this.currentStep + ")selectPhotoIndex超出tryCount限制");
@@ -1006,7 +1006,7 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     await scheduler.wait(10000);
   //     if (this.stop === 1) {
-  //       await this.selectPhotoIndex(tryCount + 1, id, accessHash, type);
+  //       await this.selectPhotoIndex(tryCount + 1, id, type);
   //     } else if (this.stop === 2) {
   //       this.broadcast({
   //         "result": "pause",
@@ -1016,11 +1016,11 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
-  // async selectPhotoIndex(tryCount, id, accessHash, type) {
+  // async selectPhotoIndex(tryCount, id, type) {
   //   this.apiCount += 1;
   //   let photoResult = {};
   //   try {
-  //     photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(*) FROM `PHOTOINDEX` WHERE `id` = ? AND `accessHash` = ? AND `sizeType` = ? LIMIT 1;").bind(id, accessHash, type).run();
+  //     photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(*) FROM `PHOTOINDEX` WHERE `id` = ? AND `sizeType` = ? LIMIT 1;").bind(id, type).run();
   //   } catch (err) {
   //     // console.log("(" + this.currentStep + ") selectPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
   //     this.sendGrid("selectPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1031,7 +1031,7 @@ export class WebSocketServer extends DurableObject {
   //       });
   //       await this.close();
   //     } else {
-  //       await this.selectPhotoIndexError(tryCount, id, accessHash, type);
+  //       await this.selectPhotoIndexError(tryCount, id, type);
   //     }
   //     return;
   //   }
@@ -1041,11 +1041,11 @@ export class WebSocketServer extends DurableObject {
   //       return photoResult.results[0];
   //     }
   //   } else {
-  //     await this.selectPhotoIndexError(tryCount, id, accessHash, type);
+  //     await this.selectPhotoIndexError(tryCount, id, type);
   //   }
   // }
 
-  // async insertPhotoIndexError(tryCount, Pindex, id, accessHash, type) {
+  // async insertPhotoIndexError(tryCount, Pindex, id, type) {
   //   if (tryCount === 5) {
   //     this.stop = 2;
   //     // console.log("(" + this.currentStep + ")insertPhotoIndex超出tryCount限制");
@@ -1054,7 +1054,7 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     await scheduler.wait(10000);
   //     if (this.stop === 1) {
-  //       await this.insertPhotoIndex(tryCount + 1, Pindex, id, accessHash, type);
+  //       await this.insertPhotoIndex(tryCount + 1, Pindex, id, type);
   //     } else if (this.stop === 2) {
   //       this.broadcast({
   //         "result": "pause",
@@ -1064,11 +1064,11 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
-  // async insertPhotoIndex(tryCount, Pindex, id, accessHash, type) {
+  // async insertPhotoIndex(tryCount, Pindex, id, type) {
   //   this.apiCount += 1;
   //   let photoResult = {};
   //   try {
-  //     photoResult = await this.env.PHOTODB.prepare("INSERT INTO `PHOTOINDEX` (Pindex, id, accessHash, sizeType) VALUES (?, ?, ?, ?);").bind(Pindex, id, accessHash, type).run();
+  //     photoResult = await this.env.PHOTODB.prepare("INSERT INTO `PHOTOINDEX` (Pindex, id, sizeType) VALUES (?, ?, ?);").bind(Pindex, id, type).run();
   //   } catch (err) {
   //     // console.log("(" + this.currentStep + ") insertPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
   //     this.sendGrid("insertPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1079,7 +1079,7 @@ export class WebSocketServer extends DurableObject {
   //       });
   //       await this.close();
   //     } else {
-  //       await this.insertPhotoIndexError(tryCount, Pindex, id, accessHash, type);
+  //       await this.insertPhotoIndexError(tryCount, Pindex, id, type);
   //     }
   //     return;
   //   }
@@ -1090,11 +1090,11 @@ export class WebSocketServer extends DurableObject {
   //   } else {
   //     // console.log("(" + this.currentStep + ") 插入photoIndex数据失败");
   //     this.sendGrid("insertPhotoIndex", "插入photoIndex数据失败", "error", true);
-  //     await this.insertPhotoIndexError(tryCount, Pindex, id, accessHash, type);
+  //     await this.insertPhotoIndexError(tryCount, Pindex, id, type);
   //   }
   // }
 
-  async selectPhotoError(tryCount, id, accessHash, type) {
+  async selectPhotoError(tryCount, id, type) {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("(" + this.currentStep + ")selectPhoto超出tryCount限制");
@@ -1103,7 +1103,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       await scheduler.wait(10000);
       if (this.stop === 1) {
-        await this.selectPhoto(tryCount + 1, id, accessHash, type);
+        await this.selectPhoto(tryCount + 1, id, type);
       } else if (this.stop === 2) {
         this.broadcast({
           "result": "pause",
@@ -1113,11 +1113,11 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectPhoto(tryCount, id, accessHash, type) {
+  async selectPhoto(tryCount, id, type) {
     this.apiCount += 1;
     let photoResult = {};
     try {
-      photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(*) FROM `PHOTO` WHERE `id` = ? AND `accessHash` = ? AND `sizeType` = ? LIMIT 1;").bind(id, accessHash, type).run();
+      photoResult = await this.env.PHOTODB.prepare("SELECT `Pindex`, COUNT(*) FROM `PHOTO` WHERE `id` = ? AND `sizeType` = ? LIMIT 1;").bind(id, type).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ") selectPhoto : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendGrid("selectPhoto", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1128,7 +1128,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.selectPhotoError(tryCount, id, accessHash, type);
+        await this.selectPhotoError(tryCount, id, type);
       }
       return;
     }
@@ -1138,7 +1138,7 @@ export class WebSocketServer extends DurableObject {
         return photoResult.results[0];
       }
     } else {
-      await this.selectPhotoError(tryCount, id, accessHash, type);
+      await this.selectPhotoError(tryCount, id, type);
     }
   }
 
@@ -1197,7 +1197,7 @@ export class WebSocketServer extends DurableObject {
     if (this.stop === 1) {
       const index = await this.insertPhoto(1, id, accessHash, dcId, photoIndex, type, size);
       // if (index > 0) {
-      //   await this.insertPhotoIndex(1, index, id, accessHash, type);
+      //   await this.insertPhotoIndex(1, index, id, type);
       // }
       return index;
     } else if (this.stop === 2) {
@@ -1379,13 +1379,13 @@ export class WebSocketServer extends DurableObject {
     const id = message.media.document.id.toString();
     const accessHash = message.media.document.accessHash.toString();
     if (id && accessHash) {
-      // const mediaIndexResult = await this.selectMediaIndex(1, id, accessHash);
+      // const mediaIndexResult = await this.selectMediaIndex(1, id);
       // if (mediaIndexResult) {
         const category = 2;
         const txt = message.message;
       //   const mediaIndexCount = parseInt(mediaIndexResult["COUNT(*)"]);
       //   if (mediaIndexCount === 0) {
-          const mediaResult = await this.selectMedia(1, id, accessHash);
+          const mediaResult = await this.selectMedia(1, id);
           if (mediaResult) {
             const mediaCount = parseInt(mediaResult["COUNT(*)"]);
             if (mediaCount === 0) {
@@ -1442,7 +1442,7 @@ export class WebSocketServer extends DurableObject {
               this.sendGrid("getMedia", "", "fileExist", false);
               const Vindex = mediaResult.Vindex;
               // if (Vindex && Vindex > 0) {
-              //   await this.insertMediaIndex(1, Vindex, id, accessHash);
+              //   await this.insertMediaIndex(1, Vindex, id);
               // }
               await this.endMediaInsert(messageId, category, Vindex, id, accessHash, txt);
               this.offsetId += 1;
@@ -1495,11 +1495,11 @@ export class WebSocketServer extends DurableObject {
         for (let index = 0; index < photoLength; index++) {
           const photoIndex = index + 1;
           const type = photoInfo[index].type;
-          // const photoIndexResult = await this.selectPhotoIndex(1, id, accessHash, type);
+          // const photoIndexResult = await this.selectPhotoIndex(1, id, type);
           // if (photoIndexResult) {
           //   const photoIndexCount = parseInt(photoIndexResult["COUNT(*)"]);
           //   if (photoIndexCount === 0) {
-              const photoResult = await this.selectPhoto(1, id, accessHash, type);
+              const photoResult = await this.selectPhoto(1, id, type);
               if (photoResult) {
                 const photoCount = parseInt(photoResult["COUNT(*)"]);
                 if (photoCount === 0) {
@@ -1535,7 +1535,7 @@ export class WebSocketServer extends DurableObject {
                   this.sendPhoto("getPhoto", "", photoIndex, "fileExist", false);
                   const Pindex = photoResult.Pindex;
                   // if (Pindex && Pindex > 0) {
-                  //   await this.insertPhotoIndex(1, Pindex, id, accessHash);
+                  //   await this.insertPhotoIndex(1, Pindex, id);
                   // }
                   await this.endPhotoInsert(messageId, category, type, Pindex, id, accessHash, txt);
                 }
@@ -1574,13 +1574,13 @@ export class WebSocketServer extends DurableObject {
     const id = message.media.document.id.toString();
     const accessHash = message.media.document.accessHash.toString();
     if (id && accessHash) {
-      // const photoIndexResult = await this.selectPhotoIndex(1, id, accessHash,"p");
+      // const photoIndexResult = await this.selectPhotoIndex(1, id,"p");
       // if (photoIndexResult) {
         const category = 1;
         const txt = message.message;
         // const photoIndexCount = parseInt(photoIndexResult["COUNT(*)"]);
         // if (photoIndexCount === 0) {
-          const photoResult = await this.selectPhoto(1, id, accessHash,"p");
+          const photoResult = await this.selectPhoto(1, id,"p");
           if (photoResult) {
             const photoCount = parseInt(photoResult["COUNT(*)"]);
             if (photoCount === 0) {
@@ -1616,7 +1616,7 @@ export class WebSocketServer extends DurableObject {
               this.sendGrid("getFile", "", "fileExist", false);
               const Pindex = photoResult.Pindex;
               // if (Pindex && Pindex > 0) {
-              //   await this.insertPhotoIndex(1, Pindex, id, accessHash,"p");
+              //   await this.insertPhotoIndex(1, Pindex, id,"p");
               // }
               await this.endMediaInsert(messageId, category, Pindex, id, accessHash, txt);
               this.offsetId += 1;
@@ -2304,7 +2304,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectChatError(tryCount, channelId, accessHash) {
+  async selectChatError(tryCount, channelId) {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("selectChat超出tryCount限制");
@@ -2313,7 +2313,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       await scheduler.wait(10000);
       if (this.stop === 1) {
-        await this.selectChat(tryCount + 1, channelId, accessHash);
+        await this.selectChat(tryCount + 1, channelId);
       } else if (this.stop === 2) {
         this.broadcast({
           "result": "pause",
@@ -2323,11 +2323,11 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectChat(tryCount, channelId, accessHash) {
+  async selectChat(tryCount, channelId) {
     this.apiCount += 1;
     let chatResult = {};
     try {
-      chatResult = await this.env.MAINDB.prepare("SELECT Cindex, username, title, COUNT(*) FROM `FORWARDCHAT` WHERE `tgId` = 0 AND `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
+      chatResult = await this.env.MAINDB.prepare("SELECT Cindex, username, title, COUNT(*) FROM `FORWARDCHAT` WHERE `tgId` = 0 AND `channelId` = ? LIMIT 1;").bind(channelId).run();
     } catch (err) {
       // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -2338,7 +2338,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.selectChatError(tryCount, channelId, accessHash);
+        await this.selectChatError(tryCount, channelId);
       }
       return;
     }
@@ -2348,7 +2348,7 @@ export class WebSocketServer extends DurableObject {
         return chatResult.results[0];
       }
     } else {
-      await this.selectChatError(tryCount, channelId, accessHash);
+      await this.selectChatError(tryCount, channelId);
     }
   }
 
@@ -2510,7 +2510,7 @@ export class WebSocketServer extends DurableObject {
             }
             // console.log(channelId + " : " + accessHash);  //测试
             if (channelId && accessHash) {
-              const chatResult = await this.selectChat(1, channelId, accessHash);
+              const chatResult = await this.selectChat(1, channelId);
               // console.log("chatResult : " + chatResult);  //测试
               if (chatResult) {
                 const username = dialog.entity.username || dialog.draft._entity.username || "";

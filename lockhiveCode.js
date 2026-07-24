@@ -284,7 +284,7 @@ export class WebSocketServer extends DurableObject {
     if (result && result.chats && result.chats.length > 0) {
       this.fromPeer = result.chats[0];
       if (this.fromPeer) {
-        this.sendLog("getChat", "caht", "add", false);
+        this.sendLog("getChat", "chat", "add", false);
       } else {
         // console.log("chat已不存在了");  //测试
         this.sendLog("getChat", "chat已不存在了", null, true);
@@ -451,7 +451,7 @@ export class WebSocketServer extends DurableObject {
             for (const item of entities) {
               const url = item?.url?.trim();
               if (url) {
-                const string = url?.split("https://t.me/Turnautobot?start=");
+                const string = url?.split("https://t.me/LHTurnbot?start=");
                 if (string.length === 2) {
                   const code = string[1].replace("f_", "LH_").replace("F_", "LH_");
                   if (code) {

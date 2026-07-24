@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS FORWARDCHAT (
   updated DATE
 );
 
-CREATE INDEX IF NOT EXISTS idx_forwardChat_tgId_id_accessHash ON FORWARDCHAT(tgId, channelId, accessHash);
+CREATE INDEX IF NOT EXISTS idx_forwardChat_tgId_id ON FORWARDCHAT(tgId, channelId);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_tgId_index_noforwards_exist ON FORWARDCHAT(tgId, Cindex, noforwards, exist);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_tgId_current_exist ON FORWARDCHAT(tgId, current, exist);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_tgId_photo_exist ON FORWARDCHAT(tgId, photo, exist);
@@ -61,12 +61,12 @@ CREATE TABLE IF NOT EXISTS MESSAGE (
   txt TEXT
 );
 
+CREATE INDEX IF NOT EXISTS idx_message_Id ON MESSAGE(id);
 CREATE INDEX IF NOT EXISTS idx_message_mid ON MESSAGE(mid);
 CREATE INDEX IF NOT EXISTS idx_message_userId_id ON MESSAGE(userId, id);
 CREATE INDEX IF NOT EXISTS idx_message_userId_mid ON MESSAGE(userId, mid);
 CREATE INDEX IF NOT EXISTS idx_message_userId_mindex ON MESSAGE(userId, Mindex);
 CREATE INDEX IF NOT EXISTS idx_message_userId_id_sizeType ON MESSAGE(userId, id, sizeType);
-CREATE INDEX IF NOT EXISTS idx_message_accessId_accessHash ON MESSAGE(accessId, accessHash);
 
 
 DROP TABLE IF EXISTS MESSAGEINDEX;
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS MEDIA (
   height INTEGER
 );
 
-CREATE INDEX IF NOT EXISTS idx_media_id_accessHash ON MEDIA(id, accessHash);
+CREATE INDEX IF NOT EXISTS idx_media_id ON MEDIA(id);
 
 
 DROP TABLE IF EXISTS MEDIAINDEX;
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS MEDIAINDEX (
   accessHash TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_mediaIndex_id_accessHash ON MEDIAINDEX(id, accessHash);
+CREATE INDEX IF NOT EXISTS idx_mediaIndex_id ON MEDIAINDEX(id);
 
 
 DROP TABLE IF EXISTS PHOTO;
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS PHOTO (
   size INTEGER NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_photo_id_accessHash_sizeType ON PHOTO(id, accessHash, sizeType);
+CREATE INDEX IF NOT EXISTS idx_photo_id_sizeType ON PHOTO(id, sizeType);
 
 
 DROP TABLE IF EXISTS PHOTOINDEX;
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS PHOTOINDEX (
   sizeType TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_photoIndex_id_accessHash_sizeType ON PHOTOINDEX(id, accessHash, sizeType);
+CREATE INDEX IF NOT EXISTS idx_photoIndex_id_sizeType ON PHOTOINDEX(id, sizeType);
 
 
 

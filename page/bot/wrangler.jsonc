@@ -1,5 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "bot",
   "compatibility_date": "2026-04-21",
   "pages_build_output_dir": "./build",

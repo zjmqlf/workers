@@ -1418,7 +1418,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectChatError(tryCount, channelId, accessHash) {
+  async selectChatError(tryCount, channelId) {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("selectChat超出tryCount限制");
@@ -1427,7 +1427,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       await scheduler.wait(10000);
       if (this.stop === 1) {
-        await this.selectChat(tryCount + 1, channelId, accessHash);
+        await this.selectChat(tryCount + 1, channelId);
       } else if (this.stop === 2) {
         this.broadcast({
           "result": "pause",
@@ -1437,11 +1437,11 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async selectChat(tryCount, channelId, accessHash) {
+  async selectChat(tryCount, channelId) {
     this.apiCount += 1;
     let chatResult = {};
     try {
-      chatResult = await this.env.MAINDB.prepare("SELECT Cindex, username, title, COUNT(*) FROM `PANCHAT` WHERE `channelId` = ? AND `accessHash` = ? LIMIT 1;").bind(channelId, accessHash).run();
+      chatResult = await this.env.MAINDB.prepare("SELECT Cindex, username, title, COUNT(*) FROM `PANCHAT` WHERE `channelId` = ? LIMIT 1;").bind(channelId).run();
     } catch (err) {
       // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendLog("selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1452,7 +1452,7 @@ export class WebSocketServer extends DurableObject {
         });
         await this.close();
       } else {
-        await this.selectChatError(tryCount, channelId, accessHash);
+        await this.selectChatError(tryCount, channelId);
       }
       return;
     }
@@ -1462,7 +1462,7 @@ export class WebSocketServer extends DurableObject {
         return chatResult.results[0];
       }
     } else {
-      await this.selectChatError(tryCount, channelId, accessHash);
+      await this.selectChatError(tryCount, channelId);
     }
   }
 
@@ -1611,7 +1611,7 @@ export class WebSocketServer extends DurableObject {
           }
           // console.log(channelId + " : " + accessHash);  //测试
           if (channelId && accessHash) {
-            const chatResult = await this.selectChat(1, channelId, accessHash);
+            const chatResult = await this.selectChat(1, channelId);
             // console.log("chatResult : " + chatResult);  //测试
             if (chatResult) {
               const username = dialog.entity.username || dialog.draft._entity.username || "";

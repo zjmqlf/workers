@@ -70,7 +70,7 @@ const App = () => {
   const [isSendBtnDisabled, setSendBtnDisabled] = useState(true);
   const getRowId = useCallback((params) => String(params.data.codeIndex), []);
 
-  const renderTime = useCallback((timestamp ) => {
+  const renderTime = useCallback((timestamp) => {
     if (timestamp && timestamp > 0) {
       const dateTime = new Date(timestamp);
       let hour = dateTime.getHours();

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS FORWARDCHAT (
   updated DATE
 );
 
-CREATE INDEX IF NOT EXISTS idx_forwardChat_id_accessHash ON FORWARDCHAT(channelId, accessHash);
+CREATE INDEX IF NOT EXISTS idx_forwardChat_id ON FORWARDCHAT(channelId);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_index_noforwards_exist ON FORWARDCHAT(Cindex, noforwards, exist);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_current_exist ON FORWARDCHAT(current, exist);
 CREATE INDEX IF NOT EXISTS idx_forwardChat_photo_exist ON FORWARDCHAT(photo, exist);

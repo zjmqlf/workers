@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS PANCHAT (
   updated DATE
 );
 
-CREATE INDEX IF NOT EXISTS idx_panChat_id_accessHash ON PANCHAT(channelId, accessHash);
+CREATE INDEX IF NOT EXISTS idx_panChat_id ON PANCHAT(channelId);
 CREATE INDEX IF NOT EXISTS idx_panChat_index_exist ON PANCHAT(Cindex, exist);
 CREATE INDEX IF NOT EXISTS idx_panChat_current_exist ON PANCHAT(current, exist);
 
