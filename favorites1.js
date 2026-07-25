@@ -15,7 +15,7 @@ export class WebSocketServer extends DurableObject {
   api = apiString.slice(this.env.BEGIN_INDEX, this.env.END_INDEX);
   clientCount = 0;
   tg = [];
-  waitTime = 60000;
+  waitTime = 120000;
   pingTime = 5000;
   filterType = -1;
   limit = 0;
@@ -131,7 +131,7 @@ export class WebSocketServer extends DurableObject {
       this.api = apiString.slice(this.env.BEGIN_INDEX, this.env.END_INDEX);
       this.clientCount = this.api.length;
       this.tg = Array(this.clientCount).fill(null);
-      this.waitTime = 60000;
+      this.waitTime = 120000;
       this.pingTime = 5000;
       this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
       this.messageArray = [];
