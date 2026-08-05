@@ -1,8 +1,6 @@
 import {
     PROD_DC_IPV4,
     PROD_DC_IPV6,
-    TEST_DC_IPV4,
-    TEST_DC_IPV6,
     TelegramBaseClient,
     TelegramClientParams,
     webSocketDcAddress,
@@ -18,9 +16,23 @@ import * as updateMethods from "./updates";
 import * as uploadMethods from "./uploads";
 import * as userMethods from "./users";
 import * as chatMethods from "./chats";
+import * as inviteLinkMethods from "./inviteLinks";
+import * as accountMethods from "./account";
+import * as contactMethods from "./contacts";
 import * as dialogMethods from "./dialogs";
 import * as twoFA from "./2fa";
-import type { ButtonLike, Entity, EntityLike, MessageIDLike } from "../define";
+import * as forumMethods from "./forums";
+import * as storyMethods from "./stories";
+import * as folderMethods from "./folders";
+import * as stickerMethods from "./stickers";
+import type { BigInteger } from "big-integer";
+import type {
+    ButtonLike,
+    Entity,
+    EntityLike,
+    FileLike,
+    MessageIDLike,
+} from "../define";
 import { Api } from "../tl";
 import { createApiProxy } from "../tl/runtime/apiProxy";
 import { HTMLParser } from "../extensions/html";
@@ -38,6 +50,7 @@ import { Album, AlbumEvent } from "../events/Album";
 import { CallbackQuery, CallbackQueryEvent } from "../events/CallbackQuery";
 import { EditedMessage, EditedMessageEvent } from "../events/EditedMessage";
 import { DeletedMessage, DeletedMessageEvent } from "../events/DeletedMessage";
+import { Buffer } from "node:buffer";
 
 export class TelegramClient<
     S extends Session = Session
@@ -141,6 +154,16 @@ export class TelegramClient<
         return authMethods.signInBot(this, apiCredentials, authParams);
     }
 
+    signInWithWebToken(
+        apiCredentials: authMethods.ApiCredentials,
+        webAuthToken: string
+    ) {
+        return authMethods.signInWithWebToken(
+            this,
+            apiCredentials,
+            webAuthToken
+        );
+    }
     async updateTwoFaSettings({
         isCheckPassword,
         currentPassword,
@@ -392,21 +415,27 @@ export class TelegramClient<
         entity: EntityLike,
         messageId: number,
         reaction?: Api.TypeReaction[],
-        big?: boolean
+        big?: boolean,
+        addToRecent?: boolean
     ) {
         return messageMethods.sendReaction(
             this,
             entity,
             messageId,
             reaction,
-            big
+            big,
+            addToRecent
         );
     }
 
     getReactionUsers(
         entity: EntityLike,
         messageId: number,
-        params?: { reaction?: string; limit?: number; offset?: string }
+        params?: {
+            reaction?: string | Api.TypeReaction;
+            limit?: number;
+            offset?: string;
+        }
     ) {
         return messageMethods.getReactionUsers(
             this,
@@ -414,6 +443,72 @@ export class TelegramClient<
             messageId,
             params
         );
+    }
+
+    sendPoll(
+        entity: EntityLike,
+        poll: messageMethods.SendPollParams,
+        params?: Omit<uploadMethods.SendFileInterface, "file" | "caption">
+    ) {
+        return messageMethods.sendPoll(this, entity, poll, params);
+    }
+
+    vote(
+        entity: EntityLike,
+        message: MessageIDLike,
+        options: number | number[] | Buffer | Buffer[]
+    ) {
+        return messageMethods.vote(this, entity, message, options);
+    }
+
+    closePoll(entity: EntityLike, message: MessageIDLike) {
+        return messageMethods.closePoll(this, entity, message);
+    }
+
+    getScheduledMessages(entity: EntityLike, ids?: number | number[]) {
+        return messageMethods.getScheduledMessages(this, entity, ids);
+    }
+
+    sendScheduledMessages(entity: EntityLike, ids: number | number[]) {
+        return messageMethods.sendScheduledMessages(this, entity, ids);
+    }
+
+    deleteScheduledMessages(entity: EntityLike, ids: number | number[]) {
+        return messageMethods.deleteScheduledMessages(this, entity, ids);
+    }
+
+    copyMessages(
+        entity: EntityLike,
+        copyMessagesParams: Omit<
+            messageMethods.ForwardMessagesParams,
+            "dropAuthor"
+        >
+    ) {
+        return messageMethods.copyMessages(this, entity, copyMessagesParams);
+    }
+
+    saveDraft(entity: EntityLike, params?: messageMethods.SaveDraftParams) {
+        return messageMethods.saveDraft(this, entity, params);
+    }
+
+    clearDraft(entity: EntityLike) {
+        return messageMethods.clearDraft(this, entity);
+    }
+
+    clearAllDrafts() {
+        return messageMethods.clearAllDrafts(this);
+    }
+
+    getMessageByLink(link: string) {
+        return messageMethods.getMessageByLink(this, link);
+    }
+
+    getDiscussionMessage(entity: EntityLike, message: MessageIDLike) {
+        return messageMethods.getDiscussionMessage(this, entity, message);
+    }
+
+    getRichMessage(entity: EntityLike, message: MessageIDLike) {
+        return messageMethods.getRichMessage(this, entity, message);
     }
 
     iterDialogs(iterDialogsParams: dialogMethods.IterDialogsParams = {}) {
@@ -440,6 +535,578 @@ export class TelegramClient<
 
     kickParticipant(entity: EntityLike, participant: EntityLike) {
         return chatMethods.kickParticipant(this, entity, participant);
+    }
+
+    getParticipant(entity: EntityLike, participant: EntityLike) {
+        return chatMethods.getParticipant(this, entity, participant);
+    }
+
+    editBanned(
+        entity: EntityLike,
+        participant: EntityLike,
+        params?: chatMethods.EditBannedParams | Api.ChatBannedRights
+    ) {
+        return chatMethods.editBanned(this, entity, participant, params);
+    }
+
+    editAdmin(
+        entity: EntityLike,
+        participant: EntityLike,
+        params: chatMethods.EditAdminParams | Api.ChatAdminRights
+    ) {
+        return chatMethods.editAdmin(this, entity, participant, params);
+    }
+
+    editChatDefaultBannedRights(
+        entity: EntityLike,
+        params: chatMethods.EditBannedParams | Api.ChatBannedRights
+    ) {
+        return chatMethods.editChatDefaultBannedRights(this, entity, params);
+    }
+
+    editTitle(entity: EntityLike, title: string) {
+        return chatMethods.editTitle(this, entity, title);
+    }
+
+    editPhoto(entity: EntityLike, photo?: FileLike | Api.TypeInputChatPhoto) {
+        return chatMethods.editPhoto(this, entity, photo);
+    }
+
+    editChatAbout(entity: EntityLike, about: string) {
+        return chatMethods.editChatAbout(this, entity, about);
+    }
+
+    toggleSlowMode(entity: EntityLike, seconds?: number) {
+        return chatMethods.toggleSlowMode(this, entity, seconds);
+    }
+    createChannel(params: chatMethods.CreateChannelParams) {
+        return chatMethods.createChannel(this, params);
+    }
+
+    createChat(params: chatMethods.CreateChatParams) {
+        return chatMethods.createChat(this, params);
+    }
+
+    joinChannel(entity: EntityLike) {
+        return chatMethods.joinChannel(this, entity);
+    }
+
+    importChatInvite(link: string) {
+        return chatMethods.importChatInvite(this, link);
+    }
+
+    leaveChannel(entity: EntityLike) {
+        return chatMethods.leaveChannel(this, entity);
+    }
+
+    deleteHistory(
+        entity: EntityLike,
+        params?: chatMethods.DeleteHistoryParams
+    ) {
+        return chatMethods.deleteHistory(this, entity, params);
+    }
+
+    editPeerFolders(entity: EntityLike | EntityLike[], folderId: number) {
+        return chatMethods.editPeerFolders(this, entity, folderId);
+    }
+
+    iterAdminLog(entity: EntityLike, params?: chatMethods.AdminLogParams) {
+        return chatMethods.iterAdminLog(this, entity, params);
+    }
+
+    getAdminLog(entity: EntityLike, params?: chatMethods.AdminLogParams) {
+        return chatMethods.getAdminLog(this, entity, params);
+    }
+
+    setTyping(
+        entity: EntityLike,
+        action?: chatMethods.ChatActionType | Api.TypeSendMessageAction,
+        params?: { topMsgId?: number }
+    ) {
+        return chatMethods.setTyping(this, entity, action, params);
+    }
+
+    getCommonChats(
+        entity: EntityLike,
+        params?: userMethods.GetCommonChatsParams
+    ) {
+        return userMethods.getCommonChats(this, entity, params);
+    }
+
+    exportChatInvite(
+        entity: EntityLike,
+        params?: inviteLinkMethods.ExportChatInviteParams
+    ) {
+        return inviteLinkMethods.exportChatInvite(this, entity, params);
+    }
+
+    editExportedChatInvite(
+        entity: EntityLike,
+        link: string,
+        params: inviteLinkMethods.EditExportedChatInviteParams
+    ) {
+        return inviteLinkMethods.editExportedChatInvite(
+            this,
+            entity,
+            link,
+            params
+        );
+    }
+
+    getExportedChatInvite(entity: EntityLike, link: string) {
+        return inviteLinkMethods.getExportedChatInvite(this, entity, link);
+    }
+
+    deleteExportedChatInvite(entity: EntityLike, link: string) {
+        return inviteLinkMethods.deleteExportedChatInvite(this, entity, link);
+    }
+
+    deleteRevokedExportedChatInvites(entity: EntityLike, admin?: EntityLike) {
+        return inviteLinkMethods.deleteRevokedExportedChatInvites(
+            this,
+            entity,
+            admin
+        );
+    }
+
+    getAdminsWithInvites(entity: EntityLike) {
+        return inviteLinkMethods.getAdminsWithInvites(this, entity);
+    }
+
+    iterExportedChatInvites(
+        entity: EntityLike,
+        params?: inviteLinkMethods.ExportedChatInvitesParams
+    ) {
+        return inviteLinkMethods.iterExportedChatInvites(this, entity, params);
+    }
+
+    getExportedChatInvites(
+        entity: EntityLike,
+        params?: inviteLinkMethods.ExportedChatInvitesParams
+    ) {
+        return inviteLinkMethods.getExportedChatInvites(this, entity, params);
+    }
+
+    iterChatInviteImporters(
+        entity: EntityLike,
+        params?: inviteLinkMethods.ChatInviteImportersParams
+    ) {
+        return inviteLinkMethods.iterChatInviteImporters(this, entity, params);
+    }
+
+    getChatInviteImporters(
+        entity: EntityLike,
+        params?: inviteLinkMethods.ChatInviteImportersParams
+    ) {
+        return inviteLinkMethods.getChatInviteImporters(this, entity, params);
+    }
+
+    hideChatJoinRequest(
+        entity: EntityLike,
+        user: EntityLike,
+        params?: { approved?: boolean }
+    ) {
+        return inviteLinkMethods.hideChatJoinRequest(
+            this,
+            entity,
+            user,
+            params
+        );
+    }
+
+    hideAllChatJoinRequests(
+        entity: EntityLike,
+        params?: { approved?: boolean; link?: string }
+    ) {
+        return inviteLinkMethods.hideAllChatJoinRequests(this, entity, params);
+    }
+
+    checkChatInvite(link: string) {
+        return inviteLinkMethods.checkChatInvite(this, link);
+    }
+
+    updateProfile(params: accountMethods.UpdateProfileParams) {
+        return accountMethods.updateProfile(this, params);
+    }
+
+    updateUsername(username: string) {
+        return accountMethods.updateUsername(this, username);
+    }
+
+    updateStatus(online?: boolean) {
+        return accountMethods.updateStatus(this, online);
+    }
+
+    uploadProfilePhoto(params: accountMethods.UploadProfilePhotoParams) {
+        return accountMethods.uploadProfilePhoto(this, params);
+    }
+
+    updateProfilePhoto(
+        photo: Api.TypeInputPhoto | Api.TypePhoto,
+        params?: { fallback?: boolean; bot?: EntityLike }
+    ) {
+        return accountMethods.updateProfilePhoto(this, photo, params);
+    }
+
+    deleteProfilePhotos(photos: (Api.TypeInputPhoto | Api.TypePhoto)[]) {
+        return accountMethods.deleteProfilePhotos(this, photos);
+    }
+
+    getUserPhotos(
+        entity: EntityLike,
+        params?: accountMethods.GetUserPhotosParams
+    ) {
+        return accountMethods.getUserPhotos(this, entity, params);
+    }
+
+    getContacts() {
+        return contactMethods.getContacts(this);
+    }
+
+    addContact(entity: EntityLike, params: contactMethods.AddContactParams) {
+        return contactMethods.addContact(this, entity, params);
+    }
+
+    deleteContacts(users: EntityLike | EntityLike[]) {
+        return contactMethods.deleteContacts(this, users);
+    }
+
+    importContacts(contacts: contactMethods.ImportContactEntry[]) {
+        return contactMethods.importContacts(this, contacts);
+    }
+
+    block(entity: EntityLike, params?: { myStoriesFrom?: boolean }) {
+        return contactMethods.block(this, entity, params);
+    }
+
+    unblock(entity: EntityLike, params?: { myStoriesFrom?: boolean }) {
+        return contactMethods.unblock(this, entity, params);
+    }
+
+    getBlocked(params?: contactMethods.GetBlockedParams) {
+        return contactMethods.getBlocked(this, params);
+    }
+
+    resetAuthorization(hash?: BigInteger) {
+        return accountMethods.resetAuthorization(this, hash);
+    }
+
+    getAuthorizations() {
+        return accountMethods.getAuthorizations(this);
+    }
+
+    getPrivacy(key: Api.TypeInputPrivacyKey) {
+        return accountMethods.getPrivacy(this, key);
+    }
+
+    setPrivacy(
+        key: Api.TypeInputPrivacyKey,
+        rules: Api.TypeInputPrivacyRule[]
+    ) {
+        return accountMethods.setPrivacy(this, key, rules);
+    }
+
+    getNotifySettings(entity: EntityLike | Api.TypeInputNotifyPeer) {
+        return accountMethods.getNotifySettings(this, entity);
+    }
+
+    updateNotifySettings(
+        entity: EntityLike | Api.TypeInputNotifyPeer,
+        params: accountMethods.UpdateNotifySettingsParams
+    ) {
+        return accountMethods.updateNotifySettings(this, entity, params);
+    }
+
+    getAccountTTL() {
+        return accountMethods.getAccountTTL(this);
+    }
+
+    setAccountTTL(days: number) {
+        return accountMethods.setAccountTTL(this, days);
+    }
+
+    getGlobalPrivacySettings() {
+        return accountMethods.getGlobalPrivacySettings(this);
+    }
+
+    setGlobalPrivacySettings(settings: Api.TypeGlobalPrivacySettings) {
+        return accountMethods.setGlobalPrivacySettings(this, settings);
+    }
+
+    createForumTopic(
+        entity: EntityLike,
+        params: forumMethods.CreateForumTopicParams
+    ) {
+        return forumMethods.createForumTopic(this, entity, params);
+    }
+
+    editForumTopic(
+        entity: EntityLike,
+        topicId: number,
+        params: forumMethods.EditForumTopicParams
+    ) {
+        return forumMethods.editForumTopic(this, entity, topicId, params);
+    }
+
+    updatePinnedForumTopic(
+        entity: EntityLike,
+        topicId: number,
+        pinned: boolean
+    ) {
+        return forumMethods.updatePinnedForumTopic(
+            this,
+            entity,
+            topicId,
+            pinned
+        );
+    }
+
+    reorderPinnedForumTopics(
+        entity: EntityLike,
+        order: number[],
+        params?: { force?: boolean }
+    ) {
+        return forumMethods.reorderPinnedForumTopics(
+            this,
+            entity,
+            order,
+            params
+        );
+    }
+
+    getForumTopics(
+        entity: EntityLike,
+        params?: forumMethods.GetForumTopicsParams
+    ) {
+        return forumMethods.getForumTopics(this, entity, params);
+    }
+
+    getForumTopicsByID(entity: EntityLike, topicIds: number | number[]) {
+        return forumMethods.getForumTopicsByID(this, entity, topicIds);
+    }
+
+    toggleForum(entity: EntityLike, enabled: boolean, tabs?: boolean) {
+        return forumMethods.toggleForum(this, entity, enabled, tabs);
+    }
+
+    toggleViewForumAsMessages(entity: EntityLike, enabled: boolean) {
+        return forumMethods.toggleViewForumAsMessages(this, entity, enabled);
+    }
+
+    sendStory(entity: EntityLike, params: storyMethods.SendStoryParams) {
+        return storyMethods.sendStory(this, entity, params);
+    }
+
+    editStory(
+        entity: EntityLike,
+        storyId: number,
+        params: storyMethods.EditStoryParams
+    ) {
+        return storyMethods.editStory(this, entity, storyId, params);
+    }
+
+    deleteStories(entity: EntityLike, ids: number | number[]) {
+        return storyMethods.deleteStories(this, entity, ids);
+    }
+
+    toggleStoriesPinned(
+        entity: EntityLike,
+        ids: number | number[],
+        pinned?: boolean
+    ) {
+        return storyMethods.toggleStoriesPinned(this, entity, ids, pinned);
+    }
+
+    canSendStory(entity: EntityLike) {
+        return storyMethods.canSendStory(this, entity);
+    }
+
+    getAllStories(params?: storyMethods.GetAllStoriesParams) {
+        return storyMethods.getAllStories(this, params);
+    }
+
+    getPeerStories(entity: EntityLike) {
+        return storyMethods.getPeerStories(this, entity);
+    }
+
+    getStoriesByID(entity: EntityLike, ids: number | number[]) {
+        return storyMethods.getStoriesByID(this, entity, ids);
+    }
+
+    getPinnedStories(
+        entity: EntityLike,
+        params?: storyMethods.GetStoriesPageParams
+    ) {
+        return storyMethods.getPinnedStories(this, entity, params);
+    }
+
+    getStoriesArchive(
+        entity: EntityLike,
+        params?: storyMethods.GetStoriesPageParams
+    ) {
+        return storyMethods.getStoriesArchive(this, entity, params);
+    }
+
+    readStories(entity: EntityLike, maxId?: number) {
+        return storyMethods.readStories(this, entity, maxId);
+    }
+
+    incrementStoryViews(entity: EntityLike, ids: number | number[]) {
+        return storyMethods.incrementStoryViews(this, entity, ids);
+    }
+
+    getStoryViewsList(
+        entity: EntityLike,
+        storyId: number,
+        params?: storyMethods.GetStoryViewsListParams
+    ) {
+        return storyMethods.getStoryViewsList(this, entity, storyId, params);
+    }
+
+    exportStoryLink(entity: EntityLike, storyId: number) {
+        return storyMethods.exportStoryLink(this, entity, storyId);
+    }
+
+    sendStoryReaction(
+        entity: EntityLike,
+        storyId: number,
+        reaction?: string | BigInteger | Api.TypeReaction,
+        params?: { addToRecent?: boolean }
+    ) {
+        return storyMethods.sendStoryReaction(
+            this,
+            entity,
+            storyId,
+            reaction,
+            params
+        );
+    }
+
+    getDialogFilters() {
+        return folderMethods.getDialogFilters(this);
+    }
+
+    updateDialogFilter(id: number, filter?: Api.TypeDialogFilter) {
+        return folderMethods.updateDialogFilter(this, id, filter);
+    }
+
+    updateDialogFiltersOrder(order: number[]) {
+        return folderMethods.updateDialogFiltersOrder(this, order);
+    }
+
+    getStickerSet(set: stickerMethods.InputStickerSetLike) {
+        return stickerMethods.getStickerSet(this, set);
+    }
+
+    getAllStickers() {
+        return stickerMethods.getAllStickers(this);
+    }
+
+    installStickerSet(
+        set: stickerMethods.InputStickerSetLike,
+        params?: { archived?: boolean }
+    ) {
+        return stickerMethods.installStickerSet(this, set, params);
+    }
+
+    uninstallStickerSet(set: stickerMethods.InputStickerSetLike) {
+        return stickerMethods.uninstallStickerSet(this, set);
+    }
+
+    getRecentStickers(params?: { attached?: boolean }) {
+        return stickerMethods.getRecentStickers(this, params);
+    }
+
+    saveRecentSticker(
+        document: Api.TypeInputDocument | Api.Document,
+        params?: { unsave?: boolean; attached?: boolean }
+    ) {
+        return stickerMethods.saveRecentSticker(this, document, params);
+    }
+
+    clearRecentStickers(params?: { attached?: boolean }) {
+        return stickerMethods.clearRecentStickers(this, params);
+    }
+
+    getFavedStickers() {
+        return stickerMethods.getFavedStickers(this);
+    }
+
+    faveSticker(
+        document: Api.TypeInputDocument | Api.Document,
+        params?: { unfave?: boolean }
+    ) {
+        return stickerMethods.faveSticker(this, document, params);
+    }
+
+    getCustomEmojiDocuments(documentIds: BigInteger[]) {
+        return stickerMethods.getCustomEmojiDocuments(this, documentIds);
+    }
+
+    setBotCommands(
+        commands: botMethods.BotCommandEntry[],
+        params?: botMethods.BotCommandScopeParams
+    ) {
+        return botMethods.setBotCommands(this, commands, params);
+    }
+
+    getBotCommands(params?: botMethods.BotCommandScopeParams) {
+        return botMethods.getBotCommands(this, params);
+    }
+
+    resetBotCommands(params?: botMethods.BotCommandScopeParams) {
+        return botMethods.resetBotCommands(this, params);
+    }
+
+    setBotInfo(params: botMethods.SetBotInfoParams) {
+        return botMethods.setBotInfo(this, params);
+    }
+
+    getBotInfo(params?: { bot?: EntityLike; langCode?: string }) {
+        return botMethods.getBotInfo(this, params);
+    }
+
+    setBotMenuButton(user: EntityLike, button: Api.TypeBotMenuButton) {
+        return botMethods.setBotMenuButton(this, user, button);
+    }
+
+    getBotMenuButton(user: EntityLike) {
+        return botMethods.getBotMenuButton(this, user);
+    }
+
+    translateText(params: messageMethods.TranslateTextParams) {
+        return messageMethods.translateText(this, params);
+    }
+
+    getMessagesViews(
+        entity: EntityLike,
+        ids: number | number[],
+        increment?: boolean
+    ) {
+        return messageMethods.getMessagesViews(this, entity, ids, increment);
+    }
+
+    getOutboxReadDate(entity: EntityLike, message: MessageIDLike) {
+        return messageMethods.getOutboxReadDate(this, entity, message);
+    }
+
+    getMessageReadParticipants(entity: EntityLike, message: MessageIDLike) {
+        return messageMethods.getMessageReadParticipants(
+            this,
+            entity,
+            message
+        );
+    }
+
+    iterDownload(
+        file:
+            | Api.Message
+            | Api.MessageMediaDocument
+            | Api.MessageMediaPhoto
+            | Api.TypeInputFileLocation,
+        params?: downloadMethods.IterDownloadParams
+    ) {
+        return downloadMethods.iterDownload(this, file, params);
     }
 
     on(event: NewMessage): (f: (event: NewMessageEvent) => void) => void;
@@ -569,7 +1236,7 @@ export class TelegramClient<
     async _handleReconnect() {
         this._log.info("Handling reconnect!");
         try {
-            const res = await this.getMe();
+            await this.getMe();
         } catch (e) {
             if (this._sender?.userDisconnected) {
                 this._log.debug(
@@ -579,9 +1246,17 @@ export class TelegramClient<
                 );
                 return;
             }
-            this._log.error(`Error while trying to reconnect`, e);
-            if (this._errorHandler) {
-                await this._errorHandler(e as Error);
+            if ((e as { code?: number })?.code === 401) {
+                this._log.debug(
+                    `Reconnect probe skipped: not authorized yet (${
+                        (e as { errorMessage?: string }).errorMessage
+                    })`
+                );
+            } else {
+                this._log.error(`Error while trying to reconnect`, e);
+                if (this._errorHandler) {
+                    await this._errorHandler(e as Error);
+                }
             }
         }
         if (!this._loopStarted && !this._destroyed) {
@@ -594,9 +1269,21 @@ export class TelegramClient<
     async connect() {
         await this._initSession();
         if (this._sender === undefined) {
-            this._sender = new MTProtoSender(this.session.getAuthKey(), {
+            const dcId = this.session.dcId || 4;
+            const sessionKey = this.session.getAuthKey(dcId);
+            const dcenter = this._dcenters.get(
+                dcId,
+                sessionKey
+            );
+            if (sessionKey && sessionKey !== dcenter.authKey) {
+                await dcenter.authKey.setKey(sessionKey.getKey());
+            }
+            // Dcenter is canonical per-DC state shared by main and pooled
+            // senders, so persist this very object rather than a copy.
+            this.session.setAuthKey(dcenter.authKey, dcId);
+            this._sender = new MTProtoSender(dcenter.authKey, {
                 logger: this._log,
-                dcId: this.session.dcId || 4,
+                dcId,
                 retries: this._connectionRetries,
                 delay: this._retryDelay,
                 autoReconnect: this._autoReconnect,
@@ -608,10 +1295,7 @@ export class TelegramClient<
                 securityChecks: this._securityChecks,
                 autoReconnectCallback: this._handleReconnect.bind(this),
                 reconnectRetries: this._reconnectRetries,
-                dcenter: this._dcenters.get(
-                    this.session.dcId || 4,
-                    this.session.getAuthKey()
-                ),
+                dcenter,
             });
         }
 
@@ -647,13 +1331,8 @@ export class TelegramClient<
 
     async _switchDC(newDc: number) {
         this._log.info(`Reconnecting to new data center ${newDc}`);
-        const sameDc = newDc === this.session.dcId;
         const DC = await this.getDC(newDc);
         this.session.setDC(newDc, DC.ipAddress, DC.port);
-        if (!sameDc) {
-            await this._sender!.authKey.setKey(undefined);
-            this.session.setAuthKey(undefined);
-        }
         this.session.save();
         this._isSwitchingDc = true;
         await this._media.purge();
@@ -668,6 +1347,13 @@ export class TelegramClient<
         downloadDC = false
     ): Promise<{ id: number; ipAddress: string; port: number }> {
         this._log.debug(`Getting DC ${dcId}`);
+        if (this.networkSocket.isWebSocket) {
+            const address = webSocketDcAddress(dcId, downloadDC);
+            if (address) {
+                return { id: dcId, ipAddress: address, port: 443 };
+            }
+            throw new Error(`Cannot find the DC with the ID of ${dcId}`);
+        }
         if (!this._config) {
             try {
                 this._config = await this.api.help.getConfig();
@@ -681,8 +1367,8 @@ export class TelegramClient<
         if (lookup) {
             return lookup;
         }
-        const ipv4Table = this._testServers ? TEST_DC_IPV4 : PROD_DC_IPV4;
-        const ipv6Table = this._testServers ? TEST_DC_IPV6 : PROD_DC_IPV6;
+        const ipv4Table = PROD_DC_IPV4;
+        const ipv6Table = PROD_DC_IPV6;
         const ipAddress = (this._useIPV6 ? ipv6Table : ipv4Table)[dcId];
         if (ipAddress) {
             return { id: dcId, ipAddress, port: 443 };
@@ -707,9 +1393,6 @@ export class TelegramClient<
         if (mediaCluster && candidates.some((DC) => DC.mediaOnly)) {
             candidates = candidates.filter((DC) => DC.mediaOnly);
         }
-        // if (this._proxy && candidates.some((DC) => DC.static)) {
-        //     candidates = candidates.filter((DC) => DC.static);
-        // }
         const failures =
             this._dcConnectFailures.get(`${dcId}:${mediaCluster}`) ?? 0;
         const chosen = candidates[failures % candidates.length];
@@ -757,6 +1440,6 @@ export class TelegramClient<
     }
 
     static get events() {
-        return require("../events");
+        return import("../events");
     }
 }

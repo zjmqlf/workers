@@ -28,14 +28,14 @@ export function getFileInfo(
             size: undefined,
         };
     }
-    let location;
-    if (fileLocation instanceof Api.Message) {
-        location = fileLocation.media;
+    let location: unknown = fileLocation;
+    if (location instanceof Api.Message) {
+        location = location.media;
     }
-    if (fileLocation instanceof Api.MessageMediaDocument) {
-        location = fileLocation.document;
-    } else if (fileLocation instanceof Api.MessageMediaPhoto) {
-        location = fileLocation.photo;
+    if (location instanceof Api.MessageMediaDocument) {
+        location = location.document;
+    } else if (location instanceof Api.MessageMediaPhoto) {
+        location = location.photo;
     }
     if (location instanceof Api.Document) {
         return {
@@ -76,23 +76,23 @@ export function getPhotoInfo(
     dcId?: number;
     location: Api.TypeInputFileLocation;
     size?: bigInt.BigInteger;
-} {
+}[] {
     if (!fileLocation || !fileLocation.SUBCLASS_OF_ID) {
         _raiseCastFail(fileLocation, "InputFileLocation");
     }
-    if (fileLocation.SUBCLASS_OF_ID == 354669666) {
-        return {
+    if (fileLocation.SUBCLASS_OF_ID == unionId("InputFileLocation")) {
+        return [{
             dcId: undefined,
-            location: fileLocation,
+            location: fileLocation as Api.TypeInputFileLocation,
             size: undefined,
-        };
+        }];
     }
-    let location;
-    if (fileLocation instanceof Api.Message) {
-        location = fileLocation.media;
+    let location: unknown = fileLocation;
+    if (location instanceof Api.Message) {
+        location = location.media;
     }
-    if (fileLocation instanceof Api.MessageMediaPhoto) {
-        location = fileLocation.photo;
+    if (location instanceof Api.MessageMediaPhoto) {
+        location = location.photo;
     }
     if (location instanceof Api.Photo) {
         const array = [];
@@ -100,7 +100,7 @@ export function getPhotoInfo(
           array.push({
               dcId: location.dcId,
               type: size.type,
-              size: _photoSizeByteCount(size) || 0,
+              size: bigInt(_photoSizeByteCount(size) || 0),
               location: new Api.InputPhotoFileLocation({
                   id: location.id,
                   accessHash: location.accessHash,
@@ -709,6 +709,11 @@ export interface GetInputMediaInterface {
     voiceNote?: boolean;
     videoNote?: boolean;
     supportsStreaming?: boolean;
+    spoiler?: boolean;
+    ttlSeconds?: number;
+    videoCover?: Api.TypeInputPhoto;
+    videoTimestamp?: number;
+    nosoundVideo?: boolean;
 }
 
 export function getInputMedia(
@@ -720,6 +725,11 @@ export function getInputMedia(
         voiceNote = false,
         videoNote = false,
         supportsStreaming = false,
+        spoiler = undefined,
+        ttlSeconds = undefined,
+        videoCover = undefined,
+        videoTimestamp = undefined,
+        nosoundVideo = undefined,
     }: GetInputMediaInterface = {}
 ): Api.TypeInputMedia {
     if (media.SUBCLASS_OF_ID === undefined) {
@@ -729,17 +739,28 @@ export function getInputMedia(
         return media;
     } else {
         if (media.SUBCLASS_OF_ID === unionId("InputPhoto")) {
-            return new Api.InputMediaPhoto({ id: media });
+            return new Api.InputMediaPhoto({
+                id: media,
+                spoiler: spoiler,
+                ttlSeconds: ttlSeconds,
+            });
         } else {
             if (media.SUBCLASS_OF_ID === unionId("InputDocument")) {
-                return new Api.InputMediaDocument({ id: media });
+                return new Api.InputMediaDocument({
+                    id: media,
+                    spoiler: spoiler,
+                    ttlSeconds: ttlSeconds,
+                    videoCover: videoCover,
+                    videoTimestamp: videoTimestamp,
+                });
             }
         }
     }
     if (media instanceof Api.MessageMediaPhoto) {
         return new Api.InputMediaPhoto({
             id: getInputPhoto(media.photo),
-            ttlSeconds: media.ttlSeconds,
+            spoiler: spoiler,
+            ttlSeconds: ttlSeconds ?? media.ttlSeconds,
         });
     }
     if (
@@ -747,20 +768,37 @@ export function getInputMedia(
         media instanceof Api.photos.Photo ||
         media instanceof Api.PhotoEmpty
     ) {
-        return new Api.InputMediaPhoto({ id: getInputPhoto(media) });
+        return new Api.InputMediaPhoto({
+            id: getInputPhoto(media),
+            spoiler: spoiler,
+            ttlSeconds: ttlSeconds,
+        });
     }
     if (media instanceof Api.MessageMediaDocument) {
         return new Api.InputMediaDocument({
             id: getInputDocument(media.document),
-            ttlSeconds: media.ttlSeconds,
+            spoiler: spoiler,
+            ttlSeconds: ttlSeconds ?? media.ttlSeconds,
+            videoCover: videoCover,
+            videoTimestamp: videoTimestamp,
         });
     }
     if (media instanceof Api.Document || media instanceof Api.DocumentEmpty) {
-        return new Api.InputMediaDocument({ id: getInputDocument(media) });
+        return new Api.InputMediaDocument({
+            id: getInputDocument(media),
+            spoiler: spoiler,
+            ttlSeconds: ttlSeconds,
+            videoCover: videoCover,
+            videoTimestamp: videoTimestamp,
+        });
     }
     if (media instanceof Api.InputFile || media instanceof Api.InputFileBig) {
         if (isPhoto) {
-            return new Api.InputMediaUploadedPhoto({ file: media });
+            return new Api.InputMediaUploadedPhoto({
+                file: media,
+                spoiler: spoiler,
+                ttlSeconds: ttlSeconds,
+            });
         } else {
             const { attrs, mimeType } = getAttributes(media, {
                 attributes: attributes,
@@ -774,6 +812,11 @@ export function getInputMedia(
                 mimeType: mimeType,
                 attributes: attrs,
                 forceFile: forceDocument,
+                spoiler: spoiler,
+                ttlSeconds: ttlSeconds,
+                videoCover: videoCover,
+                videoTimestamp: videoTimestamp,
+                nosoundVideo: nosoundVideo,
             });
         }
     }

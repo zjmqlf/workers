@@ -4,6 +4,7 @@ import { sleep } from "../Helpers";
 import { computeCheck as computePasswordSrpCheck } from "../Password";
 import { UnauthorizedError } from "../errors";
 import type { TelegramClient } from "./TelegramClient";
+import { Raw } from "../events";
 import { Buffer } from "node:buffer";
 
 export interface EmailVerificationOptions {
@@ -367,7 +368,6 @@ export async function signInUserWithQrCode(
         }
     })();
 
-    const Raw = require("../events/Raw").Raw;
     const rawEvent = new Raw({});
     const onUpdate = (update: Api.TypeUpdate) => {
         if (update instanceof Api.UpdateLoginToken) resolveUpdate();
@@ -671,6 +671,36 @@ export async function signInBot(
             botAuthToken,
         })
     )) as Api.auth.Authorization;
+    return user;
+}
+
+export async function signInWithWebToken(
+    client: TelegramClient,
+    apiCredentials: ApiCredentials,
+    webAuthToken: string
+): Promise<Api.User> {
+    const { apiId, apiHash } = apiCredentials;
+    const result = await client.invoke(
+        new Api.auth.ImportWebTokenAuthorization({
+            apiId,
+            apiHash,
+            webAuthToken,
+        })
+    );
+    if (result instanceof Api.auth.AuthorizationSignUpRequired) {
+        throw new Error(
+            "The account bound to this web token does not exist yet; sign up is required"
+        );
+    }
+    const user = result.user as Api.User;
+    client._bot = user.bot;
+    client._selfInputPeer = utils.getInputPeer(
+        user,
+        false
+    ) as Api.InputPeerUser;
+    client._log.info(
+        "Signed in successfully as " + utils.getDisplayName(user)
+    );
     return user;
 }
 

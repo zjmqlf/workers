@@ -1,4 +1,4 @@
-import type { ProxyInterface } from "../network/connection/TCPMTProxy";
+import { Buffer } from "node:buffer";
 
 export interface PacketReader {
     read(n: number): Promise<Buffer>;
@@ -6,7 +6,7 @@ export interface PacketReader {
 }
 
 export interface SocketInterface extends PacketReader {
-    connect(port: number, ip: string, testServers?: boolean): Promise<unknown>;
+    connect(port: number, ip: string): Promise<unknown>;
     readAll(): Promise<Buffer>;
     write(data: Buffer): void;
     close(): Promise<void>;
@@ -14,7 +14,6 @@ export interface SocketInterface extends PacketReader {
 
 export interface SocketFactory {
     new (
-        proxy?: ProxyInterface,
         keepAliveInterval?: number
     ): SocketInterface;
     readonly isWebSocket?: boolean;

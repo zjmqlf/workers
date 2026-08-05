@@ -4,7 +4,7 @@ import type { TelegramClient } from "./TelegramClient";
 import { UpdateConnectionState } from "../network";
 import type { Raw } from "../events";
 import { getRandomInt, returnBigInt, sleep } from "../Helpers";
-import Timeout = NodeJS.Timeout;
+import { Raw as raw } from "../events";
 
 const PING_INTERVAL = 9000;
 const PING_TIMEOUT = 10000;
@@ -30,7 +30,6 @@ export function addEventHandler(
     event?: EventBuilder,
 ) {
     if (event == undefined) {
-        const raw = require("../events/Raw").Raw;
         event = new raw({}) as Raw;
     }
     event.client = client;
@@ -190,7 +189,7 @@ export async function _updateLoop(client: TelegramClient) {
                     PING_FAIL_INTERVAL,
                 );
             } else {
-                let wakeUpWarningTimeout: Timeout | undefined =
+                let wakeUpWarningTimeout: ReturnType<typeof setTimeout> | undefined =
                     setTimeout(() => {
                         _handleUpdate(client, UpdateConnectionState.disconnected);
                         wakeUpWarningTimeout = undefined;

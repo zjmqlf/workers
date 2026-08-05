@@ -1,4 +1,5 @@
 import { BinaryWriter } from "../extensions";
+import { Buffer } from "node:buffer";
 
 type WriterLike = BinaryWriter | { write: Function; close?: Function };
 

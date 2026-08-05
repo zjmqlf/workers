@@ -1,5 +1,5 @@
 import net from "node:net";
-import { SocksClient } from "socks";
+import { Buffer } from "node:buffer";
 
 const closeError = new Error("NetSocket was closed");
 const DEFAULT_KEEP_ALIVE_INTERVAL = 30_000;

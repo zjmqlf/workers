@@ -1,5 +1,6 @@
 import * as crypto from "node:crypto";
 import * as Helpers from "../Helpers";
+import { Buffer } from "node:buffer";
 
 const InvSbox = new Uint8Array(256);
 const Td0 = new Uint32Array(256);
@@ -42,10 +43,10 @@ const Rcon = [
   }
   for (let i = 0; i < 256; i++) {
     const j = InvSbox[i];
-    const m9 = (xtime(xtime(xtime(j))) ^ j) & 0xff; // 9¡¤j
-    const mb = (xtime(xtime(xtime(j))) ^ xtime(j) ^ j) & 0xff; // 11¡¤j
-    const md = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ j) & 0xff; // 13¡¤j
-    const me = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ xtime(j)) & 0xff; // 14¡¤j
+    const m9 = (xtime(xtime(xtime(j))) ^ j) & 0xff; // 9ï¿½ï¿½j
+    const mb = (xtime(xtime(xtime(j))) ^ xtime(j) ^ j) & 0xff; // 11ï¿½ï¿½j
+    const md = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ j) & 0xff; // 13ï¿½ï¿½j
+    const me = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ xtime(j)) & 0xff; // 14ï¿½ï¿½j
     Td0[i] = ((me << 24) | (m9 << 16) | (md << 8) | mb) >>> 0;
     Td1[i] = ((mb << 24) | (me << 16) | (m9 << 8) | md) >>> 0;
     Td2[i] = ((md << 24) | (mb << 16) | (me << 8) | m9) >>> 0;

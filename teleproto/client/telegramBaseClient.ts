@@ -23,10 +23,6 @@ import {
     MediaSchedulerOptions,
 } from "../network/MediaScheduler";
 import { LAYER } from "../tl/runtime/registry";
-import {
-    ConnectionTCPMTProxyAbridged,
-    ProxyInterface,
-} from "../network/connection/TCPMTProxy";
 import { LogLevel } from "../extensions/Logger";
 import { Deferred } from "../extensions/Deferred";
 import { UpdateManager } from "./UpdateManager";
@@ -51,16 +47,6 @@ export const PROD_DC_IPV6: { readonly [id: number]: string } = {
     4: "2001:067c:04e8:f004:0000:0000:0000:000a",
     5: "2001:0b28:f23f:f005:0000:0000:0000:000a",
 };
-export const TEST_DC_IPV4: { readonly [id: number]: string } = {
-    1: "149.154.175.10",
-    2: "149.154.167.40",
-    3: "149.154.175.117",
-};
-export const TEST_DC_IPV6: { readonly [id: number]: string } = {
-    1: "2001:0b28:f23d:f001:0000:0000:0000:000e",
-    2: "2001:067c:04e8:f002:0000:0000:0000:000e",
-    3: "2001:0b28:f23d:f003:0000:0000:0000:000e",
-};
 const DC_PORT = 443;
 
 export const WEBSOCKET_DC_HOSTS: { readonly [id: number]: string } = {
@@ -81,8 +67,6 @@ export function webSocketDcAddress(
 }
 
 function inferSessionEnv(address: string): boolean | undefined {
-    for (const ip of Object.values(TEST_DC_IPV4)) if (ip === address) return true;
-    for (const ip of Object.values(TEST_DC_IPV6)) if (ip === address) return true;
     for (const ip of Object.values(PROD_DC_IPV4)) if (ip === address) return false;
     for (const ip of Object.values(PROD_DC_IPV6)) if (ip === address) return false;
     return undefined;
@@ -91,7 +75,6 @@ function inferSessionEnv(address: string): boolean | undefined {
 export interface TelegramClientParams {
     connection?: typeof Connection;
     useIPV6?: boolean;
-    testServers?: boolean;
     timeout?: number;
     requestRetries?: number;
     connectionRetries?: number;
@@ -126,7 +109,6 @@ const clientParamsDefault = {
     connection: ConnectionTCPFull,
     networkSocket: PromisedNetSockets,
     useIPV6: false,
-    testServers: false,
     timeout: 10,
     requestRetries: 5,
     connectionRetries: Infinity,
@@ -163,10 +145,8 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _initRequest: Api.InitConnection;
     public _sender?: MTProtoSender;
     public _floodWaitedRequests: any;
-    public _borrowedSenderPromises: any;
     public _bot?: boolean;
     public _useIPV6: boolean;
-    public _testServers: boolean;
     public _selfInputPeer?: Api.InputPeerUser;
     public _errorHandler?: (error: Error) => Promise<void>;
     public _eventBuilders: [EventBuilder, CallableFunction][];
@@ -182,7 +162,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _network!: Network;
     public _dcConnectFailures = new Map<string, number>();
     public _media!: MediaScheduler;
-    public _filePool!: FilePool;
     public readonly _dcenters = new DcenterRegistry();
     _loopStarted: boolean;
     _reconnecting: boolean;
@@ -225,7 +204,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this.apiId = apiId;
         this.apiHash = apiHash;
         this._useIPV6 = clientParams.useIPV6!;
-        this._testServers = clientParams.testServers!;
         this._requestRetries = clientParams.requestRetries!;
         this._downloadRetries = clientParams.downloadRetries!;
         this._connectionRetries = clientParams.connectionRetries!;
@@ -306,12 +284,9 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     async _initSession() {
         await this.session.load();
         if (!this.session.serverAddress) {
-            this.session.testServers = this._testServers;
-            const dcId = this._testServers
-                ? TEST_DEFAULT_DC_ID
-                : PROD_DEFAULT_DC_ID;
-            const ipv4Table = this._testServers ? TEST_DC_IPV4 : PROD_DC_IPV4;
-            const ipv6Table = this._testServers ? TEST_DC_IPV6 : PROD_DC_IPV6;
+            const dcId = PROD_DEFAULT_DC_ID;
+            const ipv4Table = PROD_DC_IPV4;
+            const ipv6Table = PROD_DC_IPV6;
             this.session.setDC(
                 dcId,
                 this._useIPV6 ? ipv6Table[dcId] : ipv4Table[dcId],
@@ -319,15 +294,13 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             );
         } else {
             const sessionEnv = inferSessionEnv(this.session.serverAddress);
-            if (sessionEnv !== undefined && sessionEnv !== this._testServers) {
+            if (sessionEnv !== undefined) {
                 this._log.warn(
-                    `testServers mismatch: client constructed with testServers=${this._testServers}, ` +
                     `but the session's saved address (${this.session.serverAddress}) looks like ` +
                     `${sessionEnv ? "test" : "production"}. Sessions are not portable between ` +
                     `environments — use a separate session for each.`
                 );
             }
-            this.session.testServers = this._testServers;
             this._useIPV6 = this.session.serverAddress.includes(":");
         }
         if (this.networkSocket.isWebSocket) {
@@ -338,8 +311,8 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
                 }
             }
         } else if (this.session.serverAddress.endsWith(".web.telegram.org")) {
-            const ipv4Table = this._testServers ? TEST_DC_IPV4 : PROD_DC_IPV4;
-            const ipv6Table = this._testServers ? TEST_DC_IPV6 : PROD_DC_IPV6;
+            const ipv4Table = PROD_DC_IPV4;
+            const ipv6Table = PROD_DC_IPV6;
             const ip = (this._useIPV6 ? ipv6Table : ipv4Table)[
                 this.session.dcId
             ];

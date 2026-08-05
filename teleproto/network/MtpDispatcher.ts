@@ -14,6 +14,7 @@ import { MTProtoState } from "./MTProtoState";
 import { Dcenter } from "./Dcenter";
 import { RequestState } from "./RequestState";
 import MsgsAck = Api.MsgsAck;
+import { Buffer } from "node:buffer";
 
 export interface SenderActions {
     readonly log: Logger;

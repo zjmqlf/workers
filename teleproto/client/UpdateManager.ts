@@ -27,7 +27,7 @@ interface PendingSeqUpdate {
 
 interface ChannelTracker {
     pts: PtsWaiter;
-    timer?: NodeJS.Timeout;
+    timer?: ReturnType<typeof setTimeout>;
     inputChannel?: Api.TypeInputChannel;
 }
 
@@ -78,18 +78,18 @@ export class UpdateManager {
 
     private readonly client: TelegramClient;
     private readonly globalPts: PtsWaiter;
-    private globalPtsTimer?: NodeJS.Timeout;
+    private globalPtsTimer?: ReturnType<typeof setTimeout>;
     private readonly channels = new Map<string, ChannelTracker>();
     private readonly pendingSeq: PendingSeqUpdate[] = [];
-    private seqGapTimer?: NodeJS.Timeout;
+    private seqGapTimer?: ReturnType<typeof setTimeout>;
     private readonly recentMessageKeys = new Set<string>();
     private readonly recentMessageQueue: string[] = [];
 
     private fetchingDifference = false;
     private failTimeoutS = FAIL_DIFFERENCE_INITIAL_S;
-    private failRetryTimer?: NodeJS.Timeout;
+    private failRetryTimer?: ReturnType<typeof setTimeout>;
     private readonly channelFailTimeoutS = new Map<string, number>();
-    private readonly channelFailRetryTimers = new Map<string, NodeJS.Timeout>();
+    private readonly channelFailRetryTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
     private running = false;
 
@@ -372,7 +372,7 @@ export class UpdateManager {
                 return;
             }
             const tracker = this.getOrCreateChannel(channelId);
-            if (this.fetchingDifference || tracker.pts.requesting()) return;
+            if (tracker.pts.requesting()) return;
             if (!tracker.pts.inited()) {
                 tracker.pts.init(u.pts);
                 this.dispatch(update, payload);

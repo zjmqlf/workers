@@ -1,4 +1,4 @@
-import type { ProxyInterface } from "../network/connection/TCPMTProxy";
+import { Buffer } from "node:buffer";
 
 const closeError = new Error("WebSocket was closed");
 
@@ -26,17 +26,12 @@ export class PromisedWebSockets {
     private canRead?: Promise<boolean>;
     private resolveRead: ((value?: any) => void) | undefined;
 
-    constructor(proxy?: ProxyInterface, _keepAliveInterval?: number) {
+    constructor(_keepAliveInterval?: number) {
         this.client = undefined;
         this.closed = true;
         this.chunks = [];
         this.headOffset = 0;
         this.available = 0;
-        if (proxy && !("MTProxy" in proxy)) {
-            throw new Error(
-                "Socks proxies are not supported over the WebSocket transport"
-            );
-        }
     }
 
     async readExactly(number: number) {
@@ -119,7 +114,7 @@ export class PromisedWebSockets {
         return out;
     }
 
-    async connect(port: number, ip: string, testServers = false) {
+    async connect(port: number, ip: string) {
         const impl =
             PromisedWebSockets.webSocketImpl ??
             (globalThis as { WebSocket?: WebSocketCtor }).WebSocket;
@@ -133,9 +128,7 @@ export class PromisedWebSockets {
         this.headOffset = 0;
         this.available = 0;
         const scheme = port === 443 ? "wss" : "ws";
-        const url = `${scheme}://${ip}:${port}/apiws${
-            testServers ? "_test" : ""
-        }`;
+        const url = `${scheme}://${ip}:${port}/apiws`;
         const socket = new impl(url, "binary");
         socket.binaryType = "arraybuffer";
         this.client = socket;

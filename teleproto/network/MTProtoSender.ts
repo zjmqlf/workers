@@ -148,7 +148,6 @@ export class MTProtoSender {
             this._log,
             this._securityChecks
         );
-        this._sendQueue = new MessagePacker(this._state, this._log);
         this._pendingState = new PendingState();
         this._pendingAck = new Set();
         this._lastAcks = [];

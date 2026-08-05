@@ -22,7 +22,13 @@ import * as utils from "../Utils";
 import { _parseMessageText } from "./messageParse";
 import { _getPeer } from "./users";
 import bigInt, { BigInteger } from "big-integer";
-import { _fileToMedia } from "./uploads";
+import {
+    _fileToMedia,
+    _toQuickReplyShortcut,
+    _toReplyObject,
+    SendFileInterface,
+} from "./uploads";
+import { Buffer } from "node:buffer";
 
 const _MAX_CHUNK_SIZE = 100;
 
@@ -37,6 +43,8 @@ interface MessageIterParams {
     filter: any;
     search: string;
     replyTo: MessageIDLike;
+    topMsgId?: number;
+    savedPeerId?: EntityLike;
 }
 
 export class _MessagesIter extends RequestIter {
@@ -62,6 +70,8 @@ export class _MessagesIter extends RequestIter {
         filter,
         search,
         replyTo,
+        topMsgId,
+        savedPeerId,
     }: MessageIterParams) {
         if (entity) {
             this.entity = await this.client.getInputEntity(entity);
@@ -131,7 +141,9 @@ export class _MessagesIter extends RequestIter {
         } else if (
             search !== undefined ||
             !(filter instanceof Api.InputMessagesFilterEmpty) ||
-            fromUser !== undefined
+            fromUser !== undefined ||
+            topMsgId !== undefined ||
+            savedPeerId !== undefined
         ) {
             this.request = new Api.messages.Search({
                 peer: this.entity,
@@ -146,6 +158,10 @@ export class _MessagesIter extends RequestIter {
                 minId: 0,
                 hash: generateRandomBigInt(),
                 fromId: fromUser,
+                topMsgId: topMsgId,
+                savedPeerId: savedPeerId
+                    ? await this.client.getInputEntity(savedPeerId)
+                    : undefined,
             });
             if (
                 !(filter instanceof Api.InputMessagesFilterEmpty) &&
@@ -399,6 +415,8 @@ export interface IterMessagesParams {
     reverse?: boolean;
     replyTo?: number;
     scheduled: boolean;
+    topMsgId?: number;
+    savedPeerId?: EntityLike;
 }
 
 const IterMessagesDefaults: IterMessagesParams = {
@@ -416,19 +434,25 @@ const IterMessagesDefaults: IterMessagesParams = {
     reverse: false,
     replyTo: undefined,
     scheduled: false,
+    topMsgId: undefined,
+    savedPeerId: undefined,
 };
 
 export interface SendMessageParams {
     message?: MessageLike;
-    replyTo?: number | Api.Message;
+    replyTo?: number | Api.Message | Api.TypeInputReplyTo;
+    quoteText?: string;
+    quoteEntities?: Api.TypeMessageEntity[];
+    quoteOffset?: number;
+    replyToPeerId?: EntityLike;
     attributes?: Api.TypeDocumentAttribute[];
     parseMode?: any;
     formattingEntities?: Api.TypeMessageEntity[];
     linkPreview?: boolean;
     file?: FileLike | FileLike[];
     thumb?: FileLike;
-    forceDocument?: false;
-    clearDraft?: false;
+    forceDocument?: boolean;
+    clearDraft?: boolean;
     buttons?: MarkupLike;
     silent?: boolean;
     supportStreaming?: boolean;
@@ -439,6 +463,14 @@ export interface SendMessageParams {
     sendAs?: EntityLike;
     effect?: BigInteger;
     invertMedia?: boolean;
+    background?: boolean;
+    updateStickersetsOrder?: boolean;
+    allowPaidFloodskip?: boolean;
+    allowPaidStars?: BigInteger;
+    scheduleRepeatPeriod?: number;
+    quickReplyShortcut?: string | number | Api.TypeInputQuickReplyShortcut;
+    suggestedPost?: Api.TypeSuggestedPost;
+    richMessage?: Api.TypeInputRichMessage;
 }
 
 export interface ForwardMessagesParams {
@@ -453,6 +485,14 @@ export interface ForwardMessagesParams {
     effect?: BigInteger;
     dropMediaCaptions?: boolean;
     withMyScore?: boolean;
+    background?: boolean;
+    allowPaidFloodskip?: boolean;
+    allowPaidStars?: BigInteger;
+    videoTimestamp?: number;
+    scheduleRepeatPeriod?: number;
+    quickReplyShortcut?: string | number | Api.TypeInputQuickReplyShortcut;
+    suggestedPost?: Api.TypeSuggestedPost;
+    replyTo?: number | Api.Message | Api.TypeInputReplyTo;
 }
 
 export interface EditMessageParams {
@@ -462,20 +502,26 @@ export interface EditMessageParams {
     formattingEntities?: Api.TypeMessageEntity[];
     linkPreview?: boolean;
     file?: FileLike;
-    forceDocument?: false;
+    forceDocument?: boolean;
     buttons?: MarkupLike;
     schedule?: DateLike;
     invertMedia?: boolean;
+    scheduleRepeatPeriod?: number;
+    quickReplyShortcutId?: number;
+    richMessage?: Api.TypeInputRichMessage;
 }
 
 export interface UpdatePinMessageParams {
     notify?: boolean;
     pmOneSide?: boolean;
+    topMsgId?: number;
+    savedPeerId?: EntityLike;
 }
 
 export interface MarkAsReadParams {
     maxId?: number;
     clearMentions?: boolean;
+    topMsgId?: number;
 }
 
 export function iterMessages(
@@ -497,6 +543,8 @@ export function iterMessages(
         ids,
         reverse,
         replyTo,
+        topMsgId,
+        savedPeerId,
     } = { ...IterMessagesDefaults, ...options };
     if (ids) {
         let idsArray;
@@ -536,6 +584,8 @@ export function iterMessages(
             filter: filter,
             search: search,
             replyTo: replyTo,
+            topMsgId: topMsgId,
+            savedPeerId: savedPeerId,
         }
     );
 }
@@ -588,6 +638,18 @@ export async function sendMessage(
         sendAs,
         effect,
         invertMedia,
+        background,
+        updateStickersetsOrder,
+        allowPaidFloodskip,
+        allowPaidStars,
+        scheduleRepeatPeriod,
+        quickReplyShortcut,
+        suggestedPost,
+        richMessage,
+        quoteText,
+        quoteEntities,
+        quoteOffset,
+        replyToPeerId,
     }: SendMessageParams = {}
 ) {
     if (file) {
@@ -612,6 +674,20 @@ export async function sendMessage(
             noforwards: noforwards,
             commentTo: commentTo,
             topMsgId: topMsgId,
+            sendAs: sendAs,
+            effect: effect,
+            invertMedia: invertMedia,
+            background: background,
+            updateStickersetsOrder: updateStickersetsOrder,
+            allowPaidFloodskip: allowPaidFloodskip,
+            allowPaidStars: allowPaidStars,
+            scheduleRepeatPeriod: scheduleRepeatPeriod,
+            quickReplyShortcut: quickReplyShortcut,
+            suggestedPost: suggestedPost,
+            quoteText: quoteText,
+            quoteEntities: quoteEntities,
+            quoteOffset: quoteOffset,
+            replyToPeerId: replyToPeerId,
         });
     }
     entity = await client.getInputEntity(entity);
@@ -621,17 +697,12 @@ export async function sendMessage(
         replyTo = discussionData.replyTo;
     }
     let markup, request;
-    let replyObject: Api.InputReplyToMessage | undefined = undefined;
-    if (replyTo != undefined) {
-        replyObject = new Api.InputReplyToMessage({
-            replyToMsgId: getMessageId(replyTo)!,
-            topMsgId: getMessageId(topMsgId),
-        });
-    } else if (topMsgId != undefined) {
-        replyObject = new Api.InputReplyToMessage({
-            replyToMsgId: getMessageId(topMsgId)!,
-        });
-    }
+    const replyObject = await _toReplyObject(client, replyTo, topMsgId, {
+        quoteText,
+        quoteEntities,
+        quoteOffset,
+        replyToPeerId,
+    });
 
     if (message && message instanceof Api.Message) {
         if (buttons == undefined) {
@@ -655,6 +726,18 @@ export async function sendMessage(
                 buttons: markup,
                 formattingEntities: message.entities,
                 scheduleDate: schedule,
+                clearDraft: clearDraft,
+                noforwards: noforwards,
+                topMsgId: topMsgId,
+                sendAs: sendAs,
+                effect: effect,
+                invertMedia: invertMedia,
+                background: background,
+                allowPaidStars: allowPaidStars,
+                quoteText: quoteText,
+                quoteEntities: quoteEntities,
+                quoteOffset: quoteOffset,
+                replyToPeerId: replyToPeerId,
             });
         }
         request = new Api.messages.SendMessage({
@@ -667,7 +750,15 @@ export async function sendMessage(
             clearDraft: clearDraft,
             noWebpage: !(message.media instanceof Api.MessageMediaWebPage),
             scheduleDate: schedule,
+            scheduleRepeatPeriod: scheduleRepeatPeriod,
             noforwards: noforwards,
+            background: background,
+            updateStickersetsOrder: updateStickersetsOrder,
+            allowPaidFloodskip: allowPaidFloodskip,
+            allowPaidStars: allowPaidStars,
+            quickReplyShortcut: _toQuickReplyShortcut(quickReplyShortcut),
+            suggestedPost: suggestedPost,
+            richMessage: richMessage,
             sendAs: sendAs
                 ? await client.getInputEntity(sendAs)
                 : undefined,
@@ -683,7 +774,7 @@ export async function sendMessage(
                 parseMode
             );
         }
-        if (!message) {
+        if (!message && !richMessage) {
             throw new Error(
                 "The message cannot be empty unless a file is provided"
             );
@@ -691,7 +782,7 @@ export async function sendMessage(
 
         request = new Api.messages.SendMessage({
             peer: entity,
-            message: message.toString(),
+            message: message ? message.toString() : "",
             entities: formattingEntities,
             noWebpage: !linkPreview,
             replyTo: replyObject,
@@ -699,7 +790,15 @@ export async function sendMessage(
             silent: silent,
             replyMarkup: client.buildReplyMarkup(buttons),
             scheduleDate: schedule,
+            scheduleRepeatPeriod: scheduleRepeatPeriod,
             noforwards: noforwards,
+            background: background,
+            updateStickersetsOrder: updateStickersetsOrder,
+            allowPaidFloodskip: allowPaidFloodskip,
+            allowPaidStars: allowPaidStars,
+            quickReplyShortcut: _toQuickReplyShortcut(quickReplyShortcut),
+            suggestedPost: suggestedPost,
+            richMessage: richMessage,
             sendAs: sendAs
                 ? await client.getInputEntity(sendAs)
                 : undefined,
@@ -741,6 +840,14 @@ export async function forwardMessages(
         effect,
         dropMediaCaptions,
         withMyScore,
+        background,
+        allowPaidFloodskip,
+        allowPaidStars,
+        videoTimestamp,
+        scheduleRepeatPeriod,
+        quickReplyShortcut,
+        suggestedPost,
+        replyTo,
     }: ForwardMessagesParams & { topMsgId?: number | Api.Message }
 ) {
     if (!isArrayLike(messages)) {
@@ -790,15 +897,23 @@ export async function forwardMessages(
             toPeer: entity,
             silent: silent,
             scheduleDate: schedule,
+            scheduleRepeatPeriod: scheduleRepeatPeriod,
             noforwards: noforwards,
             dropAuthor: dropAuthor,
             topMsgId: topMsgId ? getMessageId(topMsgId) : undefined,
+            replyTo: await _toReplyObject(client, replyTo, undefined),
             sendAs: sendAs
                 ? await client.getInputEntity(sendAs)
                 : undefined,
             effect: effect,
             dropMediaCaptions: dropMediaCaptions,
             withMyScore: withMyScore,
+            background: background,
+            allowPaidFloodskip: allowPaidFloodskip,
+            allowPaidStars: allowPaidStars,
+            videoTimestamp: videoTimestamp,
+            quickReplyShortcut: _toQuickReplyShortcut(quickReplyShortcut),
+            suggestedPost: suggestedPost,
         });
 
         const result = await client.invoke(request);
@@ -824,13 +939,17 @@ export async function editMessage(
         buttons,
         schedule,
         invertMedia,
+        scheduleRepeatPeriod,
+        quickReplyShortcutId,
+        richMessage,
     }: EditMessageParams
 ) {
     if (
         typeof message === "number" &&
         typeof text === "undefined" &&
         !file &&
-        !schedule
+        !schedule &&
+        !richMessage
     ) {
         throw Error(
             "You have to provide either file or text or schedule property."
@@ -887,6 +1006,9 @@ export async function editMessage(
         media: inputMedia,
         replyMarkup: markup,
         scheduleDate: schedule,
+        scheduleRepeatPeriod: scheduleRepeatPeriod,
+        quickReplyShortcutId: quickReplyShortcutId,
+        richMessage: richMessage,
         invertMedia: invertMedia,
     });
     const result = await client.invoke(request);
@@ -897,7 +1019,7 @@ export async function deleteMessages(
     client: TelegramClient,
     entity: EntityLike | undefined,
     messageIds: MessageIDLike[],
-    { revoke = false }
+    { revoke = true }
 ) {
     let ty = _EntityType.USER;
     if (entity) {
@@ -954,7 +1076,8 @@ export async function pinMessage(
         message,
         false,
         pinMessageParams?.notify,
-        pinMessageParams?.pmOneSide
+        pinMessageParams?.pmOneSide,
+        pinMessageParams
     );
 }
 
@@ -970,7 +1093,8 @@ export async function unpinMessage(
         message,
         true,
         unpinMessageParams?.notify,
-        unpinMessageParams?.pmOneSide
+        unpinMessageParams?.pmOneSide,
+        unpinMessageParams
     );
 }
 
@@ -980,13 +1104,18 @@ export async function _pin(
     message: MessageIDLike | undefined,
     unpin: boolean,
     notify: boolean = false,
-    pmOneSide: boolean = false
+    pmOneSide: boolean = false,
+    params?: UpdatePinMessageParams
 ) {
     message = utils.getMessageId(message) || 0;
 
     if (message === 0) {
         return await client.api.messages.unpinAllMessages({
             peer: entity,
+            topMsgId: params?.topMsgId,
+            savedPeerId: params?.savedPeerId
+                ? await client.getInputEntity(params.savedPeerId)
+                : undefined,
         });
     }
 
@@ -1033,8 +1162,13 @@ export async function markAsRead(
     }
 
     entity = await client.getInputEntity(entity);
-    if (markAsReadParams && !markAsReadParams.clearMentions) {
-        await client.invoke(new Api.messages.ReadMentions({ peer: entity }));
+    if (markAsReadParams && markAsReadParams.clearMentions) {
+        await client.invoke(
+            new Api.messages.ReadMentions({
+                peer: entity,
+                topMsgId: markAsReadParams.topMsgId,
+            })
+        );
         if (maxIdIsUndefined && message === undefined) {
             return true;
         }
@@ -1088,7 +1222,8 @@ export async function sendReaction(
     entity: EntityLike,
     messageId: number,
     reaction?: Api.TypeReaction[],
-    big?: boolean
+    big?: boolean,
+    addToRecent?: boolean
 ) {
     return client.invoke(
         new Api.messages.SendReaction({
@@ -1096,6 +1231,7 @@ export async function sendReaction(
             msgId: messageId,
             reaction: reaction || [],
             big: big,
+            addToRecent: addToRecent,
         })
     );
 }
@@ -1104,7 +1240,11 @@ export async function getReactionUsers(
     client: TelegramClient,
     entity: EntityLike,
     messageId: number,
-    params?: { reaction?: string; limit?: number; offset?: string }
+    params?: {
+        reaction?: string | Api.TypeReaction;
+        limit?: number;
+        offset?: string;
+    }
 ) {
     const { reaction, limit = 100, offset = "" } = params || {};
     return client.invoke(
@@ -1113,9 +1253,605 @@ export async function getReactionUsers(
             id: messageId,
             limit: limit,
             offset: offset,
-            reaction: reaction
-                ? new Api.ReactionEmoji({ emoticon: reaction })
-                : undefined,
+            reaction:
+                typeof reaction === "string"
+                    ? new Api.ReactionEmoji({ emoticon: reaction })
+                    : reaction,
         })
     );
+}
+
+export interface SendPollParams {
+    question: string;
+    answers: string[];
+    multipleChoice?: boolean;
+    quiz?: boolean;
+    correctAnswers?: number | number[];
+    publicVoters?: boolean;
+    closePeriod?: number;
+    closeDate?: DateLike;
+    solution?: string;
+    solutionEntities?: Api.TypeMessageEntity[];
+    solutionMedia?: Api.TypeInputMedia;
+    attachedMedia?: Api.TypeInputMedia;
+    openAnswers?: boolean;
+    shuffleAnswers?: boolean;
+    hideResultsUntilClose?: boolean;
+    revotingDisabled?: boolean;
+    subscribersOnly?: boolean;
+    countriesIso2?: string[];
+    parseMode?: any;
+}
+
+async function _pollText(
+    client: TelegramClient,
+    text: string,
+    parseMode: any
+): Promise<Api.TextWithEntities> {
+    const [parsed, entities] = await _parseMessageText(client, text, parseMode);
+    return new Api.TextWithEntities({ text: parsed, entities: entities });
+}
+
+export async function sendPoll(
+    client: TelegramClient,
+    entity: EntityLike,
+    poll: SendPollParams,
+    params: Omit<SendFileInterface, "file" | "caption"> = {}
+) {
+    let solution: string | undefined;
+    let solutionEntities = poll.solutionEntities;
+    if (poll.solution != undefined) {
+        if (solutionEntities == undefined) {
+            [solution, solutionEntities] = await _parseMessageText(
+                client,
+                poll.solution,
+                poll.parseMode
+            );
+        } else {
+            solution = poll.solution;
+        }
+    }
+    const correctAnswers =
+        poll.correctAnswers == undefined
+            ? undefined
+            : Array.isArray(poll.correctAnswers)
+            ? poll.correctAnswers
+            : [poll.correctAnswers];
+    const media = new Api.InputMediaPoll({
+        poll: new Api.Poll({
+            id: bigInt.zero,
+            question: await _pollText(client, poll.question, poll.parseMode),
+            answers: await Promise.all(
+                poll.answers.map(
+                    async (answer, i) =>
+                        new Api.PollAnswer({
+                            text: await _pollText(
+                                client,
+                                answer,
+                                poll.parseMode
+                            ),
+                            option: Buffer.from([48 + i]),
+                        })
+                )
+            ),
+            multipleChoice: poll.multipleChoice,
+            quiz: poll.quiz,
+            publicVoters: poll.publicVoters,
+            closePeriod: poll.closePeriod,
+            closeDate: poll.closeDate as number | undefined,
+            openAnswers: poll.openAnswers,
+            shuffleAnswers: poll.shuffleAnswers,
+            hideResultsUntilClose: poll.hideResultsUntilClose,
+            revotingDisabled: poll.revotingDisabled,
+            subscribersOnly: poll.subscribersOnly,
+            countriesIso2: poll.countriesIso2,
+            hash: bigInt.zero,
+        }),
+        correctAnswers: correctAnswers,
+        solution: solution,
+        solutionEntities: solution != undefined ? solutionEntities : undefined,
+        solutionMedia: poll.solutionMedia,
+        attachedMedia: poll.attachedMedia,
+    });
+    return client.sendFile(entity, { ...params, file: media });
+}
+
+async function _getMessagePoll(
+    client: TelegramClient,
+    entity: Api.TypeInputPeer,
+    message: MessageIDLike
+): Promise<Api.Poll> {
+    let msg: Api.Message | undefined =
+        message instanceof Api.Message ? message : undefined;
+    if (!msg || !(msg.media instanceof Api.MessageMediaPoll)) {
+        const id = utils.getMessageId(message);
+        if (id == undefined) {
+            throw new Error(`Cannot convert ${message} to a message ID`);
+        }
+        msg = (await getMessages(client, entity, { ids: id }))[0];
+    }
+    if (!msg || !(msg.media instanceof Api.MessageMediaPoll)) {
+        throw new Error("The message does not contain a poll");
+    }
+    return msg.media.poll;
+}
+
+export async function vote(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike,
+    options: number | number[] | Buffer | Buffer[]
+) {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    const list = Array.isArray(options) ? options : [options];
+    let bytes: Buffer[];
+    if (list.every((option) => typeof option === "number")) {
+        const poll = await _getMessagePoll(client, peer, message);
+        bytes = (list as number[]).map((index) => {
+            const answer = poll.answers[index];
+            if (!answer || !(answer instanceof Api.PollAnswer)) {
+                throw new Error(`Poll has no answer with index ${index}`);
+            }
+            return answer.option;
+        });
+    } else {
+        bytes = list as Buffer[];
+    }
+    return client.invoke(
+        new Api.messages.SendVote({
+            peer: peer,
+            msgId: msgId,
+            options: bytes,
+        })
+    );
+}
+
+export async function closePoll(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike
+): Promise<Api.Poll> {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    const poll = await _getMessagePoll(client, peer, message);
+    const request = new Api.messages.EditMessage({
+        peer: peer,
+        id: msgId,
+        media: new Api.InputMediaPoll({
+            poll: new Api.Poll({
+                id: poll.id,
+                closed: true,
+                question: poll.question,
+                answers: poll.answers,
+                multipleChoice: poll.multipleChoice,
+                quiz: poll.quiz,
+                publicVoters: poll.publicVoters,
+                hash: poll.hash,
+            }),
+        }),
+    });
+    const result = await client.invoke(request);
+    if ("updates" in result) {
+        for (const update of result.updates) {
+            if (update instanceof Api.UpdateMessagePoll && update.poll) {
+                return update.poll;
+            }
+        }
+    }
+    return _getMessagePoll(client, peer, msgId);
+}
+
+function _collectMessages(
+    client: TelegramClient,
+    messages: Api.TypeMessage[],
+    users: Api.TypeUser[],
+    chats: Api.TypeChat[]
+): Api.Message[] {
+    const entities = new Map<string, any>();
+    for (const x of [...users, ...chats]) {
+        entities.set(utils.getPeerId(x), x);
+    }
+    const out: Api.Message[] = [];
+    for (const m of messages) {
+        if (m instanceof Api.MessageEmpty) {
+            continue;
+        }
+        const msg = m as unknown as Api.Message;
+        try {
+            msg._finishInit(client, entities, undefined);
+        } catch (e) {}
+        msg._entities = entities;
+        out.push(msg);
+    }
+    return out;
+}
+
+export async function getScheduledMessages(
+    client: TelegramClient,
+    entity: EntityLike,
+    ids?: number | number[]
+): Promise<Api.Message[]> {
+    const peer = await client.getInputEntity(entity);
+    const result =
+        ids == undefined
+            ? await client.api.messages.getScheduledHistory({
+                  peer: peer,
+                  hash: bigInt.zero,
+              })
+            : await client.api.messages.getScheduledMessages({
+                  peer: peer,
+                  id: Array.isArray(ids) ? ids : [ids],
+              });
+    if (!("messages" in result)) {
+        return [];
+    }
+    return _collectMessages(client, result.messages, result.users, result.chats);
+}
+
+export async function sendScheduledMessages(
+    client: TelegramClient,
+    entity: EntityLike,
+    ids: number | number[]
+): Promise<Api.Message[]> {
+    const peer = await client.getInputEntity(entity);
+    const result = await client.api.messages.sendScheduledMessages({
+        peer: peer,
+        id: Array.isArray(ids) ? ids : [ids],
+    });
+    if (!("updates" in result)) {
+        return [];
+    }
+    const messages: Api.TypeMessage[] = [];
+    for (const update of result.updates) {
+        if (
+            update instanceof Api.UpdateNewMessage ||
+            update instanceof Api.UpdateNewChannelMessage ||
+            update instanceof Api.UpdateNewScheduledMessage
+        ) {
+            messages.push(update.message);
+        }
+    }
+    return _collectMessages(client, messages, result.users, result.chats);
+}
+
+export async function deleteScheduledMessages(
+    client: TelegramClient,
+    entity: EntityLike,
+    ids: number | number[]
+): Promise<void> {
+    const peer = await client.getInputEntity(entity);
+    await client.api.messages.deleteScheduledMessages({
+        peer: peer,
+        id: Array.isArray(ids) ? ids : [ids],
+    });
+}
+
+export async function copyMessages(
+    client: TelegramClient,
+    entity: EntityLike,
+    params: Omit<ForwardMessagesParams, "dropAuthor">
+) {
+    return forwardMessages(client, entity, { ...params, dropAuthor: true });
+}
+
+export interface SaveDraftParams {
+    message?: string;
+    parseMode?: any;
+    formattingEntities?: Api.TypeMessageEntity[];
+    linkPreview?: boolean;
+    replyTo?: number | Api.Message | Api.TypeInputReplyTo;
+    quoteText?: string;
+    quoteEntities?: Api.TypeMessageEntity[];
+    quoteOffset?: number;
+    replyToPeerId?: EntityLike;
+    topMsgId?: number | Api.Message;
+    invertMedia?: boolean;
+    media?: Api.TypeInputMedia;
+    effect?: BigInteger;
+    suggestedPost?: Api.TypeSuggestedPost;
+    richMessage?: Api.TypeInputRichMessage;
+}
+
+export async function saveDraft(
+    client: TelegramClient,
+    entity: EntityLike,
+    params: SaveDraftParams = {}
+): Promise<boolean> {
+    const peer = await client.getInputEntity(entity);
+    let message = params.message || "";
+    let entities = params.formattingEntities;
+    if (entities == undefined && message) {
+        [message, entities] = await _parseMessageText(
+            client,
+            message,
+            params.parseMode
+        );
+    }
+    const replyTo = await _toReplyObject(
+        client,
+        params.replyTo,
+        params.topMsgId,
+        {
+            quoteText: params.quoteText,
+            quoteEntities: params.quoteEntities,
+            quoteOffset: params.quoteOffset,
+            replyToPeerId: params.replyToPeerId,
+        }
+    );
+    return client.invoke(
+        new Api.messages.SaveDraft({
+            peer: peer,
+            message: message.toString(),
+            entities: entities,
+            noWebpage:
+                params.linkPreview === undefined
+                    ? undefined
+                    : !params.linkPreview,
+            replyTo: replyTo,
+            invertMedia: params.invertMedia,
+            media: params.media,
+            effect: params.effect,
+            suggestedPost: params.suggestedPost,
+            richMessage: params.richMessage,
+        })
+    );
+}
+
+export async function clearDraft(client: TelegramClient, entity: EntityLike) {
+    return saveDraft(client, entity, {});
+}
+
+export async function clearAllDrafts(client: TelegramClient): Promise<boolean> {
+    return client.api.messages.clearAllDrafts({});
+}
+
+interface ParsedMessageLink {
+    username?: string;
+    channelId?: string;
+    msgId: number;
+    thread?: number;
+    comment?: number;
+}
+
+function _linkInt(value: string | null | undefined): number | undefined {
+    if (!value || !/^\d+$/.test(value)) {
+        return undefined;
+    }
+    const n = parseInt(value, 10);
+    return isNaN(n) ? undefined : n;
+}
+
+export function _parseMessageLink(link: string): ParsedMessageLink | undefined {
+    let raw = link.trim();
+    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(raw)) {
+        raw = "https://" + raw;
+    }
+    let url: URL;
+    try {
+        url = new URL(raw);
+    } catch (e) {
+        return undefined;
+    }
+    const query = url.searchParams;
+    if (url.protocol === "tg:") {
+        const host = url.host || url.pathname.replace(/^\/+/, "");
+        const post = _linkInt(query.get("post"));
+        if (post == undefined) {
+            return undefined;
+        }
+        const common = {
+            msgId: post,
+            thread: _linkInt(query.get("thread")),
+            comment: _linkInt(query.get("comment")),
+        };
+        if (host === "resolve" && query.get("domain")) {
+            return { username: query.get("domain")!, ...common };
+        }
+        if (host === "privatepost" && _linkInt(query.get("channel"))) {
+            return { channelId: query.get("channel")!, ...common };
+        }
+        return undefined;
+    }
+    if (!/^(t\.me|telegram\.me|telegram\.dog)$/i.test(url.hostname)) {
+        return undefined;
+    }
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts[0] === "s") {
+        parts.shift();
+    }
+    if (parts.length < 2) {
+        return undefined;
+    }
+    const msgId = _linkInt(parts[parts.length - 1]);
+    if (msgId == undefined) {
+        return undefined;
+    }
+    const thread =
+        parts.length >= 3 ? _linkInt(parts[1]) : _linkInt(query.get("thread"));
+    const comment = _linkInt(query.get("comment"));
+    if (parts[0] === "c") {
+        const channelId = parts[1];
+        if (parts.length < 3 || !/^\d+$/.test(channelId)) {
+            return undefined;
+        }
+        return {
+            channelId,
+            msgId,
+            thread: parts.length >= 4 ? _linkInt(parts[2]) : thread,
+            comment,
+        };
+    }
+    const username = parts[0];
+    if (username.startsWith("+") || username.startsWith("joinchat")) {
+        return undefined;
+    }
+    return { username, msgId, thread, comment };
+}
+
+export async function getMessageByLink(
+    client: TelegramClient,
+    link: string
+): Promise<Api.Message | undefined> {
+    const parsed = _parseMessageLink(link);
+    if (!parsed) {
+        throw new Error(`Cannot parse message link: ${link}`);
+    }
+    const peer = await client.getInputEntity(
+        parsed.channelId != undefined ? "-100" + parsed.channelId : parsed.username!
+    );
+    if (parsed.comment != undefined) {
+        const discussion = await getCommentData(client, peer, parsed.msgId);
+        return (
+            await getMessages(client, discussion.entity, {
+                ids: parsed.comment,
+            })
+        )[0];
+    }
+    return (await getMessages(client, peer, { ids: parsed.msgId }))[0];
+}
+
+export interface TranslateTextParams {
+    toLang: string;
+    tone?: string;
+    entity?: EntityLike;
+    ids?: number | number[];
+    text?: string | string[];
+}
+
+export async function translateText(
+    client: TelegramClient,
+    params: TranslateTextParams
+): Promise<Api.messages.TypeTranslatedText> {
+    const { toLang, tone, entity, ids, text } = params;
+    if ((entity == undefined) !== (ids == undefined)) {
+        throw new Error("translateText: entity and ids must be used together");
+    }
+    if ((entity == undefined) === (text == undefined)) {
+        throw new Error(
+            "translateText: provide either entity+ids or text, not both"
+        );
+    }
+    return client.invoke(
+        new Api.messages.TranslateText({
+            toLang: toLang,
+            tone: tone,
+            peer: entity ? await client.getInputEntity(entity) : undefined,
+            id: ids == undefined ? undefined : Array.isArray(ids) ? ids : [ids],
+            text:
+                text == undefined
+                    ? undefined
+                    : (Array.isArray(text) ? text : [text]).map(
+                          (t) =>
+                              new Api.TextWithEntities({
+                                  text: t,
+                                  entities: [],
+                              })
+                      ),
+        })
+    );
+}
+
+export async function getMessagesViews(
+    client: TelegramClient,
+    entity: EntityLike,
+    ids: number | number[],
+    increment: boolean = false
+): Promise<Api.messages.MessageViews> {
+    const peer = await client.getInputEntity(entity);
+    return client.api.messages.getMessagesViews({
+        peer: peer,
+        id: Array.isArray(ids) ? ids : [ids],
+        increment: increment,
+    });
+}
+
+export async function getOutboxReadDate(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike
+): Promise<Api.TypeOutboxReadDate> {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    return client.api.messages.getOutboxReadDate({
+        peer: peer,
+        msgId: msgId,
+    });
+}
+
+export async function getMessageReadParticipants(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike
+): Promise<Api.TypeReadParticipantDate[]> {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    return client.api.messages.getMessageReadParticipants({
+        peer: peer,
+        msgId: msgId,
+    });
+}
+
+export async function getRichMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike
+): Promise<Api.Message | undefined> {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    const result = await client.api.messages.getRichMessage({
+        peer: peer,
+        id: msgId,
+    });
+    if (!("messages" in result)) {
+        return undefined;
+    }
+    const collected = _collectMessages(
+        client,
+        result.messages,
+        result.users,
+        result.chats
+    );
+    return collected.find((m) => m.id === msgId) ?? collected[0];
+}
+
+export async function getDiscussionMessage(
+    client: TelegramClient,
+    entity: EntityLike,
+    message: MessageIDLike
+): Promise<Api.Message | undefined> {
+    const peer = await client.getInputEntity(entity);
+    const msgId = utils.getMessageId(message);
+    if (msgId == undefined) {
+        throw new Error(`Cannot convert ${message} to a message ID`);
+    }
+    const result = await client.api.messages.getDiscussionMessage({
+        peer: peer,
+        msgId: msgId,
+    });
+    const collected = _collectMessages(
+        client,
+        result.messages,
+        result.users,
+        result.chats
+    );
+    if (!collected.length) {
+        return undefined;
+    }
+    return collected.reduce((a, b) => (a.id < b.id ? a : b));
 }

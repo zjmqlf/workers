@@ -14,6 +14,7 @@ import {
 } from "../network/OrderedWriter";
 import { MediaAbortError } from "../network/MediaScheduler";
 import { createHash } from "node:crypto";
+import { Buffer } from "node:buffer";
 
 export interface progressCallback {
     (
@@ -705,4 +706,76 @@ export async function downloadProfilePhoto(
         signal: fileParams.signal,
         requestTimeout: fileParams.requestTimeout,
     });
+}
+
+export interface IterDownloadParams extends DownloadCancelParams {
+    offset?: bigInt.BigInteger | number;
+    limit?: number;
+    requestSize?: number;
+    dcId?: number;
+}
+
+export async function* iterDownload(
+    client: TelegramClient,
+    file:
+        | Api.Message
+        | Api.MessageMediaDocument
+        | Api.MessageMediaPhoto
+        | Api.TypeInputFileLocation,
+    params: IterDownloadParams = {}
+): AsyncGenerator<Buffer, void, unknown> {
+    const info = utils.getFileInfo(file);
+    const requestSize = params.requestSize ?? 512 * 1024;
+    if (requestSize % 4096 !== 0) {
+        throw new Error("requestSize must be divisible by 4096");
+    }
+    let dcId = params.dcId ?? info.dcId;
+    let offset =
+        typeof params.offset === "number"
+            ? bigInt(params.offset)
+            : params.offset ?? bigInt.zero;
+    let downloaded = 0;
+    for (;;) {
+        if (params.signal?.aborted) {
+            throw new MediaAbortError();
+        }
+        let result;
+        try {
+            result = await client.invoke(
+                new Api.upload.GetFile({
+                    location: info.location,
+                    offset: offset,
+                    limit: requestSize,
+                    precise: true,
+                }),
+                dcId
+            );
+        } catch (e: any) {
+            if (
+                typeof e?.errorMessage === "string" &&
+                e.errorMessage.startsWith("FILE_MIGRATE") &&
+                typeof e.newDc === "number"
+            ) {
+                dcId = e.newDc;
+                continue;
+            }
+            throw e;
+        }
+        if (result instanceof Api.upload.FileCdnRedirect) {
+            throw new Error(
+                "CDN redirects are not supported by iterDownload; use downloadFile instead"
+            );
+        }
+        if (result.bytes.length) {
+            yield result.bytes;
+            downloaded += result.bytes.length;
+            offset = offset.add(result.bytes.length);
+        }
+        if (result.bytes.length < requestSize) {
+            return;
+        }
+        if (params.limit != undefined && downloaded >= params.limit) {
+            return;
+        }
+    }
 }

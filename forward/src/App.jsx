@@ -491,7 +491,7 @@ const App = () => {
           // "message": renderTime(Date.now()) + "  >>> 过了" + count + "分钟都没有收到任何消息",
           "message": renderTime(Date.now()) + "  >>> 过了1分钟都没有收到任何消息",
         });
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
           ws.current.send(JSON.stringify({
             "command": "close",
           }));
@@ -517,7 +517,7 @@ const App = () => {
     url.protocol = "wss";
     url.pathname = "/ws";
     ws.current = new WebSocket(url);
-    if (!ws.current) {
+    if (!(ws.current instanceof WebSocket)) {
       errorCount.current += 1;
       if (errorCount.current === 10) {
         waitTime.current = 300000;
@@ -544,7 +544,7 @@ const App = () => {
           rowNodes: [lastRow.current],
         });
       }
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
         try {
           ws.current.send(command);
           setTime();
@@ -554,7 +554,7 @@ const App = () => {
             "error": true,
             "message": renderTime(Date.now()) + "  >>> send失败",
           });
-          if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+          if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
             ws.current.close();
             // handlerClose();
           }
@@ -673,8 +673,7 @@ const App = () => {
     if (pauseBtnText === "暂停") {
       setPauseBtnText("开始");
       handlerBtn(true);
-      // console.log(ws.current);  //测试
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
         try {
           ws.current.send(JSON.stringify({
             "command": "pause",
@@ -692,7 +691,7 @@ const App = () => {
       // console.log(documentValue);  //测试
       setPauseBtnText("暂停");
       handlerBtn(false);
-      if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+      if (!(ws.current instanceof WebSocket) || ws.current.readyState !== WebSocket.OPEN) {
         waitReconnect(JSON.stringify({
           "command": "start",
           "filterType": documentValue,
@@ -703,7 +702,7 @@ const App = () => {
 
   const handlerConnectBtnClick = useCallback(() => {
     handlerBtnUnable();
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.close();
         // handlerClose();
@@ -720,7 +719,7 @@ const App = () => {
 
   const handlerCloseBtnClick = useCallback(() => {
     handlerBtnUnable();
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.send(JSON.stringify({
           "command": "close",
@@ -738,7 +737,7 @@ const App = () => {
 
   const handlerNextBtnClick = useCallback(() => {
     setNextBtnDisabled(true);
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.send(JSON.stringify({
           "command": "over",
@@ -755,7 +754,7 @@ const App = () => {
   }, [setNextBtnDisabled, handlerMessageError]);
 
   const handlerChatBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.send(JSON.stringify({
           "command": "chat",
@@ -772,7 +771,7 @@ const App = () => {
   }, [handlerMessageError, waitReconnect]);
 
   const handlerClearCacheBtnClick = useCallback(() => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.send(JSON.stringify({
           "command": "clear",
@@ -803,7 +802,7 @@ const App = () => {
   const handlerCompressChange = useCallback(() => {
     const isCompress = isCompressChecked;
     setCompressChecked(!isCompress);
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         if (isCompress === true) {
           ws.current.send(JSON.stringify({
@@ -825,7 +824,7 @@ const App = () => {
   const handlerBatchChange = useCallback(() => {
     const isBatch = isBatchChecked;
     setBatchChecked(!isBatch);
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         if (isBatch === true) {
           ws.current.send(JSON.stringify({
@@ -850,7 +849,7 @@ const App = () => {
 
   const handlerSendBtnClick = useCallback(() => {
     setSendBtnDisabled(true);
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
         ws.current.send(JSON.stringify({
           "command": inputValue,

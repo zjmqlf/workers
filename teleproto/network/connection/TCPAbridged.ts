@@ -3,6 +3,7 @@ import { Connection, PacketCodec } from "./Connection";
 import { InvalidBufferError } from "../../errors";
 import type { PacketReader } from "../../extensions/SocketInterface";
 import bigInt from "big-integer";
+import { Buffer } from "node:buffer";
 
 const TRANSPORT_ERROR_HEAD = new Set([
     0x6c,

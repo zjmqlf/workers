@@ -8,12 +8,15 @@ import { Forward } from "./forward";
 import { File } from "./file";
 import {
     EditMessageParams,
+    ForwardMessagesParams,
+    MarkAsReadParams,
     SendMessageParams,
     UpdatePinMessageParams,
 } from "../../client/messages";
 import { DownloadMediaInterface } from "../../client/downloads";
+import * as rich from "../../richMessage";
 import { returnBigInt } from "../../Helpers";
-import bigInt, { BigInteger } from "big-integer";
+import { BigInteger } from "big-integer";
 import { MessageButton } from "./messageButton";
 import { Buffer } from "node:buffer";
 
@@ -99,6 +102,7 @@ export class CustomMessage extends SenderGetter {
     ttlPeriod?: number;
     reactions?: Api.MessageReactions;
     noforwards?: boolean;
+    richMessage?: Api.TypeRichMessage;
     _actionEntities?: any;
     _client?: TelegramClient;
     _text?: string;
@@ -572,6 +576,44 @@ export class CustomMessage extends SenderGetter {
         return this.peerId;
     }
 
+    get richText(): string | undefined {
+        return this.richMessage && this.richMessage instanceof Api.RichMessage
+            ? rich.toPlainText(this.richMessage)
+            : undefined;
+    }
+
+    get richMarkdown(): string | undefined {
+        return this.richMessage && this.richMessage instanceof Api.RichMessage
+            ? rich.toMarkdown(this.richMessage)
+            : undefined;
+    }
+
+    get richHtml(): string | undefined {
+        return this.richMessage && this.richMessage instanceof Api.RichMessage
+            ? rich.toHtml(this.richMessage)
+            : undefined;
+    }
+
+    async fetchRichMessage(): Promise<Api.Message> {
+        const current = this.richMessage;
+        if (
+            !this._client ||
+            !current ||
+            !(current instanceof Api.RichMessage) ||
+            !current.part
+        ) {
+            return this as unknown as Api.Message;
+        }
+        const full = await this._client.getRichMessage(
+            (await this.getInputChat())!,
+            this.id
+        );
+        if (full && full.richMessage) {
+            this.richMessage = full.richMessage;
+        }
+        return this as unknown as Api.Message;
+    }
+
     getEntitiesText(cls?: Function) {
         let ent = this.entities;
         if (!ent || ent.length == 0) return;
@@ -632,14 +674,17 @@ export class CustomMessage extends SenderGetter {
         }
     }
 
-    async forwardTo(entity: EntityLike) {
+    async forwardTo(
+        entity: EntityLike,
+        params?: Omit<ForwardMessagesParams, "messages" | "fromPeer">
+    ) {
         if (this._client) {
             entity = await this._client.getInputEntity(entity);
-            const params = {
+            return this._client.forwardMessages(entity, {
+                ...params,
                 messages: [this.id],
                 fromPeer: (await this.getInputChat())!,
-            };
-            return this._client.forwardMessages(entity, params);
+            });
         }
     }
 
@@ -656,7 +701,7 @@ export class CustomMessage extends SenderGetter {
         return this._client.editMessage((await this.getInputChat())!, param);
     }
 
-    async delete({ revoke } = { revoke: false }) {
+    async delete({ revoke = true }: { revoke?: boolean } = {}) {
         if (this._client) {
             return this._client.deleteMessages(
                 await this.getInputChat(),
@@ -697,7 +742,7 @@ export class CustomMessage extends SenderGetter {
             return this._client.downloadMedia(this as any, params || {});
     }
 
-    async markAsRead() {
+    async markAsRead(params?: MarkAsReadParams) {
         if (this._client) {
             const entity = await this.getInputChat();
             if (entity === undefined) {
@@ -705,7 +750,7 @@ export class CustomMessage extends SenderGetter {
                     `Failed to mark message id ${this.id} as read due to cannot get input chat.`
                 );
             }
-            return this._client.markAsRead(entity, this.id);
+            return this._client.markAsRead(entity, this.id, params);
         }
     }
 
@@ -715,7 +760,8 @@ export class CustomMessage extends SenderGetter {
             | BigInteger
             | Api.TypeReaction
             | (string | BigInteger | Api.TypeReaction)[],
-        big?: boolean
+        big?: boolean,
+        addToRecent?: boolean
     ) {
         if (!this._client) return;
 
@@ -751,31 +797,40 @@ export class CustomMessage extends SenderGetter {
             (await this.getInputChat())!,
             this.id,
             reactionList,
-            big
+            big,
+            addToRecent
         );
     }
 
-    async getReactions(limit?: number, reaction?: string) {
+    async getReactions(
+        limit?: number,
+        reaction?: string | Api.TypeReaction,
+        offset?: string
+    ) {
         if (!this._client) return;
         return this._client.getReactionUsers(
             (await this.getInputChat())!,
             this.id,
-            { limit, reaction }
+            { limit, reaction, offset }
         );
     }
 
-    async copy(entity: EntityLike) {
+    async copy(
+        entity: EntityLike,
+        params?: Omit<
+            ForwardMessagesParams,
+            "messages" | "fromPeer" | "dropAuthor"
+        >
+    ) {
         if (!this._client) return;
         entity = await this._client.getInputEntity(entity);
-        const request = new Api.messages.ForwardMessages({
+        const sent = await this._client.forwardMessages(entity, {
+            ...params,
+            messages: [this.id],
             fromPeer: (await this.getInputChat())!,
-            id: [this.id],
-            toPeer: entity,
             dropAuthor: true,
-            randomId: [bigInt(Math.floor(Math.random() * 1e15))],
         });
-        const result = await this._client.invoke(request);
-        return this._client._getResponseMessage(request, result, entity);
+        return sent[0];
     }
 
     async click({

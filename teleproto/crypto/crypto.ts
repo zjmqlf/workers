@@ -5,6 +5,7 @@ import {
     randomBytes as nodeRandomBytes,
     pbkdf2Sync as nodePbkdf2Sync,
 } from 'node:crypto';
+import { Buffer } from "node:buffer";
 
 export class CTR {
     private cipher: any;

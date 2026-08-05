@@ -1,11 +1,13 @@
 import { MemorySession } from "./Memory";
 import { BinaryReader } from "../extensions";
 import { AuthKey } from "../crypto/AuthKey";
+import { Buffer } from "node:buffer";
 
 const CURRENT_VERSION = "1";
 
 export class StringSession extends MemorySession {
     _key?: Buffer;
+    private _loaded = false;
 
     constructor(session?: string) {
         super();
@@ -59,6 +61,8 @@ export class StringSession extends MemorySession {
     }
 
     async load() {
+        if (this._loaded) return;
+        this._loaded = true;
         if (this._key) {
             this._authKey = new AuthKey();
             await this._authKey.setKey(this._key);
@@ -66,6 +70,7 @@ export class StringSession extends MemorySession {
     }
 
     delete() {
+        this._loaded = false;
         this._key = undefined;
         super.delete();
     }

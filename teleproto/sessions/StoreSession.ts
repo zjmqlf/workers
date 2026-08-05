@@ -46,10 +46,6 @@ export class StoreSession extends MemorySession {
         if (serverAddress) {
             this._serverAddress = serverAddress;
         }
-        const testServers = this.store.get(this.sessionName + "testServers");
-        if (testServers != null) {
-            super.testServers = !!testServers;
-        }
         const dcKeys = this.store.get(this.sessionName + "dcAuthKeys");
         if (dcKeys && typeof dcKeys === "object") {
             for (const [k, v] of Object.entries(dcKeys)) {
@@ -69,29 +65,17 @@ export class StoreSession extends MemorySession {
     setAuthKey(authKey?: AuthKey, dcId?: number) {
         super.setAuthKey(authKey, dcId);
         if (dcId !== undefined && dcId !== this._dcId) {
-            const snapshot: Record<string, Buffer | undefined> = {};
-            for (const [id, k] of this._dcAuthKeys) {
-                const raw = k.getKey();
-                if (raw) snapshot[String(id)] = raw;
-            }
-            this.store.set(this.sessionName + "dcAuthKeys", snapshot);
+            this._saveDcAuthKeys();
         }
     }
 
     setDC(dcId: number, serverAddress: string, port: number) {
+        super.setDC(dcId, serverAddress, port);
         this.store.set(this.sessionName + "dcId", dcId);
         this.store.set(this.sessionName + "port", port);
         this.store.set(this.sessionName + "serverAddress", serverAddress);
-        super.setDC(dcId, serverAddress, port);
-    }
-
-    set testServers(value: boolean) {
-        super.testServers = value;
-        this.store.set(this.sessionName + "testServers", value);
-    }
-
-    get testServers() {
-        return super.testServers;
+        this.store.set(this.sessionName + "authKey", this._authKey?.getKey());
+        this._saveDcAuthKeys();
     }
 
     set authKey(value: AuthKey | undefined) {
@@ -103,8 +87,16 @@ export class StoreSession extends MemorySession {
         return this._authKey;
     }
 
+    private _saveDcAuthKeys() {
+        const snapshot: Record<string, Buffer | undefined> = {};
+        for (const [id, k] of this._dcAuthKeys) {
+            const raw = k.getKey();
+            if (raw) snapshot[String(id)] = raw;
+        }
+        this.store.set(this.sessionName + "dcAuthKeys", snapshot);
+    }
+
     delete() {
-        this.store.clearAll();
         super.delete();
     }
 

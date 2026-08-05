@@ -139,10 +139,7 @@ export class Network {
                     ? {
                           permAuthKey: dcenter.authKey,
 
-                          dcParam: -(
-                              dcId +
-                              ((this._client as any)._testServers ? 10000 : 0)
-                          ),
+                          dcParam: -dcId,
                           expiresIn: TEMP_KEY_EXPIRES_IN,
                           onFailed: (err: unknown) => {
                               dcenter.mediaTempFailed = true;

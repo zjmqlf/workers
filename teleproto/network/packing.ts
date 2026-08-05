@@ -2,6 +2,7 @@ import { BinaryWriter, Logger } from "../extensions";
 import { MessageContainer, TLMessage } from "../tl/core";
 import { MTProtoState } from "./MTProtoState";
 import { RequestState } from "./RequestState";
+import { Buffer } from "node:buffer";
 
 export interface PackedBatch {
     batch: RequestState[];
