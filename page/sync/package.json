@@ -1,0 +1,42 @@
+{
+  "name": "sync",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-scripts": "5.0.1",
+    "ag-grid-react": "36.0.0",
+    "ag-grid-community": "36.0.0",
+    "ag-grid-enterprise": "36.0.0",
+    "wrangler": "4.105.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

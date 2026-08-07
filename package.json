@@ -85,6 +85,8 @@
     "deploy-zyxfiles": "wrangler deploy -c ./wrangler-zyxfiles.jsonc",
     "build-hash": "wrangler deploy -c ./wrangler-hash.jsonc --dry-run --outdir=./hash/dist",
     "deploy-hash": "wrangler deploy -c ./wrangler-hash.jsonc",
+    "build-sync": "wrangler deploy -c ./wrangler-sync.jsonc --dry-run --outdir=./hash/dist",
+    "deploy-sync": "wrangler deploy -c ./wrangler-sync.jsonc",
     "build-favorites": "wrangler deploy -c ./wrangler-favorites.jsonc --dry-run --outdir=./hash/dist",
     "deploy-favorites": "wrangler deploy -c ./wrangler-favorites.jsonc"
   },
