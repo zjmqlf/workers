@@ -470,7 +470,7 @@ const App = () => {
         // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
       });
     } else {
-      if (message.offsetId && message.offsetId >= 0) {
+      if (message.type && message.type === "grid") {
         if (message.offsetId < lastId.current) {
           console.log("消息offsetId小了");
           addNewEvent({
@@ -629,8 +629,8 @@ const App = () => {
         try {
           ws.current.send(command);
           setTime();
-        } catch (e) {
-          console.log(e);  //测试
+        } catch (err) {
+          console.log(err);  //测试
           addNewEvent({
             "error": true,
             "message": renderTime(Date.now()) + "  >>> send失败",
@@ -657,7 +657,7 @@ const App = () => {
         let message = null;
         try {
           message = JSON.parse(data);
-        } catch (e) {
+        } catch (err) {
           // console.log("解析JSON失败");  //测试
           addNewEvent({
             "error": true,
@@ -712,7 +712,7 @@ const App = () => {
         });
         try {
           connectWS(command);
-        } catch (e) {
+        } catch (err) {
           handlerBtnUnable();
           // console.log("连接远程websocket失败");  //测试
           addNewEvent({
@@ -748,8 +748,8 @@ const App = () => {
           ws.current.send(JSON.stringify({
             "command": "pause",
           }));
-        } catch (e) {
-          // console.log(e);  //测试
+        } catch (err) {
+          // console.log(err);  //测试
           handlerBtnEnable();
           handlerMessageError("  >>> pause失败");
         }
@@ -774,8 +774,8 @@ const App = () => {
       try {
         ws.current.close();
         // handlerClose();
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerBtnEnable();
         handlerMessageError("  >>> connect失败");
       }
@@ -792,8 +792,8 @@ const App = () => {
         ws.current.send(JSON.stringify({
           "command": "close",
         }));
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerBtnEnable();
         handlerMessageError("  >>> close失败");
       }
@@ -810,8 +810,8 @@ const App = () => {
         ws.current.send(JSON.stringify({
           "command": "over",
         }));
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> next失败");
         setNextBtnDisabled(false);
       }
@@ -827,8 +827,8 @@ const App = () => {
         ws.current.send(JSON.stringify({
           "command": "chat",
         }));
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> chat失败");
       }
     } else {
@@ -844,8 +844,8 @@ const App = () => {
         ws.current.send(JSON.stringify({
           "command": "cache",
         }));
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> cache失败");
       }
     } else {
@@ -861,8 +861,8 @@ const App = () => {
         ws.current.send(JSON.stringify({
           "command": "clear",
         }));
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> clear失败");
       }
     } else {
@@ -898,8 +898,8 @@ const App = () => {
             "command": "compress",
           }));
         }
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> compress失败");
         setCompressChecked(isCompress);
       }
@@ -920,8 +920,8 @@ const App = () => {
             "command": "batch",
           }));
         }
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> batch失败");
         setBatchChecked(isBatch);
       }
@@ -940,8 +940,8 @@ const App = () => {
           "command": inputValue,
         }));
         setInputValue("");
-      } catch (e) {
-        // console.log(e);  //测试
+      } catch (err) {
+        // console.log(err);  //测试
         handlerMessageError("  >>> send失败");
         setSendBtnDisabled(false);
       }

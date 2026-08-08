@@ -135,7 +135,7 @@ export class WebSocketServer extends DurableObject {
   //   }
   // }
 
-  async countMedia() {
+  async countMediaIndex() {
     const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
     // console.log("mediaResult : " + mediaResult["COUNT(*)"]);  //测试
     if (mediaResult.success === true) {
@@ -164,7 +164,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async countPhoto() {
+  async countPhotoIndex() {
     const photoResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
     // console.log("photoResult : " + photoResult["COUNT(*)"]);  //测试
     if (photoResult.success === true) {
@@ -330,7 +330,7 @@ export class WebSocketServer extends DurableObject {
         console.log("length : " + length);  //测试
         for (let index = 0; index < length; index++) {
           // console.log(JSON.stringify(results[index]));  //测试
-          id = results[index].id;
+          id = results[index].Mindex;
           const exist = await this.selectMessageIndex(id);
           if (!exist || exist === 0) {
             await this.insertMessageIndex(results[index]);
@@ -347,7 +347,7 @@ export class WebSocketServer extends DurableObject {
 
     // let id = 0;
     // let current = 0;
-    // const count = await this.countMedia();
+    // const count = await this.countMediaIndex();
     // console.log("mediaCount : " + count);  //测试
     // if (count > 0) {
     //   while (current <= count) {
@@ -356,9 +356,9 @@ export class WebSocketServer extends DurableObject {
     //     console.log("length : " + length);  //测试
     //     for (let index = 0; index < length; index++) {
     //       // console.log(JSON.stringify(results[index]));
-    //       id = results[index].id;
-    //       // if (!await this.ctx.storage.get(id)) {
-    //         await this.ctx.storage.put(id, "[]");
+    //       id = results[index].Vindex;
+    //       // if (!await this.ctx.storage.get(results[index].id)) {
+    //         await this.ctx.storage.put(results[index].id, "[]");
     //       // }
     //     }
     //     // await scheduler.wait(5000);  //测试
@@ -370,7 +370,7 @@ export class WebSocketServer extends DurableObject {
 
     // let id = 0;
     // let current = 0;
-    // const count = await this.countPhoto();
+    // const count = await this.countPhotoIndex();
     // console.log("PhotoCount : " + count);  //测试
     // if (count > 0) {
     //   while (current <= count) {
@@ -379,9 +379,9 @@ export class WebSocketServer extends DurableObject {
     //     console.log("length : " + length);  //测试
     //     for (let index = 0; index < length; index++) {
     //       // console.log(JSON.stringify(results[index]));
-    //       id = results[index].id;
-    //       // if (!await this.ctx.storage.get(id)) {
-    //         await this.ctx.storage.put(id, "[]");
+    //       id = results[index].Pindex;
+    //       // if (!await this.ctx.storage.get(results[index].id)) {
+    //         await this.ctx.storage.put(results[index].id, "[]");
     //       // }
     //     }
     //     // await scheduler.wait(5000);  //测试

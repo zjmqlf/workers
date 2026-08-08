@@ -176,9 +176,10 @@ export class WebSocketServer extends DurableObject {
     });
   }
 
-  sendLog(operate, message, status, error) {
+  sendMessage(type, operate, message, status, error) {
     this.broadcast({
       "step": this.currentStep,
+      "type": type,
       "operate": operate,
       "message": message,
       "status": status,
@@ -192,7 +193,7 @@ export class WebSocketServer extends DurableObject {
       await this.client.destroy();
       this.client = null;
       // console.log("断开服务器成功");
-      this.sendLog("close", "断开服务器成功", null, false);
+      this.sendMessage("log", "close", "断开服务器成功", null, false);
     }
     this.stop = 0;
     this.ws.close();
@@ -217,11 +218,11 @@ export class WebSocketServer extends DurableObject {
       await this.client.connect();
     } catch (err) {
       // console.log(err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
-      this.sendLog("open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
+      this.sendMessage("log", "open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
-        this.sendLog("open", "超出tryCount限制", null, true);
+        this.sendMessage("log", "open", "超出tryCount限制", null, true);
         await this.close();
       } else {
         await scheduler.wait(30000);
@@ -238,7 +239,7 @@ export class WebSocketServer extends DurableObject {
     }
     this.stop = 1;
     // console.log("连接服务器成功");
-    this.sendLog("open", "连接服务器成功", null, false);  //测试
+    this.sendMessage("log", "open", "连接服务器成功", null, false);  //测试
     // console.log(this.client);  //测试
     //await scheduler.wait(5000);
   }
@@ -256,15 +257,15 @@ export class WebSocketServer extends DurableObject {
       );
     } catch (err) {
       // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
-      this.sendLog("getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
+      this.sendMessage("log", "getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         // console.log("chat已不存在了");  //测试
-        this.sendLog("getChat", "chat已不存在了", null, true);
+        this.sendMessage("log", "getChat", "chat已不存在了", null, true);
       } else {
         if (tryCount === 5) {
           this.stop = 2;
           // console.log("(" + this.currentStep + ")getChat超出tryCount限制");
-          this.sendLog("getChat", "超出tryCount限制", null, true);
+          this.sendMessage("log", "getChat", "超出tryCount限制", null, true);
           await this.close();
         } else {
           await scheduler.wait(10000);
@@ -284,14 +285,14 @@ export class WebSocketServer extends DurableObject {
     if (result && result.chats && result.chats.length > 0) {
       this.fromPeer = result.chats[0];
       if (this.fromPeer) {
-        this.sendLog("getChat", "chat", "add", false);
+        this.sendMessage("log", "getChat", "chat", "add", false);
       } else {
         // console.log("chat已不存在了");  //测试
-        this.sendLog("getChat", "chat已不存在了", null, true);
+        this.sendMessage("log", "getChat", "chat已不存在了", null, true);
       }
     } else {
       // console.log("chat已不存在了");  //测试
-      this.sendLog("getChat", "chat已不存在了", null, true);
+      this.sendMessage("log", "getChat", "chat已不存在了", null, true);
     }
   }
 
@@ -318,14 +319,14 @@ export class WebSocketServer extends DurableObject {
       if (err.name === "ChannelPrivateError" || err.errorMessage === "CHANNEL_INVALID" || err.errorMessage === "CHANNEL_PRIVATE" || err.code === 400) {
         this.fromPeer = null;
         // console.log("chat已不存在了");  //测试
-        this.sendLog("getMessage", "chat已不存在了", null, true);
+        this.sendMessage("log", "getMessage", "chat已不存在了", null, true);
       } else {
         // console.log("(" + this.currentStep + ")getMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
-        this.sendLog("getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
+        this.sendMessage("log", "getMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
         if (tryCount === 5) {
           this.stop = 2;
           // console.log("(" + this.currentStep + ")getMessage超出tryCount限制");
-          this.sendLog("getMessage", "超出tryCount限制", null, true);
+          this.sendMessage("log", "getMessage", "超出tryCount限制", null, true);
           await this.close();
         } else {
           await scheduler.wait(10000);
@@ -347,7 +348,7 @@ export class WebSocketServer extends DurableObject {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("(" + this.currentStep + ")selectCode超出tryCount限制");
-      this.sendLog("selectCode", "超出tryCount限制", null, true);
+      this.sendMessage("log", "selectCode", "超出tryCount限制", null, true);
       await this.close();
     } else {
       await scheduler.wait(10000);
@@ -369,7 +370,7 @@ export class WebSocketServer extends DurableObject {
       codeResult = await this.env.MAINDB.prepare("SELECT COUNT(*) FROM `CODE` WHERE `code` = ? AND `chatId` = 1 LIMIT 1;").bind(code).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectCode : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
-      this.sendLog("selectCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
+      this.sendMessage("log", "selectCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -395,7 +396,7 @@ export class WebSocketServer extends DurableObject {
     if (tryCount === 5) {
       this.stop = 2;
       // console.log("(" + this.currentStep + ")insertCode超出tryCount限制");
-      this.sendLog("insertCode", "超出tryCount限制", null, true);
+      this.sendMessage("log", "insertCode", "超出tryCount限制", null, true);
       await this.close();
     } else {
       await scheduler.wait(10000);
@@ -417,7 +418,7 @@ export class WebSocketServer extends DurableObject {
       codeResult = await this.env.MAINDB.prepare("INSERT INTO `CODE` (chatId, code, status) VALUES (?, ?, ?);").bind(1, code, 0).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : insertCode : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
-      this.sendLog("insertCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
+      this.sendMessage("log", "insertCode", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
       if (err.message === this.errorMessage) {
         this.stop = 2;
         this.broadcast({
@@ -433,10 +434,10 @@ export class WebSocketServer extends DurableObject {
     if (codeResult.success === true) {
       this.successCount += 1;
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据成功");
-      this.sendLog("insertCode", "插入code数据成功", "success", false);
+      this.sendMessage("log", "insertCode", "插入code数据成功", "success", false);
     } else {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] : 插入code数据失败");
-      this.sendLog("insertCode", "插入code数据失败", "error", true);
+      this.sendMessage("log", "insertCode", "插入code数据失败", "error", true);
       await this.insertCodeError(tryCount, code);
     }
   }
@@ -461,11 +462,11 @@ export class WebSocketServer extends DurableObject {
                       await this.insertCode(1, code);
                     } else {
                       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
-                      this.sendLog("nextMessage", "message已在数据库中", "exist", false);
+                      this.sendMessage("log", "nextMessage", "message已在数据库中", "exist", false);
                     }
                   } else {
                     // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : code为空");
-                    this.sendLog("nextMessage", "code为空", "error", true);
+                    this.sendMessage("log", "nextMessage", "code为空", "error", true);
                   }
                   break;
                 }
@@ -474,18 +475,18 @@ export class WebSocketServer extends DurableObject {
             this.offsetId += 1;
           } else {
             // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-            this.sendLog("nextMessage", "txt为空", "error", true);
+            this.sendMessage("log", "nextMessage", "txt为空", "error", true);
             this.offsetId += 1;
           }
         } else {
           // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
-          this.sendLog("nextMessage", "错误的消息", "error", true);
+          this.sendMessage("log", "nextMessage", "错误的消息", "error", true);
           this.offsetId += 1;
         }
       } else {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")nextMessage超出apiCount限制");
-        this.sendLog("nextMessage", "超出apiCount限制", "limit", true);
+        this.sendMessage("log", "nextMessage", "超出apiCount限制", "limit", true);
         await this.close();
         // this.ctx.abort("reset");
       }
@@ -506,21 +507,21 @@ export class WebSocketServer extends DurableObject {
       const messageLength = messageArray.length;
       this.messageArray = [];
       // console.log("(" + this.currentStep + ")messageLength : " + messageLength);  //测试
-      // this.sendLog("nextStep", "messageLength : " + messageLength, null, false);  //测试
+      // this.sendMessage("log", "nextStep", "messageLength : " + messageLength, null, false);  //测试
       // if (messageLength > this.limit) {
       //   // console.log("(" + this.currentStep + ") messageLength比limit大");
-      //   this.sendLog("nextStep", "messageLength比limit大", null, true);
+      //   this.sendMessage("log", "nextStep", "messageLength比limit大", null, true);
       // }
       if (messageLength && messageLength > 0) {
         // console.log("(" + this.currentStep + ")messageLength : " + messageLength);
-        this.sendLog("nextStep", "messageLength : " + messageLength, null, false);
+        this.sendMessage("log", "nextStep", "messageLength : " + messageLength, null, false);
         if (this.stop === 1) {
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
             await this.nextMessage(messageLength, messageIndex + 1, messageArray[messageIndex]);
             // this.offsetId += 1;
           }
           // console.log("(" + this.currentStep + ")successCount : " + this.successCount);
-          this.sendLog("nextStep", "successCount : " + this.successCount, null, false);
+          this.sendMessage("log", "nextStep", "successCount : " + this.successCount, null, false);
           this.successCount = 0;
           if (this.stop === 1) {
             if (this.apiCount < 900) {
@@ -528,7 +529,7 @@ export class WebSocketServer extends DurableObject {
             } else {
               this.stop = 2;
               // console.log("(" + this.currentStep + ")nextStep超出apiCount限制");
-              this.sendLog("nextStep", "超出apiCount限制", "limit", true);
+              this.sendMessage("log", "nextStep", "超出apiCount限制", "limit", true);
               await this.close();
               // this.ctx.abort("reset");
             }
@@ -546,7 +547,7 @@ export class WebSocketServer extends DurableObject {
         }
       } else {
         // console.log("(" + this.currentStep + ") 没有获取到有效的消息");
-        this.sendLog("nextStep", "没有获取到有效的消息", "error", true);
+        this.sendMessage("log", "nextStep", "没有获取到有效的消息", "error", true);
         if (this.stop === 1) {
           await this.nextStep();
         } else if (this.stop === 2) {
@@ -601,10 +602,10 @@ export class WebSocketServer extends DurableObject {
         const messageLength = messageArray.length;
         this.messageArray = [];
         // console.log("(" + this.currentStep + ")messageLength : " + messageLength);  //测试
-        // this.sendLog("start", "messageLength : " + messageLength, null, false);  //测试
+        // this.sendMessage("log", "start", "messageLength : " + messageLength, null, false);  //测试
         // if (messageLength > this.limit) {
         //   // console.log("(" + this.currentStep + ") messageLength比limit大");
-        //   this.sendLog("start", "messageLength比limit大", null, true);
+        //   this.sendMessage("log", "start", "messageLength比limit大", null, true);
         // }
         if (messageLength && messageLength > 0) {
           for (let messageIndex = 0; messageIndex < messageLength; messageIndex++) {
@@ -612,7 +613,7 @@ export class WebSocketServer extends DurableObject {
             // this.offsetId += 1;
           }
           // console.log("(" + this.currentStep + ")successCount : " + this.successCount);
-          this.sendLog("start", "successCount : " + this.successCount, null, false);
+          this.sendMessage("log", "start", "successCount : " + this.successCount, null, false);
           this.successCount = 0;
           if (this.stop === 1) {
             if (this.apiCount < 900) {
@@ -620,7 +621,7 @@ export class WebSocketServer extends DurableObject {
             } else {
               this.stop = 2;
               // console.log("(" + this.currentStep + ")start超出apiCount限制");
-              this.sendLog("start", "超出apiCount限制", "limit", true);
+              this.sendMessage("log", "start", "超出apiCount限制", "limit", true);
               await this.close();
               // this.ctx.abort("reset");
             }
@@ -632,7 +633,7 @@ export class WebSocketServer extends DurableObject {
           }
         } else {
           // console.log("(" + this.currentStep + ") 没有获取到有效的消息");
-          this.sendLog("start", "没有获取到有效的消息", "error", true);
+          this.sendMessage("log", "start", "没有获取到有效的消息", "error", true);
           if (this.stop === 1) {
             await this.nextStep();
           } else if (this.stop === 2) {
@@ -650,7 +651,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       // console.log("查找不到fromPeer");
-      this.sendLog("start", "查找不到fromPeer", null, false);
+      this.sendMessage("log", "start", "查找不到fromPeer", null, false);
       this.broadcast({
         "result": "over",
       });
@@ -672,7 +673,7 @@ export class WebSocketServer extends DurableObject {
       } catch (err) {
         command = data;
         // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
-        this.sendLog("webSocketMessage", "parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
+        this.sendMessage("log", "webSocketMessage", "parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       }
     // }
     if (command === "start") {

@@ -8,11 +8,11 @@ export class WebSocketServer extends DurableObject {
   currentStep = 0;
   compress = false;
   batch = false;
-  // limit = 100;
-  begin = 0;
-  end = 0;
-  index = 0;
-  count = 0;
+  limit = 100;
+  beginId = 0;
+  endId = 0;
+  syncIndex = 0;
+  syncCount = 0;
   offsetId = 0;
   filterType = 0;
   errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
@@ -58,20 +58,20 @@ export class WebSocketServer extends DurableObject {
         if (option.batch) {
           this.batch = option.batch;
         }
-        // if (option.limit && option.limit > 0) {
-        //   this.limit = option.limit;
-        // }
-        if (option.begin) {
-          this.begin = option.begin;
+        if (option.limit && option.limit > 0) {
+          this.limit = option.limit;
         }
-        if (option.end) {
-          this.end = option.end;
+        if (option.beginId) {
+          this.beginId = option.beginId;
         }
-        if (option.index) {
-          this.index = option.index;
+        if (option.endId) {
+          this.endId = option.endId;
         }
-        if (option.count) {
-          this.count = option.count;
+        if (option.syncIndex) {
+          this.syncIndex = option.syncIndex;
+        }
+        if (option.syncCount) {
+          this.syncCount = option.syncCount;
         }
         if (option.offsetId && option.offsetId > 0) {
           this.offsetId = option.offsetId;
@@ -82,11 +82,11 @@ export class WebSocketServer extends DurableObject {
       } else {
         this.compress = false;
         this.batch = false;
-        // this.limit = 100;
-        this.begin = 0;
-        this.end = 0;
-        this.index = 0;
-        this.count = 0;
+        this.limit = 100;
+        this.beginId = 0;
+        this.endId = 0;
+        this.syncIndex = 0;
+        this.syncCount = 0;
         this.offsetId = 0;
         this.filterType = 0;
       }
@@ -271,7 +271,7 @@ export class WebSocketServer extends DurableObject {
         }
         if (!option || !option.limited) {
           if (result.limited && result.limited > 0) {
-            this.limit = result.limited;
+            this.endId = result.limited;
           }
         }
       } else {
@@ -334,7 +334,7 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
-  async countMedia() {
+  async countMediaIndex() {
     const mediaResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `MEDIAINDEX` WHERE 1 = 1;").run();
     // console.log("mediaResult : " + mediaResult["COUNT(*)"]);  //测试
     if (mediaResult.success === true) {
@@ -393,6 +393,17 @@ export class WebSocketServer extends DurableObject {
     }
   }
 
+  async countPhotoIndex() {
+    const photoResult = await env.MEDIADB.prepare("SELECT COUNT(*) FROM `PHOTOINDEX` WHERE 1 = 1;").run();
+    // console.log("photoResult : " + photoResult["COUNT(*)"]);  //测试
+    if (photoResult.success === true) {
+      if (photoResult.results && photoResult.results.length > 0) {
+        return photoResult.results[0]["COUNT(*)"];
+      }
+    }
+    return -1;
+  }
+
   async selectPhotoIndexError(tryCount, type) {
     if (tryCount === 5) {
       this.stop = 2;
@@ -416,7 +427,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let photoResult = {};
     try {
-      photoResult = await this.env.MAINDB.prepare("SELECT `id`, `Pindex` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(this.offsetId, type).run();
+      photoResult = await this.env.MAINDB.prepare("SELECT `id`, `Pindex`, `sizeType` FROM `PHOTOINDEX` WHERE `Pindex` >= ? ORDER BY `Pindex` ASC LIMIT 100;").bind(this.offsetId, type).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -442,9 +453,9 @@ export class WebSocketServer extends DurableObject {
   }
 
   async syncMediaIndex() {
-    if (this.end && this.end > 0) {
-      if (this.end > this.offsetId) {
-        while (this.offsetId <= this.end) {
+    if (this.endId && this.endId > 0) {
+      if (this.endId > this.offsetId) {
+        while (this.offsetId <= this.endId) {
           const results = await this.selectMediaIndex();
           if (results) {
             const length = results.length;
@@ -452,14 +463,14 @@ export class WebSocketServer extends DurableObject {
             this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
             if (length > 0) {
               for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].id;
-                // if (this.offsetId > this.end) {
+                this.offsetId = results[index].Vindex;
+                // if (this.offsetId > this.endId) {
                 //   // console.log("offsetId超过end");
                 //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
                 //   break;
                 // }
-                // if (!await this.ctx.storage.get("m" + this.offsetId)) {
-                  await this.ctx.storage.put("m" + this.offsetId, "[]");
+                // if (!await this.ctx.storage.get("m_" + results[index].id)) {
+                  await this.ctx.storage.put("m_" + results[index].id, "[]");
                 // }
                 // console.log("id : " + this.offsetId);  //测试
                 // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
@@ -481,11 +492,11 @@ export class WebSocketServer extends DurableObject {
         this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
       }
     } else {
-      this.count = await this.countMedia();
-      // console.log("mediaCount : " + this.count);  //测试
-      this.sendMessage("log", "syncMediaIndex", "mediaCount : " + this.count, null, false);  //测试
-      if (this.count > 0) {
-        while (this.index <= this.count) {
+      this.syncCount = await this.countMediaIndex();
+      // console.log("mediaCount : " + this.syncCount);  //测试
+      this.sendMessage("log", "syncMediaIndex", "mediaCount : " + this.syncCount, null, false);  //测试
+      if (this.syncCount > 0) {
+        while (this.syncIndex <= this.syncCount) {
           const results = await this.selectMediaIndex();
           if (results) {
             const length = results.length;
@@ -493,15 +504,15 @@ export class WebSocketServer extends DurableObject {
             this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
             if (length > 0) {
               for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].id;
-                // if (!await this.ctx.storage.get("m" + this.offsetId)) {
-                  await this.ctx.storage.put("m" + this.offsetId, "[]");
+                this.offsetId = results[index].Vindex;
+                // if (!await this.ctx.storage.get("m_" + results[index].id)) {
+                  await this.ctx.storage.put("m_" + results[index].id, "[]");
                 // }
                 // console.log("id : " + this.offsetId);  //测试
                 // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
               }
               // await scheduler.wait(5000);  //测试
-              this.index += length;
+              this.syncIndex += length;
             } else {
               // console.log("mediaLength为0");
               this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
@@ -521,9 +532,9 @@ export class WebSocketServer extends DurableObject {
   }
 
   async syncPhotoIndex() {
-    if (this.end && this.end > 0) {
-      if (this.end > this.offsetId) {
-        while (this.offsetId <= this.end) {
+    if (this.endId && this.endId > 0) {
+      if (this.endId > this.offsetId) {
+        while (this.offsetId <= this.endId) {
           const results = await this.selectPhotoIndex();
           if (results) {
             const length = results.length;
@@ -531,14 +542,14 @@ export class WebSocketServer extends DurableObject {
             this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
             if (length > 0) {
               for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].id;
-                // if (this.offsetId > this.end) {
+                this.offsetId = results[index].Pindex;
+                // if (this.offsetId > this.endId) {
                 //   // console.log("offsetId超过end");
                 //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
                 //   break;
                 // }
-                // if (!await this.ctx.storage.get("p" + this.offsetId)) {
-                  await this.ctx.storage.put("p" + this.offsetId, "[]");
+                // if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
+                  await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
                 // }
                 // console.log("id : " + this.offsetId);  //测试
                 // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
@@ -560,11 +571,11 @@ export class WebSocketServer extends DurableObject {
         this.sendMessage("log", "syncPhotoIndex", "offsetId超过end", null, true);
       }
     } else {
-      this.count = await this.countPhoto();
-      // console.log("PhotoCount : " + this.count);  //测试
-      this.sendMessage("log", "syncPhotoIndex", "PhotoCount : " + this.count, null, false);  //测试
-      if (this.count > 0) {
-        while (this.index <= this.count) {
+      this.syncCount = await this.countPhotoIndex();
+      // console.log("PhotoCount : " + this.syncCount);  //测试
+      this.sendMessage("log", "syncPhotoIndex", "PhotoCount : " + this.syncCount, null, false);  //测试
+      if (this.syncCount > 0) {
+        while (this.syncIndex <= this.syncCount) {
           const results = await this.selectPhotoIndex();
           if (results) {
             const length = results.length;
@@ -572,15 +583,15 @@ export class WebSocketServer extends DurableObject {
             this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
             if (length > 0) {
               for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].id;
-                // if (!await this.ctx.storage.get("p" + this.offsetId)) {
-                  await this.ctx.storage.put("p" + this.offsetId, "[]");
+                this.offsetId = results[index].Pindex;
+                // if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
+                  await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
                 // }
                 // console.log("id : " + this.offsetId);  //测试
                 // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
               }
               // await scheduler.wait(5000);  //测试
-              this.index += length;
+              this.syncIndex += length;
             } else {
               // console.log("photoLength为0");
               this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
@@ -625,7 +636,7 @@ export class WebSocketServer extends DurableObject {
     // this.stop = 1;
     this.init(option);
     await this.getConfig(1, option);
-    this.offsetId = this.begin;
+    this.offsetId = this.beginId;
     if (this.filterType === 0) {
       await this.syncPhotoIndex();
     } else if (this.filterType === 1) {
