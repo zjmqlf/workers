@@ -49,7 +49,11 @@ const App = () => {
   let key = 0;
   let waitReconnect = null;
   const urlArray = [
-    "wss://hash.19421.xyz/ws",
+    {
+      "id": 1,
+      "name": "2025",
+      "url": "wss://hash.19421.xyz/ws"
+    }
   ];
   const clientCount = urlArray.length;
   const clientArray = [];
@@ -177,6 +181,12 @@ const App = () => {
           //   columnGroupShow: "closed",
           // },
           {
+            field: "connent",
+            headerName: "connent",
+            columnGroupShow: "open",
+            cellRenderer: resultRenderer,
+          },
+          {
             field: "offsetId",
             headerName:"offsetId",
             columnGroupShow: "open",
@@ -298,12 +308,6 @@ const App = () => {
           {
             field: "insertFile",
             headerName: "insertFile",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "insertIndex",
-            headerName: "insertIndex",
             columnGroupShow: "open",
             cellRenderer: resultRenderer,
           },
@@ -476,27 +480,6 @@ const App = () => {
     }
   }, []);
 
-  const getLastRow = useCallback((offsetId, items) => {
-    let found = false;
-    gridRef.current.api.forEachNode((rowNode) => {
-      if (rowNode.data.offsetId === offsetId) {
-        lastRow.current = rowNode;
-        lastId.current = lastRow.current.data.offsetId;
-        updateLastRow(items);
-        found = true;
-        return;
-      }
-    });
-    if (found === false) {
-      // console.log("lastRow错误");
-      // addNewEvent({
-      //   "error": true,
-      //   "message": renderTime(Date.now()) + "  >>> lastRow错误",
-      // });
-      // addItems({offsetId, ...items});
-    }
-  }, [updateLastRow, addItems]);
-
   const updateItems = useCallback((data) => {
     // console.log(lastRow.current);  //测试
     const {offsetId, ...items} = data;
@@ -505,13 +488,9 @@ const App = () => {
       // console.log(items);  //测试
       if (lastId.current === offsetId) {
         updateLastRow(items);
-      } else {
-        getLastRow(offsetId, items);
       }
-    } else {
-      getLastRow(offsetId, items);
     }
-  }, [updateLastRow, getLastRow]);
+  }, [updateLastRow]);
 
   const updateSelect = useCallback((message, name) => {
     if (message.status === "try") {
@@ -1219,6 +1198,23 @@ const App = () => {
     }
   }, [handlerMessageError, waitReconnect]);
 
+  const handlerSyncBtnClick = useCallback(() => {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({
+          "command": "sync",
+        }));
+      } catch (err) {
+        // console.log(err);  //测试
+        handlerMessageError("  >>> sync失败");
+      }
+    } else {
+      waitReconnect(JSON.stringify({
+        "command": "sync",
+      }), 1000);
+    }
+  }, [handlerMessageError, waitReconnect]);
+
   const handlerClearCacheBtnClick = useCallback(() => {
     if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -1357,6 +1353,14 @@ const App = () => {
 //    }
   },[setSendBtnDisabled, inputValue]);
 
+  useEffect(() => {
+    if (clientCount > 0) {
+      for (let index = 0; index < clientCount; index++) {
+        addItems([urlArray[index]]);
+      }
+    }
+  },[clientCount]);
+
   // useEffect(() => {
   //   const handleBeforeUnload = (event) => {
   //     if (!confirm("程序正在运行中，确定要关闭吗？")) {
@@ -1415,6 +1419,7 @@ const App = () => {
           <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
           <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
           <button onClick={handlerChatBtnClick}>chat</button>
+          <button onClick={handlerSyncBtnClick}>sync</button>
           <button onClick={handlerClearCacheBtnClick}>清空cache</button>
           <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
           <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
