@@ -48,44 +48,44 @@ ModuleRegistry.registerModules([
 const App = () => {
   let key = 0;
   let waitReconnect = null;
-  const urlArray = [
-    {
-      "id": 1,
-      "name": "2025",
-      "url": "wss://hash.19421.xyz/ws"
-    }
-  ];
-  const clientCount = urlArray.length;
-  const clientArray = [];
   // const pagination = true;
   // const paginationPageSize = 50;
   // const paginationPageSizeSelector = [50, 150, 200];
-  const rowArray = useRef({});
-  const lastId = useRef({});
-  const lastClient = useRef(0);
-  const ws = useRef(Array(clientCount).fill(null));
-  const stop = useRef(false);
-  const over = useRef(false);
-  const timeOut = useRef(null);
+  // const runningCount = useRef(0);
   const gridRef = useRef(null);
-  const errorCount = useRef(0);
-  const waitTime = useRef(30000);
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ width: "100%", height: "80%" }), []);
   const [documentValue, setDocumentValue] = useState(2);
   const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
   const [isConnectBtnDisabled, setConnectBtnDisabled] = useState(true);
   const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
-  const [isClearGridBtnDisabled, setClearGridBtnDisabled] = useState(true);
   const [isClearLogBtnDisabled, setClearLogBtnDisabled] = useState(true);
   const [pauseBtnText, setPauseBtnText] = useState("开始");
   const [isCompressChecked, setCompressChecked] = useState(false);
   const [isBatchChecked, setBatchChecked] = useState(false);
-  const [rowData, setRowData] = useState([]);
+  const [rowData, setRowData] = useState([{
+    "clientId": 1,
+    "clientName": "2025",
+    "url": "wss://hash.19421.xyz/ws"
+  }]);
   const [logData, setLogData] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isSendBtnDisabled, setSendBtnDisabled] = useState(true);
+  const clientCount = rowData.length;
+  const clientArray = useRef(Array(clientCount).fill({
+    "ws": null,
+    "stop": false,
+    "over": false,
+    "timeOut": null,
+    "errorCount": 0,
+    "waitTime": 30000,
+  }));
+  const idArray = useRef({});
   const getRowId = useCallback((params) => String(params.data.chatId), []);
+
+  for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+    idArray[rowData[clientIndex].clientId] = clientArray.current[clientIndex];
+  }
 
   const resultRenderer = useCallback((params) => {
     return params.value === true ?
@@ -180,6 +180,16 @@ const App = () => {
           //   headerName: "messageIndex",
           //   columnGroupShow: "closed",
           // },
+          {
+            field: "clientId",
+            headerName:"clientId",
+            columnGroupShow: "open",
+          },
+          {
+            field: "clientName",
+            headerName:"clientName",
+            columnGroupShow: "open",
+          },
           {
             field: "connent",
             headerName: "connent",
@@ -388,7 +398,7 @@ const App = () => {
 
   const rowClassRules = useMemo(() => {
     return {
-      "rag-red": params => params.node.level === 1 && params.node.data.chatId === lastId.current[params.node.data.clientId] && (!params.node.data.messageLength || params.node.data.messageLength < 100),
+      "rag-red": params => params.node.level === 1 && params.node.data.stop === true,
     };
   }, []);
 
@@ -428,69 +438,26 @@ const App = () => {
     // }
   }, [setLogData, key]);
 
-  const addItems = useCallback((items) => {
-    if (gridRef.current.api.getDisplayedRowCount() >= 200) {
-      setRowData([]);
-      setClearGridBtnDisabled(true);
-      console.log("删除grid成功");  //测试
-    }
-    const res = gridRef.current.api.applyTransaction({
-      add: items,
-      addIndex: 0,
-    });
-    // console.log(res);  //测试
-    if (res.add && res.add.length > 0) {
-      lastRow.current = res.add[0];
-      // console.log(lastRow.current);  //测试
-      lastId.current = lastRow.current.data.offsetId;
-    } else {
-      lastRow.current = null;
-      lastId.current = 0;
-      console.log("添加row失败");
-      addNewEvent({
-        "message": renderTime(Date.now()) + "  >>> 添加row失败",
-      });
-      // console.log(items);  //测试
-    }
-    if (gridRef.current.api.getDisplayedRowCount() === 0) {
-      setClearGridBtnDisabled(true);
-    } else {
-      setClearGridBtnDisabled(false);
-    }
-  }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled]);
-
-  const updateLastRow = useCallback((items) => {
-    if (items.date && (items.date >= lastRow.current.data.time)) {
-      lastRow.current.setDataValue("useTime", items.date - lastRow.current.data.time);
+  const updateItems = useCallback((items) => {
+    if (items.date && (items.date >= rowArray.current[items.clientId].time)) {
+      rowArray.current[items.clientId].setDataValue("useTime", items.date - rowArray.current[items.clientId].time);
     }
     for (const name in items) {
       // console.log(name);  //测试
       // console.log(items[name]);  //测试
       if (name === "error") {
         if (items[name] === true) {
-          if (lastRow.current.data.error > 0) {
-            lastRow.current.setDataValue("error", lastRow.current.data.error + 1);
+          if (rowArray.current[items.clientId].error > 0) {
+            rowArray.current[items.clientId].setDataValue("error", rowArray.current[items.clientId].error + 1);
           } else {
-            lastRow.current.setDataValue("error", 1);
+            rowArray.current[items.clientId].setDataValue("error", 1);
           }
         }
       } else {
-        lastRow.current.setDataValue(name, items[name]);
+        rowArray.current[items.clientId].setDataValue(name, items[name]);
       }
     }
   }, []);
-
-  const updateItems = useCallback((data) => {
-    // console.log(lastRow.current);  //测试
-    const {offsetId, ...items} = data;
-    if (lastRow.current) {
-      // console.log(offsetId);  //测试
-      // console.log(items);  //测试
-      if (lastId.current === offsetId) {
-        updateLastRow(items);
-      }
-    }
-  }, [updateLastRow]);
 
   const updateSelect = useCallback((message, name) => {
     if (message.status === "try") {
@@ -567,28 +534,25 @@ const App = () => {
   }, [handlerBtn, setPauseBtnText]);
 
   const handlerClose = useCallback(() => {
-    ws.current = null;
-    stop.current = true;
-    errorCount.current += 1;
-    if (errorCount.current === 10) {
-      waitTime.current = 300000;
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      clientArray.current[clientIndex].ws = null;
+      clientArray.current[clientIndex].stop = true;
+      clientArray.current[clientIndex].errorCount += 1;
+      if (clientArray.current[clientIndex].errorCount === 10) {
+        clientArray.current[clientIndex].waitTime = 300000;
+      }
+      // console.log("远程websocket连续" + clientArray.current[clientIndex].errorCount + "次断开了连接");  //测试
+      addNewEvent({
+        "error": true,
+        "message": renderTime(Date.now()) + "  >>> 远程websocket连续" + clientArray.current[clientIndex].errorCount + "次断开了连接",
+      });
     }
     window.removeEventListener("beforeunload", handleBeforeUnload);
     window.removeEventListener("popstate", handleBeforeUnload);
-    if (lastRow.current) {
-      gridRef.current.api.redrawRows({
-        rowNodes: [lastRow.current],
-      });
-    }
     handlerBtnUnable();
     // setLogData(() => {
     //   return [];
     // });
-    // console.log("远程websocket连续" + errorCount.current + "次断开了连接");  //测试
-    addNewEvent({
-      "error": true,
-      "message": renderTime(Date.now()) + "  >>> 远程websocket连续" + errorCount.current + "次断开了连接",
-    });
   }, [addNewEvent, renderTime, handleBeforeUnload, handlerBtnUnable]);
 
   const parseMessage = useCallback((message) => {
@@ -600,12 +564,9 @@ const App = () => {
         "error": true,
         "message": renderTime(Date.now()) + "  >>> 远程websocket已停止完毕",
       });
-      ws.current.close();
+      idArray.current[message.clientId].ws.close();
       // handlerClose();
     } else if (message.result === "end") {
-      // rowArray.current = {};
-      // setRowData([]);
-      // setClearGridBtnDisabled(true);
       // setLogData(() => {
       //   return [];
       // });
@@ -616,8 +577,8 @@ const App = () => {
       //   // "message": renderTime(message.date) + " " + message.operate + " - " + message.message,
       // });
     } else if (message.result === "over") {
-      over.current = true;
-      clearTimeout(timeOut.current);
+      idArray.current[message.clientId].over = true;
+      clearTimeout(idArray.current[message.clientId].timeOut);
       // console.log("全部chat采集完毕");  //测试
       // addNewEvent({
       //   "message": renderTime(Date.now()) + "  >>>全部chat采集完毕",
@@ -625,13 +586,7 @@ const App = () => {
       // });
     } else {
       if (message.type && message.type === "grid") {
-        if (message.offsetId < lastId.current) {
-          // console.log("消息offsetId小了");
-          addNewEvent({
-            "error": true,
-            "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " 消息offsetId小了" + (message.message ? " - " + message.message  : " "),
-          });
-        } else {
+        if (message.clientId && message.clientId > 0) {
           switch (message.operate) {
             case "nextHash":
               if (message.status === "update") {
@@ -688,18 +643,7 @@ const App = () => {
               }
               break;
             case "nextMessage":
-              if (message.status === "add") {
-                if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
-                  //delete message.operate;
-                  //delete message.status;
-                  const {
-                    operate,
-                    status,
-                    ...temp
-                  } = message;
-                  addItems([temp]);
-                }
-              } else if (message.status === "error") {
+              if (message.status === "error") {
                 // if (isCompressChecked === false) {
                 //   updateItems({
                 //     "offsetId": message.offsetId,
@@ -721,18 +665,7 @@ const App = () => {
               break;
             case "start":
             case "nextStep":
-              if (message.status === "add") {
-                if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
-                  //delete message.operate;
-                  //delete message.status;
-                  const {
-                    operate,
-                    status,
-                    ...temp
-                  } = message;
-                  addItems([temp]);
-                }
-              } else if (message.status === "error") {
+              if (message.status === "error") {
                 // if (isCompressChecked === false) {
                 //   updateItems({
                 //     "offsetId": message.offsetId,
@@ -887,6 +820,12 @@ const App = () => {
             default:
               console.log("未知消息 : " + JSON.stringify(message));
           }
+        } else {
+          // console.log("消息不包含clientId");
+          addNewEvent({
+            "error": true,
+            "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " 消息不包含clientId" + (message.message ? " - " + message.message  : " "),
+          });
         }
       } else {
         addNewEvent({
@@ -895,28 +834,28 @@ const App = () => {
         });
       }
     }
-  }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled, setLogData, setClearLogBtnDisabled, addItems, updateInsert, updateItems, updateSelect, isCompressChecked]);
+  }, [addNewEvent, renderTime, setLogData, setClearLogBtnDisabled, updateInsert, updateItems, updateSelect, isCompressChecked]);
 
-  const setTime = useCallback(() => {
-    clearTimeout(timeOut.current);
+  const setTime = useCallback((clientIndex) => {
+    clearTimeout(clientArray.current[clientIndex].timeOut);
     // let time = 120000;
     // let count = 2;
     // if (documentValue === 1) {
     //   time = 60000;
     //   count = 1;
     // }
-    timeOut.current = setTimeout(function() {
-      if (over.current === false) {
+    clientArray.current[clientIndex].timeOut = setTimeout(function() {
+      if (clientArray.current[clientIndex].over === false) {
         addNewEvent({
           "error": true,
           // "message": renderTime(Date.now()) + "  >>> 过了" + count + "分钟都没有收到任何消息",
           "message": renderTime(Date.now()) + "  >>> 过了1分钟都没有收到任何消息",
         });
-        if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-          ws.current.send(JSON.stringify({
+        if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
             "command": "close",
           }));
-          ws.current.close();
+          clientArray.current[clientIndex].ws.close();
           // handlerClose();
         }
       } else {
@@ -931,30 +870,30 @@ const App = () => {
 //  }, [addNewEvent, renderTime, documentValue]);
  }, [addNewEvent, renderTime]);
 
-  const connectWS = useCallback((command) => {
+  const connectWS = useCallback((clientIndex, command) => {
     // console.log("documentValue : " + documentValue);  //测试
     const url = new URL(window.location);
     url.protocol = "wss";
     url.pathname = "/ws";
-    ws.current = new WebSocket(url);
-    if (!(ws.current instanceof WebSocket)) {
-      errorCount.current += 1;
-      if (errorCount.current === 10) {
-        waitTime.current = 300000;
+    clientArray.current[clientIndex].ws = new WebSocket(url);
+    if (!(clientArray.current[clientIndex].ws instanceof WebSocket)) {
+      clientArray.current[clientIndex].errorCount += 1;
+      if (clientArray.current[clientIndex].errorCount === 10) {
+        clientArray.current[clientIndex].waitTime = 300000;
       }
-      throw new Error("  >>> 连续" + errorCount.current + "次连接远程websocket失败");
+      throw new Error("  >>> 连续" + clientArray.current[clientIndex].errorCount + "次连接远程websocket失败");
     }
 
-    ws.current.addEventListener("open", () => {
-      stop.current = false;
+    clientArray.current[clientIndex].ws.addEventListener("open", () => {
+      clientArray.current[clientIndex].stop = false;
       // console.log("连接远程websocket成功，准备send");  //测试
       addNewEvent({
         "message": renderTime(Date.now()) + "  >>> 连接远程websocket成功，准备send",
       });
-      if (errorCount.current > 0) {
-        errorCount.current = 0;
-        // if (waitTime.current !== 30000) {
-        //   waitTime.current = 30000;
+      if (clientArray.current[clientIndex].errorCount > 0) {
+        clientArray.current[clientIndex].errorCount = 0;
+        // if (clientArray.current[clientIndex].waitTime !== 30000) {
+        //   clientArray.current[clientIndex].waitTime = 30000;
         // }
       }
       window.addEventListener("beforeunload", handleBeforeUnload);
@@ -969,24 +908,24 @@ const App = () => {
       //     rowNodes: [rowNode],
       //   });
       // }
-      if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
         try {
-          ws.current.send(command);
-          setTime();
+          clientArray.current[clientIndex].ws.send(command);
+          setTime(clientIndex);
         } catch (err) {
           console.log(err);  //测试
           addNewEvent({
             "error": true,
             "message": renderTime(Date.now()) + "  >>> send失败",
           });
-          if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-            ws.current.close();
+          if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+            clientArray.current[clientIndex].ws.close();
             // handlerClose();
           }
-          // waitReconnect(JSON.stringify({
+          // waitReconnect(clientIndex, JSON.stringify({
           //   "command": "start",
           //   "filterType": documentValue,
-          // }), waitTime.current);
+          // }), clientArray.current[clientIndex].waitTime);
         }
       } else {
         // console.log(command + "失败");  //测试
@@ -997,7 +936,7 @@ const App = () => {
       }
     })
 
-    ws.current.addEventListener("message", ({ data }) => {
+    clientArray.current[clientIndex].ws.addEventListener("message", ({ data }) => {
       if (data) {
         let message = null;
         try {
@@ -1032,38 +971,35 @@ const App = () => {
           "message": renderTime(Date.now()) + "  >>> 消息为空",
         });
       }
-      setTime();
+      setTime(clientIndex);
     })
 
-    ws.current.addEventListener("close", () => {
+    clientArray.current[clientIndex].ws.addEventListener("close", () => {
       handlerClose();
-      if (over.current === false) {
+      if (clientArray.current[clientIndex].over === false) {
         // console.log(documentValue);  //测试
-        if (lastClient.current > 0) {
-          waitTime.current = 600000 - (lastClient.current * 3000);
+        if (clientArray.current[clientIndex].waitTime < 30000) {
+          clientArray.current[clientIndex].waitTime = 30000;
         }
-        if (waitTime.current < 30000) {
-          waitTime.current = 30000;
-        }
-        waitReconnect(JSON.stringify({
+        waitReconnect(clientIndex, JSON.stringify({
           "command": "start",
           "filterType": documentValue,
-        }), waitTime.current);
+        }), clientArray.current[clientIndex].waitTime);
       }
     })
 
   }, [addNewEvent, renderTime, handleBeforeUnload, parseMessage, setTime, handlerClose, waitReconnect, documentValue]);
 
-  waitReconnect = useCallback((command, time) => {
+  waitReconnect = useCallback((clientIndex, command, time) => {
     setTimeout(function() {
-      if (over.current === false) {
+      if (clientArray.current[clientIndex].over === false) {
         handlerBtnEnable();
         // console.log("连接远程websocket");  //测试
         addNewEvent({
           "message": renderTime(Date.now()) + "  >>> 连接远程websocket",
         });
         try {
-          connectWS(command);
+          connectWS(clientIndex, command);
         } catch (err) {
           handlerBtnUnable();
           // console.log("连接远程websocket失败");  //测试
@@ -1071,7 +1007,7 @@ const App = () => {
             "error": true,
             "message": renderTime(Date.now()) + "  >>> 连接远程websocket失败",
           });
-          waitReconnect(command, time);
+          waitReconnect(clientIndex, command, time);
         }
       } else {
         // console.log("停止采集，不再继续send");  //测试
@@ -1100,141 +1036,150 @@ const App = () => {
     if (pauseBtnText === "暂停") {
       setPauseBtnText("开始");
       handlerBtn(true);
-      // console.log(ws.current);  //测试
-      if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-        try {
-          ws.current.send(JSON.stringify({
-            "command": "pause",
-          }));
-        } catch (err) {
-          // console.log(err);  //测试
-          handlerBtnEnable();
-          handlerMessageError("  >>> pause失败");
+      for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+        if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+          try {
+            clientArray.current[clientIndex].ws.send(JSON.stringify({
+              "command": "pause",
+            }));
+          } catch (err) {
+            // console.log(err);  //测试
+            // handlerBtnEnable();
+            handlerMessageError("  >>> pause失败");
+          }
+        } else {
+          // handlerBtnEnable();
+          handlerMessageError("  >>> 没有连接ws");
         }
-      } else {
-        handlerBtnEnable();
-        handlerMessageError("  >>> 没有连接ws");
       }
     } else if (pauseBtnText === "开始") {
       // console.log(documentValue);  //测试
       setPauseBtnText("暂停");
       handlerBtn(false);
-      if (!(ws.current instanceof WebSocket) || ws.current.readyState !== WebSocket.OPEN) {
-        waitReconnect(JSON.stringify({
-          "command": "start",
-          "filterType": documentValue,
-        }), 1000);
+      for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+        if (!(clientArray.current[clientIndex].ws instanceof WebSocket) || clientArray.current[clientIndex].ws.readyState !== WebSocket.OPEN) {
+          waitReconnect(clientIndex, JSON.stringify({
+            "command": "start",
+            "filterType": documentValue,
+          }), 1000);
+        }
       }
     }
   }, [setPauseBtnText, handlerBtn, handlerBtnEnable, handlerMessageError, waitReconnect, pauseBtnText, documentValue]);
 
   const handlerConnectBtnClick = useCallback(() => {
     handlerBtnUnable();
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.close();
-        // handlerClose();
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerBtnEnable();
-        handlerMessageError("  >>> connect失败");
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.close();
+          // handlerClose();
+        } catch (err) {
+          // console.log(err);  //测试
+          // handlerBtnEnable();
+          handlerMessageError("  >>> connect失败");
+        }
+      } else {
+        // handlerBtnEnable();
+        handlerMessageError("  >>> 没有连接ws");
       }
-    } else {
-      handlerBtnEnable();
-      handlerMessageError("  >>> 没有连接ws");
     }
   }, [handlerBtnUnable, handlerBtnEnable, handlerMessageError]);
 
   const handlerCloseBtnClick = useCallback(() => {
     handlerBtnUnable();
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "close",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerBtnEnable();
-        handlerMessageError("  >>> close失败");
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": "close",
+          }));
+        } catch (err) {
+          // console.log(err);  //测试
+          // handlerBtnEnable();
+          handlerMessageError("  >>> close失败");
+        }
+      } else {
+        // handlerBtnEnable();
+        handlerMessageError("  >>> 没有连接ws");
       }
-    } else {
-      handlerBtnEnable();
-      handlerMessageError("  >>> 没有连接ws");
     }
   }, [handlerBtnUnable, handlerBtnEnable, handlerMessageError]);
 
   const handlerNextBtnClick = useCallback(() => {
     setNextBtnDisabled(true);
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "over",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> next失败");
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": "over",
+          }));
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> next失败");
+          setNextBtnDisabled(false);
+        }
+      } else {
+        handlerMessageError("  >>> 没有连接ws");
         setNextBtnDisabled(false);
       }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-      setNextBtnDisabled(false);
     }
   }, [setNextBtnDisabled, handlerMessageError]);
 
   const handlerChatBtnClick = useCallback(() => {
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": "chat",
+          }));
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> chat失败");
+        }
+      } else {
+        waitReconnect(clientIndex, JSON.stringify({
           "command": "chat",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> chat失败");
+        }), 1000);
       }
-    } else {
-      waitReconnect(JSON.stringify({
-        "command": "chat",
-      }), 1000);
     }
   }, [handlerMessageError, waitReconnect]);
 
   const handlerSyncBtnClick = useCallback(() => {
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": "sync",
+          }));
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> sync失败");
+        }
+      } else {
+        waitReconnect(clientIndex, JSON.stringify({
           "command": "sync",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> sync失败");
+        }), 1000);
       }
-    } else {
-      waitReconnect(JSON.stringify({
-        "command": "sync",
-      }), 1000);
     }
   }, [handlerMessageError, waitReconnect]);
 
   const handlerClearCacheBtnClick = useCallback(() => {
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "clear",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> clear失败");
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": "clear",
+          }));
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> clear失败");
+        }
+      } else {
+        handlerMessageError("  >>> 没有连接ws");
       }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
     }
   }, [handlerMessageError]);
-
-  const handlerClearGridBtnClick = useCallback(() => {
-    rowArray.current = {};
-    setRowData([]);
-    setClearGridBtnDisabled(true);
-  }, [setRowData, setClearGridBtnDisabled]);
 
   const handlerClearLogBtnClick = useCallback(() => {
     setLogData(() => {
@@ -1246,21 +1191,23 @@ const App = () => {
   const handlerCompressChange = useCallback(() => {
     const isCompress = isCompressChecked;
     setCompressChecked(!isCompress);
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        if (isCompress === true) {
-          ws.current.send(JSON.stringify({
-            "command": "noCompress",
-          }));
-        } else if (isCompress === false) {
-          ws.current.send(JSON.stringify({
-            "command": "compress",
-          }));
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          if (isCompress === true) {
+            clientArray.current[clientIndex].ws.send(JSON.stringify({
+              "command": "noCompress",
+            }));
+          } else if (isCompress === false) {
+            clientArray.current[clientIndex].ws.send(JSON.stringify({
+              "command": "compress",
+            }));
+          }
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> compress失败");
+          setCompressChecked(isCompress);
         }
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> compress失败");
-        setCompressChecked(isCompress);
       }
     }
   }, [setCompressChecked, handlerMessageError, isCompressChecked]);
@@ -1268,21 +1215,23 @@ const App = () => {
   const handlerBatchChange = useCallback(() => {
     const isBatch = isBatchChecked;
     setBatchChecked(!isBatch);
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        if (isBatch === true) {
-          ws.current.send(JSON.stringify({
-            "command": "noBatch",
-          }));
-        } else if (isBatch === false) {
-          ws.current.send(JSON.stringify({
-            "command": "batch",
-          }));
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          if (isBatch === true) {
+            clientArray.current[clientIndex].ws.send(JSON.stringify({
+              "command": "noBatch",
+            }));
+          } else if (isBatch === false) {
+            clientArray.current[clientIndex].ws.send(JSON.stringify({
+              "command": "batch",
+            }));
+          }
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> batch失败");
+          setBatchChecked(isBatch);
         }
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> batch失败");
-        setBatchChecked(isBatch);
       }
     }
   }, [setBatchChecked, handlerMessageError, isBatchChecked]);
@@ -1293,39 +1242,25 @@ const App = () => {
 
   const handlerSendBtnClick = useCallback(() => {
     setSendBtnDisabled(true);
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": inputValue,
-        }));
-        setInputValue("");
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> send失败");
-        setSendBtnDisabled(false);
+    for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+      if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
+        try {
+          clientArray.current[clientIndex].ws.send(JSON.stringify({
+            "command": inputValue,
+          }));
+          setInputValue("");
+        } catch (err) {
+          // console.log(err);  //测试
+          handlerMessageError("  >>> send失败");
+          setSendBtnDisabled(false);
+        }
+      } else {
+        // handlerMessageError("  >>> 没有连接ws");
+        // setSendBtnDisabled(false);
+        waitReconnect(clientIndex, inputValue, 1000);
       }
-    } else {
-      // handlerMessageError("  >>> 没有连接ws");
-      // setSendBtnDisabled(false);
-      waitReconnect(inputValue, 1000);
     }
   }, [setSendBtnDisabled, setInputValue, handlerMessageError, waitReconnect, inputValue]);
-
-  // useEffect(() => {
-  //   if (rowData.length === 0) {
-  //     setClearGridBtnDisabled(true);
-  //   } else if (rowData.length >= 200) {
-  //     setLogData(() => {
-  //       return [];
-  //     });
-  //     setClearGridBtnDisabled(true);
-  //     console.log("删除grid成功");  //测试
-  //   } else {
-  //     setClearGridBtnDisabled(false);
-  //   }
-  // //    return () => {
-  // //    }
-  // },[setClearGridBtnDisabled, setLogData, rowData]);
 
   useEffect(() => {
     if (logData.length === 0) {
@@ -1353,13 +1288,28 @@ const App = () => {
 //    }
   },[setSendBtnDisabled, inputValue]);
 
-  useEffect(() => {
-    if (clientCount > 0) {
-      for (let index = 0; index < clientCount; index++) {
-        addItems([urlArray[index]]);
-      }
-    }
-  },[clientCount]);
+  // const addItems = useCallback((items) => {
+  //   const res = gridRef.current.api.applyTransaction({
+  //     add: items
+  //   });
+  //   // console.log(res);  //测试
+  //   if (!res.add || res.add.length <= 0) {
+  //     console.log("添加row失败");
+  //     addNewEvent({
+  //       "message": renderTime(Date.now()) + "  >>> 添加row失败",
+  //     });
+  //     // console.log(items);  //测试
+  //   }
+  // }, [addNewEvent, renderTime]);
+
+  // useEffect(() => {
+  //   if (clientCount > 0) {
+  //     // for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+  //     //   addItems([urlArray[clientIndex]]);
+  //     // }
+  //     addItems(urlArray);
+  //   }
+  // },[clientCount, addItems]);
 
   // useEffect(() => {
   //   const handleBeforeUnload = (event) => {
@@ -1421,7 +1371,6 @@ const App = () => {
           <button onClick={handlerChatBtnClick}>chat</button>
           <button onClick={handlerSyncBtnClick}>sync</button>
           <button onClick={handlerClearCacheBtnClick}>清空cache</button>
-          <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
           <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
           <label>
             <input type="checkbox" checked={isCompressChecked} onChange={handlerCompressChange} />
