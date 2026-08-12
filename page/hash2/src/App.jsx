@@ -56,9 +56,6 @@ const App = () => {
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ width: "100%", height: "80%" }), []);
   const [documentValue, setDocumentValue] = useState(2);
-  const [isCloseBtnDisabled, setCloseBtnDisabled] = useState(true);
-  const [isConnectBtnDisabled, setConnectBtnDisabled] = useState(true);
-  const [isNextBtnDisabled, setNextBtnDisabled] = useState(true);
   const [isClearLogBtnDisabled, setClearLogBtnDisabled] = useState(true);
   const [pauseBtnText, setPauseBtnText] = useState("开始");
   const [isCompressChecked, setCompressChecked] = useState(false);
@@ -79,11 +76,13 @@ const App = () => {
     "timeOut": null,
     "errorCount": 0,
     "waitTime": 30000,
+    "rowData": {},
   }));
   const idArray = useRef({});
   const getRowId = useCallback((params) => String(params.data.chatId), []);
 
   for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
+    clientArray.current[clientIndex].rowData = rowData[clientIndex];
     idArray[rowData[clientIndex].clientId] = clientArray.current[clientIndex];
   }
 
@@ -388,13 +387,55 @@ const App = () => {
 
   const rowSelection = useMemo(() => {
     return {
-      //mode: "multiRow",
-      mode: "singleRow",
-      checkboxes: false,
-      headerCheckbox: false,
+      mode: "multiRow",
+      checkboxes: true,
+      headerCheckbox: true,
+      selectAll: 'filtered',
       enableClickSelection: true,
+      // enableSelectionWithoutKeys: true,
+      // isRowSelectable: (rowNode) => rowNode.data ? rowNode.data.year < 2007 : false,
     };
   }, []);
+
+  const selectionColumnDef = useMemo(() => { 
+    return {
+      width: 100,
+      // pinned: 'left',
+      sortable: true,
+      resizable: true,
+      suppressHeaderMenuButton: false,
+      headerTooltip: 'Checkboxes indicate selection',
+    };
+  }, []);
+
+  // const onRowSelected = useCallback((event) => {
+  //   event.node.isSelected()
+  // }, []);
+
+  const onSelectionChanged = useCallback((event) => {
+    const selectedNodes = event.selectedNodes;
+    if (selectedNodes) {
+      const rowCount = selectedNodes.length;
+      if (rowCount > 0) {
+        console.log(selectedNodes.data);  //测试
+        setPauseBtnText("暂停");
+      } else {
+        setPauseBtnText("开始");
+      }
+    } else {
+      setPauseBtnText("开始");
+    }
+  }, []);
+  
+  // const onFirstDataRendered = (params) => {
+  //   const nodesToSelect = [];
+  //   params.api.forEachNode((node) => {
+  //     if (node.data && node.data.year <= 2008 && node.data.year >= 2004) {
+  //       nodesToSelect.push(node);
+  //     }
+  //   });
+  //   params.api.setNodesSelected({ nodes: nodesToSelect, newValue: true });
+  // };
 
   const rowClassRules = useMemo(() => {
     return {
@@ -439,24 +480,31 @@ const App = () => {
   }, [setLogData, key]);
 
   const updateItems = useCallback((items) => {
-    if (items.date && (items.date >= rowArray.current[items.clientId].time)) {
-      rowArray.current[items.clientId].setDataValue("useTime", items.date - rowArray.current[items.clientId].time);
+    if (items.date && (items.date >= idArray[items.clientId].rowData.time)) {
+      // idArray[items.clientId].rowData.setDataValue("useTime", items.date - idArray[items.clientId].rowData.time);
+      idArray[items.clientId].rowData.useTime = items.date - idArray[items.clientId].rowData.time;
     }
     for (const name in items) {
       // console.log(name);  //测试
       // console.log(items[name]);  //测试
       if (name === "error") {
         if (items[name] === true) {
-          if (rowArray.current[items.clientId].error > 0) {
-            rowArray.current[items.clientId].setDataValue("error", rowArray.current[items.clientId].error + 1);
+          if (idArray[items.clientId].rowData.error > 0) {
+            // idArray[items.clientId].rowData.setDataValue("error", idArray[items.clientId].rowData.error + 1);
+            idArray[items.clientId].rowData.error = idArray[items.clientId].rowData.error + 1;
           } else {
-            rowArray.current[items.clientId].setDataValue("error", 1);
+            // idArray[items.clientId].rowData.setDataValue("error", 1);
+            idArray[items.clientId].rowData.error = 1;
           }
         }
       } else {
-        rowArray.current[items.clientId].setDataValue(name, items[name]);
+        // idArray[items.clientId].rowData.setDataValue(name, items[name]);
+        idArray[items.clientId].rowData[name] = items[name];
       }
     }
+    setRowData((prevState) => {
+      return [...prevState];
+    });
   }, []);
 
   const updateSelect = useCallback((message, name) => {
@@ -509,30 +557,6 @@ const App = () => {
     }
   }, []);
 
-  const handlerBtn = useCallback((status) => {
-    setConnectBtnDisabled(status);
-    setCloseBtnDisabled(status);
-    setNextBtnDisabled(status);
-  }, [setConnectBtnDisabled, setCloseBtnDisabled, setNextBtnDisabled]);
-
-  const handlerBtnUnable = useCallback(() => {
-    handlerBtn(true);
-    // // if (pauseBtnText === "暂停") {
-    // if (pauseBtnText !== "开始") {
-      setPauseBtnText("开始");
-    // }
-  // }, [handlerBtn, setPauseBtnText, pauseBtnText]);
-  }, [handlerBtn, setPauseBtnText]);
-
-  const handlerBtnEnable = useCallback(() => {
-    handlerBtn(false);
-    // // if (pauseBtnText === "开始") {
-    // if (pauseBtnText !== "暂停") {
-      setPauseBtnText("暂停");
-    // }
-  // }, [handlerBtn, setPauseBtnText, pauseBtnText]);
-  }, [handlerBtn, setPauseBtnText]);
-
   const handlerClose = useCallback(() => {
     for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
       clientArray.current[clientIndex].ws = null;
@@ -549,11 +573,11 @@ const App = () => {
     }
     window.removeEventListener("beforeunload", handleBeforeUnload);
     window.removeEventListener("popstate", handleBeforeUnload);
-    handlerBtnUnable();
+    setPauseBtnText("开始");
     // setLogData(() => {
     //   return [];
     // });
-  }, [addNewEvent, renderTime, handleBeforeUnload, handlerBtnUnable]);
+  }, [addNewEvent, renderTime, handleBeforeUnload]);
 
   const parseMessage = useCallback((message) => {
     if (message.result === "ping") {
@@ -993,7 +1017,7 @@ const App = () => {
   waitReconnect = useCallback((clientIndex, command, time) => {
     setTimeout(function() {
       if (clientArray.current[clientIndex].over === false) {
-        handlerBtnEnable();
+        setPauseBtnText("暂停");
         // console.log("连接远程websocket");  //测试
         addNewEvent({
           "message": renderTime(Date.now()) + "  >>> 连接远程websocket",
@@ -1001,7 +1025,7 @@ const App = () => {
         try {
           connectWS(clientIndex, command);
         } catch (err) {
-          handlerBtnUnable();
+          setPauseBtnText("开始");
           // console.log("连接远程websocket失败");  //测试
           addNewEvent({
             "error": true,
@@ -1017,7 +1041,7 @@ const App = () => {
         });
       }
     }, time);
-  }, [addNewEvent, renderTime, handlerBtnEnable, connectWS, handlerBtnUnable, waitReconnect]);
+  }, [addNewEvent, renderTime, connectWS, waitReconnect]);
 
   const handlerRadioChange = useCallback((e) => {
     // console.log(parseInt(e.target.value));  //测试
@@ -1035,7 +1059,6 @@ const App = () => {
     // console.log(pauseBtnText);  //测试
     if (pauseBtnText === "暂停") {
       setPauseBtnText("开始");
-      handlerBtn(true);
       for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
         if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
           try {
@@ -1044,18 +1067,17 @@ const App = () => {
             }));
           } catch (err) {
             // console.log(err);  //测试
-            // handlerBtnEnable();
+            // setPauseBtnText("暂停");
             handlerMessageError("  >>> pause失败");
           }
         } else {
-          // handlerBtnEnable();
+          // setPauseBtnText("暂停");
           handlerMessageError("  >>> 没有连接ws");
         }
       }
     } else if (pauseBtnText === "开始") {
       // console.log(documentValue);  //测试
       setPauseBtnText("暂停");
-      handlerBtn(false);
       for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
         if (!(clientArray.current[clientIndex].ws instanceof WebSocket) || clientArray.current[clientIndex].ws.readyState !== WebSocket.OPEN) {
           waitReconnect(clientIndex, JSON.stringify({
@@ -1065,10 +1087,10 @@ const App = () => {
         }
       }
     }
-  }, [setPauseBtnText, handlerBtn, handlerBtnEnable, handlerMessageError, waitReconnect, pauseBtnText, documentValue]);
+  }, [setPauseBtnText, handlerMessageError, waitReconnect, pauseBtnText, documentValue]);
 
   const handlerConnectBtnClick = useCallback(() => {
-    handlerBtnUnable();
+    setPauseBtnText("开始");
     for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
       if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
         try {
@@ -1076,18 +1098,18 @@ const App = () => {
           // handlerClose();
         } catch (err) {
           // console.log(err);  //测试
-          // handlerBtnEnable();
+          // setPauseBtnText("暂停");
           handlerMessageError("  >>> connect失败");
         }
       } else {
-        // handlerBtnEnable();
+        // hsetPauseBtnText("暂停");
         handlerMessageError("  >>> 没有连接ws");
       }
     }
-  }, [handlerBtnUnable, handlerBtnEnable, handlerMessageError]);
+  }, [handlerMessageError]);
 
   const handlerCloseBtnClick = useCallback(() => {
-    handlerBtnUnable();
+    setPauseBtnText("开始");
     for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
       if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
         try {
@@ -1096,18 +1118,17 @@ const App = () => {
           }));
         } catch (err) {
           // console.log(err);  //测试
-          // handlerBtnEnable();
+          // setPauseBtnText("暂停");
           handlerMessageError("  >>> close失败");
         }
       } else {
-        // handlerBtnEnable();
+        // setPauseBtnText("暂停");
         handlerMessageError("  >>> 没有连接ws");
       }
     }
-  }, [handlerBtnUnable, handlerBtnEnable, handlerMessageError]);
+  }, [handlerMessageError]);
 
   const handlerNextBtnClick = useCallback(() => {
-    setNextBtnDisabled(true);
     for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
       if ((clientArray.current[clientIndex].ws instanceof WebSocket) && clientArray.current[clientIndex].ws.readyState === WebSocket.OPEN) {
         try {
@@ -1117,14 +1138,12 @@ const App = () => {
         } catch (err) {
           // console.log(err);  //测试
           handlerMessageError("  >>> next失败");
-          setNextBtnDisabled(false);
         }
       } else {
         handlerMessageError("  >>> 没有连接ws");
-        setNextBtnDisabled(false);
       }
     }
-  }, [setNextBtnDisabled, handlerMessageError]);
+  }, [handlerMessageError]);
 
   const handlerChatBtnClick = useCallback(() => {
     for (let clientIndex = 0; clientIndex < clientCount; clientIndex++) {
@@ -1335,6 +1354,10 @@ const App = () => {
             getRowId={getRowId}
             rowClassRules={rowClassRules}
             rowSelection={rowSelection}
+            selectionColumnDef={selectionColumnDef}
+            // onRowSelected={onRowSelected}
+            onSelectionChanged={onSelectionChanged}
+            // onFirstDataRendered={onFirstDataRendered}
             // onRowDataUpdated={onRowDataUpdated}
             // pagination={pagination}
             // paginationPageSize={paginationPageSize}
@@ -1364,10 +1387,10 @@ const App = () => {
             <input type="radio" name="filterType" value="4" checked={documentValue === 4} onChange={handlerRadioChange} />
             动图
           </label>
-          <button onClick={handlerPauseBtnClick}>{pauseBtnText}</button>
-          <button onClick={handlerConnectBtnClick} disabled={isConnectBtnDisabled}>断开</button>
-          <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
-          <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
+          <button onClick={handlerPauseBtnClick} disabled={true}>{pauseBtnText}</button>
+          <button onClick={handlerConnectBtnClick} disabled={true}>断开</button>
+          <button onClick={handlerCloseBtnClick} disabled={true}>强制关闭</button>
+          <button onClick={handlerNextBtnClick} disabled={true}>不再继续</button>
           <button onClick={handlerChatBtnClick}>chat</button>
           <button onClick={handlerSyncBtnClick}>sync</button>
           <button onClick={handlerClearCacheBtnClick}>清空cache</button>

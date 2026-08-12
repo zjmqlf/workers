@@ -1576,5 +1576,6 @@
   "LunindiaCipokSupretto_bot_v:S5nm0CtA4WdhVMlrCAkS3VgS34SLym9e",
   "LunindiaCipokSupretto_bot_v:PSpq3CKcPthdTfrE9QGcK75Y07OGq7iz",
   "LunindiaCipokSupretto_bot_col:cJVxBXgMDj6bm42NFFSvRiaDyJ5h668f",
-  "LunindiaCipokSupretto_bot_v:WKOg3Lx65nq0g0lRqRdyB26zgHS3XDAl"
+  "LunindiaCipokSupretto_bot_v:WKOg3Lx65nq0g0lRqRdyB26zgHS3XDAl",
+  "LunindiaCipokSupretto_bot_v:lYmKMsDorh3bk4pMzObxrQCESqoIzli3"
 ]

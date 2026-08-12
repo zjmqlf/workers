@@ -1367,5 +1367,6 @@
   "KodeXFiles2bot_v:zzvcMVUYLItkA0YyL7qHKnSyyazcMdQl",
   "KodeXFiles2bot_p:fncgn0PRY4pqr6em1pTB4YtwnrkBsh9V",
   "KodeXFiles2bot_p:hlZpaD1CKbbEbWGZS24S6Pn0wEGW8Vp3",
-  "KodeXFiles2bot_v:OF8IzHNSxlStjsKO1wOXe8FmZoE5SoXG"
+  "KodeXFiles2bot_v:OF8IzHNSxlStjsKO1wOXe8FmZoE5SoXG",
+  "KodeXFiles2bot_col:dC2ixq0vcEI7xbjea5pE0sj2GyxBriL6"
 ]

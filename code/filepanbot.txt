@@ -677,5 +677,7 @@
   "@filepan_bot:_1V_Fc280te8CyPH",
   "@filepan_bot:_2V_qTUnaXa0kHCK",
   "@filepan_bot:_11P_2V_yw7rMsWErUTB",
-  "@filepan_bot:_4P_lvoLnct5ycwh"
+  "@filepan_bot:_4P_lvoLnct5ycwh",
+  "@filepan_bot:_1V_TWJi8Z3nQuCH",
+  "@filepan_bot:_99V_GB5CfZQh9FTV"
 ]
