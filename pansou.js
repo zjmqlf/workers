@@ -102,6 +102,7 @@ export class WebSocketServer extends DurableObject {
     //     this.webSocket.push(ws);
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
+    //     //   "type": "log",
     //     //   "step": this.currentStep,
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
@@ -306,6 +307,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
           //   //   "date": new Date().getTime(),
@@ -314,6 +316,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
           //     "error": true,
@@ -1094,6 +1097,7 @@ export class WebSocketServer extends DurableObject {
           const txt = message.message;
           this.broadcast({
             "step": this.currentStep,
+            "type": "grid",
             "operate": "nextMessage",
             // "messageLength": messageLength,
             // "messageIndex": messageIndex,
@@ -1813,12 +1817,14 @@ export class WebSocketServer extends DurableObject {
           const signed_url = await exportDB(name);
           if (signed_url) {
             this.broadcast({
+              "type": "log",
               "operate": "backup",
               "message": signed_url,
               "date": new Date().getTime(),
             });
           } else {
             this.broadcast({
+              "type": "log",
               "operate": "backup",
               "message": "获取signed_url失败",
               "error": true,
@@ -1827,6 +1833,7 @@ export class WebSocketServer extends DurableObject {
           }
         } else {
           this.broadcast({
+            "type": "log",
             "operate": "backup",
             "message": "获取db失败",
             "error": true,
@@ -1835,6 +1842,7 @@ export class WebSocketServer extends DurableObject {
         }
       } else {
         this.broadcast({
+          "type": "log",
           "operate": "backup",
           "message": "要备份的数据库id不能为空",
           "error": true,
@@ -1843,6 +1851,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       this.broadcast({
+        "type": "log",
         "operate": "webSocketMessage",
         "message": "未知消息",
         "error": true,

@@ -244,8 +244,8 @@ const App = () => {
             columnGroupShow: "closed",
           },
           {
-            field: "type",
-            headerName: "type",
+            field: "mimeType",
+            headerName: "mimeType",
             columnGroupShow: "closed",
           },
           {
@@ -271,8 +271,8 @@ const App = () => {
         openByDefault: true,
         children: [
           {
-            field: "type",
-            headerName: "type",
+            field: "mimeType",
+            headerName: "mimeType",
             columnGroupShow: "open",
           },
           {
@@ -580,7 +580,7 @@ const App = () => {
   }, [addNewEvent, renderTime, handleBeforeUnload]);
 
   const parseMessage = useCallback((message) => {
-    if (message.result === "ping") {
+    if (message.type === "ping") {
       // console.log("ping");  //测试
     } else if (message.result === "pause") {
       // console.log("远程websocket已停止完毕");  //测试

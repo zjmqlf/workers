@@ -5,22 +5,22 @@
   "vars": {
     "APP_NAME": "favorites1",
     "BEGIN_INDEX": 0,
-    "END_INDEX": 18,
+    "END_INDEX": 18
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./forward1/build"
-  },
-  "routes": [
-    {
-      "pattern": "favorites1.19421.xyz/*",
-      "zone_name": "19421.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./forward1/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "favorites1.19421.xyz/*",
+  //     "zone_name": "19421.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [

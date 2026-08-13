@@ -6,22 +6,22 @@
     "APP_NAME": "forward",
     "API_ID": 1334621,
     "API_HASH": "2bc36173f487ece3052a00068be59e7b",
-    "SESSION_STRING": "",
+    "SESSION_STRING": ""
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./forward/build"
-  },
-  "routes": [
-    {
-      "pattern": "forward.19421.xyz/*",
-      "zone_name": "19421.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./forward/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "forward.19421.xyz/*",
+  //     "zone_name": "19421.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [

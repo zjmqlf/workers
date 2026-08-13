@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "pansou",
+  "compatibility_date": "2026-04-21",
+  "pages_build_output_dir": "./build",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "pansou_WebSocketServer",
+        "script_name": "pansou",
+        "class_name": "WebSocketServer"
+      },
+    ]
+  }
+}

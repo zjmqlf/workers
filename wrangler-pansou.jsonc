@@ -4,24 +4,24 @@
   "main": "pansou.js",
   "vars": {
     "APP_NAME": "pansou",
-    "API_ID": 25429403,
-    "API_HASH": "2bb9a1bfd8f598da6cb5c511f0e5fbdf",
-    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjEyMgG7h1nJaYxO7n+3NCoCyKO5Z3vgtybsINQpGDYnqHEbJ70FagSAuISGTvujWlBeLT4f/bSAXS0pthzdO1SWdk8fWyKKL2IH9byAl0ztazHDMHn4ABwk7Cki8D8Qme87EPLORX4lU955yDbe5dpCrWvOgE8V79mdf7YC/2jBWGwUW35pDRYI+6vm6koDDC8lO2LJ1RPr3pux5sOMliaxMKuqNN/XOEFDCCdHfwphu5SHHeSGRxd0ChNbo3xQwwn5PvVx4quTPHaw0eAKZRh/wTs6woBr5Bbf3NfZKX80Oqrk024II8iXNhamHELlPvIG5iJ1fPI6kIn2oXFwmi7gWNsoMw==",
+    "API_ID": 21979386,
+    "API_HASH": "f89dbd720d7b2b2b843ae9aea2e4f02f",
+    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjExOAG7QuaYapy3jH7ns+/wVOJ4CCXhdGH59nwADEZPzBrw9oZRRDXG4MTejOMLVCqre1OWdkN2K3UgWtAzJDDnUiiJTQ0PA89yzhyPM3IzWNUvemtlhQnJ41pgs2HU8Fz5MfuP9gyXgE3cVfTLFkfKfz2vtFrDhjd6dE2eKdrNWF2YkoxDI33T+Nng4ht5JGrbyAKxgSVuIVZ3XqvAQ206Eu4ASwLW+dsjCeTmAxfnN4/RNySkbPGPWTMOOpMdLCfmA+0Hcm8lg5kFqTKkr8vTontkwPnPD8p3J6iZ+rhlWqlnQjWzKU23YqiEi7adlgEx1hYdSp7EwjyEHc48zyHvVLFdyw=="
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./pansou/build"
-  },
-  "routes": [
-    {
-      "pattern": "pansou.19420.xyz/*",
-      "zone_name": "19420.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./pansou/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "pansou.19420.xyz/*",
+  //     "zone_name": "19420.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [

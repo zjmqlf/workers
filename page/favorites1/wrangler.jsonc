@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "favorites1",
+  "compatibility_date": "2026-04-21",
+  "pages_build_output_dir": "./build",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "favorites1_WebSocketServer",
+        "script_name": "favorites1",
+        "class_name": "WebSocketServer"
+      },
+    ]
+  }
+}

@@ -115,6 +115,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
     //     //   "step": this.currentStep,
+    //     //   "type": "log",
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
     //     //   "date": new Date().getTime(),
@@ -405,6 +406,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
           //   //   "date": new Date().getTime(),
@@ -413,6 +415,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
           //     "error": true,
@@ -1835,12 +1838,13 @@ export class WebSocketServer extends DurableObject {
             const hashLength = Math.ceil(size / (131072 * 8));
             this.broadcast({
               "step": this.currentStep,
+              "type": "grid",
               "operate": "getMedia",
               "offsetId": this.offsetId,
               "category": category,
               "dcId": dcId,
               "size": size,
-              "type": mimeType,
+              "mimeType": mimeType,
               "fileName": fileName,
               "duration": duration,
               "width": width,
@@ -1936,6 +1940,7 @@ export class WebSocketServer extends DurableObject {
         const ids = [];
         this.broadcast({
           "step": this.currentStep,
+          "type": "grid",
           "operate": "getPhoto",
           "offsetId": this.offsetId,
           "category": category,
@@ -1958,6 +1963,7 @@ export class WebSocketServer extends DurableObject {
                 // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : (" + photoLength +"/" + photoIndex + ") 准备查询图片"+ type + "的hash");
                 this.broadcast({
                   "step": this.currentStep,
+                  "type": "grid",
                   "operate": "getPhoto",
                   "offsetId": this.offsetId,
                   "photoIndex": photoIndex,
@@ -2060,12 +2066,13 @@ export class WebSocketServer extends DurableObject {
             const hashLength = Math.ceil(size / (131072 * 8));
             this.broadcast({
               "step": this.currentStep,
+              "type": "grid",
               "operate": "getFile",
               "offsetId": this.offsetId,
               "category": category,
               "dcId": dcId,
               "size": size,
-              "type": mimeType,
+              "mimeType": mimeType,
               "hashLength": hashLength,
               "status": "update",
               "date": new Date().getTime(),
@@ -2135,6 +2142,7 @@ export class WebSocketServer extends DurableObject {
           const time = new Date().getTime();
           this.broadcast({
             "step": this.currentStep,
+            "type": "grid",
             "operate": "nextMessage",
             // "messageLength": messageLength,
             // "messageIndex": messageIndex,
@@ -3097,6 +3105,7 @@ export class WebSocketServer extends DurableObject {
     // console.log("删除cache成功");
     this.broadcast({
       "step": this.currentStep,
+      "type": "log",
       "operate": "clearCache",
       "message": "删除cache成功",
       "error": true,
@@ -3142,6 +3151,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log(mediaResult);
     //     this.broadcast({
     //       "step": this.currentStep,
+    //       "type": "log",
     //       "operate": "count",
     //       "message": mediaResult,
     //       "date": new Date().getTime(),
@@ -3150,6 +3160,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("获取media总数失败");
     //     this.broadcast({
     //       "step": this.currentStep,
+    //       "type": "log",
     //       "operate": "count",
     //       "message": "获取media总数失败",
     //       "error": true,
@@ -3189,12 +3200,14 @@ export class WebSocketServer extends DurableObject {
           const signed_url = await exportDB(name);
           if (signed_url) {
             this.broadcast({
+              "type": "log",
               "operate": "backup",
               "message": signed_url,
               "date": new Date().getTime(),
             });
           } else {
             this.broadcast({
+              "type": "log",
               "operate": "backup",
               "message": "获取signed_url失败",
               "error": true,
@@ -3203,6 +3216,7 @@ export class WebSocketServer extends DurableObject {
           }
         } else {
           this.broadcast({
+            "type": "log",
             "operate": "backup",
             "message": "获取db失败",
             "error": true,
@@ -3211,6 +3225,7 @@ export class WebSocketServer extends DurableObject {
         }
       } else {
         this.broadcast({
+          "type": "log",
           "operate": "backup",
           "message": "要备份的数据库id不能为空",
           "error": true,
@@ -3219,6 +3234,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       this.broadcast({
+        "type": "log",
         "operate": "webSocketMessage",
         "message": "未知消息",
         "error": true,

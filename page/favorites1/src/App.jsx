@@ -115,28 +115,6 @@ const App = () => {
     }
   }, []);
 
-  const utcToTimestamp = useCallback((utcTime) => {
-    if (utcTime && utcTime > 0) {
-      const secondTemp = Math.floor(utcTime / 1000);
-      if (secondTemp > 60) {
-        const second = secondTemp % 60;
-        if (second > 0) {
-          return Math.floor(secondTemp / 60) + "分" + second + "秒";
-        } else {
-          return Math.floor(secondTemp / 60) + "分";
-        }
-      } else {
-        if (secondTemp === 0) {
-          return "1秒";
-        } else {
-          return secondTemp + "秒";
-        }
-      }
-    } else {
-      return "";
-    }
-  }, []);
-
   const getColumnDefs = () => {
     return [
       {
@@ -213,8 +191,8 @@ const App = () => {
             columnGroupShow: "closed",
           },
           {
-            field: "type",
-            headerName: "type",
+            field: "mimeType",
+            headerName: "mimeType",
             columnGroupShow: "closed",
           },
           {
@@ -240,8 +218,8 @@ const App = () => {
         openByDefault: true,
         children: [
           {
-            field: "type",
-            headerName: "type",
+            field: "mimeType",
+            headerName: "mimeType",
             columnGroupShow: "open",
           },
           {
@@ -262,73 +240,15 @@ const App = () => {
         openByDefault: true,
         children: [
           {
-            field: "hashLength",
-            headerName: "hashLength",
-            columnGroupShow: "open",
-          },
-          {
-            field: "hashIndex",
-            headerName: "hashIndex",
-            columnGroupShow: "open",
-          },
-          {
-            field: "selectIndex",
-            headerName: "selectIndex",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "selectFile",
-            headerName: "selectFile",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "insertFile",
-            headerName: "insertFile",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "insertIndex",
-            headerName: "insertIndex",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "selectMessage",
-            headerName: "selectMessage",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
-            field: "insertMessage",
-            headerName: "insertMessage",
-            columnGroupShow: "open",
-            cellRenderer: resultRenderer,
-          },
-          {
             field: "error",
             headerName: "error",
             columnGroupShow: "open",
           },
           {
-            field: "time",
+            field: "date",
             headerName: "startTime",
             columnGroupShow: "open",
             cellRenderer: params => renderTime(params.value),
-          },
-          {
-            field: "date",
-            headerName: "endTime",
-            columnGroupShow: "open",
-            cellRenderer: params => renderTime(params.value),
-          },
-          {
-            field: "useTime",
-            headerName: "useTime",
-            columnGroupShow: "open",
-            cellRenderer: params => utcToTimestamp(params.value),
           },
           // {
           //   field: "status",
@@ -430,9 +350,6 @@ const App = () => {
   }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled]);
 
   const updateLastRow = useCallback((items) => {
-    if (items.date && (items.date >= lastRow.current.data.time)) {
-      lastRow.current.setDataValue("useTime", items.date - lastRow.current.data.time);
-    }
     for (const name in items) {
       // console.log(name);  //测试
       // console.log(items[name]);  //测试
@@ -487,49 +404,6 @@ const App = () => {
     }
   }, [updateLastRow, getLastRow]);
 
-  const updateSelect = useCallback((message, name) => {
-    if (message.status === "try") {
-      // updateItems({
-      //   "offsetId": message.offsetId,
-      //   [name]: false,
-      //   "error": true,
-      //   "date": message.date,
-      // });
-      addNewEvent({
-        "error": true,
-        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-      });
-    } else {
-      console.log("未知消息 : " + JSON.stringify(message));
-    }
-  }, [addNewEvent, renderTime, updateItems]);
-
-  const updateInsert = useCallback((message, name) => {
-    if (message.status === "success") {
-      updateItems({
-        "offsetId": message.offsetId,
-        [name]: true,
-        "date": message.date,
-      });
-    } else if (message.status === "error") {
-      // updateItems({
-      //   "offsetId": message.offsetId,
-      //   [name]: false,
-      //   "date": message.date,
-      // });
-      addNewEvent({
-        "error": true,
-        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-      });
-    } else if (message.status === "try") {
-      addNewEvent({
-        "error": true,
-        "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-      });
-    } else {
-      console.log("未知消息 : " + JSON.stringify(message));
-    }
-  }, [addNewEvent, renderTime, updateItems]);
 
   const handleBeforeUnload = useCallback((event) => {
     if (!confirm("程序正在运行中，确定要关闭吗？")) {
@@ -587,7 +461,7 @@ const App = () => {
   }, [addNewEvent, renderTime, handleBeforeUnload, handlerBtnUnable]);
 
   const parseMessage = useCallback((message) => {
-    if (message.result === "ping") {
+    if (message.type === "ping") {
       // console.log("ping");  //测试
     } else if (message.result === "pause") {
       // console.log("远程websocket已停止完毕");  //测试
@@ -629,61 +503,8 @@ const App = () => {
           });
         } else {
           switch (message.operate) {
-            case "nextHash":
-              if (message.status === "update") {
-                if (message.hashIndex && message.hashIndex > 0) {
-                  updateItems({
-                    "offsetId": message.offsetId,
-                    "hashIndex": message.hashIndex,
-                    "date": message.date,
-                  });
-                } else {
-                  console.log("hashIndex错误");
-                }
-              } else if (message.status === "error") {
-                // updateItems({
-                //   "offsetId": message.offsetId,
-                //   "date": message.date,
-                // });
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else if (message.status === "limit") {
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else {
-                console.log("未知消息 : " + JSON.stringify(message));
-              }
-              break;
-            case "getHash":
-              if (message.status === "try") {
-                // updateItems({
-                //   "offsetId": message.offsetId,
-                //   "hashIndex": message.hashIndex,
-                //   "date": message.date,
-                // });
-                // if (message.hashIndex === 1) {
-                //   addNewEvent({
-                //     "error": true,
-                //     "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - 查询首个hash出错 - " + message.message,
-                //   });
-                // } else if (message.hashIndex > 1) {
-                if (message.hashIndex && message.hashIndex > 0) {
-                  addNewEvent({
-                    "error": true,
-                    "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - 查询hash出错",
-                  });
-                } else {
-                  console.log("hashIndex错误");
-                }
-              } else {
-                console.log("未知消息 : " + JSON.stringify(message));
-              }
-              break;
-            case "nextMessage":
+            case "nextChat":
+            case "checkChat":
               if (message.status === "add") {
                 if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
                   //delete message.operate;
@@ -695,40 +516,13 @@ const App = () => {
                   } = message;
                   addItems([temp]);
                 }
-              } else if (message.status === "error") {
-                // if (isCompressChecked === false) {
-                //   updateItems({
-                //     "offsetId": message.offsetId,
-                //     "date": message.date,
-                //   });
-                // }
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else if (message.status === "limit") {
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
               } else {
                 console.log("未知消息 : " + JSON.stringify(message));
               }
               break;
             case "start":
             case "nextStep":
-              if (message.status === "add") {
-                if (!lastRow.current || lastRow.current.data.offsetId !== message.offsetId) {
-                  //delete message.operate;
-                  //delete message.status;
-                  const {
-                    operate,
-                    status,
-                    ...temp
-                  } = message;
-                  addItems([temp]);
-                }
-              } else if (message.status === "error") {
+              if (message.status === "error") {
                 // if (isCompressChecked === false) {
                 //   updateItems({
                 //     "offsetId": message.offsetId,
@@ -748,104 +542,6 @@ const App = () => {
                 addNewEvent({
                   "error": true,
                   "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else {
-                console.log("未知消息 : " + JSON.stringify(message));
-              }
-              break;
-            case "getMedia":
-            case "getPhoto":
-            case "getFile":
-              if (message.status === "update") {
-                const {
-                  operate,
-                  status,
-                  ...temp
-                } = message;
-                updateItems(temp);
-              } else if (message.status === "error") {
-                // if (isCompressChecked === false) {
-                //   updateItems({
-                //     "offsetId": message.offsetId,
-                //     "date": message.date,
-                //   });
-                // }
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else if (message.status === "indexExist") {
-                updateItems({
-                  "offsetId": message.offsetId,
-                  "selectIndex": true,
-                  "date": message.date,
-                });
-              } else if (message.status === "fileExist") {
-                updateItems({
-                  "offsetId": message.offsetId,
-                  "selectFile": true,
-                  "date": message.date,
-                });
-              } else if (message.status === "cache") {
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else {
-                console.log("未知消息 : " + JSON.stringify(message));
-              }
-              break;
-            case "selectMediaIndex":
-              updateSelect(message, "selectIndex");
-              break;
-            case "insertMedia":
-              updateInsert(message, "insertFile");
-              break;
-            case "insertMediaIndex":
-              updateInsert(message, "insertIndex");
-              break;
-            case "selectPhotoIndex":
-              updateSelect(message, "selectIndex");
-              break;
-            case "insertPhoto":
-              updateInsert(message, "insertFile");
-              break;
-            case "insertPhotoIndex":
-              updateInsert(message, "insertIndex");
-              break;
-            case "endMessage":
-            case "endMediaMessage":
-            case "endPhotoMessage":
-              if (message.status === "try") {
-                // updateItems({
-                //   "offsetId": message.offsetId,
-                //   "date": message.date,
-                // });
-                addNewEvent({
-                  "error": true,
-                  "message": renderTime(message.date) + " " + message.offsetId + ":" + message.operate + " - " + message.message,
-                });
-              } else {
-                console.log("未知消息 : " + JSON.stringify(message));
-              }
-              break;
-            case "selectMedia":
-            case "selectMediaMessage":
-            case "selectPhoto":
-            case "selectPhotoMessage":
-              updateSelect(message, "selectMessage");
-              break;
-            case "insertMessage":
-              updateInsert(message, "insertMessage");
-              break;
-            case "endInsert":
-            case "endMediaInsert":
-            case "endPhotoInsert":
-              if (message.status === "exist") {
-                updateItems({
-                  "offsetId": message.offsetId,
-                  "selectMessage": true,
-                  "date": message.date,
                 });
               } else {
                 console.log("未知消息 : " + JSON.stringify(message));
@@ -891,7 +587,7 @@ const App = () => {
         });
       }
     }
-  }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled, setLogData, setClearLogBtnDisabled, addItems, updateInsert, updateItems, updateSelect, isCompressChecked]);
+  }, [addNewEvent, renderTime, setRowData, setClearGridBtnDisabled, setLogData, setClearLogBtnDisabled, addItems, updateItems, isCompressChecked]);
 
   const setTime = useCallback(() => {
     clearTimeout(timeOut.current);
@@ -1183,23 +879,6 @@ const App = () => {
     }
   }, [handlerMessageError, waitReconnect]);
 
-  const handlerIndexBtnClick = useCallback(() => {
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "index",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> index失败");
-      }
-    } else {
-      waitReconnect(JSON.stringify({
-        "command": "index",
-      }), 1000);
-    }
-  }, [handlerMessageError, waitReconnect]);
-
   const handlerClearCacheBtnClick = useCallback(() => {
     if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -1394,7 +1073,6 @@ const App = () => {
           <button onClick={handlerCloseBtnClick} disabled={isCloseBtnDisabled}>强制关闭</button>
           <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
           <button onClick={handlerChatBtnClick}>chat</button>
-          <button onClick={handlerIndexBtnClick}>index</button>
           <button onClick={handlerClearCacheBtnClick}>清空cache</button>
           <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
           <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>

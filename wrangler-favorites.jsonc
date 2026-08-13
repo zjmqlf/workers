@@ -6,22 +6,22 @@
     "APP_NAME": "favorites",
     "API_ID": 25429403,
     "API_HASH": "2bb9a1bfd8f598da6cb5c511f0e5fbdf",
-    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjE4MwG7IWvEvkNunR7nJsoQNgDYFZaO6cBXfvp9aj4uVcOna4S5rIXy8TcFdi2+K0nZSUT6XqW3Hpa192FO5fc1To5tBA+LdfjhiTHJy6wk5/VnO3pBK6FziQBRz3xvjgkDDdnq1WaaBTTDOCepfHI+3GRIkXaI7BA+nZHW68q2PDJ87cXFKQ/zDT/pw/MLQ2waiVvClL+fC/cDKorcsAN0AiCNC7GfGVHHnm4bn+nTzz0Wt8eFrk8uySsFIdvrw0pCGTI49zc72XPz5J7zJDxhTP+4ysmUTpy+uJ/NpSfngU+3vqNKbUI8Qs94NMKFXdwIgcoakw96419P88TNxHaxNI9kIg==",
+    "SESSION_STRING": ""
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./hash/build"
-  },
-  "routes": [
-    {
-      "pattern": "favorites.19422.xyz/*",
-      "zone_name": "19422.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./hash/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "favorites.19422.xyz/*",
+  //     "zone_name": "19422.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [

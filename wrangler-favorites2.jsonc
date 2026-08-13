@@ -1,26 +1,26 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "favorites2",
+  "name": "favorites1",
   "main": "favorites1.js",
   "vars": {
-    "APP_NAME": "favorites2",
+    "APP_NAME": "favorites1",
     "BEGIN_INDEX": 36,
-    "END_INDEX": 37,
+    "END_INDEX": 37
   },
   "compatibility_date": "2026-04-21",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./forward1/build"
-  },
-  "routes": [
-    {
-      "pattern": "favorites2.19420.xyz/*",
-      "zone_name": "19420.xyz"
-    }
-  ],
+  // "assets": {
+  //   "binding": "ASSETS",
+  //   "directory": "./forward1/build"
+  // },
+  // "routes": [
+  //   {
+  //     "pattern": "favorites1.19420.xyz/*",
+  //     "zone_name": "19420.xyz"
+  //   }
+  // ],
   "preview_urls": false,
   "workers_dev": false,
   "d1_databases": [
@@ -34,7 +34,7 @@
     "bindings": [
       {
         "name": "WEBSOCKET_SERVER",
-        "script_name": "favorites2",
+        "script_name": "favorites1",
         "class_name": "WebSocketServer"
       }
     ]

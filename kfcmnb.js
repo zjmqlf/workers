@@ -47,6 +47,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
     //     //   "step": this.currentStep,
+    //     //   "type": "log",
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
     //     //   "date": new Date().getTime(),
@@ -223,6 +224,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
           //   //   "date": new Date().getTime(),
@@ -231,6 +233,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
           //     "error": true,
@@ -305,8 +308,8 @@ export class WebSocketServer extends DurableObject {
       this.client.setLogLevel(LogLevel.ERROR);
       await this.client.connect();
     } catch (err) {
-      // console.log("open : " + err instanceof Error ? (err.name ? err.name + " : " : "") + (err.name ? err.name + " : " : "") + err.message : err);
-      this.sendMessage("log", "open", err instanceof Error ? (err.name ? err.name + " : " : "") + (err.name ? err.name + " : " : "") + err.message : err, null, true);
+      // console.log("open : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+      this.sendMessage("log", "open", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       if (tryCount === 5) {
         this.stop = 2;
         // console.log("(" + this.currentStep + ")open超出tryCount限制");
@@ -538,10 +541,10 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(this.pingTime);
             // this.ws.ping();
             // this.ws.send({
-            //   "result": "ping",
+            //   "type": "ping",
             // });
             this.broadcast({
-              "result": "ping",
+              "type": "ping",
             });
           }
         }
@@ -707,10 +710,10 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(5000);
             // this.ws.ping();
             // this.ws.send({
-            //   "result": "ping",
+            //   "type": "ping",
             // });
             this.broadcast({
-              "result": "ping",
+              "type": "ping",
             });
           }
         }
@@ -1326,8 +1329,8 @@ export class WebSocketServer extends DurableObject {
         }
       } catch (err) {
         command = data;
-        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + (err.name ? err.name + " : " : "") + err.message : err);
-        this.sendMessage("log", "webSocketMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + (err.name ? err.name + " : " : "") + err.message : err, null, true);
+        // console.log("parse : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
+        this.sendMessage("log", "webSocketMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
       }
     // }
     if (command === "start") {
@@ -1347,6 +1350,7 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.deleteAll();
       // console.log("删除cache成功");
       this.broadcast({
+        "type": "log",
         "operate": "clearCache",
         "step": this.currentStep,
         "message": "删除cache成功",
@@ -1379,6 +1383,7 @@ export class WebSocketServer extends DurableObject {
       this.fileIdArray = [];
       // console.log("清空队列缓存成功");
       this.broadcast({
+        "type": "log",
         "operate": "clearQueue",
         "step": this.currentStep,
         "message": "清空队列缓存成功",
@@ -1390,6 +1395,7 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.put("offsetId", 0);
       // console.log("重置offset序号成功");
       this.broadcast({
+        "type": "log",
         "operate": "resetOffset",
         "step": this.currentStep,
         "message": "重置offset序号成功",
@@ -1401,6 +1407,7 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.put("codeIndex", -1);
       // console.log("重置code序号成功");
       this.broadcast({
+        "type": "log",
         "operate": "resetCode",
         "step": this.currentStep,
         "message": "重置code序号成功",
@@ -1412,6 +1419,7 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.put("queue", false);
       // console.log("重置queue状态成功");
       this.broadcast({
+        "type": "log",
         "operate": "resetQueue",
         "step": this.currentStep,
         "message": "重置queue状态成功",
@@ -1422,6 +1430,7 @@ export class WebSocketServer extends DurableObject {
       await this.clearQueue();
       // console.log("发送队列缓存成功");
       this.broadcast({
+        "type": "log",
         "operate": "sendQueue",
         "step": this.currentStep,
         "message": "发送队列缓存成功",
@@ -1430,6 +1439,7 @@ export class WebSocketServer extends DurableObject {
       });
     } else {
       this.broadcast({
+        "type": "log",
         "operate": "webSocketMessage",
         "message": "未知消息",
         "error": true,

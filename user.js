@@ -52,6 +52,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
     //     //   "step": this.currentStep,
+    //     //   "type": "log",
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
     //     //   "date": new Date().getTime(),
@@ -171,6 +172,90 @@ export class WebSocketServer extends DurableObject {
         } else {
           return;
         }
+      } else if (message.operate === "getMedia" || message.operate === "getPhoto" || message.operate === "getFile") {
+        if (message.status === "update") {
+          if (this.cacheMessage) {
+            if (message.offsetId === this.cacheMessage.offsetId) {
+              const {
+                offsetId,
+                operate,
+                status,
+                ...Items
+              } = message;
+              for (const name in Items) {
+                this.cacheMessage[name] = Items[name];
+              }
+              this.updateTime(message.date);
+            }
+          }
+          return;
+        // } else if (message.status === "indexExist") {
+        //   if (this.cacheMessage) {
+        //     if (message.offsetId === this.cacheMessage.offsetId) {
+        //       this.cacheMessage["selectIndex"] = true;
+        //       this.updateTime(message.date);
+        //     }
+        //   }
+        //   return;
+        } else if (message.status === "fileExist") {
+          if (this.cacheMessage) {
+            if (message.offsetId === this.cacheMessage.offsetId) {
+              this.cacheMessage["selectFile"] = true;
+              this.updateTime(message.date);
+            }
+          }
+          return;
+        } else if (message.status === "error") {
+        } else if (!message.error) {
+        } else {
+          return;
+        }
+      } else if (message.operate === "insertMedia") {
+        if (this.cacheMessage) {
+          if (message.offsetId === this.cacheMessage.offsetId) {
+            if (message.status === "success") {
+              this.cacheMessage["insertFile"] = true;
+            } else if (message.status === "error") {
+              this.cacheMessage["insertFile"] = false;
+            }
+            this.updateTime(message.date);
+          }
+        }
+        return;
+      } else if (message.operate === "insertPhoto") {
+        if (this.cacheMessage) {
+          if (message.offsetId === this.cacheMessage.offsetId) {
+            if (message.status === "success") {
+              this.cacheMessage["insertFile"] = true;
+            } else if (message.status === "error") {
+              this.cacheMessage["insertFile"] = false;
+            }
+            this.updateTime(message.date);
+          }
+        }
+        return;
+      } else if (message.operate === "endMediaInsert" || message.operate === "endPhotoInsert") {
+        if (message.status === "exist") {
+          if (this.cacheMessage) {
+            if (message.offsetId === this.cacheMessage.offsetId) {
+              this.cacheMessage["selectMessage"] = true;
+              this.updateTime(message.date);
+            }
+          }
+        }
+        return;
+      } else if (message.operate === "insertMessage") {
+        if (this.cacheMessage) {
+          if (message.offsetId === this.cacheMessage.offsetId) {
+            if (message.status === "success") {
+              this.cacheMessage["insertMessage"] = true;
+            } else if (message.status === "error") {
+              this.cacheMessage["insertMessage"] = false;
+            }
+            this.updateTime(message.date);
+          }
+        }
+        return;
       } else if (message.operate === "open") {
       } else if (message.operate === "close") {
       } else if (message.operate === "getChat") {
@@ -223,6 +308,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
           //   //   "date": new Date().getTime(),
@@ -231,6 +317,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
           //     "error": true,
@@ -830,10 +917,10 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(this.pingTime);
             // this.ws.ping();
             // this.ws.send({
-            //   "result": "ping",
+            //   "type": "ping",
             // });
             this.broadcast({
-              "result": "ping",
+              "type": "ping",
             });
           }
         }
@@ -1647,12 +1734,13 @@ export class WebSocketServer extends DurableObject {
               const mimeType = message.media.document.mimeType;
               this.broadcast({
                 "step": this.currentStep,
+                "type": "grid",
                 "operate": "getMedia",
                 "offsetId": this.offsetId,
                 "category": category,
                 "dcId": dcId,
                 "size": size,
-                "type": mimeType,
+                "mimeType": mimeType,
                 "fileName": fileName,
                 "duration": duration,
                 "width": width,
@@ -1721,6 +1809,7 @@ export class WebSocketServer extends DurableObject {
         const txt = message.message;
         this.broadcast({
           "step": this.currentStep,
+          "type": "grid",
           "operate": "getPhoto",
           "offsetId": this.offsetId,
           "category": category,
@@ -1744,13 +1833,14 @@ export class WebSocketServer extends DurableObject {
                   const time = new Date().getTime();
                   this.broadcast({
                     "step": this.currentStep,
+                    "type": "grid",
                     "operate": "getPhoto",
                     "chatId": this.chatId,
                     "offsetId": this.offsetId,
                     "messageId": messageId,
                     "photoIndex": photoIndex,
                     "dcId": dcId,
-                    "type": type,
+                    "mimeType": type,
                     "size": size,
                     "status": "update",
                     "time": time,
@@ -1831,12 +1921,13 @@ export class WebSocketServer extends DurableObject {
               const mimeType = message.media.document.mimeType;
               this.broadcast({
                 "step": this.currentStep,
+                "type": "grid",
                 "operate": "getFile",
                 "offsetId": this.offsetId,
                 "category": category,
                 "dcId": dcId,
                 "size": size,
-                "type": mimeType,
+                "mimeType": mimeType,
                 "status": "update",
                 "date": new Date().getTime(),
               });
@@ -2122,6 +2213,7 @@ export class WebSocketServer extends DurableObject {
                     const time = new Date().getTime();
                     this.broadcast({
                       "step": this.currentStep,
+                      "type": "grid",
                       "operate": "nextStep",
                       "chatId": this.chatId,
                       "offsetId": this.offsetId,
@@ -2393,6 +2485,7 @@ export class WebSocketServer extends DurableObject {
                   const time = new Date().getTime();
                   this.broadcast({
                     "step": this.currentStep,
+                    "type": "grid",
                     "operate": "start",
                     "chatId": this.chatId,
                     "offsetId": this.offsetId,
@@ -2847,6 +2940,7 @@ export class WebSocketServer extends DurableObject {
       // console.log("删除cache成功");
       this.broadcast({
         "step": this.currentStep,
+        "type": "log",
         "operate": "clearCache",
         "message": "删除cache成功",
         "error": true,
@@ -2876,6 +2970,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       this.broadcast({
+        "type": "log",
         "operate": "webSocketMessage",
         "message": "未知消息",
         "error": true,

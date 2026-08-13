@@ -39,6 +39,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
     //     //   "step": this.currentStep,
+    //     //   "type": "log",
     //     //   "clientCount": this.clientCount,
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
@@ -358,6 +359,7 @@ export class WebSocketServer extends DurableObject {
       // this.sendMessage("log", 0, "init", "clientCount : " + this.clientCount, null, false);  //测试
       this.broadcast({
         "step": this.currentStep,
+        "type": "log",
         "operate": "init",
         "message": "clientCount : " + this.clientCount,
         "date": new Date().getTime(),
@@ -430,6 +432,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "clientCount": this.clientCount,
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
@@ -439,6 +442,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "clientCount": this.clientCount,
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
@@ -962,7 +966,7 @@ export class WebSocketServer extends DurableObject {
             if (this.tg[clientIndex].fromPeer) {
               this.setOffsetId(clientIndex, chatResult);
               this.tg[clientIndex].errorCount = await this.ctx.storage.get(this.tg[clientIndex].chatId) || 0;
-              this.sendForward(clientIndex, "checkChat", this.tg[clientIndex].chatId + " : " + chatResult.title, 0, "add", false);
+              this.sendMessage("grid", clientIndex, "checkChat", this.tg[clientIndex].chatId + " : " + chatResult.title, "add", false);
             } else {
               await this.noExistChat(clientIndex, 1, chatResult.Cindex);
               this.tg[clientIndex].chatId = chatResult.Cindex + 1;
@@ -1374,10 +1378,10 @@ export class WebSocketServer extends DurableObject {
                 await scheduler.wait(this.pingTime);
                 // this.ws.ping();
                 // this.ws.send({
-                //   "result": "ping",
+                //   "type": "ping",
                 // });
                 this.broadcast({
-                  "result": "ping",
+                  "type": "ping",
                 });
               }
             }
@@ -1485,10 +1489,10 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(this.pingTime);
             // this.ws.ping();
             // this.ws.send({
-            //   "result": "ping",
+            //   "type": "ping",
             // });
             this.broadcast({
-              "result": "ping",
+              "type": "ping",
             });
           }
         }
@@ -2397,6 +2401,7 @@ export class WebSocketServer extends DurableObject {
       await this.ctx.storage.deleteAll();
       // console.log("删除cache成功");
       this.broadcast({
+        "type": "log",
         "operate": "clearCache",
         "step": this.currentStep,
         "message": "删除cache成功",
@@ -2452,6 +2457,7 @@ export class WebSocketServer extends DurableObject {
     } else {
       this.broadcast({
         "step": this.currentStep,
+        "type": "log",
         "clientCount": this.clientCount,
         "operate": "webSocketMessage",
         "message": "未知消息",

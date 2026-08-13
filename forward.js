@@ -50,6 +50,7 @@ export class WebSocketServer extends DurableObject {
     //     // console.log("(" + this.currentStep + ")添加ws成功");
     //     // this.broadcast({
     //     //   "step": this.currentStep,
+    //     //   "type": "log",
     //     //   "operate": "constructor",
     //     //   "message": "添加ws成功",
     //     //   "date": new Date().getTime(),
@@ -219,6 +220,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")删除ws成功");
           //   // this.broadcast({
           //   //   "step": this.currentStep,
+          //   //   "type": "log",
           //   //   "operate": "broadcast",
           //   //   "message": "删除ws成功",
           //   //   "date": new Date().getTime(),
@@ -227,6 +229,7 @@ export class WebSocketServer extends DurableObject {
           //   // console.log("(" + this.currentStep + ")没找到该ws");
           //   this.broadcast({
           //     "step": this.currentStep,
+          //     "type": "log",
           //     "operate": "broadcast",
           //     "message": "没找到该ws",
           //     "error": true,
@@ -1058,10 +1061,10 @@ export class WebSocketServer extends DurableObject {
             await scheduler.wait(this.pingTime);
             // this.ws.ping();
             // this.ws.send({
-            //   "result": "ping",
+            //   "type": "ping",
             // });
             this.broadcast({
-              "result": "ping",
+              "type": "ping",
             });
           }
         }
@@ -1962,6 +1965,7 @@ export class WebSocketServer extends DurableObject {
       // console.log("删除cache成功");
       this.broadcast({
         "step": this.currentStep,
+        "type": "log",
         "operate": "clearCache",
         "message": "删除cache成功",
         "error": true,
@@ -1991,6 +1995,7 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       this.broadcast({
+        "type": "log",
         "operate": "webSocketMessage",
         "message": "未知消息",
         "error": true,
