@@ -15,6 +15,7 @@ import {
   RowApiModule,
   RowStyleModule,
   RowSelectionModule,
+  RowAutoHeightModule,
   ColumnApiModule,
   NumberFilterModule,
   TextFilterModule,
@@ -35,6 +36,7 @@ ModuleRegistry.registerModules([
   RowApiModule,
   RowStyleModule,
   RowSelectionModule,
+  RowAutoHeightModule,
   ColumnApiModule,
   TextFilterModule,
   NumberFilterModule,
@@ -214,8 +216,9 @@ const App = () => {
       flex: 1,
       //filter: true,
       width: "100%",
-      height: "40%",
+      autoHeight: true,
       editable: false,
+      autoHeaderHeight: true,
       enableCellChangeFlash: true,
     };
   }, []);
@@ -991,7 +994,7 @@ const App = () => {
   // useEffect(() => {
   //   if (rowData.length === 0) {
   //     setClearGridBtnDisabled(true);
-  //   } else if (rowData.length >= 100) {
+  //   } else if (rowData.length >= 1000) {
   //     setLogData(() => {
   //       return [];
   //     });

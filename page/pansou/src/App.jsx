@@ -15,6 +15,7 @@ import {
   RowApiModule,
   RowStyleModule,
   RowSelectionModule,
+  RowAutoHeightModule,
   ColumnApiModule,
   NumberFilterModule,
   TextFilterModule,
@@ -31,6 +32,7 @@ ModuleRegistry.registerModules([
   RowApiModule,
   RowStyleModule,
   RowSelectionModule,
+  RowAutoHeightModule,
   ColumnApiModule,
   TextFilterModule,
   NumberFilterModule,
@@ -201,8 +203,9 @@ const App = () => {
       flex: 1,
       //filter: true,
       width: "100%",
-      height: "70%",
+      autoHeight: true,
       editable: false,
+      autoHeaderHeight: true,
       enableCellChangeFlash: true,
     };
   }, []);
@@ -838,6 +841,23 @@ const App = () => {
     }
   }, [handlerMessageError, waitReconnect]);
 
+  const handlerIndexBtnClick = useCallback(() => {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({
+          "command": "index",
+        }));
+      } catch (err) {
+        // console.log(err);  //测试
+        handlerMessageError("  >>> index失败");
+      }
+    } else {
+      waitReconnect(JSON.stringify({
+        "command": "index",
+      }), 1000);
+    }
+  }, [handlerMessageError, waitReconnect]);
+
   const cacheBtnClickHandler = useCallback(() => {
     if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -1030,6 +1050,7 @@ const App = () => {
           <button onClick={handlerNextBtnClick} disabled={isNextBtnDisabled}>不再继续</button>
           <button onClick={handlerChatBtnClick}>chat</button>
           {/* <button onClick={cacheBtnClickHandler}>cache</button> */}
+          <button onClick={handlerIndexBtnClick}>index</button>
           <button onClick={handlerClearCacheBtnClick}>清空cache</button>
           <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
           <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>

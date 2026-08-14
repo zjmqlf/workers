@@ -4,11 +4,11 @@
   "main": "fileleakcode.js",
   "vars": {
     "APP_NAME": "fileleakcode",
-    "API_ID": 25429403,
+    "API_ID": "25429403",
     "API_HASH": "2bb9a1bfd8f598da6cb5c511f0e5fbdf",
-    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjExMwG7AU805ztc1oA8tvnUgxwqXOJXnS0DtG1WVCK8EiohmAV0fZwxlbIvX9opqaU4rUjAk6yaarBHiTOgSAHX8+q/OfoCGqttGWSQ1yQpzOgqxu1tWY9txhr7/9SexpYtk8YFhNX2KUNw4y8e+legfUVIpfgLNgRbyPlyPsomSpXrPdRROie3lqiqm2UI5RjMWQxzD293SpSG3uUED0FseMSbZggXff7Z1kxIw0YbgdSlnFT+x+o4GDjQ/T5247E5ZQxC3Qfzq67mNlKWT93/yjTruqdxr2zM0gB5/8ciPiFLgAOLVZPxOInV+kcZ3OZw1uky/LD0Kn/oCpNAkaxzAFV8xA==",
+    "SESSION_STRING": ""
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

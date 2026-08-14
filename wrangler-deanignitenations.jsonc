@@ -4,13 +4,13 @@
   "main": "deanignitenations.js",
   "vars": {
     "APP_NAME": "deanignitenations",
-    "API_ID": 1334621,
+    "API_ID": "1334621",
     "API_HASH": "2bc36173f487ece3052a00068be59e7b",
     "SESSION_STRING": "",
     "BOT_ID": "8737186679",
-    "BOT_HASH": "1024528739420182834",
+    "BOT_HASH": "1024528739420182834"
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

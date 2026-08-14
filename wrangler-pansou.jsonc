@@ -4,11 +4,11 @@
   "main": "pansou.js",
   "vars": {
     "APP_NAME": "pansou",
-    "API_ID": 21979386,
+    "API_ID": "21979386",
     "API_HASH": "f89dbd720d7b2b2b843ae9aea2e4f02f",
     "SESSION_STRING": "1BQANOTEuMTA4LjU2LjExOAG7QuaYapy3jH7ns+/wVOJ4CCXhdGH59nwADEZPzBrw9oZRRDXG4MTejOMLVCqre1OWdkN2K3UgWtAzJDDnUiiJTQ0PA89yzhyPM3IzWNUvemtlhQnJ41pgs2HU8Fz5MfuP9gyXgE3cVfTLFkfKfz2vtFrDhjd6dE2eKdrNWF2YkoxDI33T+Nng4ht5JGrbyAKxgSVuIVZ3XqvAQ206Eu4ASwLW+dsjCeTmAxfnN4/RNySkbPGPWTMOOpMdLCfmA+0Hcm8lg5kFqTKkr8vTontkwPnPD8p3J6iZ+rhlWqlnQjWzKU23YqiEi7adlgEx1hYdSp7EwjyEHc48zyHvVLFdyw=="
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

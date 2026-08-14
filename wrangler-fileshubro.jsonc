@@ -4,13 +4,13 @@
   "main": "fileshubro.js",
   "vars": {
     "APP_NAME": "fileshubro",
-    "API_ID": 1334621,
+    "API_ID": "1334621",
     "API_HASH": "2bc36173f487ece3052a00068be59e7b",
     "SESSION_STRING": "",
     "BOT_ID": "8917447973",
-    "BOT_HASH": "-5762012854124752780",
+    "BOT_HASH": "-5762012854124752780"
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

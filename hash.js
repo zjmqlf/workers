@@ -2568,7 +2568,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let chatResult = {};
     try {
-      chatResult = await this.env.MAINDB.prepare("INSERT INTO `CHAT` (channelId, accessHash,  chatType, username, title, noforwards, current, photo, video, document, gif, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, chatType, username, title, noforwards, 0, 0, 0, 0, 0, 1).run();
+      chatResult = await this.env.MAINDB.prepare("INSERT INTO `CHAT` (channelId, accessHash, chatType, username, title, noforwards, current, photo, video, document, gif, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);").bind(channelId, accessHash, chatType, username, title, noforwards, 0, 0, 0, 0, 0, 1).run();
     } catch (err) {
       // console.log("insertChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("log", "insertChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);

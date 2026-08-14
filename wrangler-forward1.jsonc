@@ -7,7 +7,7 @@
     "BEGIN_INDEX": 0,
     "END_INDEX": 21
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

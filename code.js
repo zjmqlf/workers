@@ -57,6 +57,7 @@ const lockHivebot = [];
 const tgdecoderbot = [];
 const tiantianziyoubot = [];
 const xiumi1bot = [];
+const zyxfileBot = [];
 const ZYXFilesBot = [];
 const ntmjmqbot = [];
 const newjmqbot = [];
@@ -312,6 +313,13 @@ const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tgde
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/g;   //tgdecoderbot
 const tiantianziyoubotRegexp = /(amumushuangxiangbot_tiantianziyoubot_[a-z0-9]{10})/g;   //tiantianziyoubot
 const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/g;   //xiumi1bot
+const zyxfileBot1Regexp = /(zyxfiles-\d+v-\d+p-\d+d-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot2Regexp = /(zyxfiles-\d+v-\d+p-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot3Regexp = /(zyxfiles-\d+v-\d+d-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot4Regexp = /(zyxfiles-\d+p-\d+d-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot5Regexp = /(zyxfiles-\d+v-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot6Regexp = /(zyxfiles-\d+p-[a-z0-9]{24})/g;   //zyxfileBot
+const zyxfileBot7Regexp = /(zyxfiles-\d+d-[a-z0-9]{24})/g;   //zyxfileBot
 const ZYXFilesBot1Regexp = /(📌 取件码：[A-Za-z0-9]+)/g;   //ZYXFilesBot
 const ZYXFilesBot2Regexp = /([a-z0-9]{40})/g;   //ZYXFilesBot
 const ntmjmqbotRegexp = /(ntmjmqbot_\d+p_\d+v_\d+d_[A-Za-z0-9]{13})/g;   //ntmjmqbot
@@ -3850,6 +3858,104 @@ try {
           }
         }
 
+        const zyxfileBot1Matches = str.match(zyxfileBot1Regexp);
+        // console.log(zyxfileBot1Matches);  //测试
+        if (zyxfileBot1Matches) {
+          const zyxfileBot1MatchesLength = zyxfileBot1Matches.length;
+          // console.log("zyxfileBot1MatchesLength : " + zyxfileBot1MatchesLength);  //测试
+          if (zyxfileBot1MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot1MatchesLength; j++) {
+              if (zyxfileBot1Matches[j]) {
+                zyxfileBot.push(zyxfileBot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot2Matches = str.match(zyxfileBot2Regexp);
+        // console.log(zyxfileBot2Matches);  //测试
+        if (zyxfileBot2Matches) {
+          const zyxfileBot2MatchesLength = zyxfileBot2Matches.length;
+          // console.log("zyxfileBot2MatchesLength : " + zyxfileBot2MatchesLength);  //测试
+          if (zyxfileBot2MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot2MatchesLength; j++) {
+              if (zyxfileBot2Matches[j]) {
+                zyxfileBot.push(zyxfileBot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot3Matches = str.match(zyxfileBot3Regexp);
+        // console.log(zyxfileBot3Matches);  //测试
+        if (zyxfileBot3Matches) {
+          const zyxfileBot3MatchesLength = zyxfileBot3Matches.length;
+          // console.log("zyxfileBot3MatchesLength : " + zyxfileBot3MatchesLength);  //测试
+          if (zyxfileBot3MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot3MatchesLength; j++) {
+              if (zyxfileBot3Matches[j]) {
+                zyxfileBot.push(zyxfileBot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot4Matches = str.match(zyxfileBot4Regexp);
+        // console.log(zyxfileBot4Matches);  //测试
+        if (zyxfileBot4Matches) {
+          const zyxfileBot4MatchesLength = zyxfileBot4Matches.length;
+          // console.log("zyxfileBot4MatchesLength : " + zyxfileBot4MatchesLength);  //测试
+          if (zyxfileBot4MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot4MatchesLength; j++) {
+              if (zyxfileBot4Matches[j]) {
+                zyxfileBot.push(zyxfileBot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot5Matches = str.match(zyxfileBot5Regexp);
+        // console.log(zyxfileBot5Matches);  //测试
+        if (zyxfileBot5Matches) {
+          const zyxfileBot5MatchesLength = zyxfileBot5Matches.length;
+          // console.log("zyxfileBot5MatchesLength : " + zyxfileBot5MatchesLength);  //测试
+          if (zyxfileBot5MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot5MatchesLength; j++) {
+              if (zyxfileBot5Matches[j]) {
+                zyxfileBot.push(zyxfileBot5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot6Matches = str.match(zyxfileBot6Regexp);
+        // console.log(zyxfileBot6Matches);  //测试
+        if (zyxfileBot6Matches) {
+          const zyxfileBot6MatchesLength = zyxfileBot6Matches.length;
+          // console.log("zyxfileBot6MatchesLength : " + zyxfileBot6MatchesLength);  //测试
+          if (zyxfileBot6MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot6MatchesLength; j++) {
+              if (zyxfileBot6Matches[j]) {
+                zyxfileBot.push(zyxfileBot6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const zyxfileBot7Matches = str.match(zyxfileBot7Regexp);
+        // console.log(zyxfileBot7Matches);  //测试
+        if (zyxfileBot7Matches) {
+          const zyxfileBot7MatchesLength = zyxfileBot7Matches.length;
+          // console.log("zyxfileBot7MatchesLength : " + zyxfileBot7MatchesLength);  //测试
+          if (zyxfileBot7MatchesLength > 0) {
+            for (let j = 0; j < zyxfileBot7MatchesLength; j++) {
+              if (zyxfileBot7Matches[j]) {
+                zyxfileBot.push(zyxfileBot7Matches[j]);
+              }
+            }
+          }
+        }
+
         const ZYXFilesBot1Matches = str.match(ZYXFilesBot1Regexp);
         // console.log(ZYXFilesBot1Matches);  //测试
         if (ZYXFilesBot1Matches) {
@@ -5413,6 +5519,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/xiumi1bot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err instanceof Error ? err.message : err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }
+
+  all += zyxfileBot.length;
+  console.log("zyxfileBot : " + zyxfileBot.length);  //测试
+  if (zyxfileBot.length > 0) {
+    const data = fs.readFileSync("./code/zyxfileBot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...zyxfileBot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/zyxfileBot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err instanceof Error ? err.message : err);
           }

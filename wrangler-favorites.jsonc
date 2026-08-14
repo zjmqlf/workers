@@ -4,11 +4,11 @@
   "main": "favorites.js",
   "vars": {
     "APP_NAME": "favorites",
-    "API_ID": 25429403,
+    "API_ID": "25429403",
     "API_HASH": "2bb9a1bfd8f598da6cb5c511f0e5fbdf",
     "SESSION_STRING": ""
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],

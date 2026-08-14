@@ -4,13 +4,13 @@
   "main": "kodexfiles2.js",
   "vars": {
     "APP_NAME": "kodexfiles2",
-    "API_ID": 1334621,
+    "API_ID": "1334621",
     "API_HASH": "2bc36173f487ece3052a00068be59e7b",
     "SESSION_STRING": "",
     "BOT_ID": "8508964084",
-    "BOT_HASH": "8777468622410567541",
+    "BOT_HASH": "8777468622410567541"
   },
-  "compatibility_date": "2026-04-21",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": [
     "nodejs_compat"
   ],
