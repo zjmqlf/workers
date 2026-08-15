@@ -858,6 +858,23 @@ const App = () => {
     }
   }, [handlerMessageError, waitReconnect]);
 
+  const handlerDuplicateBtnClick = useCallback(() => {
+    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({
+          "command": "duplicate",
+        }));
+      } catch (err) {
+        // console.log(err);  //测试
+        handlerMessageError("  >>> duplicate失败");
+      }
+    } else {
+      waitReconnect(JSON.stringify({
+        "command": "duplicate",
+      }), 1000);
+    }
+  }, [handlerMessageError, waitReconnect]);
+
   const cacheBtnClickHandler = useCallback(() => {
     if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
       try {
@@ -875,20 +892,20 @@ const App = () => {
     }
   }, [handlerMessageError, waitReconnect]);
 
-  const handlerClearCacheBtnClick = useCallback(() => {
-    if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
-      try {
-        ws.current.send(JSON.stringify({
-          "command": "clear",
-        }));
-      } catch (err) {
-        // console.log(err);  //测试
-        handlerMessageError("  >>> clear失败");
-      }
-    } else {
-      handlerMessageError("  >>> 没有连接ws");
-    }
-  }, [handlerMessageError]);
+  // const handlerClearCacheBtnClick = useCallback(() => {
+  //   if ((ws.current instanceof WebSocket) && ws.current.readyState === WebSocket.OPEN) {
+  //     try {
+  //       ws.current.send(JSON.stringify({
+  //         "command": "clear",
+  //       }));
+  //     } catch (err) {
+  //       // console.log(err);  //测试
+  //       handlerMessageError("  >>> clear失败");
+  //     }
+  //   } else {
+  //     handlerMessageError("  >>> 没有连接ws");
+  //   }
+  // }, [handlerMessageError]);
 
   const handlerClearGridBtnClick = useCallback(() => {
     lastId.current = 0;
@@ -1051,7 +1068,8 @@ const App = () => {
           <button onClick={handlerChatBtnClick}>chat</button>
           {/* <button onClick={cacheBtnClickHandler}>cache</button> */}
           <button onClick={handlerIndexBtnClick}>index</button>
-          <button onClick={handlerClearCacheBtnClick}>清空cache</button>
+          <button onClick={handlerDuplicateBtnClick}>duplicate</button>
+          {/* <button onClick={handlerClearCacheBtnClick}>清空cache</button> */}
           <button onClick={handlerClearGridBtnClick} disabled={isClearGridBtnDisabled}>清空grid</button>
           <button onClick={handlerClearLogBtnClick} disabled={isClearLogBtnDisabled}>清空log</button>
           <label>

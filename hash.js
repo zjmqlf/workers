@@ -1801,6 +1801,16 @@ export class WebSocketServer extends DurableObject {
       const ids = [];
       const mediaIndexResult = await this.ctx.storage.get("m_" + id);
       if (mediaIndexResult) {
+        // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 视频已入过索引库了");
+        this.sendMessage("grid", "getMedia", "", "indexExist", false);
+        const Vindex = mediaIndexResult.Vindex;
+        if (Vindex && Vindex > 0) {
+          status = 1;
+          ids.push(Vindex);
+        }
+        await this.endInsert(messageId, category, txt, ids, status);
+        this.offsetId += 1;
+      } else {
         const mediaResult = await this.selectMedia(1, id);
         if (mediaResult) {
           const mediaCount = parseInt(mediaResult["COUNT(*)"]);
@@ -1907,16 +1917,6 @@ export class WebSocketServer extends DurableObject {
           this.sendMessage("grid", "getMedia", "视频的mediaResult错误", "error", true);
           this.offsetId += 1;
         }
-      } else {
-        // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 视频已入过索引库了");
-        this.sendMessage("grid", "getMedia", "", "indexExist", false);
-        const Vindex = mediaIndexResult.Vindex;
-        if (Vindex && Vindex > 0) {
-          status = 1;
-          ids.push(Vindex);
-        }
-        await this.endInsert(messageId, category, txt, ids, status);
-        this.offsetId += 1;
       }
     } else {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 视频的id或accessHash错误");
@@ -1953,6 +1953,14 @@ export class WebSocketServer extends DurableObject {
           const type = photoInfo[index].type;
           const photoIndexResult = await this.ctx.storage.get("p_" + type + "_" + id);
           if (photoIndexResult) {
+            // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片已入过索引库了");
+            this.sendPhoto("getPhoto", "", photoIndex, "indexExist", false);
+            const Pindex = photoIndexResult.Pindex;
+            if (Pindex && Pindex > 0) {
+              status = 1;
+              ids.push(Pindex);
+            }
+          } else {
             const photoResult = await this.selectPhoto(1, id, type);
             if (photoResult) {
               const photoCount = parseInt(photoResult["COUNT(*)"]);
@@ -2012,14 +2020,6 @@ export class WebSocketServer extends DurableObject {
               // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片的photoResult错误");
               this.sendPhoto("getPhoto", "图片的photoResult错误", photoIndex, "error", true);
             }
-          } else {
-            // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片已入过索引库了");
-            this.sendPhoto("getPhoto", "", photoIndex, "indexExist", false);
-            const Pindex = photoIndexResult.Pindex;
-            if (Pindex && Pindex > 0) {
-              status = 1;
-              ids.push(Pindex);
-            }
           }
           // await scheduler.wait(1000);
         }
@@ -2044,6 +2044,16 @@ export class WebSocketServer extends DurableObject {
     if (id && accessHash) {
       const photoIndexResult = await this.ctx.storage.get("p_p_" + id);
       if (photoIndexResult) {
+        // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片已入过索引库了");
+        this.sendMessage("grid", "getFile", "", "indexExist", false);
+        const Pindex = photoIndexResult.Pindex;
+        if (Pindex && Pindex > 0) {
+          status = 1;
+          ids.push(Pindex);
+        }
+        await this.endInsert(messageId, category, txt, ids, status);
+        this.offsetId += 1;
+      } else {
         let status = 0;
         const category = 1;
         const txt = message.message;
@@ -2117,16 +2127,6 @@ export class WebSocketServer extends DurableObject {
           this.sendMessage("grid", "getFile", "图片的photoResult错误", "error", true);
           this.offsetId += 1;
         }
-      } else {
-        // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片已入过索引库了");
-        this.sendMessage("grid", "getFile", "", "indexExist", false);
-        const Pindex = photoIndexResult.Pindex;
-        if (Pindex && Pindex > 0) {
-          status = 1;
-          ids.push(Pindex);
-        }
-        await this.endInsert(messageId, category, txt, ids, status);
-        this.offsetId += 1;
       }
     } else {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 图片的id或accessHash错误");
@@ -2880,36 +2880,45 @@ export class WebSocketServer extends DurableObject {
     if (this.endId && this.endId > 0) {
       if (this.endId > this.offsetId) {
         while (this.offsetId <= this.endId) {
-          const results = await this.selectMediaIndex(1);
-          if (results) {
-            const length = results.length;
-            // console.log("mediaLength : " + length);  //测试
-            this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
-            if (length > 0) {
-              for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].rowid;
-                // if (this.offsetId > this.endId) {
-                //   // console.log("offsetId超过end");
-                //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
-                //   break;
-                // }
-                if (!await this.ctx.storage.get("m_" + results[index].id)) {
-                  await this.ctx.storage.put("m_" + results[index].id, "[]");
-                  // console.log("id : " + this.offsetId);  //测试
-                  // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
+          if (this.apiCount < 900) {
+            const results = await this.selectMediaIndex(1);
+            if (results) {
+              const length = results.length;
+              // console.log("mediaLength : " + length);  //测试
+              // this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
+              this.sendMessage("log", "syncMediaIndex", "offsetId : " + this.offsetId, null, false);  //测试
+              if (length > 1) {
+                for (let index = 0; index < length; index++) {
+                  this.offsetId = results[index].rowid;
+                  // if (this.offsetId > this.endId) {
+                  //   // console.log("offsetId超过end");
+                  //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
+                  //   break;
+                  // }
+                  if (!await this.ctx.storage.get("m_" + results[index].id)) {
+                    await this.ctx.storage.put("m_" + results[index].id, "[]");
+                    // console.log("id : " + this.offsetId);  //测试
+                    // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
+                  }
                 }
+                // await scheduler.wait(5000);  //测试
+                await this.updateConfig(1, "sync");
+              } else {
+                // console.log("mediaLength为0");
+                this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+                break;
               }
-              // await scheduler.wait(5000);  //测试
-              await this.updateConfig(1, "sync");
             } else {
               // console.log("mediaLength为0");
-              this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+              this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
               break;
             }
           } else {
-            // console.log("mediaLength为0");
-            this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
-            break;
+            this.stop = 2;
+            // console.log("syncMediaIndex - 超出apiCount限制");
+            this.sendMessage("log", "syncMediaIndex", "超出apiCount限制", "limit", true);
+            await this.close();
+            // this.ctx.abort("reset");
           }
         }
       } else {
@@ -2922,32 +2931,41 @@ export class WebSocketServer extends DurableObject {
       this.sendMessage("log", "syncMediaIndex", "mediaCount : " + this.syncCount, null, false);  //测试
       if (this.syncCount > 0) {
         while (this.syncIndex <= this.syncCount) {
-          const results = await this.selectMediaIndex(1);
-          if (results) {
-            const length = results.length;
-            // console.log("mediaLength : " + length);  //测试
-            this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
-            if (length > 0) {
-              for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].rowid;
-                if (!await this.ctx.storage.get("m_" + results[index].id)) {
-                  await this.ctx.storage.put("m_" + results[index].id, "[]");
-                  // console.log("id : " + this.offsetId);  //测试
-                  // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
+          if (this.apiCount < 900) {
+            const results = await this.selectMediaIndex(1);
+            if (results) {
+              const length = results.length;
+              // console.log("mediaLength : " + length);  //测试
+              // this.sendMessage("log", "syncMediaIndex", "mediaLength : " + length, null, false);  //测试
+              this.sendMessage("log", "syncMediaIndex", "offsetId : " + this.offsetId, null, false);  //测试
+              if (length > 1) {
+                for (let index = 0; index < length; index++) {
+                  this.offsetId = results[index].rowid;
+                  if (!await this.ctx.storage.get("m_" + results[index].id)) {
+                    await this.ctx.storage.put("m_" + results[index].id, "[]");
+                    // console.log("id : " + this.offsetId);  //测试
+                    // this.sendMessage("log", "syncMediaIndex", "id : " + this.offsetId, null, false);  //测试
+                  }
                 }
+                // await scheduler.wait(5000);  //测试
+                this.syncIndex += length;
+                await this.updateConfig(1, "sync");
+              } else {
+                // console.log("mediaLength为0");
+                this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+                break;
               }
-              // await scheduler.wait(5000);  //测试
-              this.syncIndex += length;
-              await this.updateConfig(1, "sync");
             } else {
               // console.log("mediaLength为0");
-              this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+              this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
               break;
             }
           } else {
-            // console.log("mediaLength为0");
-            this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
-            break;
+            this.stop = 2;
+            // console.log("syncMediaIndex - 超出apiCount限制");
+            this.sendMessage("log", "syncMediaIndex", "超出apiCount限制", "limit", true);
+            await this.close();
+            // this.ctx.abort("reset");
           }
         }
       } else {
@@ -2961,37 +2979,45 @@ export class WebSocketServer extends DurableObject {
     if (this.endId && this.endId > 0) {
       if (this.endId > this.offsetId) {
         while (this.offsetId <= this.endId) {
-          const results = await this.selectPhotoIndex(1);
-          if (results) {
-            const length = results.length;
-            // console.log("photoLength : " + length);  //测试
-            this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
-            this.sendMessage("log", "syncPhotoIndex", "offsetId : " + this.offsetId, null, false);  //测试
-            if (length > 0) {
-              for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].rowid;
-                // if (this.offsetId > this.endId) {
-                //   // console.log("offsetId超过end");
-                //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
-                //   break;
-                // }
-                if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
-                  await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
-                  // console.log("id : " + this.offsetId);  //测试
-                  // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
+          if (this.apiCount < 900) {
+            const results = await this.selectPhotoIndex(1);
+            if (results) {
+              const length = results.length;
+              // console.log("photoLength : " + length);  //测试
+              // this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
+              this.sendMessage("log", "syncPhotoIndex", "offsetId : " + this.offsetId, null, false);  //测试
+              if (length > 1) {
+                for (let index = 0; index < length; index++) {
+                  this.offsetId = results[index].rowid;
+                  // if (this.offsetId > this.endId) {
+                  //   // console.log("offsetId超过end");
+                  //   this.sendMessage("log", "syncMediaIndex", "offsetId超过end", null, true);
+                  //   break;
+                  // }
+                  if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
+                    await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
+                    // console.log("id : " + this.offsetId);  //测试
+                    // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
+                  }
                 }
+                // await scheduler.wait(5000);  //测试
+                await this.updateConfig(1, "sync");
+              } else {
+                // console.log("photoLength为0");
+                this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+                break;
               }
-              // await scheduler.wait(5000);  //测试
-              await this.updateConfig(1, "sync");
             } else {
-              // console.log("photoLength为0");
-              this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+              // console.log("PhotoLength为0");
+              this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
               break;
             }
           } else {
-            // console.log("PhotoLength为0");
-            this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
-            break;
+            this.stop = 2;
+            // console.log("syncPhotoIndex - 超出apiCount限制");
+            this.sendMessage("log", "syncPhotoIndex", "超出apiCount限制", "limit", true);
+            await this.close();
+            // this.ctx.abort("reset");
           }
         }
       } else {
@@ -3004,32 +3030,41 @@ export class WebSocketServer extends DurableObject {
       this.sendMessage("log", "syncPhotoIndex", "PhotoCount : " + this.syncCount, null, false);  //测试
       if (this.syncCount > 0) {
         while (this.syncIndex <= this.syncCount) {
-          const results = await this.selectPhotoIndex(1);
-          if (results) {
-            const length = results.length;
-            // console.log("photoLength : " + length);  //测试
-            this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
-            if (length > 0) {
-              for (let index = 0; index < length; index++) {
-                this.offsetId = results[index].rowid;
-                if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
-                  await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
-                  // console.log("id : " + this.offsetId);  //测试
-                  // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
+          if (this.apiCount < 900) {
+            const results = await this.selectPhotoIndex(1);
+            if (results) {
+              const length = results.length;
+              // console.log("photoLength : " + length);  //测试
+              // this.sendMessage("log", "syncPhotoIndex", "photoLength : " + length, null, false);  //测试
+              this.sendMessage("log", "syncPhotoIndex", "offsetId : " + this.offsetId, null, false);  //测试
+              if (length > 1) {
+                for (let index = 0; index < length; index++) {
+                  this.offsetId = results[index].rowid;
+                  if (!await this.ctx.storage.get("p_" + results[index].sizeType + "_" + results[index].id)) {
+                    await this.ctx.storage.put("p_" + results[index].sizeType + "_" + results[index].id, "[]");
+                    // console.log("id : " + this.offsetId);  //测试
+                    // this.sendMessage("log", "syncPhotoIndex", "id : " + this.offsetId, null, false);  //测试
+                  }
                 }
+                // await scheduler.wait(5000);  //测试
+                this.syncIndex += length;
+                await this.updateConfig(1, "sync");
+              } else {
+                // console.log("photoLength为0");
+                this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+                break;
               }
-              // await scheduler.wait(5000);  //测试
-              this.syncIndex += length;
-              await this.updateConfig(1, "sync");
             } else {
-              // console.log("photoLength为0");
-              this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+              // console.log("PhotoLength为0");
+              this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
               break;
             }
           } else {
-            // console.log("PhotoLength为0");
-            this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
-            break;
+            this.stop = 2;
+            // console.log("syncPhotoIndex - 超出apiCount限制");
+            this.sendMessage("log", "syncPhotoIndex", "超出apiCount限制", "limit", true);
+            await this.close();
+            // this.ctx.abort("reset");
           }
         }
       } else {
