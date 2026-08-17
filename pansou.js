@@ -1053,7 +1053,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.PANSOUDB.prepare("SELECT COUNT(*) FROM `PANMESSAGE` WHERE `chatId` = ? AND  `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
+      messageResult = await this.env.PANSOUDB.prepare("SELECT COUNT(*) FROM `PANMESSAGE` WHERE `chatId` = ? AND `id` = ? LIMIT 1;").bind(this.chatId, messageId).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("grid", "selectMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1820,7 +1820,8 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.PANSOUDB.prepare("SELECT `chatId`, `id`, `Mindex` FROM `PANMESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
+      // messageResult = await this.env.PANSOUDB.prepare("SELECT `chatId`, `id`, `Mindex` FROM `PANMESSAGE` WHERE `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
+      messageResult = await this.env.PANSOUDB.prepare("SELECT `id`, `Mindex` FROM `PANMESSAGE` WHERE `chatId` = 4 AND `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessageIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectMessageIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -1854,23 +1855,27 @@ export class WebSocketServer extends DurableObject {
             if (results) {
               const length = results.length;
               // console.log("messageLength : " + length);  //测试
-              // this.sendMessage("log", "syncMessageIndex", "messageLength : " + length, null, false);  //测试
-              this.sendMessage("log", "syncMessageIndex", "offsetId : " + this.offsetId, null, false);  //测试
               if (length > 1) {
                 for (let index = 0; index < length; index++) {
                   this.offsetId = results[index].Mindex;
+                  // this.sendMessage("log", "syncMessageIndex", "messageLength : " + length, null, false);  //测试
+                  this.sendMessage("log", "syncMessageIndex", "offsetId : " + this.offsetId, null, false);  //测试
                   // if (this.offsetId > this.endId) {
                   //   // console.log("offsetId超过end");
                   //   this.sendMessage("log", "syncMessageIndex", "offsetId超过end", null, true);
                   //   break;
                   // }
-                  if (results[index].chatId === 4 || results[index].chatId === 365) {
-                    continue;
-                  }
-                  if (!await this.ctx.storage.get(results[index].chatId + "|" + results[index].id)) {
-                    await this.ctx.storage.put(results[index].chatId + "|" + results[index].id, "[]");
-                    // console.log("id : " + this.offsetId);  //测试
-                    // this.sendMessage("log", "syncMessageIndex", "id : " + this.offsetId, null, false);  //测试
+                  // if (results[index].chatId === 4 || results[index].chatId === 365) {
+                  //   continue;
+                  // }
+                  // if (!await this.ctx.storage.get(results[index].chatId + "|" + results[index].id)) {
+                  //   await this.ctx.storage.put(results[index].chatId + "|" + results[index].id, "[]");
+                  //   // console.log("id : " + this.offsetId);  //测试
+                  //   // this.sendMessage("log", "syncMessageIndex", "id : " + this.offsetId, null, false);  //测试
+                  // }
+                  if (await this.ctx.storage.get("4|" + results[index].id)) {
+                    // await this.ctx.storage.delete("4|" + results[index].id);
+                    this.sendMessage("log", "syncMessageIndex", "id : " + this.offsetId, null, false);  //测试
                   }
                 }
                 // await scheduler.wait(5000);  //测试
@@ -2038,7 +2043,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.MAINDB.prepare("INSERT INTO `PANINDEX` (chatId, txt) VALUES (?, ?);").bind(4, txt).run();
+      messageResult = await this.env.MAINDB.prepare("INSERT INTO `PANINDEX` (chatId, txt) VALUES (?, ?);").bind(365, txt).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("log", "insertIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -2087,7 +2092,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.PANSOUDB.prepare("SELECT `txt`, `Mindex` FROM `PANMESSAGE` WHERE `chatId` = 4 AND `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
+      messageResult = await this.env.PANSOUDB.prepare("SELECT `txt`, `Mindex` FROM `PANMESSAGE` WHERE `chatId` = 365 AND `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectDuplicateMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectDuplicateMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -2109,6 +2114,55 @@ export class WebSocketServer extends DurableObject {
       }
     } else {
       await this.selectDuplicateMessageError(tryCount);
+    }
+  }
+
+  async deleteMessageError(tryCount, id) {
+    if (tryCount === 5) {
+      this.stop = 2;
+      // console.log("(" + this.currentStep + ")deleteMessage超出tryCount限制");
+      this.sendMessage("log", "deleteMessage", "超出tryCount限制", null, true);
+      await this.close();
+    } else {
+      await scheduler.wait(10000);
+      if (this.stop === 1) {
+        await this.deleteMessage(tryCount + 1, id);
+      } else if (this.stop === 2) {
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      }
+    }
+  }
+
+  async deleteMessage(tryCount, id) {
+    this.apiCount += 1;
+    let messageResult = {};
+    try {
+      messageResult = await this.env.PANSOUDB.prepare("DELETE FROM `PANMESSAGE` WHERE `Mindex` = ?;").bind(id).run();
+    } catch (err) {
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : deleteMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
+      this.sendMessage("log", "deleteMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
+      if (err.message === this.errorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "pause",
+        });
+        await this.close();
+      } else {
+        await this.deleteMessageError(tryCount, id);
+      }
+      return;
+    }
+    // console.log(messageResult);  //测试
+    if (messageResult.success === true) {
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 插入message数据成功");
+      // this.sendMessage("log", "deleteMessage", "", "success", false);
+    } else {
+      // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 插入message数据失败");
+      this.sendMessage("log", "deleteMessage", "删除message数据失败", "error", true);
+      await this.deleteMessageError(tryCount, id);
     }
   }
 
@@ -2135,6 +2189,7 @@ export class WebSocketServer extends DurableObject {
                   if (parseInt(indexCount) === 0) {
                     await this.insertIndex(1, results[index].txt);
                   } else {
+                    await this.deleteMessage(1, this.offsetId);
                     // console.log("(" + this.currentStep + ")" + this.offsetId + " : index已在数据库中");
                     this.sendMessage("log", "duplicateMessage", "exist", "exist", false);
                   }
@@ -2182,6 +2237,7 @@ export class WebSocketServer extends DurableObject {
                   if (parseInt(indexCount) === 0) {
                     await this.insertIndex(1, results[index].txt);
                   } else {
+                    await this.deleteMessage(1, this.offsetId);
                     // console.log("(" + this.currentStep + ")" + this.offsetId + " : index已在数据库中");
                     this.sendMessage("log", "duplicateMessage", "exist", "exist", false);
                   }
@@ -2233,17 +2289,32 @@ export class WebSocketServer extends DurableObject {
 
   // async clear() {
   //   // await this.ctx.storage.deleteAll();
-  //   const results = await this.ctx.storage.list({
-  //     // start: 0,
-  //     // startAfter: 0,
-  //     // end: 0,
-  //     // prefix: "c_",
-  //     // reverse : true,
-  //     // limit: 100,
-  //   });
-  //   for (const item of results) {
-  //     // console.log(item[0]);  //测试
-  //     this.sendMessage("log", "clear", item[0], null, false);  //测试
+  //   let begin = 0;
+  //   let end = 100;
+  //   while (true) {
+  //     const results = await this.ctx.storage.list({
+  //       start: begin,
+  //       // startAfter: 0,
+  //       end: end,
+  //       // prefix: "4|",
+  //       // prefix: "365_",
+  //       // reverse : true,
+  //       limit: 100,
+  //     });
+  //     if (results) {
+  //       for (const item of results) {
+  //         // console.log(item[0]);  //测试
+  //         if (item[0].substr(0, 2) === "4|") {
+  //           begin -= 1;
+  //           await this.ctx.storage.delete(item[0]);
+  //           this.sendMessage("log", "clear", item[0], null, false);  //测试
+  //         }
+  //       }
+  //       begin += 100;
+  //       end += 100;
+  //     } else {
+  //       break;
+  //     }
   //   }
   //   // console.log("删除cache成功");
   //   this.broadcast({
