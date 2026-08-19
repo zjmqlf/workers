@@ -1883,11 +1883,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("messageLength为0");
                 this.sendMessage("log", "syncMessageIndex", "messageLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("messageLength为0");
               this.sendMessage("log", "syncMessageIndex", "messageResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -1933,11 +1939,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("messageLength为0");
                 this.sendMessage("log", "syncMessageIndex", "messageLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("messageLength为0");
               this.sendMessage("log", "syncMessageIndex", "messageResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -2043,7 +2055,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.MAINDB.prepare("INSERT INTO `PANINDEX` (chatId, txt) VALUES (?, ?);").bind(365, txt).run();
+      messageResult = await this.env.MAINDB.prepare("INSERT INTO `PANINDEX` (chatId, txt) VALUES (?, ?);").bind(4, txt).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("log", "insertIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -2092,7 +2104,7 @@ export class WebSocketServer extends DurableObject {
     this.apiCount += 1;
     let messageResult = {};
     try {
-      messageResult = await this.env.PANSOUDB.prepare("SELECT `txt`, `Mindex` FROM `PANMESSAGE` WHERE `chatId` = 365 AND `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
+      messageResult = await this.env.PANSOUDB.prepare("SELECT `txt`, `Mindex` FROM `PANMESSAGE` WHERE `chatId` = 4 AND `Mindex` >= ? ORDER BY `Mindex` ASC LIMIT 100;").bind(this.offsetId).run();
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectDuplicateMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectDuplicateMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
@@ -2199,11 +2211,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("messageLength为0");
                 this.sendMessage("log", "duplicateMessage", "messageLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("messageLength为0");
               this.sendMessage("log", "duplicateMessage", "messageResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -2248,11 +2266,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("messageLength为0");
                 this.sendMessage("log", "duplicateMessage", "messageLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("messageLength为0");
               this.sendMessage("log", "duplicateMessage", "messageResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {

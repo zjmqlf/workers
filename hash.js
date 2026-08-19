@@ -2906,11 +2906,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("mediaLength为0");
                 this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("mediaLength为0");
               this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -2953,11 +2959,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("mediaLength为0");
                 this.sendMessage("log", "syncMediaIndex", "mediaLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("mediaLength为0");
               this.sendMessage("log", "syncMediaIndex", "mediaResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -3005,11 +3017,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("photoLength为0");
                 this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("PhotoLength为0");
               this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
@@ -3052,11 +3070,17 @@ export class WebSocketServer extends DurableObject {
               } else {
                 // console.log("photoLength为0");
                 this.sendMessage("log", "syncPhotoIndex", "photoLength为0", null, true);
+                this.broadcast({
+                  "result": "over",
+                });
                 break;
               }
             } else {
               // console.log("PhotoLength为0");
               this.sendMessage("log", "syncPhotoIndex", "PhotoResult为空", null, true);
+              this.broadcast({
+                "result": "over",
+              });
               break;
             }
           } else {
