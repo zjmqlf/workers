@@ -72,6 +72,12 @@ interface DEFAULT_OPTIONS {
     };
 }
 
+const STABLE_CONNECTION_MS = 30_000;
+const QUICK_CONNECT_ATTEMPTS = 3;
+const QUICK_CONNECT_DELAY_MS = 1;
+const CONNECT_DELAY_CAP_MS = 64_000;
+const FLAPPING_CONNECTIONS = 5;
+
 export class MTProtoSender {
     static DEFAULT_OPTIONS = {
         reconnectRetries: Infinity,
@@ -99,6 +105,8 @@ export class MTProtoSender {
     private readonly _autoReconnectCallback?: DEFAULT_OPTIONS["autoReconnectCallback"];
     private readonly _isMainSender: boolean;
     private _lifecycle: SenderLifecycle = "disconnected";
+    private _connectedAt = 0;
+    private _shortLived = 0;
     readonly authKey: AuthKey;
     private readonly _state: MTProtoState;
     private _queued: RequestState[] = [];
@@ -202,6 +210,7 @@ export class MTProtoSender {
             await this.authKey.setKey(undefined);
         }
         let lastError: unknown;
+        let retryDelay = QUICK_CONNECT_DELAY_MS;
         for (let attempt = 0; attempt < this._retries; attempt++) {
             try {
                 await this._connect();
@@ -227,17 +236,28 @@ export class MTProtoSender {
                         )
                     );
                 }
-                this._log.error(
-                    `Connection failed attempt: ${attempt + 1}`,
-                    err
-                );
+                const message = `Connection to dc ${this._dcId} failed (attempt ${
+                    attempt + 1
+                }), next try in ${retryDelay}ms`;
+                if (attempt < QUICK_CONNECT_ATTEMPTS) {
+                    this._log.error(message, err);
+                } else {
+                    this._log.warn(`${message}: ${err}`);
+                }
                 if (this._client._errorHandler) {
                     await this._client._errorHandler(err as Error);
                 }
-                await sleep(this._delay);
+                await sleep(retryDelay);
+                retryDelay =
+                    attempt + 1 < QUICK_CONNECT_ATTEMPTS
+                        ? retryDelay + 1
+                        : Math.min(
+                              Math.max(this._delay, retryDelay * 2),
+                              CONNECT_DELAY_CAP_MS
+                          );
             }
         }
-        await this._disconnect().catch(() => {});
+        await this._disconnect().catch(() => { });
         throw lastError instanceof Error
             ? lastError
             : new Error(`Failed to connect to dc ${this._dcId}`);
@@ -297,12 +317,12 @@ export class MTProtoSender {
     private async _connectWithTimeout(connection: Connection) {
         const seconds =
             typeof this._connectTimeout === "number" &&
-            this._connectTimeout > 0
+                this._connectTimeout > 0
                 ? this._connectTimeout
                 : 10;
         let timer: ReturnType<typeof setTimeout> | undefined;
         const dial = connection.connect();
-        dial.catch(() => {});
+        dial.catch(() => { });
         try {
             await Promise.race([
                 dial,
@@ -319,7 +339,7 @@ export class MTProtoSender {
                 }),
             ]);
         } catch (err) {
-            connection.socket.close().catch(() => {});
+            connection.socket.close().catch(() => { });
             throw err;
         } finally {
             if (timer) clearTimeout(timer);
@@ -473,9 +493,9 @@ export class MTProtoSender {
                 this._log,
                 this._tempBinding
                     ? {
-                          expiresIn: this._tempBinding.expiresIn,
-                          dc: this._tempBinding.dcParam,
-                      }
+                        expiresIn: this._tempBinding.expiresIn,
+                        dc: this._tempBinding.dcParam,
+                    }
                     : undefined
             );
             this._log.debug("Generated new auth_key successfully");
@@ -492,6 +512,7 @@ export class MTProtoSender {
             this._state.salt = this._dcenter.salt;
         }
         this._lifecycle = "connected";
+        this._connectedAt = Date.now();
 
         this._startIo(connection);
 
@@ -691,9 +712,24 @@ export class MTProtoSender {
                     return;
                 }
                 if (this._lifecycle !== "dead") {
+                    const aliveFor = Date.now() - this._connectedAt;
+                    if (aliveFor < STABLE_CONNECTION_MS) {
+                        this._shortLived++;
+                    } else {
+                        this._shortLived = 0;
+                    }
                     this._log.info(
-                        `Connection to DC ${this._dcId} closed by server, reconnecting`
+                        `Connection to DC ${this._dcId} closed by server after ${aliveFor}ms (${e}), reconnecting`
                     );
+                    if (
+                        this._shortLived >= FLAPPING_CONNECTIONS &&
+                        this._shortLived % FLAPPING_CONNECTIONS === 0
+                    ) {
+                        this._log.warn(
+                            `Connection to DC ${this._dcId} died ${this._shortLived} times in a row without staying up for ${STABLE_CONNECTION_MS / 1000
+                            }s: the network path (or proxy) keeps dropping it`
+                        );
+                    }
                     this.reconnect();
                 }
                 return;
@@ -757,7 +793,13 @@ export class MTProtoSender {
                     }
                 }
             }
-            this._currentRetries = 0;
+            if (
+                this._currentRetries !== 0 &&
+                Date.now() - this._connectedAt >= STABLE_CONNECTION_MS
+            ) {
+                this._currentRetries = 0;
+                this._shortLived = 0;
+            }
         }
     }
 
@@ -778,7 +820,7 @@ export class MTProtoSender {
 
         if (this._tempBinding) {
             this._lifecycle = "dead";
-            this.authKey.setKey(undefined).catch(() => {});
+            this.authKey.setKey(undefined).catch(() => { });
             if (this._onConnectionBreak) {
                 this._onConnectionBreak(this._dcId);
             }
@@ -799,13 +841,13 @@ export class MTProtoSender {
             }
             this.authKey
                 .setKey(undefined)
-                .catch(() => {})
+                .catch(() => { })
                 .then(() => {
                     if (this._authKeyCallback) {
                         return this._authKeyCallback(undefined, this._dcId);
                     }
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .then(() => this.reconnect());
         } else if (this._onConnectionBreak) {
             this._lifecycle = "dead";
@@ -824,7 +866,7 @@ export class MTProtoSender {
         }
         if (!this._autoReconnect) {
             this._lifecycle = "dead";
-            this._disconnect().catch(() => {});
+            this._disconnect().catch(() => { });
             if (!this._isMainSender && this._onConnectionBreak) {
                 this._onConnectionBreak(this._dcId);
             }

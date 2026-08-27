@@ -188,7 +188,8 @@ export class MediaScheduler {
         location: Api.TypeInputFileLocation,
         offset: bigInt.BigInteger,
         limit: number,
-        signal?: AbortSignal
+        signal?: AbortSignal,
+        onMigrate?: (newDc: number) => void
     ): Promise<Buffer> {
         const request = new Api.upload.GetFile({
             location,
@@ -221,6 +222,7 @@ export class MediaScheduler {
                 if (err instanceof SlotRemovedError) continue;
                 if (err instanceof FileMigrateError) {
                     currentDc = err.newDc;
+                    onMigrate?.(currentDc);
                     continue;
                 }
                 if (isFlood(err)) continue;
@@ -283,18 +285,18 @@ export class MediaScheduler {
         while (id < 0) {
             if (signal?.aborted) throw new MediaAbortError();
             await new Promise<void>((resolve, reject) => {
-                const onAbort = () => {
-                    const i = b.waiters.indexOf(ticket);
-                    if (i >= 0) b.waiters.splice(i, 1);
-                    reject(new MediaAbortError());
-                };
+                let off: (() => void) | undefined;
                 const ticket = () => {
-                    signal?.removeEventListener("abort", onAbort);
+                    off?.();
                     resolve();
                 };
                 if (signal) {
                     if (signal.aborted) return reject(new MediaAbortError());
-                    signal.addEventListener("abort", onAbort, { once: true });
+                    off = onAbort(signal, (err) => {
+                        const i = b.waiters.indexOf(ticket);
+                        if (i >= 0) b.waiters.splice(i, 1);
+                        reject(err);
+                    });
                 }
 
                 if (priority) b.waiters.unshift(ticket);
@@ -372,6 +374,32 @@ export class MediaScheduler {
     }
 }
 
+const abortHooks = new WeakMap<AbortSignal, Set<(err: MediaAbortError) => void>>();
+
+function onAbort(
+    signal: AbortSignal,
+    hook: (err: MediaAbortError) => void
+): () => void {
+    let hooks = abortHooks.get(signal);
+    if (!hooks) {
+        const own = new Set<(err: MediaAbortError) => void>();
+        hooks = own;
+        abortHooks.set(signal, own);
+        signal.addEventListener(
+            "abort",
+            () => {
+                const pending = [...own];
+                own.clear();
+                for (const fn of pending) fn(new MediaAbortError());
+            },
+            { once: true }
+        );
+    }
+    const own = hooks;
+    own.add(hook);
+    return () => own.delete(hook);
+}
+
 function isFlood(err: any): boolean {
     return (
         err instanceof FloodWaitError ||
@@ -394,7 +422,7 @@ async function raceWithSlotDeath<T>(
     signal?: AbortSignal
 ): Promise<T> {
     let unsub: (() => void) | undefined;
-    let onAbort: (() => void) | undefined;
+    let off: (() => void) | undefined;
     const death = new Promise<never>((_, reject) => {
         unsub = slot.onDeath((reason) => reject(new SlotRemovedError(reason)));
     });
@@ -404,8 +432,7 @@ async function raceWithSlotDeath<T>(
         races.push(
             new Promise<never>((_, reject) => {
                 if (signal.aborted) return reject(new MediaAbortError());
-                onAbort = () => reject(new MediaAbortError());
-                signal.addEventListener("abort", onAbort, { once: true });
+                off = onAbort(signal, reject);
             })
         );
     }
@@ -413,7 +440,7 @@ async function raceWithSlotDeath<T>(
         return await Promise.race(races);
     } finally {
         unsub?.();
-        if (signal && onAbort) signal.removeEventListener("abort", onAbort);
+        off?.();
     }
 }
 
@@ -444,22 +471,21 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 
 async function sleepOrAbort(ms: number, signal?: AbortSignal): Promise<void> {
     await new Promise<void>((resolve, reject) => {
-        let onAbort: (() => void) | undefined;
+        let off: (() => void) | undefined;
         const t = setTimeout(() => {
-            if (signal && onAbort) signal.removeEventListener("abort", onAbort);
+            off?.();
             resolve();
         }, ms);
-        onAbort = () => {
-            clearTimeout(t);
-            reject(new MediaAbortError());
-        };
         if (signal) {
             if (signal.aborted) {
                 clearTimeout(t);
                 reject(new MediaAbortError());
                 return;
             }
-            signal.addEventListener("abort", onAbort, { once: true });
+            off = onAbort(signal, (err) => {
+                clearTimeout(t);
+                reject(err);
+            });
         }
     });
 }

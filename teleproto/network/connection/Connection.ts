@@ -1,13 +1,10 @@
-import {
-    Logger,
-} from "../../extensions";
+import type { Logger } from "../../extensions/Logger";
 import type {
     PacketReader,
     SocketFactory,
     SocketInterface,
 } from "../../extensions/SocketInterface";
-import { AbridgedPacketCodec } from "./TCPAbridged";
-import { FullPacketCodec } from "./TCPFull";
+import type { ProxyInterface } from "./TCPMTProxy";
 import { Buffer } from "node:buffer";
 
 interface ConnectionInterfaceParams {
@@ -20,7 +17,7 @@ interface ConnectionInterfaceParams {
 }
 
 class Connection {
-    PacketCodecClass?: typeof AbridgedPacketCodec | typeof FullPacketCodec;
+    PacketCodecClass?: typeof PacketCodec;
     readonly _ip: string;
     readonly _port: number;
     _dcId: number;

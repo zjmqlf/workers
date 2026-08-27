@@ -1261,9 +1261,14 @@ export async function getReactionUsers(
     );
 }
 
+export interface SendPollAnswer {
+    text: string;
+    media?: Api.TypeInputMedia;
+}
+
 export interface SendPollParams {
     question: string;
-    answers: string[];
+    answers: (string | SendPollAnswer)[];
     multipleChoice?: boolean;
     quiz?: boolean;
     correctAnswers?: number | number[];
@@ -1322,17 +1327,18 @@ export async function sendPoll(
             id: bigInt.zero,
             question: await _pollText(client, poll.question, poll.parseMode),
             answers: await Promise.all(
-                poll.answers.map(
-                    async (answer, i) =>
-                        new Api.PollAnswer({
-                            text: await _pollText(
-                                client,
-                                answer,
-                                poll.parseMode
-                            ),
-                            option: Buffer.from([48 + i]),
-                        })
-                )
+                poll.answers.map(async (answer) => {
+                    const item: SendPollAnswer =
+                        typeof answer === "string" ? { text: answer } : answer;
+                    return new Api.InputPollAnswer({
+                        text: await _pollText(
+                            client,
+                            item.text,
+                            poll.parseMode
+                        ),
+                        media: item.media,
+                    });
+                })
             ),
             multipleChoice: poll.multipleChoice,
             quiz: poll.quiz,

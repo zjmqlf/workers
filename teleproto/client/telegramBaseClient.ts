@@ -1,5 +1,5 @@
 import { Connection } from "../network";
-import { TelegramClient } from "./TelegramClient";
+import type { TelegramClient } from "./TelegramClient";
 import {
     ConnectionTCPFull,
     ConnectionTCPObfuscated,
@@ -25,7 +25,8 @@ import {
 import { LAYER } from "../tl/runtime/registry";
 import { LogLevel } from "../extensions/Logger";
 import { Deferred } from "../extensions/Deferred";
-import { UpdateManager } from "./UpdateManager";
+import { UpdateManager } from "./updates/manager";
+import { installMessageBehaviour } from "../tl/custom/message";
 
 const SESSION_IDLE_TIMEOUT_MS = 60_000;
 const SESSION_STARTUP_DELAY_MS = 800;
@@ -102,6 +103,7 @@ export interface TelegramClientParams {
         idleTimeoutMs?: number;
         sessionStartupDelayMs?: number;
     };
+    channelPollInterval?: number;
     entityCache?: EntityCacheOptions;
 }
 
@@ -123,6 +125,7 @@ const clientParamsDefault = {
     appVersion: "",
     langCode: "en",
     systemLangCode: "en",
+    channelPollInterval: 5000,
     _securityChecks: true,
 };
 
@@ -151,6 +154,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _errorHandler?: (error: Error) => Promise<void>;
     public _eventBuilders: [EventBuilder, CallableFunction][];
     public _entityCache: EntityCache;
+    public _channelPollInterval: number;
     public _lastRequest?: number;
     public _lastReceivedAt = 0;
     public _parseMode?: ParseInterface;
@@ -203,12 +207,14 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this.session = session;
         this.apiId = apiId;
         this.apiHash = apiHash;
+        installMessageBehaviour();
         this._useIPV6 = clientParams.useIPV6!;
         this._requestRetries = clientParams.requestRetries!;
         this._downloadRetries = clientParams.downloadRetries!;
         this._connectionRetries = clientParams.connectionRetries!;
         this._reconnectRetries = clientParams.reconnectRetries!;
         this._retryDelay = clientParams.retryDelay || 0;
+        this._channelPollInterval = clientParams.channelPollInterval!;
         this._timeout = clientParams.timeout!;
         this._autoReconnect = clientParams.autoReconnect!;
         this._maxConcurrentDownloads = clientParams.maxConcurrentDownloads || 1;

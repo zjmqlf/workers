@@ -1,10 +1,9 @@
-import type { EventBuilder } from "../events/common";
-import { Api } from "../tl";
-import type { TelegramClient } from "./TelegramClient";
-import { UpdateConnectionState } from "../network";
-import type { Raw } from "../events";
-import { getRandomInt, returnBigInt, sleep } from "../Helpers";
-import { Raw as raw } from "../events";
+import type { EventBuilder } from "../../events/common";
+import { Api } from "../../tl";
+import type { TelegramClient } from "../TelegramClient";
+import { UpdateConnectionState } from "../../network";
+import type { Raw } from "../../events";
+import { getRandomInt, returnBigInt, sleep } from "../../Helpers";
 
 const PING_INTERVAL = 9000;
 const PING_TIMEOUT = 10000;
@@ -15,7 +14,7 @@ const PING_INTERVAL_TO_WAKE_UP = 5000;
 const PING_WAKE_UP_TIMEOUT = 3000;
 const PING_WAKE_UP_WARNING_TIMEOUT = 1000;
 
-export class StopPropagation extends Error {}
+export class StopPropagation extends Error { }
 
 export function on(client: TelegramClient, event?: EventBuilder) {
     return (f: (event: any) => void) => {
@@ -30,6 +29,7 @@ export function addEventHandler(
     event?: EventBuilder,
 ) {
     if (event == undefined) {
+        const raw = require("../../events/Raw").Raw;
         event = new raw({}) as Raw;
     }
     event.client = client;
@@ -53,7 +53,6 @@ export function listEventHandlers(client: TelegramClient) {
 export async function catchUp(client: TelegramClient): Promise<void> {
     await client.updateManager.catchUp();
 }
-
 
 export function _handleUpdate(
     client: TelegramClient,
@@ -149,6 +148,7 @@ export async function _dispatchUpdate(
             }
         }
     }
+    await client.updates._dispatch(args.update);
 }
 
 export async function _updateLoop(client: TelegramClient) {
@@ -225,6 +225,7 @@ export async function _updateLoop(client: TelegramClient) {
         }
 
         await client.updateManager.recoverIfStale();
+
         if (Date.now() - (client._lastRequest || 0) > 30 * 60 * 1000) {
             try {
                 await client.updateManager.catchUp();
@@ -233,6 +234,7 @@ export async function _updateLoop(client: TelegramClient) {
             lastPongAt = undefined;
         }
     }
+
     client._loopStarted = false;
     if (client._destroyed) {
         await client.disconnect();

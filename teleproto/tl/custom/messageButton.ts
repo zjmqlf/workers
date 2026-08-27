@@ -34,38 +34,43 @@ export class MessageButton {
     }
 
     get data() {
-        if (this.button instanceof Api.KeyboardButtonCallback) {
-            return this.button.data;
+        const type = this._inlineType;
+        if (type instanceof Api.InlineButtonTypeCallback) {
+            return type.data;
         }
     }
 
     get inlineQuery() {
-        if (this.button instanceof Api.KeyboardButtonSwitchInline) {
-            return this.button.query;
+        const type = this._inlineType;
+        if (type instanceof Api.InlineButtonTypeSwitchInline) {
+            return type.query;
         }
     }
 
     get url() {
-        if (this.button instanceof Api.KeyboardButtonUrl) {
-            return this.button.url;
+        const type = this._inlineType;
+        if (type instanceof Api.InlineButtonTypeUrl) {
+            return type.url;
         }
+    }
+
+    private get _inlineType() {
+        return this.button instanceof Api.KeyboardInlineButton
+            ? this.button.type
+            : undefined;
     }
 
     async click({
         sharePhone = false,
-        shareGeo = [0, 0],
+        shareGeo,
         password,
     }: {
         sharePhone?: boolean | string | Api.InputMediaContact;
         shareGeo?: [number, number] | Api.InputMediaGeoPoint;
         password?: string;
     }) {
-        if (this.button instanceof Api.KeyboardButton) {
-            return this._client.sendMessage(this._chat, {
-                message: this.button.text,
-                parseMode: undefined,
-            });
-        } else if (this.button instanceof Api.KeyboardButtonCallback) {
+        const inlineType = this._inlineType;
+        if (inlineType instanceof Api.InlineButtonTypeCallback) {
             let encryptedPassword;
             if (password != undefined) {
                 const pwd = await this.client.invoke(
@@ -76,7 +81,7 @@ export class MessageButton {
             const request = new Api.messages.GetBotCallbackAnswer({
                 peer: this._chat,
                 msgId: this._msgId,
-                data: this.button.data,
+                data: inlineType.data,
                 password: encryptedPassword,
             });
             try {
@@ -87,17 +92,17 @@ export class MessageButton {
                 }
                 throw e;
             }
-        } else if (this.button instanceof Api.KeyboardButtonSwitchInline) {
+        } else if (inlineType instanceof Api.InlineButtonTypeSwitchInline) {
             return this._client.invoke(
                 new Api.messages.StartBot({
                     bot: this._bot,
                     peer: this._chat,
-                    startParam: this.button.query,
+                    startParam: inlineType.query,
                 })
             );
-        } else if (this.button instanceof Api.KeyboardButtonUrl) {
-            return this.button.url;
-        } else if (this.button instanceof Api.KeyboardButtonGame) {
+        } else if (inlineType instanceof Api.InlineButtonTypeUrl) {
+            return inlineType.url;
+        } else if (inlineType instanceof Api.InlineButtonTypeGame) {
             const request = new Api.messages.GetBotCallbackAnswer({
                 peer: this._chat,
                 msgId: this._msgId,
@@ -111,30 +116,50 @@ export class MessageButton {
                 }
                 throw e;
             }
-        } else if (this.button instanceof Api.KeyboardButtonRequestPhone) {
-            if (!sharePhone) {
-                throw new Error(
-                    "cannot click on phone buttons unless sharePhone=true"
-                );
-            }
-            if (sharePhone == true || typeof sharePhone == "string") {
-                const me = await this._client.getMe();
-                sharePhone = new Api.InputMediaContact({
-                    phoneNumber:
-                        (sharePhone == true ? me.phone : sharePhone) || "",
-                    firstName: me.firstName || "",
-                    lastName: me.lastName || "",
-                    vcard: "",
+        } else if (this.button instanceof Api.KeyboardButton) {
+            const type = this.button.type;
+            if (type instanceof Api.ButtonTypeDefault) {
+                return this._client.sendMessage(this._chat, {
+                    message: this.button.text,
+                    parseMode: undefined,
+                });
+            } else if (type instanceof Api.ButtonTypeRequestPhone) {
+                if (!sharePhone) {
+                    throw new Error(
+                        "cannot click on phone buttons unless sharePhone=true"
+                    );
+                }
+                if (sharePhone == true || typeof sharePhone == "string") {
+                    const me = await this._client.getMe();
+                    sharePhone = new Api.InputMediaContact({
+                        phoneNumber:
+                            (sharePhone == true ? me.phone : sharePhone) || "",
+                        firstName: me.firstName || "",
+                        lastName: me.lastName || "",
+                        vcard: "",
+                    });
+                }
+                return this._client.sendFile(this._chat, {
+                    file: sharePhone,
+                });
+            } else if (type instanceof Api.ButtonTypeRequestGeoLocation) {
+                if (!shareGeo) {
+                    throw new Error(
+                        "cannot click on geo buttons unless shareGeo=[longitude, latitude]"
+                    );
+                }
+                if (Array.isArray(shareGeo)) {
+                    shareGeo = new Api.InputMediaGeoPoint({
+                        geoPoint: new Api.InputGeoPoint({
+                            long: shareGeo[0],
+                            lat: shareGeo[1],
+                        }),
+                    });
+                }
+                return this._client.sendFile(this._chat, {
+                    file: shareGeo,
                 });
             }
-            throw new Error("Not supported for now");
-        } else if (this.button instanceof Api.InputWebFileGeoPointLocation) {
-            if (!shareGeo) {
-                throw new Error(
-                    "cannot click on geo buttons unless shareGeo=[longitude, latitude]"
-                );
-            }
-            throw new Error("Not supported for now");
         }
     }
 }

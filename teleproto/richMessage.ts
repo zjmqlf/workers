@@ -1,4 +1,4 @@
-import { Api } from "./tl";
+import { Api } from "./tl/api";
 import { unionId } from "./Helpers";
 
 export type RichFileMap = Record<
@@ -119,6 +119,36 @@ function _tag(inner: string, mode: RenderMode, htmlTag: string, md: string) {
     return inner;
 }
 
+function _buttonUrl(type: Api.TypeInlineButtonType): string | undefined {
+    if (
+        type instanceof Api.InlineButtonTypeUrl ||
+        type instanceof Api.InlineButtonTypeUrlAuth ||
+        type instanceof Api.InputInlineButtonTypeUrlAuth ||
+        type instanceof Api.InlineButtonTypeWebView
+    ) {
+        return type.url;
+    }
+    return undefined;
+}
+
+function _renderButton(
+    text: Api.TypeRichText,
+    type: Api.TypeInlineButtonType,
+    mode: RenderMode
+): string {
+    const inner = renderRichText(text, mode);
+    const url = _buttonUrl(type);
+    if (mode === "html") {
+        return url
+            ? `<a class="button" href="${_escapeHtml(url)}">${inner}</a>`
+            : `<button>${inner}</button>`;
+    }
+    if (mode === "md" && url) {
+        return `[${inner}](${url})`;
+    }
+    return inner;
+}
+
 export function renderRichText(
     text: Api.TypeRichText | undefined,
     mode: RenderMode = "text"
@@ -220,6 +250,9 @@ export function renderRichText(
     }
     if (text instanceof Api.TextDiff) {
         return renderRichText(text.text, mode);
+    }
+    if (text instanceof Api.TextButton) {
+        return _renderButton(text.text, text.type, mode);
     }
     const nested = (text as any).text;
     if (nested && typeof nested === "object") {
@@ -465,6 +498,15 @@ function _renderBlock(block: Api.TypePageBlock, mode: RenderMode): string {
         }
         return caption ? `[audio: ${caption}]` : "[audio]";
     }
+    if (block instanceof Api.PageBlockDocument) {
+        const caption = _renderCaption(block.caption, mode);
+        if (mode === "html") {
+            return `<figure><a data-document-id="${block.documentId}"></a>${
+                caption ? `<figcaption>${caption}</figcaption>` : ""
+            }</figure>`;
+        }
+        return caption ? `[document: ${caption}]` : "[document]";
+    }
     if (
         block instanceof Api.PageBlockCollage ||
         block instanceof Api.PageBlockSlideshow
@@ -499,6 +541,19 @@ function _renderBlock(block: Api.TypePageBlock, mode: RenderMode): string {
     }
     if (block instanceof Api.PageBlockAuthorDate) {
         return renderRichText(block.author, mode);
+    }
+    if (block instanceof Api.PageBlockButtonRow) {
+        const buttons = block.buttons
+            .map((button) =>
+                button instanceof Api.PageButton
+                    ? _renderButton(button.text, button.type, mode)
+                    : ""
+            )
+            .filter(Boolean);
+        if (mode === "html") {
+            return `<div class="buttons">${buttons.join("")}</div>`;
+        }
+        return buttons.join(" ");
     }
     if (block instanceof Api.PageBlockUnsupported) {
         return "";

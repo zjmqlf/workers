@@ -179,15 +179,19 @@ export async function downloadFile(
     const totalSize: bigInt.BigInteger | undefined = fileSize ?? info.size;
     const totalBytes = totalSize ? totalSize.toJSNumber() : 0;
     const partSize = resolvePartSize(client, partSizeKb);
+    const route = { dcId: targetDc };
 
     const writer = getWriter(outputFile);
     const abort = new AbortController();
     let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
+    let unforward: (() => void) | undefined;
     if (signal) {
         if (signal.aborted) abort.abort();
-        else signal.addEventListener("abort", () => abort.abort(), {
-            once: true,
-        });
+        else {
+            const forward = () => abort.abort();
+            signal.addEventListener("abort", forward, { once: true });
+            unforward = () => signal.removeEventListener("abort", forward);
+        }
     }
     if (requestTimeout && requestTimeout > 0) {
         timeoutTimer = setTimeout(() => abort.abort(), requestTimeout);
@@ -215,7 +219,7 @@ export async function downloadFile(
             await streamSequential(
                 client,
                 location,
-                targetDc,
+                route,
                 partSize,
                 writer,
                 abort.signal,
@@ -226,13 +230,14 @@ export async function downloadFile(
             await streamParallel(
                 client,
                 location,
-                targetDc,
+                route,
                 partSize,
                 totalBytes,
                 writer,
                 abort.signal,
                 reportProgress,
                 hashChecker,
+                dcId === undefined && info.dcId === undefined,
             );
         }
         await closeWriter(writer);
@@ -242,13 +247,14 @@ export async function downloadFile(
         throw err;
     } finally {
         if (timeoutTimer) clearTimeout(timeoutTimer);
+        unforward?.();
     }
 }
 
 async function streamSequential(
     client: TelegramClient,
     location: Api.TypeInputFileLocation,
-    dcId: number,
+    route: { dcId: number },
     partSize: number,
     writer: any,
     signal: AbortSignal,
@@ -260,11 +266,12 @@ async function streamSequential(
         if (signal.aborted) return;
         const offset = bigInt(idx).multiply(partSize);
         const data = await client._media.getFile(
-            dcId,
+            route.dcId,
             location,
             offset,
             partSize,
             signal,
+            (dc) => (route.dcId = dc),
         );
         if (data.length > 0) {
             if (hashChecker) {
@@ -281,15 +288,27 @@ async function streamSequential(
 async function streamParallel(
     client: TelegramClient,
     location: Api.TypeInputFileLocation,
-    dcId: number,
+    route: { dcId: number },
     partSize: number,
     totalBytes: number,
     writer: any,
     signal: AbortSignal,
     onBytes: (n: number) => Promise<void>,
     hashChecker?: FileHashChecker,
+    probeRoute = false,
 ): Promise<void> {
     const totalParts = Math.max(1, Math.ceil(totalBytes / partSize));
+    let firstPart: Buffer | undefined;
+    if (probeRoute && totalParts > 1) {
+        firstPart = await client._media.getFile(
+            route.dcId,
+            location,
+            bigInt.zero,
+            partSize,
+            signal,
+            (dc) => (route.dcId = dc),
+        );
+    }
     const ordered = new OrderedWriter(writer);
     const dl = client._media.opts.download;
     const inflight = new BoundedSemaphore(
@@ -313,13 +332,17 @@ async function streamParallel(
         const offset = bigInt(idx).multiply(partSize);
         tasks.push((async () => {
             try {
-                const data = await client._media.getFile(
-                    dcId,
-                    location,
-                    offset,
-                    partSize,
-                    signal,
-                );
+                const data =
+                    idx === 0 && firstPart !== undefined
+                        ? firstPart
+                        : await client._media.getFile(
+                              route.dcId,
+                              location,
+                              offset,
+                              partSize,
+                              signal,
+                              (dc) => (route.dcId = dc),
+                          );
                 if (!firstError) {
                     if (hashChecker) {
                         await hashChecker.verify(idx * partSize, data);
@@ -478,6 +501,7 @@ export async function _downloadDocument(
             outputFile: outputFile,
             fileSize: size && "size" in size ? bigInt(size.size) : doc.size,
             progressCallback: progressCallback,
+            dcId: doc.dcId,
             msgData: msgData,
             signal: extra?.signal,
             requestTimeout: extra?.requestTimeout,

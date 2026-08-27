@@ -16,6 +16,7 @@ import {
 import { DownloadMediaInterface } from "../../client/downloads";
 import * as rich from "../../richMessage";
 import { returnBigInt } from "../../Helpers";
+import { patchAll } from "../runtime/patches/messages";
 import { BigInteger } from "big-integer";
 import { MessageButton } from "./messageButton";
 import { Buffer } from "node:buffer";
@@ -852,9 +853,11 @@ export class CustomMessage extends SenderGetter {
                 return;
             }
 
-            const button = new Api.KeyboardButtonCallback({
+            const button = new Api.KeyboardInlineButton({
                 text: "",
-                data: data,
+                type: new Api.InlineButtonTypeCallback({
+                    data: data,
+                }),
             });
             return await new MessageButton(
                 this.client,
@@ -1015,8 +1018,11 @@ export class CustomMessage extends SenderGetter {
         }
         for (const row of this.replyMarkup.rows) {
             for (const button of row.buttons) {
-                if (button instanceof Api.KeyboardButtonSwitchInline) {
-                    if (button.samePeer || !this.viaBotId) {
+                if (
+                    button instanceof Api.KeyboardInlineButton &&
+                    button.type instanceof Api.InlineButtonTypeSwitchInline
+                ) {
+                    if (button.type.samePeer || !this.viaBotId) {
                         const bot = this._inputSender;
                         if (!bot) throw new Error("No input sender");
                         return bot;
@@ -1048,4 +1054,12 @@ export class CustomMessage extends SenderGetter {
             }
         }
     }
+}
+
+let installed = false;
+
+export function installMessageBehaviour(): void {
+    if (installed) return;
+    installed = true;
+    patchAll(CustomMessage);
 }

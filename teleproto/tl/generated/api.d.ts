@@ -1286,6 +1286,7 @@ export namespace Api {
     canSetUsername?: boolean;
     hasScheduled?: boolean;
     translationsDisabled?: boolean;
+    hasWelcomeMessages?: boolean;
     id: long;
     about: string;
     participants: Api.TypeChatParticipants;
@@ -1313,6 +1314,7 @@ export namespace Api {
     canSetUsername?: boolean;
     hasScheduled?: boolean;
     translationsDisabled?: boolean;
+    hasWelcomeMessages?: boolean;
     id: long;
     about: string;
     participants: Api.TypeChatParticipants;
@@ -1355,6 +1357,7 @@ export namespace Api {
     paidReactionsAvailable?: boolean;
     stargiftsAvailable?: boolean;
     paidMessagesAvailable?: boolean;
+    hasWelcomeMessages?: boolean;
     id: long;
     about: string;
     participantsCount?: int;
@@ -1430,6 +1433,7 @@ export namespace Api {
     paidReactionsAvailable?: boolean;
     stargiftsAvailable?: boolean;
     paidMessagesAvailable?: boolean;
+    hasWelcomeMessages?: boolean;
     id: long;
     about: string;
     participantsCount?: int;
@@ -2645,6 +2649,7 @@ export namespace Api {
     assigned?: boolean;
     fromOffer?: boolean;
     craft?: boolean;
+    nameHidden?: boolean;
     gift: Api.TypeStarGift;
     canExportAt?: int;
     transferStars?: long;
@@ -2656,8 +2661,9 @@ export namespace Api {
     canResellAt?: int;
     dropOriginalDetailsStars?: long;
     canCraftAt?: int;
+    message?: Api.TypeTextWithEntities;
   }> {
-  CONSTRUCTOR_ID: 3871544610;
+  CONSTRUCTOR_ID: 2115768711;
   SUBCLASS_OF_ID: 2256589094;
   classType: "constructor";
   className: "MessageActionStarGiftUnique";
@@ -2671,6 +2677,7 @@ export namespace Api {
     assigned?: boolean;
     fromOffer?: boolean;
     craft?: boolean;
+    nameHidden?: boolean;
     gift: Api.TypeStarGift;
     canExportAt?: int;
     transferStars?: long;
@@ -2682,6 +2689,7 @@ export namespace Api {
     canResellAt?: int;
     dropOriginalDetailsStars?: long;
     canCraftAt?: int;
+    message?: Api.TypeTextWithEntities;
   }
   export class MessageActionPaidMessagesRefunded extends VirtualClass<{
     count: int;
@@ -2950,6 +2958,16 @@ export namespace Api {
   static fromReader(reader: Reader): MessageActionChangeCommunity;
     // flags: Api.Typeunknown;
     communityId?: long;
+  }
+  export class MessageActionChatJoinedViaCommunity extends VirtualClass<{
+    communityId: long;
+  }> {
+  CONSTRUCTOR_ID: 1250688640;
+  SUBCLASS_OF_ID: 2256589094;
+  classType: "constructor";
+  className: "MessageActionChatJoinedViaCommunity";
+  static fromReader(reader: Reader): MessageActionChatJoinedViaCommunity;
+    communityId: long;
   }
   export class Dialog extends VirtualClass<{
     // flags: Api.Typeunknown;
@@ -5996,6 +6014,30 @@ export namespace Api {
   static fromReader(reader: Reader): UpdateEditEphemeralMessage;
     message: Api.TypeEphemeralMessage;
   }
+  export class UpdateEphemeralBotCallbackQuery extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    queryId: long;
+    userId: long;
+    peer?: Api.TypePeer;
+    msgId: int;
+    data: bytes;
+    chatInstance?: long;
+    message: Api.TypeEphemeralMessage;
+  }> {
+  CONSTRUCTOR_ID: 2081454550;
+  SUBCLASS_OF_ID: 2676568142;
+  classType: "constructor";
+  className: "UpdateEphemeralBotCallbackQuery";
+  static fromReader(reader: Reader): UpdateEphemeralBotCallbackQuery;
+    // flags: Api.Typeunknown;
+    queryId: long;
+    userId: long;
+    peer?: Api.TypePeer;
+    msgId: int;
+    data: bytes;
+    chatInstance?: long;
+    message: Api.TypeEphemeralMessage;
+  }
   export class UpdateBotStarsSubscription extends VirtualClass<{
     // flags: Api.Typeunknown;
     canceled?: boolean;
@@ -6808,40 +6850,68 @@ export namespace Api {
     emoticon: string;
   }
   export class SendMessageTextDraftAction extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     text: Api.TypeTextWithEntities;
   }> {
-  CONSTRUCTOR_ID: 929929052;
+  CONSTRUCTOR_ID: 909162586;
   SUBCLASS_OF_ID: 548588577;
   classType: "constructor";
   className: "SendMessageTextDraftAction";
   static fromReader(reader: Reader): SendMessageTextDraftAction;
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     text: Api.TypeTextWithEntities;
   }
   export class InputSendMessageRichMessageDraftAction extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     richMessage: Api.TypeInputRichMessage;
   }> {
-  CONSTRUCTOR_ID: 3803331409;
+  CONSTRUCTOR_ID: 2839005118;
   SUBCLASS_OF_ID: 548588577;
   classType: "constructor";
   className: "InputSendMessageRichMessageDraftAction";
   static fromReader(reader: Reader): InputSendMessageRichMessageDraftAction;
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     richMessage: Api.TypeInputRichMessage;
   }
   export class SendMessageRichMessageDraftAction extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     richMessage: Api.TypeRichMessage;
   }> {
-  CONSTRUCTOR_ID: 2731222265;
+  CONSTRUCTOR_ID: 1381386387;
   SUBCLASS_OF_ID: 548588577;
   classType: "constructor";
   className: "SendMessageRichMessageDraftAction";
   static fromReader(reader: Reader): SendMessageRichMessageDraftAction;
+    // flags: Api.Typeunknown;
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
     richMessage: Api.TypeRichMessage;
+  }
+  export class SendMessageStopDraftAction extends VirtualClass<{
+    randomId?: long;
+  }> {
+  CONSTRUCTOR_ID: 4227400368;
+  SUBCLASS_OF_ID: 548588577;
+  classType: "constructor";
+  className: "SendMessageStopDraftAction";
+  static fromReader(reader: Reader): SendMessageStopDraftAction;
+    randomId?: long;
   }
   export class InputPrivacyKeyStatusTimestamp extends VirtualClass<void> {
   CONSTRUCTOR_ID: 1335282456;
@@ -7827,8 +7897,9 @@ export namespace Api {
     // flags: Api.Typeunknown;
     style?: Api.TypeKeyboardButtonStyle;
     text: string;
+    type: Api.TypeButtonType;
   }> {
-  CONSTRUCTOR_ID: 2098662655;
+  CONSTRUCTOR_ID: 795322159;
   SUBCLASS_OF_ID: 195916963;
   classType: "constructor";
   className: "KeyboardButton";
@@ -7836,300 +7907,7 @@ export namespace Api {
     // flags: Api.Typeunknown;
     style?: Api.TypeKeyboardButtonStyle;
     text: string;
-  }
-  export class KeyboardButtonUrl extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }> {
-  CONSTRUCTOR_ID: 3624674796;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonUrl";
-  static fromReader(reader: Reader): KeyboardButtonUrl;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }
-  export class KeyboardButtonCallback extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    requiresPassword?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    data: bytes;
-  }> {
-  CONSTRUCTOR_ID: 3861629280;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonCallback";
-  static fromReader(reader: Reader): KeyboardButtonCallback;
-    // flags: Api.Typeunknown;
-    requiresPassword?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    data: bytes;
-  }
-  export class KeyboardButtonRequestPhone extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }> {
-  CONSTRUCTOR_ID: 1098841487;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonRequestPhone";
-  static fromReader(reader: Reader): KeyboardButtonRequestPhone;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }
-  export class KeyboardButtonRequestGeoLocation extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }> {
-  CONSTRUCTOR_ID: 2856384845;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonRequestGeoLocation";
-  static fromReader(reader: Reader): KeyboardButtonRequestGeoLocation;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }
-  export class KeyboardButtonSwitchInline extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    samePeer?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    query: string;
-    peerTypes?: Api.TypeInlineQueryPeerType[];
-  }> {
-  CONSTRUCTOR_ID: 2568198652;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonSwitchInline";
-  static fromReader(reader: Reader): KeyboardButtonSwitchInline;
-    // flags: Api.Typeunknown;
-    samePeer?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    query: string;
-    peerTypes?: Api.TypeInlineQueryPeerType[];
-  }
-  export class KeyboardButtonGame extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }> {
-  CONSTRUCTOR_ID: 2311426297;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonGame";
-  static fromReader(reader: Reader): KeyboardButtonGame;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }
-  export class KeyboardButtonBuy extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }> {
-  CONSTRUCTOR_ID: 1067792645;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonBuy";
-  static fromReader(reader: Reader): KeyboardButtonBuy;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-  }
-  export class KeyboardButtonUrlAuth extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    fwdText?: string;
-    url: string;
-    buttonId: int;
-  }> {
-  CONSTRUCTOR_ID: 4111468281;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonUrlAuth";
-  static fromReader(reader: Reader): KeyboardButtonUrlAuth;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    fwdText?: string;
-    url: string;
-    buttonId: int;
-  }
-  export class InputKeyboardButtonUrlAuth extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    requestWriteAccess?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    fwdText?: string;
-    url: string;
-    bot: Api.TypeInputUser;
-  }> {
-  CONSTRUCTOR_ID: 1744911986;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "InputKeyboardButtonUrlAuth";
-  static fromReader(reader: Reader): InputKeyboardButtonUrlAuth;
-    // flags: Api.Typeunknown;
-    requestWriteAccess?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    fwdText?: string;
-    url: string;
-    bot: Api.TypeInputUser;
-  }
-  export class KeyboardButtonRequestPoll extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    quiz?: Bool;
-    text: string;
-  }> {
-  CONSTRUCTOR_ID: 2047989634;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonRequestPoll";
-  static fromReader(reader: Reader): KeyboardButtonRequestPoll;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    quiz?: Bool;
-    text: string;
-  }
-  export class InputKeyboardButtonUserProfile extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    userId: Api.TypeInputUser;
-  }> {
-  CONSTRUCTOR_ID: 2103314375;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "InputKeyboardButtonUserProfile";
-  static fromReader(reader: Reader): InputKeyboardButtonUserProfile;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    userId: Api.TypeInputUser;
-  }
-  export class KeyboardButtonUserProfile extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    userId: long;
-  }> {
-  CONSTRUCTOR_ID: 3237829897;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonUserProfile";
-  static fromReader(reader: Reader): KeyboardButtonUserProfile;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    userId: long;
-  }
-  export class KeyboardButtonWebView extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }> {
-  CONSTRUCTOR_ID: 3896947104;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonWebView";
-  static fromReader(reader: Reader): KeyboardButtonWebView;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }
-  export class KeyboardButtonSimpleWebView extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }> {
-  CONSTRUCTOR_ID: 3780920176;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonSimpleWebView";
-  static fromReader(reader: Reader): KeyboardButtonSimpleWebView;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    url: string;
-  }
-  export class KeyboardButtonRequestPeer extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    buttonId: int;
-    peerType: Api.TypeRequestPeerType;
-    maxQuantity: int;
-  }> {
-  CONSTRUCTOR_ID: 1527715317;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonRequestPeer";
-  static fromReader(reader: Reader): KeyboardButtonRequestPeer;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    buttonId: int;
-    peerType: Api.TypeRequestPeerType;
-    maxQuantity: int;
-  }
-  export class InputKeyboardButtonRequestPeer extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    nameRequested?: boolean;
-    usernameRequested?: boolean;
-    photoRequested?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    buttonId: int;
-    peerType: Api.TypeRequestPeerType;
-    maxQuantity: int;
-  }> {
-  CONSTRUCTOR_ID: 45580630;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "InputKeyboardButtonRequestPeer";
-  static fromReader(reader: Reader): InputKeyboardButtonRequestPeer;
-    // flags: Api.Typeunknown;
-    nameRequested?: boolean;
-    usernameRequested?: boolean;
-    photoRequested?: boolean;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    buttonId: int;
-    peerType: Api.TypeRequestPeerType;
-    maxQuantity: int;
-  }
-  export class KeyboardButtonCopy extends VirtualClass<{
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    copyText: string;
-  }> {
-  CONSTRUCTOR_ID: 3167006480;
-  SUBCLASS_OF_ID: 195916963;
-  classType: "constructor";
-  className: "KeyboardButtonCopy";
-  static fromReader(reader: Reader): KeyboardButtonCopy;
-    // flags: Api.Typeunknown;
-    style?: Api.TypeKeyboardButtonStyle;
-    text: string;
-    copyText: string;
+    type: Api.TypeButtonType;
   }
   export class KeyboardButtonRow extends VirtualClass<{
     buttons: Api.TypeKeyboardButton[];
@@ -8175,6 +7953,7 @@ export namespace Api {
     singleUse?: boolean;
     selective?: boolean;
     persistent?: boolean;
+    forceReply?: boolean;
     rows: Api.TypeKeyboardButtonRow[];
     placeholder?: string;
   }> {
@@ -8188,18 +7967,23 @@ export namespace Api {
     singleUse?: boolean;
     selective?: boolean;
     persistent?: boolean;
+    forceReply?: boolean;
     rows: Api.TypeKeyboardButtonRow[];
     placeholder?: string;
   }
   export class ReplyInlineMarkup extends VirtualClass<{
-    rows: Api.TypeKeyboardButtonRow[];
+    // flags: Api.Typeunknown;
+    forceReply?: boolean;
+    rows: Api.TypeKeyboardInlineButtonRow[];
   }> {
-  CONSTRUCTOR_ID: 1218642516;
+  CONSTRUCTOR_ID: 2997966704;
   SUBCLASS_OF_ID: 3806400242;
   classType: "constructor";
   className: "ReplyInlineMarkup";
   static fromReader(reader: Reader): ReplyInlineMarkup;
-    rows: Api.TypeKeyboardButtonRow[];
+    // flags: Api.Typeunknown;
+    forceReply?: boolean;
+    rows: Api.TypeKeyboardInlineButtonRow[];
   }
   export class MessageEntityUnknown extends VirtualClass<{
     offset: int;
@@ -9975,6 +9759,22 @@ export namespace Api {
     text: Api.TypeRichText;
     oldText: Api.TypeRichText;
   }
+  export class TextButton extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    text: Api.TypeRichText;
+    type: Api.TypeInlineButtonType;
+    style?: Api.TypeRichButtonStyle;
+  }> {
+  CONSTRUCTOR_ID: 2949094614;
+  SUBCLASS_OF_ID: 4056986745;
+  classType: "constructor";
+  className: "TextButton";
+  static fromReader(reader: Reader): TextButton;
+    // flags: Api.Typeunknown;
+    text: Api.TypeRichText;
+    type: Api.TypeInlineButtonType;
+    style?: Api.TypeRichButtonStyle;
+  }
   export class PageBlockUnsupported extends VirtualClass<void> {
   CONSTRUCTOR_ID: 324435594;
   SUBCLASS_OF_ID: 449467972;
@@ -10094,14 +9894,18 @@ export namespace Api {
     items: Api.TypePageListItem[];
   }
   export class PageBlockBlockquote extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    collapsed?: boolean;
     text: Api.TypeRichText;
     caption: Api.TypeRichText;
   }> {
-  CONSTRUCTOR_ID: 641563686;
+  CONSTRUCTOR_ID: 1724999435;
   SUBCLASS_OF_ID: 449467972;
   classType: "constructor";
   className: "PageBlockBlockquote";
   static fromReader(reader: Reader): PageBlockBlockquote;
+    // flags: Api.Typeunknown;
+    collapsed?: boolean;
     text: Api.TypeRichText;
     caption: Api.TypeRichText;
   }
@@ -10275,6 +10079,7 @@ export namespace Api {
     // flags: Api.Typeunknown;
     bordered?: boolean;
     striped?: boolean;
+    compact?: boolean;
     title: Api.TypeRichText;
     rows: Api.TypePageTableRow[];
   }> {
@@ -10286,6 +10091,7 @@ export namespace Api {
     // flags: Api.Typeunknown;
     bordered?: boolean;
     striped?: boolean;
+    compact?: boolean;
     title: Api.TypeRichText;
     rows: Api.TypePageTableRow[];
   }
@@ -10462,6 +10268,36 @@ export namespace Api {
   static fromReader(reader: Reader): PageBlockBlockquoteBlocks;
     blocks: Api.TypePageBlock[];
     caption: Api.TypeRichText;
+  }
+  export class PageBlockButtonRow extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    alignLeft?: boolean;
+    alignCenter?: boolean;
+    alignRight?: boolean;
+    buttons: Api.TypePageButton[];
+  }> {
+  CONSTRUCTOR_ID: 1835270936;
+  SUBCLASS_OF_ID: 449467972;
+  classType: "constructor";
+  className: "PageBlockButtonRow";
+  static fromReader(reader: Reader): PageBlockButtonRow;
+    // flags: Api.Typeunknown;
+    alignLeft?: boolean;
+    alignCenter?: boolean;
+    alignRight?: boolean;
+    buttons: Api.TypePageButton[];
+  }
+  export class PageBlockDocument extends VirtualClass<{
+    documentId: long;
+    caption: Api.TypePageCaption;
+  }> {
+  CONSTRUCTOR_ID: 955923363;
+  SUBCLASS_OF_ID: 449467972;
+  classType: "constructor";
+  className: "PageBlockDocument";
+  static fromReader(reader: Reader): PageBlockDocument;
+    documentId: long;
+    caption: Api.TypePageCaption;
   }
   export class PhoneCallDiscardReasonMissed extends VirtualClass<void> {
   CONSTRUCTOR_ID: 2246320897;
@@ -12972,6 +12808,7 @@ export namespace Api {
     manageDirectMessages?: boolean;
     manageRanks?: boolean;
     manageLinkedPeers?: boolean;
+    manageWelcomeMessages?: boolean;
   }> {
   CONSTRUCTOR_ID: 1605510357;
   SUBCLASS_OF_ID: 2252195780;
@@ -12997,6 +12834,7 @@ export namespace Api {
     manageDirectMessages?: boolean;
     manageRanks?: boolean;
     manageLinkedPeers?: boolean;
+    manageWelcomeMessages?: boolean;
   }
   export class ChatBannedRights extends VirtualClass<{
     // flags: Api.Typeunknown;
@@ -14877,18 +14715,22 @@ export namespace Api {
   export class InputInvoiceStarGiftResale extends VirtualClass<{
     // flags: Api.Typeunknown;
     ton?: boolean;
+    showName?: boolean;
     slug: string;
     toId: Api.TypeInputPeer;
+    message?: Api.TypeTextWithEntities;
   }> {
-  CONSTRUCTOR_ID: 3281998628;
+  CONSTRUCTOR_ID: 3920676440;
   SUBCLASS_OF_ID: 1919851518;
   classType: "constructor";
   className: "InputInvoiceStarGiftResale";
   static fromReader(reader: Reader): InputInvoiceStarGiftResale;
     // flags: Api.Typeunknown;
     ton?: boolean;
+    showName?: boolean;
     slug: string;
     toId: Api.TypeInputPeer;
+    message?: Api.TypeTextWithEntities;
   }
   export class InputInvoiceStarGiftPrepaidUpgrade extends VirtualClass<{
     peer: Api.TypeInputPeer;
@@ -19090,9 +18932,12 @@ export namespace Api {
   export class EphemeralMessage extends VirtualClass<{
     // flags: Api.Typeunknown;
     out?: boolean;
+    welcomeTemplate?: boolean;
+    invertMedia?: boolean;
+    noforwards?: boolean;
     id: int;
     fromId: Api.TypePeer;
-    peerId: Api.TypePeer;
+    peerId?: Api.TypePeer;
     receiverId: long;
     topMsgId?: int;
     date: int;
@@ -19101,17 +18946,23 @@ export namespace Api {
     media?: Api.TypeMessageMedia;
     replyMarkup?: Api.TypeReplyMarkup;
     replyTo?: Api.TypeMessageReplyHeader;
+    richMessage?: Api.TypeRichMessage;
+    chatInstance?: long;
+    anchorMsgId?: int;
   }> {
-  CONSTRUCTOR_ID: 3653688346;
+  CONSTRUCTOR_ID: 3710369513;
   SUBCLASS_OF_ID: 1600829168;
   classType: "constructor";
   className: "EphemeralMessage";
   static fromReader(reader: Reader): EphemeralMessage;
     // flags: Api.Typeunknown;
     out?: boolean;
+    welcomeTemplate?: boolean;
+    invertMedia?: boolean;
+    noforwards?: boolean;
     id: int;
     fromId: Api.TypePeer;
-    peerId: Api.TypePeer;
+    peerId?: Api.TypePeer;
     receiverId: long;
     topMsgId?: int;
     date: int;
@@ -19120,6 +18971,285 @@ export namespace Api {
     media?: Api.TypeMessageMedia;
     replyMarkup?: Api.TypeReplyMarkup;
     replyTo?: Api.TypeMessageReplyHeader;
+    richMessage?: Api.TypeRichMessage;
+    chatInstance?: long;
+    anchorMsgId?: int;
+  }
+  export class ButtonTypeDefault extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 3386740969;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeDefault";
+  static fromReader(reader: Reader): ButtonTypeDefault;
+}
+  export class ButtonTypeRequestPhone extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 3745330937;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeRequestPhone";
+  static fromReader(reader: Reader): ButtonTypeRequestPhone;
+}
+  export class ButtonTypeRequestGeoLocation extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 2616123712;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeRequestGeoLocation";
+  static fromReader(reader: Reader): ButtonTypeRequestGeoLocation;
+}
+  export class ButtonTypeRequestPoll extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    quiz?: Bool;
+  }> {
+  CONSTRUCTOR_ID: 2865758084;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeRequestPoll";
+  static fromReader(reader: Reader): ButtonTypeRequestPoll;
+    // flags: Api.Typeunknown;
+    quiz?: Bool;
+  }
+  export class ButtonTypeRequestPeer extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    buttonId: int;
+    peerType: Api.TypeRequestPeerType;
+    maxQuantity: int;
+  }> {
+  CONSTRUCTOR_ID: 1331208759;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeRequestPeer";
+  static fromReader(reader: Reader): ButtonTypeRequestPeer;
+    // flags: Api.Typeunknown;
+    buttonId: int;
+    peerType: Api.TypeRequestPeerType;
+    maxQuantity: int;
+  }
+  export class InputButtonTypeRequestPeer extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    nameRequested?: boolean;
+    usernameRequested?: boolean;
+    photoRequested?: boolean;
+    buttonId: int;
+    peerType: Api.TypeRequestPeerType;
+    maxQuantity: int;
+  }> {
+  CONSTRUCTOR_ID: 1071802622;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "InputButtonTypeRequestPeer";
+  static fromReader(reader: Reader): InputButtonTypeRequestPeer;
+    // flags: Api.Typeunknown;
+    nameRequested?: boolean;
+    usernameRequested?: boolean;
+    photoRequested?: boolean;
+    buttonId: int;
+    peerType: Api.TypeRequestPeerType;
+    maxQuantity: int;
+  }
+  export class ButtonTypeSimpleWebView extends VirtualClass<{
+    url: string;
+  }> {
+  CONSTRUCTOR_ID: 3222952314;
+  SUBCLASS_OF_ID: 566493579;
+  classType: "constructor";
+  className: "ButtonTypeSimpleWebView";
+  static fromReader(reader: Reader): ButtonTypeSimpleWebView;
+    url: string;
+  }
+  export class InlineButtonTypeUrl extends VirtualClass<{
+    url: string;
+  }> {
+  CONSTRUCTOR_ID: 3970234580;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeUrl";
+  static fromReader(reader: Reader): InlineButtonTypeUrl;
+    url: string;
+  }
+  export class InlineButtonTypeUrlAuth extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    fwdText?: string;
+    url: string;
+    buttonId: int;
+  }> {
+  CONSTRUCTOR_ID: 3218091426;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeUrlAuth";
+  static fromReader(reader: Reader): InlineButtonTypeUrlAuth;
+    // flags: Api.Typeunknown;
+    fwdText?: string;
+    url: string;
+    buttonId: int;
+  }
+  export class InputInlineButtonTypeUrlAuth extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    requestWriteAccess?: boolean;
+    fwdText?: string;
+    url: string;
+    bot?: Api.TypeInputUser;
+  }> {
+  CONSTRUCTOR_ID: 2573319348;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InputInlineButtonTypeUrlAuth";
+  static fromReader(reader: Reader): InputInlineButtonTypeUrlAuth;
+    // flags: Api.Typeunknown;
+    requestWriteAccess?: boolean;
+    fwdText?: string;
+    url: string;
+    bot?: Api.TypeInputUser;
+  }
+  export class InlineButtonTypeWebView extends VirtualClass<{
+    url: string;
+  }> {
+  CONSTRUCTOR_ID: 1003140532;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeWebView";
+  static fromReader(reader: Reader): InlineButtonTypeWebView;
+    url: string;
+  }
+  export class InlineButtonTypeCallback extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    requiresPassword?: boolean;
+    data: bytes;
+  }> {
+  CONSTRUCTOR_ID: 693484600;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeCallback";
+  static fromReader(reader: Reader): InlineButtonTypeCallback;
+    // flags: Api.Typeunknown;
+    requiresPassword?: boolean;
+    data: bytes;
+  }
+  export class InlineButtonTypeGame extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 1557360797;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeGame";
+  static fromReader(reader: Reader): InlineButtonTypeGame;
+}
+  export class InlineButtonTypeBuy extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 1220204453;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeBuy";
+  static fromReader(reader: Reader): InlineButtonTypeBuy;
+}
+  export class InlineButtonTypeSwitchInline extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    samePeer?: boolean;
+    query: string;
+    peerTypes?: Api.TypeInlineQueryPeerType[];
+  }> {
+  CONSTRUCTOR_ID: 2474065909;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeSwitchInline";
+  static fromReader(reader: Reader): InlineButtonTypeSwitchInline;
+    // flags: Api.Typeunknown;
+    samePeer?: boolean;
+    query: string;
+    peerTypes?: Api.TypeInlineQueryPeerType[];
+  }
+  export class InlineButtonTypeUserProfile extends VirtualClass<{
+    userId: long;
+  }> {
+  CONSTRUCTOR_ID: 1067663311;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeUserProfile";
+  static fromReader(reader: Reader): InlineButtonTypeUserProfile;
+    userId: long;
+  }
+  export class InputInlineButtonTypeUserProfile extends VirtualClass<{
+    userId: Api.TypeInputUser;
+  }> {
+  CONSTRUCTOR_ID: 1408487002;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InputInlineButtonTypeUserProfile";
+  static fromReader(reader: Reader): InputInlineButtonTypeUserProfile;
+    userId: Api.TypeInputUser;
+  }
+  export class InlineButtonTypeCopy extends VirtualClass<{
+    copyText: string;
+  }> {
+  CONSTRUCTOR_ID: 3021812338;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeCopy";
+  static fromReader(reader: Reader): InlineButtonTypeCopy;
+    copyText: string;
+  }
+  export class InlineButtonTypeDisabled extends VirtualClass<void> {
+  CONSTRUCTOR_ID: 2755158429;
+  SUBCLASS_OF_ID: 3172191428;
+  classType: "constructor";
+  className: "InlineButtonTypeDisabled";
+  static fromReader(reader: Reader): InlineButtonTypeDisabled;
+}
+  export class KeyboardInlineButton extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    style?: Api.TypeKeyboardButtonStyle;
+    text: string;
+    type: Api.TypeInlineButtonType;
+  }> {
+  CONSTRUCTOR_ID: 297902882;
+  SUBCLASS_OF_ID: 1178236322;
+  classType: "constructor";
+  className: "KeyboardInlineButton";
+  static fromReader(reader: Reader): KeyboardInlineButton;
+    // flags: Api.Typeunknown;
+    style?: Api.TypeKeyboardButtonStyle;
+    text: string;
+    type: Api.TypeInlineButtonType;
+  }
+  export class KeyboardInlineButtonRow extends VirtualClass<{
+    buttons: Api.TypeKeyboardInlineButton[];
+  }> {
+  CONSTRUCTOR_ID: 423758582;
+  SUBCLASS_OF_ID: 4073024882;
+  classType: "constructor";
+  className: "KeyboardInlineButtonRow";
+  static fromReader(reader: Reader): KeyboardInlineButtonRow;
+    buttons: Api.TypeKeyboardInlineButton[];
+  }
+  export class RichButtonStyle extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    bgPrimary?: boolean;
+    bgDanger?: boolean;
+    bgSuccess?: boolean;
+    link?: boolean;
+  }> {
+  CONSTRUCTOR_ID: 63312061;
+  SUBCLASS_OF_ID: 779049823;
+  classType: "constructor";
+  className: "RichButtonStyle";
+  static fromReader(reader: Reader): RichButtonStyle;
+    // flags: Api.Typeunknown;
+    bgPrimary?: boolean;
+    bgDanger?: boolean;
+    bgSuccess?: boolean;
+    link?: boolean;
+  }
+  export class PageButton extends VirtualClass<{
+    // flags: Api.Typeunknown;
+    text: Api.TypeRichText;
+    type: Api.TypeInlineButtonType;
+    style?: Api.TypeRichButtonStyle;
+  }> {
+  CONSTRUCTOR_ID: 1764381832;
+  SUBCLASS_OF_ID: 2655959441;
+  classType: "constructor";
+  className: "PageButton";
+  static fromReader(reader: Reader): PageButton;
+    // flags: Api.Typeunknown;
+    text: Api.TypeRichText;
+    type: Api.TypeInlineButtonType;
+    style?: Api.TypeRichButtonStyle;
   }
   export class ResPQ extends VirtualClass<{
     nonce: int128;
@@ -20438,6 +20568,18 @@ export namespace Api {
     className: "auth.PasskeyLoginOptions";
     static fromReader(reader: Reader): PasskeyLoginOptions;
       options: Api.TypeDataJSON;
+    }
+    export class FirebasePnvIntent extends VirtualClass<{
+      nonce: string;
+      digitalCredentialPayload: string;
+    }> {
+    CONSTRUCTOR_ID: 3747266572;
+    SUBCLASS_OF_ID: 4200866471;
+    classType: "constructor";
+    className: "auth.FirebasePnvIntent";
+    static fromReader(reader: Reader): FirebasePnvIntent;
+      nonce: string;
+      digitalCredentialPayload: string;
     }
   }
 
@@ -24685,6 +24827,28 @@ export namespace Api {
       users: Api.TypeUser[];
     }
   }
+
+  export namespace ephemeral {
+    export class WelcomeMessagesNotModified extends VirtualClass<void> {
+    CONSTRUCTOR_ID: 1509940017;
+    SUBCLASS_OF_ID: 1869912621;
+    classType: "constructor";
+    className: "ephemeral.WelcomeMessagesNotModified";
+    static fromReader(reader: Reader): WelcomeMessagesNotModified;
+}
+    export class WelcomeMessages extends VirtualClass<{
+      hash: long;
+      messages: Api.TypeEphemeralMessage[];
+    }> {
+    CONSTRUCTOR_ID: 273664114;
+    SUBCLASS_OF_ID: 1869912621;
+    classType: "constructor";
+    className: "ephemeral.WelcomeMessages";
+    static fromReader(reader: Reader): WelcomeMessages;
+      hash: long;
+      messages: Api.TypeEphemeralMessage[];
+    }
+  }
   
 
   export namespace storage {
@@ -24701,6 +24865,7 @@ export namespace Api {
     export type TypeLoginToken = auth.LoginToken | auth.LoginTokenMigrateTo | auth.LoginTokenSuccess;
     export type TypeLoggedOut = auth.LoggedOut;
     export type TypePasskeyLoginOptions = auth.PasskeyLoginOptions;
+    export type TypeFirebasePnvIntent = auth.FirebasePnvIntent;
   }
 
   export namespace contacts {
@@ -24975,6 +25140,10 @@ export namespace Api {
   export namespace communities {
     export type TypePeerLinkRequests = communities.PeerLinkRequests;
     export type TypeParticipantJoinedChats = communities.ParticipantJoinedChats;
+  }
+
+  export namespace ephemeral {
+    export type TypeWelcomeMessages = ephemeral.WelcomeMessagesNotModified | ephemeral.WelcomeMessages;
   }
   
 
@@ -25315,6 +25484,44 @@ export namespace Api {
       credential: Api.TypeInputPasskeyCredential;
       fromDcId?: int;
       fromAuthKeyId?: long;
+    }
+    export class InitFirebasePnvLogin extends Request<Partial<{
+      apiId: int;
+      apiHash: string;
+    }>, auth.TypeFirebasePnvIntent> {
+    CONSTRUCTOR_ID: 2004743034;
+    SUBCLASS_OF_ID: 4200866471;
+    classType: "request";
+    className: "auth.InitFirebasePnvLogin";
+    static fromReader(reader: Reader): InitFirebasePnvLogin;
+      apiId: int;
+      apiHash: string;
+    }
+    export class FinishFirebasePnvLogin extends Request<Partial<{
+      googleToken: string;
+    }>, auth.TypeAuthorization> {
+    CONSTRUCTOR_ID: 746916172;
+    SUBCLASS_OF_ID: 3118485049;
+    classType: "request";
+    className: "auth.FinishFirebasePnvLogin";
+    static fromReader(reader: Reader): FinishFirebasePnvLogin;
+      googleToken: string;
+    }
+    export class FirebasePnvSignUp extends Request<Partial<{
+      // flags: Api.Typeunknown;
+      noJoinedNotifications?: boolean;
+      firstName: string;
+      lastName: string;
+    }>, auth.TypeAuthorization> {
+    CONSTRUCTOR_ID: 2017422166;
+    SUBCLASS_OF_ID: 3118485049;
+    classType: "request";
+    className: "auth.FirebasePnvSignUp";
+    static fromReader(reader: Reader): FirebasePnvSignUp;
+      // flags: Api.Typeunknown;
+      noJoinedNotifications?: boolean;
+      firstName: string;
+      lastName: string;
     }
   }
 
@@ -27507,6 +27714,7 @@ export namespace Api {
       dropMediaCaptions?: boolean;
       noforwards?: boolean;
       allowPaidFloodskip?: boolean;
+      fromEphemeral?: boolean;
       fromPeer: Api.TypeEntityLike;
       id: int[];
       randomId: long[];
@@ -27535,6 +27743,7 @@ export namespace Api {
       dropMediaCaptions?: boolean;
       noforwards?: boolean;
       allowPaidFloodskip?: boolean;
+      fromEphemeral?: boolean;
       fromPeer: Api.TypeEntityLike;
       id: int[];
       randomId: long[];
@@ -35841,7 +36050,11 @@ export namespace Api {
   export namespace ephemeral {
     export class SendMessage extends Request<Partial<{
       // flags: Api.Typeunknown;
-      peer: Api.TypeEntityLike;
+      invertMedia?: boolean;
+      welcome?: boolean;
+      anchor?: boolean;
+      noforwards?: boolean;
+      peer?: Api.TypeEntityLike;
       receiverId: Api.TypeEntityLike;
       queryId?: long;
       message: string;
@@ -35852,13 +36065,17 @@ export namespace Api {
       randomId?: long;
       replyTo?: Api.TypeInputReplyTo;
     }>, Api.TypeUpdates> {
-    CONSTRUCTOR_ID: 1758187679;
+    CONSTRUCTOR_ID: 3129827125;
     SUBCLASS_OF_ID: 2331323052;
     classType: "request";
     className: "ephemeral.SendMessage";
     static fromReader(reader: Reader): SendMessage;
       // flags: Api.Typeunknown;
-      peer: Api.TypeEntityLike;
+      invertMedia?: boolean;
+      welcome?: boolean;
+      anchor?: boolean;
+      noforwards?: boolean;
+      peer?: Api.TypeEntityLike;
       receiverId: Api.TypeEntityLike;
       queryId?: long;
       message: string;
@@ -35870,16 +36087,18 @@ export namespace Api {
       replyTo?: Api.TypeInputReplyTo;
     }
     export class DeleteMessage extends Request<Partial<{
-      peer: Api.TypeEntityLike;
+      // flags: Api.Typeunknown;
+      peer?: Api.TypeEntityLike;
       receiverId: Api.TypeEntityLike;
       id: int;
     }>, Bool> {
-    CONSTRUCTOR_ID: 2747323665;
+    CONSTRUCTOR_ID: 2465654679;
     SUBCLASS_OF_ID: 4122188204;
     classType: "request";
     className: "ephemeral.DeleteMessage";
     static fromReader(reader: Reader): DeleteMessage;
-      peer: Api.TypeEntityLike;
+      // flags: Api.Typeunknown;
+      peer?: Api.TypeEntityLike;
       receiverId: Api.TypeEntityLike;
       id: int;
     }
@@ -35914,6 +36133,70 @@ export namespace Api {
       peer: Api.TypeEntityLike;
       id: int;
       data?: bytes;
+    }
+    export class EditMessage extends Request<Partial<{
+      // flags: Api.Typeunknown;
+      invertMedia?: boolean;
+      welcome?: boolean;
+      peer?: Api.TypeEntityLike;
+      receiverId: Api.TypeEntityLike;
+      id: int;
+      message?: string;
+      media?: Api.TypeInputMedia;
+      entities?: Api.TypeMessageEntity[];
+      replyMarkup?: Api.TypeReplyMarkup;
+      richMessage?: Api.TypeInputRichMessage;
+    }>, Api.TypeUpdates> {
+    CONSTRUCTOR_ID: 3483136603;
+    SUBCLASS_OF_ID: 2331323052;
+    classType: "request";
+    className: "ephemeral.EditMessage";
+    static fromReader(reader: Reader): EditMessage;
+      // flags: Api.Typeunknown;
+      invertMedia?: boolean;
+      welcome?: boolean;
+      peer?: Api.TypeEntityLike;
+      receiverId: Api.TypeEntityLike;
+      id: int;
+      message?: string;
+      media?: Api.TypeInputMedia;
+      entities?: Api.TypeMessageEntity[];
+      replyMarkup?: Api.TypeReplyMarkup;
+      richMessage?: Api.TypeInputRichMessage;
+    }
+    export class DeleteWelcomeMessage extends Request<Partial<{
+      peer: Api.TypeEntityLike;
+      id: int;
+    }>, Bool> {
+    CONSTRUCTOR_ID: 3900877281;
+    SUBCLASS_OF_ID: 4122188204;
+    classType: "request";
+    className: "ephemeral.DeleteWelcomeMessage";
+    static fromReader(reader: Reader): DeleteWelcomeMessage;
+      peer: Api.TypeEntityLike;
+      id: int;
+    }
+    export class DeleteAllWelcomeMessages extends Request<Partial<{
+      peer: Api.TypeEntityLike;
+    }>, Bool> {
+    CONSTRUCTOR_ID: 1934595873;
+    SUBCLASS_OF_ID: 4122188204;
+    classType: "request";
+    className: "ephemeral.DeleteAllWelcomeMessages";
+    static fromReader(reader: Reader): DeleteAllWelcomeMessages;
+      peer: Api.TypeEntityLike;
+    }
+    export class GetWelcomeMessages extends Request<Partial<{
+      peer: Api.TypeEntityLike;
+      hash: long;
+    }>, ephemeral.TypeWelcomeMessages> {
+    CONSTRUCTOR_ID: 3684352397;
+    SUBCLASS_OF_ID: 1869912621;
+    classType: "request";
+    className: "ephemeral.GetWelcomeMessages";
+    static fromReader(reader: Reader): GetWelcomeMessages;
+      peer: Api.TypeEntityLike;
+      hash: long;
     }
   }
   export interface ApiCallOptions {
@@ -35953,9 +36236,9 @@ export namespace Api {
     /** Either an ISO 639-1 language code or a language pack name obtained from a language pack link . */
     langCode: string;
     /** Info about an MTProto proxy */
-    proxy?: InputClientProxyIn;
+    proxy?: TypeInputClientProxyIn;
     /** Additional initConnection parameters. For now, only the tz_offset field is supported, for specifying the timezone offset in seconds. */
-    params?: JSONValueIn;
+    params?: TypeJSONValueIn;
     /** The query itself */
     query: X;
   }
@@ -35971,7 +36254,7 @@ export namespace Api {
   }
   export interface InvokeWithMessagesRangeParams {
     /** Message range */
-    range: MessageRangeIn;
+    range: TypeMessageRangeIn;
     /** Query */
     query: X;
   }
@@ -36017,7 +36300,7 @@ export namespace Api {
     /** Application secret hash (see App configuration ) */
     apiHash: string;
     /** Settings for the code type to send */
-    settings: CodeSettingsIn;
+    settings: TypeCodeSettingsIn;
   }
   export interface AuthSignUpParams {
     /** If set, users on Telegram that have already added phone_number to their contacts will not receive signup notifications about this user. */
@@ -36039,7 +36322,7 @@ export namespace Api {
     /** Valid numerical code from the SMS-message */
     phoneCode?: string;
     /** Email verification code or token */
-    emailVerification?: EmailVerificationIn;
+    emailVerification?: TypeEmailVerificationIn;
   }
   export interface AuthExportAuthorizationParams {
     /** Number of a target data-center */
@@ -36072,13 +36355,13 @@ export namespace Api {
   }
   export interface AuthCheckPasswordParams {
     /** The account's password (see SRP ) */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
   }
   export interface AuthRecoverPasswordParams {
     /** Code received via email */
     code: string;
     /** New password */
-    newSettings?: AccountPasswordInputSettingsIn;
+    newSettings?: TypeAccountPasswordInputSettingsIn;
   }
   export interface AuthResendCodeParams {
     /** The phone number */
@@ -36162,9 +36445,21 @@ export namespace Api {
     apiHash: string;
   }
   export interface AuthFinishPasskeyLoginParams {
-    credential: InputPasskeyCredentialIn;
+    credential: TypeInputPasskeyCredentialIn;
     fromDcId?: int;
     fromAuthKeyId?: long;
+  }
+  export interface AuthInitFirebasePnvLoginParams {
+    apiId: int;
+    apiHash: string;
+  }
+  export interface AuthFinishFirebasePnvLoginParams {
+    googleToken: string;
+  }
+  export interface AuthFirebasePnvSignUpParams {
+    noJoinedNotifications?: boolean;
+    firstName: string;
+    lastName: string;
   }
   export interface AccountRegisterDeviceParams {
     /** Avoid receiving (silent and invisible background) notifications. Useful to save battery. */
@@ -36192,7 +36487,7 @@ export namespace Api {
     /** Notification source */
     peer: Api.TypeEntityLike;
     /** Notification settings */
-    settings: InputPeerNotifySettingsIn;
+    settings: TypeInputPeerNotifySettingsIn;
   }
   export interface AccountGetNotifySettingsParams {
     /** Notification source */
@@ -36218,7 +36513,7 @@ export namespace Api {
     /** The peer to report */
     peer: Api.TypeEntityLike;
     /** The reason why this peer is being reported */
-    reason: ReportReasonIn;
+    reason: TypeReportReasonIn;
     /** Comment for report moderation */
     message: string;
   }
@@ -36232,29 +36527,29 @@ export namespace Api {
   }
   export interface AccountGetPrivacyParams {
     /** Peer category whose privacy settings should be fetched */
-    key: InputPrivacyKeyIn;
+    key: TypeInputPrivacyKeyIn;
   }
   export interface AccountSetPrivacyParams {
     /** New privacy rule */
-    key: InputPrivacyKeyIn;
+    key: TypeInputPrivacyKeyIn;
     /** Peers to which the privacy rule will apply. */
-    rules: InputPrivacyRuleIn[];
+    rules: TypeInputPrivacyRuleIn[];
   }
   export interface AccountDeleteAccountParams {
     /** Why is the account being deleted, can be empty */
     reason: string;
     /** 2FA password : this field can be omitted even for accounts with 2FA enabled: in this case account account deletion will be delayed by 7 days as specified in the docs » */
-    password?: InputCheckPasswordSRPIn;
+    password?: TypeInputCheckPasswordSRPIn;
   }
   export interface AccountSetAccountTTLParams {
     /** Time to live in days */
-    ttl: AccountDaysTTLIn;
+    ttl: TypeAccountDaysTTLIn;
   }
   export interface AccountSendChangePhoneCodeParams {
     /** New phone number */
     phoneNumber: string;
     /** Phone code settings */
-    settings: CodeSettingsIn;
+    settings: TypeCodeSettingsIn;
   }
   export interface AccountChangePhoneParams {
     /** New phone number */
@@ -36274,19 +36569,19 @@ export namespace Api {
   }
   export interface AccountGetPasswordSettingsParams {
     /** The password (see SRP ) */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
   }
   export interface AccountUpdatePasswordSettingsParams {
     /** The old password (see SRP ) */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
     /** The new password (see SRP ) */
-    newSettings: AccountPasswordInputSettingsIn;
+    newSettings: TypeAccountPasswordInputSettingsIn;
   }
   export interface AccountSendConfirmPhoneCodeParams {
     /** The hash from the service notification, for more info click here » */
     hash: string;
     /** Phone code settings */
-    settings: CodeSettingsIn;
+    settings: TypeCodeSettingsIn;
   }
   export interface AccountConfirmPhoneParams {
     /** Phone code hash, for more info click here » */
@@ -36296,7 +36591,7 @@ export namespace Api {
   }
   export interface AccountGetTmpPasswordParams {
     /** SRP password parameters */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
     /** Time during which the temporary password will be valid, in seconds; should be between 60 and 86400 */
     period: int;
   }
@@ -36306,17 +36601,17 @@ export namespace Api {
   }
   export interface AccountGetSecureValueParams {
     /** Requested value types */
-    types: SecureValueTypeIn[];
+    types: TypeSecureValueTypeIn[];
   }
   export interface AccountSaveSecureValueParams {
     /** Secure value, for more info see the passport docs » */
-    value: InputSecureValueIn;
+    value: TypeInputSecureValueIn;
     /** Passport secret hash, for more info see the passport docs » */
     secureSecretId: long;
   }
   export interface AccountDeleteSecureValueParams {
     /** Document types to delete */
-    types: SecureValueTypeIn[];
+    types: TypeSecureValueTypeIn[];
   }
   export interface AccountGetAuthorizationFormParams {
     /** User identifier of the service's bot */
@@ -36334,15 +36629,15 @@ export namespace Api {
     /** Service's public key */
     publicKey: string;
     /** Types of values sent and their hashes */
-    valueHashes: SecureValueHashIn[];
+    valueHashes: TypeSecureValueHashIn[];
     /** Encrypted values */
-    credentials: SecureCredentialsEncryptedIn;
+    credentials: TypeSecureCredentialsEncryptedIn;
   }
   export interface AccountSendVerifyPhoneCodeParams {
     /** The phone number to verify */
     phoneNumber: string;
     /** Phone code settings */
-    settings: CodeSettingsIn;
+    settings: TypeCodeSettingsIn;
   }
   export interface AccountVerifyPhoneParams {
     /** Phone number */
@@ -36354,15 +36649,15 @@ export namespace Api {
   }
   export interface AccountSendVerifyEmailCodeParams {
     /** Verification purpose. */
-    purpose: EmailVerifyPurposeIn;
+    purpose: TypeEmailVerifyPurposeIn;
     /** The email where to send the code. */
     email: string;
   }
   export interface AccountVerifyEmailParams {
     /** Verification purpose */
-    purpose: EmailVerifyPurposeIn;
+    purpose: TypeEmailVerifyPurposeIn;
     /** Email verification code or token */
-    verification: EmailVerificationIn;
+    verification: TypeEmailVerificationIn;
   }
   export interface AccountInitTakeoutSessionParams {
     /** Whether to export contacts */
@@ -36402,31 +36697,31 @@ export namespace Api {
   }
   export interface AccountGetWallPaperParams {
     /** The wallpaper to get info about */
-    wallpaper: InputWallPaperIn;
+    wallpaper: TypeInputWallPaperIn;
   }
   export interface AccountUploadWallPaperParams {
     /** Set this flag when uploading wallpapers to be passed to messages.setChatWallPaper . */
     forChat?: boolean;
     /** The JPG/PNG wallpaper */
-    file: InputFileIn;
+    file: TypeInputFileIn;
     /** MIME type of uploaded wallpaper */
     mimeType: string;
     /** Wallpaper settings */
-    settings: WallPaperSettingsIn;
+    settings: TypeWallPaperSettingsIn;
   }
   export interface AccountSaveWallPaperParams {
     /** Wallpaper to install or uninstall */
-    wallpaper: InputWallPaperIn;
+    wallpaper: TypeInputWallPaperIn;
     /** Uninstall wallpaper? */
     unsave: Bool;
     /** Wallpaper settings */
-    settings: WallPaperSettingsIn;
+    settings: TypeWallPaperSettingsIn;
   }
   export interface AccountInstallWallPaperParams {
     /** Wallpaper to install */
-    wallpaper: InputWallPaperIn;
+    wallpaper: TypeInputWallPaperIn;
     /** Wallpaper settings */
-    settings: WallPaperSettingsIn;
+    settings: TypeWallPaperSettingsIn;
   }
   export interface AccountSaveAutoDownloadSettingsParams {
     /** Whether to save media in the low data usage preset */
@@ -36434,13 +36729,13 @@ export namespace Api {
     /** Whether to save media in the high data usage preset */
     high?: boolean;
     /** Media autodownload settings */
-    settings: AutoDownloadSettingsIn;
+    settings: TypeAutoDownloadSettingsIn;
   }
   export interface AccountUploadThemeParams {
     /** Previously uploaded theme file with platform-specific colors for UI components, can be left unset when creating themes that only modify the wallpaper or accent colors. */
-    file: InputFileIn;
+    file: TypeInputFileIn;
     /** Thumbnail */
-    thumb?: InputFileIn;
+    thumb?: TypeInputFileIn;
     /** File name */
     fileName: string;
     /** MIME type, must be application/x-tgtheme-{format} , where format depends on the client */
@@ -36452,27 +36747,27 @@ export namespace Api {
     /** Theme name */
     title: string;
     /** Theme file */
-    document?: InputDocumentIn;
+    document?: TypeInputDocumentIn;
     /** Theme settings, multiple values can be provided for the different base themes (day/night mode, etc). */
-    settings?: InputThemeSettingsIn[];
+    settings?: TypeInputThemeSettingsIn[];
   }
   export interface AccountUpdateThemeParams {
     /** Theme format, a string that identifies the theming engines supported by the client */
     format: string;
     /** Theme to update */
-    theme: InputThemeIn;
+    theme: TypeInputThemeIn;
     /** Unique theme ID */
     slug?: string;
     /** Theme name */
     title?: string;
     /** Theme file */
-    document?: InputDocumentIn;
+    document?: TypeInputDocumentIn;
     /** Theme settings */
-    settings?: InputThemeSettingsIn[];
+    settings?: TypeInputThemeSettingsIn[];
   }
   export interface AccountSaveThemeParams {
     /** Theme to save */
-    theme: InputThemeIn;
+    theme: TypeInputThemeIn;
     /** Unsave */
     unsave: Bool;
   }
@@ -36480,17 +36775,17 @@ export namespace Api {
     /** Whether to install the dark version */
     dark?: boolean;
     /** Theme to install */
-    theme?: InputThemeIn;
+    theme?: TypeInputThemeIn;
     /** Theme format, a string that identifies the theming engines supported by the client */
     format?: string;
     /** Indicates a basic theme provided by all clients */
-    baseTheme?: BaseThemeIn;
+    baseTheme?: TypeBaseThemeIn;
   }
   export interface AccountGetThemeParams {
     /** Theme format, a string that identifies the theming engines supported by the client */
     format: string;
     /** Theme */
-    theme: InputThemeIn;
+    theme: TypeInputThemeIn;
   }
   export interface AccountGetThemesParams {
     /** Theme format, a string that identifies the theming engines supported by the client */
@@ -36504,19 +36799,19 @@ export namespace Api {
   }
   export interface AccountGetMultiWallPapersParams {
     /** Wallpapers to fetch info about */
-    wallpapers: InputWallPaperIn[];
+    wallpapers: TypeInputWallPaperIn[];
   }
   export interface AccountSetGlobalPrivacySettingsParams {
     /** Global privacy settings */
-    settings: GlobalPrivacySettingsIn;
+    settings: TypeGlobalPrivacySettingsIn;
   }
   export interface AccountReportProfilePhotoParams {
     /** The dialog */
     peer: Api.TypeEntityLike;
     /** Dialog photo ID */
-    photoId: InputPhotoIn;
+    photoId: TypeInputPhotoIn;
     /** Report reason */
-    reason: ReportReasonIn;
+    reason: TypeReportReasonIn;
     /** Comment for report moderation */
     message: string;
   }
@@ -36544,13 +36839,13 @@ export namespace Api {
   }
   export interface AccountSaveRingtoneParams {
     /** Notification sound uploaded using account.uploadRingtone */
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     /** Whether to add or delete the notification sound */
     unsave: Bool;
   }
   export interface AccountUploadRingtoneParams {
     /** Notification sound */
-    file: InputFileIn;
+    file: TypeInputFileIn;
     /** File name */
     fileName: string;
     /** MIME type of file */
@@ -36558,7 +36853,7 @@ export namespace Api {
   }
   export interface AccountUpdateEmojiStatusParams {
     /** Emoji status to set */
-    emojiStatus: EmojiStatusIn;
+    emojiStatus: TypeEmojiStatusIn;
   }
   export interface AccountGetDefaultEmojiStatusesParams {
     /** Hash used for caching, for more info click here . */
@@ -36596,7 +36891,7 @@ export namespace Api {
     /** Whether the new settings should affect a specific peer */
     peer?: Api.TypeEntityLike;
     /** The new autosave settings */
-    settings: AutoSaveSettingsIn;
+    settings: TypeAutoSaveSettingsIn;
   }
   export interface AccountInvalidateSignInCodesParams {
     /** The login codes to invalidate. */
@@ -36606,7 +36901,7 @@ export namespace Api {
     /** Whether to change the accent color emoji pattern of the profile page; otherwise, the accent color and emoji pattern of messages will be changed. */
     forProfile?: boolean;
     /** ID of the accent color palette » to use (not RGB24, see here » for more info). */
-    color?: PeerColorIn;
+    color?: TypePeerColorIn;
   }
   export interface AccountGetDefaultBackgroundEmojisParams {
     /** Hash used for caching, for more info click here . */
@@ -36622,31 +36917,31 @@ export namespace Api {
   }
   export interface AccountUpdateBusinessWorkHoursParams {
     /** Opening hours (optional, if not set removes all opening hours). */
-    businessWorkHours?: BusinessWorkHoursIn;
+    businessWorkHours?: TypeBusinessWorkHoursIn;
   }
   export interface AccountUpdateBusinessLocationParams {
     /** Optional, contains a set of geographical coordinates. */
-    geoPoint?: InputGeoPointIn;
+    geoPoint?: TypeInputGeoPointIn;
     /** Mandatory when setting/updating the location, contains a textual description of the address (max 96 UTF-8 chars). */
     address?: string;
   }
   export interface AccountUpdateBusinessGreetingMessageParams {
     /** Greeting message configuration and contents. */
-    message?: InputBusinessGreetingMessageIn;
+    message?: TypeInputBusinessGreetingMessageIn;
   }
   export interface AccountUpdateBusinessAwayMessageParams {
     /** Away message configuration and contents. */
-    message?: InputBusinessAwayMessageIn;
+    message?: TypeInputBusinessAwayMessageIn;
   }
   export interface AccountUpdateConnectedBotParams {
     /** Whether to fully disconnect the bot from the current account. */
     deleted?: boolean;
     /** Business bot rights. */
-    rights?: BusinessBotRightsIn;
+    rights?: TypeBusinessBotRightsIn;
     /** The bot to connect or disconnect */
     bot: Api.TypeEntityLike;
     /** Configuration for the business connection */
-    recipients: InputBusinessBotRecipientsIn;
+    recipients: TypeInputBusinessBotRecipientsIn;
   }
   export interface AccountGetBotBusinessConnectionParams {
     /** Business connection ID » . */
@@ -36654,7 +36949,7 @@ export namespace Api {
   }
   export interface AccountUpdateBusinessIntroParams {
     /** Telegram Business introduction, to remove it call the method without setting this flag. */
-    intro?: InputBusinessIntroIn;
+    intro?: TypeInputBusinessIntroIn;
   }
   export interface AccountToggleConnectedBotPausedParams {
     /** The chat to pause */
@@ -36668,17 +36963,17 @@ export namespace Api {
   }
   export interface AccountUpdateBirthdayParams {
     /** Birthday. */
-    birthday?: BirthdayIn;
+    birthday?: TypeBirthdayIn;
   }
   export interface AccountCreateBusinessChatLinkParams {
     /** Info about the link to create. */
-    link: InputBusinessChatLinkIn;
+    link: TypeInputBusinessChatLinkIn;
   }
   export interface AccountEditBusinessChatLinkParams {
     /** Slug of the link, obtained as specified here » . */
     slug: string;
     /** New link information. */
-    link: InputBusinessChatLinkIn;
+    link: TypeInputBusinessChatLinkIn;
   }
   export interface AccountDeleteBusinessChatLinkParams {
     /** Slug of the link, obtained as specified here » . */
@@ -36698,7 +36993,7 @@ export namespace Api {
   }
   export interface AccountSetReactionsNotifySettingsParams {
     /** New reaction notification settings. */
-    settings: ReactionsNotifySettingsIn;
+    settings: TypeReactionsNotifySettingsIn;
   }
   export interface AccountGetCollectibleEmojiStatusesParams {
     /** Hash for pagination */
@@ -36722,15 +37017,15 @@ export namespace Api {
   }
   export interface AccountSetMainProfileTabParams {
     /** The tab to set as main tab. */
-    tab: ProfileTabIn;
+    tab: TypeProfileTabIn;
   }
   export interface AccountSaveMusicParams {
     /** If set, removes the song. */
     unsave?: boolean;
     /** The song to add or remove; can be an already added song when reordering songs with after_id . Adding an already added song will never re-add it, only move it to the top of the song list (or after the song passed in after_id ). */
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     /** If set, the song will be added after the passed song (must be already pinned on the profile). */
-    afterId?: InputDocumentIn;
+    afterId?: TypeInputDocumentIn;
   }
   export interface AccountGetSavedMusicIdsParams {
     /** Hash generated » from the previously returned list of IDs. */
@@ -36745,7 +37040,7 @@ export namespace Api {
     hash: long;
   }
   export interface AccountRegisterPasskeyParams {
-    credential: InputPasskeyCredentialIn;
+    credential: TypeInputPasskeyCredentialIn;
   }
   export interface AccountDeletePasskeyParams {
     id: string;
@@ -36777,7 +37072,7 @@ export namespace Api {
     /** The user */
     id: Api.TypeEntityLike;
     /** Errors */
-    errors: SecureValueErrorIn[];
+    errors: TypeSecureValueErrorIn[];
   }
   export interface UsersGetRequirementsToContactParams {
     /** Users to check. */
@@ -36797,11 +37092,11 @@ export namespace Api {
     /** The ID of the user. */
     id: Api.TypeEntityLike;
     /** The songs (here, file_reference can be empty to refresh file references). */
-    documents: InputDocumentIn[];
+    documents: TypeInputDocumentIn[];
   }
   export interface UsersSuggestBirthdayParams {
     id: Api.TypeEntityLike;
-    birthday: BirthdayIn;
+    birthday: TypeBirthdayIn;
   }
   export interface ContactsGetContactIDsParams {
     /** Hash used for caching, for more info click here */
@@ -36813,7 +37108,7 @@ export namespace Api {
   }
   export interface ContactsImportContactsParams {
     /** List of contacts to import */
-    contacts: InputContactIn[];
+    contacts: TypeInputContactIn[];
   }
   export interface ContactsDeleteContactsParams {
     /** User ID list */
@@ -36886,7 +37181,7 @@ export namespace Api {
   }
   export interface ContactsResetTopPeerRatingParams {
     /** Top peer category */
-    category: TopPeerCategoryIn;
+    category: TypeTopPeerCategoryIn;
     /** Peer whose rating should be reset */
     peer: Api.TypeEntityLike;
   }
@@ -36905,7 +37200,7 @@ export namespace Api {
     lastName: string;
     /** User's phone number, may be omitted to simply add the user to the contact list, without a phone number. */
     phone: string;
-    note?: TextWithEntitiesIn;
+    note?: TypeTextWithEntitiesIn;
   }
   export interface ContactsAcceptContactParams {
     /** The user to add as contact */
@@ -36915,7 +37210,7 @@ export namespace Api {
     /** While the geolocation of the current user is public, clients should update it in the background every half-an-hour or so, while setting this flag. Do this only if the new location is more than 1 KM away from the previous one, or if the previous location is unknown. */
     background?: boolean;
     /** Geolocation */
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     /** If set, the geolocation of the current user will be public for the specified number of seconds; pass 0x7fffffff to disable expiry, 0 to make the current geolocation private; if the flag isn't set, no changes will be applied. */
     selfExpires?: int;
   }
@@ -36955,11 +37250,11 @@ export namespace Api {
   }
   export interface ContactsUpdateContactNoteParams {
     id: Api.TypeEntityLike;
-    note: TextWithEntitiesIn;
+    note: TypeTextWithEntitiesIn;
   }
   export interface MessagesGetMessagesParams {
     /** Message ID list */
-    id: InputMessageIn[];
+    id: TypeInputMessageIn[];
   }
   export interface MessagesGetDialogsParams {
     /** Exclude pinned dialogs */
@@ -37005,11 +37300,11 @@ export namespace Api {
     /** Search within the saved message dialog » with this ID. */
     savedPeerId?: Api.TypeEntityLike;
     /** You may search for saved messages tagged » with one or more reactions using this flag. */
-    savedReaction?: ReactionIn[];
+    savedReaction?: TypeReactionIn[];
     /** Thread ID */
     topMsgId?: MessageIDLike;
     /** Filter to return only specified message types */
-    filter: MessagesFilterIn;
+    filter: TypeMessagesFilterIn;
     /** If a positive value was transferred, only messages with a sending date bigger than the transferred one will be returned */
     minDate: int;
     /** If a positive value was transferred, only messages with a sending date smaller than the transferred one will be returned */
@@ -37063,7 +37358,7 @@ export namespace Api {
     /** Topic ID */
     topMsgId?: MessageIDLike;
     /** Type of action */
-    action: SendMessageActionIn;
+    action: TypeSendMessageActionIn;
   }
   export interface MessagesSendMessageParams {
     /** Set this flag to disable generation of the webpage preview */
@@ -37085,29 +37380,29 @@ export namespace Api {
     /** The destination where the message will be sent */
     peer: Api.TypeEntityLike;
     /** If set, indicates that the message should be sent in reply to the specified message or story. Also used to quote other messages. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** The message */
     message: string;
     /** Unique client message ID required to prevent message resending */
     randomId?: long;
     /** Reply markup for sending bot buttons */
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
     /** Message entities for sending styled text */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** Scheduled message date for scheduled messages */
     scheduleDate?: int;
     scheduleRepeatPeriod?: int;
     /** Send this message as the specified peer */
     sendAs?: Api.TypeEntityLike;
     /** Add the message to the specified quick reply shortcut » , instead. */
-    quickReplyShortcut?: InputQuickReplyShortcutIn;
+    quickReplyShortcut?: TypeInputQuickReplyShortcutIn;
     /** Specifies a message effect » to use for the message. */
     effect?: long;
     /** For paid messages » , specifies the amount of Telegram Stars the user has agreed to pay in order to send the message. */
     allowPaidStars?: long;
     /** Used to suggest a post to a channel, see here » for more info on the full flow. */
-    suggestedPost?: SuggestedPostIn;
-    richMessage?: InputRichMessageIn;
+    suggestedPost?: TypeSuggestedPostIn;
+    richMessage?: TypeInputRichMessageIn;
   }
   export interface MessagesSendMediaParams {
     /** Send message silently (no notification should be triggered) */
@@ -37127,30 +37422,30 @@ export namespace Api {
     /** Destination */
     peer: Api.TypeEntityLike;
     /** If set, indicates that the message should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Attached media */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
     /** Caption */
     message: string;
     /** Random ID to avoid resending the same message */
     randomId?: long;
     /** Reply markup for bot keyboards */
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
     /** Message entities for styled text */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** Scheduled message date for scheduled messages */
     scheduleDate?: int;
     scheduleRepeatPeriod?: int;
     /** Send this message as the specified peer */
     sendAs?: Api.TypeEntityLike;
     /** Add the message to the specified quick reply shortcut » , instead. */
-    quickReplyShortcut?: InputQuickReplyShortcutIn;
+    quickReplyShortcut?: TypeInputQuickReplyShortcutIn;
     /** Specifies a message effect » to use for the message. */
     effect?: long;
     /** For paid messages » , specifies the amount of Telegram Stars the user has agreed to pay in order to send the message. */
     allowPaidStars?: long;
     /** Used to suggest a post to a channel, see here » for more info on the full flow. */
-    suggestedPost?: SuggestedPostIn;
+    suggestedPost?: TypeSuggestedPostIn;
   }
   export interface MessagesForwardMessagesParams {
     /** Whether to send messages silently (no notification will be triggered on the destination clients) */
@@ -37167,6 +37462,7 @@ export namespace Api {
     noforwards?: boolean;
     /** Bots only: if set, allows sending up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance. */
     allowPaidFloodskip?: boolean;
+    fromEphemeral?: boolean;
     /** Source of messages */
     fromPeer: Api.TypeEntityLike;
     /** IDs of messages */
@@ -37178,21 +37474,21 @@ export namespace Api {
     /** Destination forum topic */
     topMsgId?: MessageIDLike;
     /** Can only contain an inputReplyToMonoForum , to forward messages to a monoforum topic (mutually exclusive with top_msg_id ). */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Scheduled message date for scheduled messages */
     scheduleDate?: int;
     scheduleRepeatPeriod?: int;
     /** Forward the messages as the specified peer */
     sendAs?: Api.TypeEntityLike;
     /** Add the messages to the specified quick reply shortcut » , instead. */
-    quickReplyShortcut?: InputQuickReplyShortcutIn;
+    quickReplyShortcut?: TypeInputQuickReplyShortcutIn;
     effect?: long;
     /** Start playing the video at the specified timestamp (seconds). */
     videoTimestamp?: int;
     /** For paid messages » , specifies the amount of Telegram Stars the user has agreed to pay in order to send the message. */
     allowPaidStars?: long;
     /** Used to suggest a post to a channel, see here » for more info on the full flow. */
-    suggestedPost?: SuggestedPostIn;
+    suggestedPost?: TypeSuggestedPostIn;
   }
   export interface MessagesReportSpamParams {
     /** Peer to report */
@@ -37230,7 +37526,7 @@ export namespace Api {
     /** Chat ID */
     chatId: long;
     /** Photo to be set */
-    photo: InputChatPhotoIn;
+    photo: TypeInputChatPhotoIn;
   }
   export interface MessagesAddChatUserParams {
     /** Chat ID */
@@ -37272,7 +37568,7 @@ export namespace Api {
   }
   export interface MessagesAcceptEncryptionParams {
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** B = g ^ b mod p , see Wikipedia */
     gB: bytes;
     /** 64-bit fingerprint of the received key */
@@ -37286,13 +37582,13 @@ export namespace Api {
   }
   export interface MessagesSetEncryptedTypingParams {
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** Typing. Possible values : (boolTrue) , if the user started typing and more than 5 seconds have passed since the last request (boolFalse) , if the user stopped typing */
     typing: Bool;
   }
   export interface MessagesReadEncryptedHistoryParams {
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** Maximum date value for received messages in history */
     maxDate: int;
   }
@@ -37300,7 +37596,7 @@ export namespace Api {
     /** Send encrypted message without a notification */
     silent?: boolean;
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** Unique client message ID, necessary to avoid message resending */
     randomId?: long;
     /** TL-serialization of DecryptedMessage type, encrypted with a key that was created during chat initialization */
@@ -37310,17 +37606,17 @@ export namespace Api {
     /** Whether to send the file without triggering a notification */
     silent?: boolean;
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** Unique client message ID necessary to prevent message resending */
     randomId?: long;
     /** TL-serialization of DecryptedMessage type, encrypted with a key generated during chat initialization */
     data: bytes;
     /** File attachment for the secret chat */
-    file: InputEncryptedFileIn;
+    file: TypeInputEncryptedFileIn;
   }
   export interface MessagesSendEncryptedServiceParams {
     /** Secret chat ID */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** Unique client message ID required to prevent message resending */
     randomId?: long;
     /** TL-serialization of DecryptedMessage type, encrypted with a key generated during chat initialization */
@@ -37332,7 +37628,7 @@ export namespace Api {
   }
   export interface MessagesReportEncryptedSpamParams {
     /** The secret chat to report */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
   }
   export interface MessagesReadMessageContentsParams {
     /** Message ID list */
@@ -37352,7 +37648,7 @@ export namespace Api {
     /** Message from which to extract the preview */
     message: string;
     /** Message entities for styled text */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
   }
   export interface MessagesExportChatInviteParams {
     /** Legacy flag, reproducing legacy behavior of this method: if set, revokes all previous links before creating a new one. Kept for bot API BC, should not be used by modern clients. */
@@ -37368,7 +37664,7 @@ export namespace Api {
     /** Description of the invite link, visible only to administrators */
     title?: string;
     /** For Telegram Star subscriptions » , contains the pricing of the subscription the user must activate to join the private channel. */
-    subscriptionPricing?: StarsSubscriptionPricingIn;
+    subscriptionPricing?: TypeStarsSubscriptionPricingIn;
   }
   export interface MessagesCheckChatInviteParams {
     /** Invite hash from chat invite deep link » . */
@@ -37380,19 +37676,19 @@ export namespace Api {
   }
   export interface MessagesGetStickerSetParams {
     /** Stickerset */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     /** Hash used for caching, for more info click here */
     hash: int;
   }
   export interface MessagesInstallStickerSetParams {
     /** Stickerset to install */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     /** Whether to archive stickerset */
     archived: Bool;
   }
   export interface MessagesUninstallStickerSetParams {
     /** The stickerset to uninstall */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
   }
   export interface MessagesStartBotParams {
     /** The bot */
@@ -37437,7 +37733,7 @@ export namespace Api {
     /** Query */
     q: string;
     /** Global search filter */
-    filter: MessagesFilterIn;
+    filter: TypeMessagesFilterIn;
     /** If a positive value was specified, the method will return only messages with date bigger than min_date */
     minDate: int;
     /** If a positive value was transferred, the method will return only messages with date smaller than max_date */
@@ -37473,7 +37769,7 @@ export namespace Api {
   }
   export interface MessagesSaveGifParams {
     /** GIF to save */
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     /** Whether to remove GIF from saved gifs list */
     unsave: Bool;
   }
@@ -37483,7 +37779,7 @@ export namespace Api {
     /** The currently opened chat */
     peer: Api.TypeEntityLike;
     /** The geolocation, if requested */
-    geoPoint?: InputGeoPointIn;
+    geoPoint?: TypeInputGeoPointIn;
     /** The query */
     query: string;
     /** The offset within the results, will be passed directly as-is to the bot. */
@@ -37497,15 +37793,15 @@ export namespace Api {
     /** Unique identifier for the answered query */
     queryId: long;
     /** Vector of results for the inline query */
-    results: InputBotInlineResultIn[];
+    results: TypeInputBotInlineResultIn[];
     /** The maximum amount of time in seconds that the result of the inline query may be cached on the server. Defaults to 300. */
     cacheTime: int;
     /** Pass the offset that a client should send in the next query with the same text to receive more results. Pass an empty string if there are no more results or if you don't support pagination. Offset length can't exceed 64 bytes. */
     nextOffset?: string;
     /** If passed, clients will display a button on top of the remaining inline result list with the specified text, that switches the user to a private chat with the bot and sends the bot a start message with a certain parameter. */
-    switchPm?: InlineBotSwitchPMIn;
+    switchPm?: TypeInlineBotSwitchPMIn;
     /** If passed, clients will display a button on top of the remaining inline result list with the specified text, that switches the user to the specified inline mode mini app . */
-    switchWebview?: InlineBotWebViewIn;
+    switchWebview?: TypeInlineBotWebViewIn;
   }
   export interface MessagesSendInlineBotResultParams {
     /** Whether to send the message silently (no notification will be triggered on the other client) */
@@ -37519,7 +37815,7 @@ export namespace Api {
     /** Destination */
     peer: Api.TypeEntityLike;
     /** If set, indicates that the message should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Random ID to avoid resending the same query */
     randomId?: long;
     /** Query ID from messages.getInlineBotResults */
@@ -37531,7 +37827,7 @@ export namespace Api {
     /** Send this message as the specified peer */
     sendAs?: Api.TypeEntityLike;
     /** Add the message to the specified quick reply shortcut » , instead. */
-    quickReplyShortcut?: InputQuickReplyShortcutIn;
+    quickReplyShortcut?: TypeInputQuickReplyShortcutIn;
     /** For paid messages » , specifies the amount of Telegram Stars the user has agreed to pay in order to send the message. */
     allowPaidStars?: long;
   }
@@ -37553,17 +37849,17 @@ export namespace Api {
     /** New message */
     message?: string;
     /** New attached media */
-    media?: InputMediaIn;
+    media?: TypeInputMediaIn;
     /** Reply markup for inline keyboards */
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
     /** Message entities for styled text */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** Scheduled message date for scheduled messages */
     scheduleDate?: int;
     scheduleRepeatPeriod?: int;
     /** If specified, edits a quick reply shortcut message, instead » . */
     quickReplyShortcutId?: int;
-    richMessage?: InputRichMessageIn;
+    richMessage?: TypeInputRichMessageIn;
   }
   export interface MessagesEditInlineBotMessageParams {
     /** Disable webpage preview */
@@ -37571,16 +37867,16 @@ export namespace Api {
     /** If set, any eventual webpage preview will be shown on top of the message instead of at the bottom. */
     invertMedia?: boolean;
     /** Sent inline message ID */
-    id: InputBotInlineMessageIDIn;
+    id: TypeInputBotInlineMessageIDIn;
     /** Message */
     message?: string;
     /** Media */
-    media?: InputMediaIn;
+    media?: TypeInputMediaIn;
     /** Reply markup for inline keyboards */
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
     /** Message entities for styled text */
-    entities?: MessageEntityIn[];
-    richMessage?: InputRichMessageIn;
+    entities?: TypeMessageEntityIn[];
+    richMessage?: TypeInputRichMessageIn;
   }
   export interface MessagesGetBotCallbackAnswerParams {
     /** Whether this is a "play game" button */
@@ -37592,7 +37888,7 @@ export namespace Api {
     /** Callback data */
     data?: bytes;
     /** For buttons requiring you to verify your identity with your 2FA password , the SRP payload generated using SRP . */
-    password?: InputCheckPasswordSRPIn;
+    password?: TypeInputCheckPasswordSRPIn;
   }
   export interface MessagesSetBotCallbackAnswerParams {
     /** Whether to show the message as a popup instead of a toast notification */
@@ -37616,20 +37912,20 @@ export namespace Api {
     /** If set, any eventual webpage preview will be shown on top of the message instead of at the bottom. */
     invertMedia?: boolean;
     /** If set, indicates that the message should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Destination of the message that should be sent */
     peer: Api.TypeEntityLike;
     /** The draft */
     message: string;
     /** Message entities for styled text */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** Attached media */
-    media?: InputMediaIn;
+    media?: TypeInputMediaIn;
     /** Specifies a message effect » to use for the message. */
     effect?: long;
     /** Used to suggest a post to a channel, see here » for more info on the full flow. */
-    suggestedPost?: SuggestedPostIn;
-    richMessage?: InputRichMessageIn;
+    suggestedPost?: TypeSuggestedPostIn;
+    richMessage?: TypeInputRichMessageIn;
   }
   export interface MessagesGetFeaturedStickersParams {
     /** Hash used for caching, for more info click here . */
@@ -37649,7 +37945,7 @@ export namespace Api {
     /** Whether to add/remove stickers recently attached to photo or video files */
     attached?: boolean;
     /** Sticker */
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     /** Whether to save or unsave the sticker */
     unsave: Bool;
   }
@@ -37673,7 +37969,7 @@ export namespace Api {
   }
   export interface MessagesGetAttachedStickersParams {
     /** Stickered media */
-    media: InputStickeredMediaIn;
+    media: TypeInputStickeredMediaIn;
   }
   export interface MessagesSetGameScoreParams {
     /** Set this flag if the game message should be automatically edited to include the current scoreboard */
@@ -37695,7 +37991,7 @@ export namespace Api {
     /** Set this flag if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters */
     force?: boolean;
     /** ID of the inline message */
-    id: InputBotInlineMessageIDIn;
+    id: TypeInputBotInlineMessageIDIn;
     /** User identifier */
     userId: Api.TypeEntityLike;
     /** New score */
@@ -37711,7 +38007,7 @@ export namespace Api {
   }
   export interface MessagesGetInlineGameHighScoresParams {
     /** ID of inline message */
-    id: InputBotInlineMessageIDIn;
+    id: TypeInputBotInlineMessageIDIn;
     /** Get high scores of a certain user */
     userId: Api.TypeEntityLike;
   }
@@ -37753,7 +38049,7 @@ export namespace Api {
     /** Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable"). Telegram will display this message to the user. */
     error?: string;
     /** A vector of available shipping options. */
-    shippingOptions?: ShippingOptionIn[];
+    shippingOptions?: TypeShippingOptionIn[];
   }
   export interface MessagesSetBotPrecheckoutResultsParams {
     /** Set this flag if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order, otherwise do not set it, and set the error field, instead */
@@ -37769,13 +38065,13 @@ export namespace Api {
     /** The chat, can be inputPeerEmpty for bots and inputPeerSelf for users. */
     peer: Api.TypeEntityLike;
     /** File uploaded in chunks as described in files » */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
   }
   export interface MessagesSendScreenshotNotificationParams {
     /** Other user */
     peer: Api.TypeEntityLike;
     /** Indicates the message that was screenshotted (the specified message ID can also be 0 to avoid indicating any specific message). */
-    replyTo: InputReplyToIn;
+    replyTo: TypeInputReplyToIn;
     /** Random ID to avoid message resending */
     randomId?: long;
   }
@@ -37785,7 +38081,7 @@ export namespace Api {
   }
   export interface MessagesFaveStickerParams {
     /** Sticker in question */
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     /** Whether to add or remove a sticker from favorites */
     unfave: Bool;
   }
@@ -37837,15 +38133,15 @@ export namespace Api {
     /** The destination chat */
     peer: Api.TypeEntityLike;
     /** If set, indicates that the message should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** The medias to send: note that they must be separately uploaded using messages.uploadMedia first, using raw inputMediaUploaded* constructors is not supported. */
-    multiMedia: InputSingleMediaIn[];
+    multiMedia: TypeInputSingleMediaIn[];
     /** Scheduled message date for scheduled messages */
     scheduleDate?: int;
     /** Send this message as the specified peer */
     sendAs?: Api.TypeEntityLike;
     /** Add the message to the specified quick reply shortcut » , instead. */
-    quickReplyShortcut?: InputQuickReplyShortcutIn;
+    quickReplyShortcut?: TypeInputQuickReplyShortcutIn;
     /** Specifies a message effect » to use for the message. */
     effect?: long;
     /** For paid messages » , specifies the amount of Telegram Stars the user has agreed to pay in order to send the message. */
@@ -37853,9 +38149,9 @@ export namespace Api {
   }
   export interface MessagesUploadEncryptedFileParams {
     /** The secret chat to associate the file to */
-    peer: InputEncryptedChatIn;
+    peer: TypeInputEncryptedChatIn;
     /** The file */
-    file: InputEncryptedFileIn;
+    file: TypeInputEncryptedFileIn;
   }
   export interface MessagesSearchStickerSetsParams {
     /** Exclude featured stickersets from results */
@@ -37918,7 +38214,7 @@ export namespace Api {
     /** The peer */
     peer: Api.TypeEntityLike;
     /** The new global rights */
-    bannedRights: ChatBannedRightsIn;
+    bannedRights: TypeChatBannedRightsIn;
   }
   export interface MessagesGetEmojiKeywordsParams {
     /** Language code */
@@ -37946,7 +38242,7 @@ export namespace Api {
     /** If set, consider only messages within the specified forum topic */
     topMsgId?: MessageIDLike;
     /** Search filters */
-    filters: MessagesFilterIn[];
+    filters: TypeMessagesFilterIn[];
   }
   export interface MessagesRequestUrlAuthParams {
     /** Peer where the message is located */
@@ -38021,13 +38317,13 @@ export namespace Api {
     /** Unarchive the specified stickersets */
     unarchive?: boolean;
     /** Stickersets to act upon */
-    stickersets: InputStickerSetIn[];
+    stickersets: TypeInputStickerSetIn[];
   }
   export interface MessagesUpdateDialogFilterParams {
     /** Folder ID */
     id: int;
     /** Folder info */
-    filter?: DialogFilterIn;
+    filter?: TypeDialogFilterIn;
   }
   export interface MessagesUpdateDialogFiltersOrderParams {
     /** New folder order */
@@ -38099,7 +38395,7 @@ export namespace Api {
     /** The Telegram chat where the history should be imported . */
     peer: Api.TypeEntityLike;
     /** File with messages to import. */
-    file: InputFileIn;
+    file: TypeInputFileIn;
     /** Number of media files associated with the chat that will be uploaded using messages.uploadImportedMedia . */
     mediaCount: int;
   }
@@ -38111,7 +38407,7 @@ export namespace Api {
     /** File name */
     fileName: string;
     /** Media metadata */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
   }
   export interface MessagesStartHistoryImportParams {
     /** The Telegram chat where the messages should be imported, click here for more info » */
@@ -38203,7 +38499,7 @@ export namespace Api {
     /** Private chat where to change theme */
     peer: Api.TypeEntityLike;
     /** The theme to set. */
-    theme: InputChatThemeIn;
+    theme: TypeInputChatThemeIn;
   }
   export interface MessagesGetMessageReadParticipantsParams {
     /** Dialog */
@@ -38217,7 +38513,7 @@ export namespace Api {
     /** Search within the saved message dialog » with this ID. */
     savedPeerId?: Api.TypeEntityLike;
     /** Message filter, inputMessagesFilterEmpty , inputMessagesFilterMyMentions filters are not supported by this method. */
-    filter: MessagesFilterIn;
+    filter: TypeMessagesFilterIn;
     /** Offsets for pagination, for more info click here */
     offsetId: int;
     /** Offsets for pagination, for more info click here */
@@ -38229,7 +38525,7 @@ export namespace Api {
     /** Search within the saved message dialog » with this ID. */
     savedPeerId?: Api.TypeEntityLike;
     /** Message filter, inputMessagesFilterEmpty , inputMessagesFilterMyMentions filters are not supported by this method. */
-    filter: MessagesFilterIn;
+    filter: TypeMessagesFilterIn;
     /** Offsets for pagination, for more info click here */
     offsetId: int;
     /** Maximum number of results to return, see pagination */
@@ -38274,7 +38570,7 @@ export namespace Api {
     /** Message ID to react to */
     msgId: MessageIDLike;
     /** A list of reactions (doesn't accept reactionPaid constructors, use messages.sendPaidReaction to send paid reactions, instead). */
-    reaction?: ReactionIn[];
+    reaction?: TypeReactionIn[];
   }
   export interface MessagesGetMessagesReactionsParams {
     /** Peer */
@@ -38288,7 +38584,7 @@ export namespace Api {
     /** Message ID */
     id: int;
     /** Get only reactions of this type */
-    reaction?: ReactionIn;
+    reaction?: TypeReactionIn;
     /** Offset for pagination (taken from the next_offset field of the returned messages.MessageReactionsList ); empty in the first request. */
     offset?: string;
     /** Maximum number of results to return, see pagination */
@@ -38298,7 +38594,7 @@ export namespace Api {
     /** Group where to apply changes */
     peer: Api.TypeEntityLike;
     /** Allowed reaction emojis */
-    availableReactions: ChatReactionsIn;
+    availableReactions: TypeChatReactionsIn;
     /** This flag may be used to impose a custom limit of unique reactions (i.e. a customizable version of appConfig.reactions_uniq_max ); this field and the other info set by the method will then be available to users in channelFull and chatFull . If this flag is not set, the previously configured reactions_limit will not be altered. */
     reactionsLimit?: int;
     /** If this flag is set and a Bool is passed, the method will enable or disable paid message reactions » . If this flag is not set, the previously stored setting will not be changed. */
@@ -38310,7 +38606,7 @@ export namespace Api {
   }
   export interface MessagesSetDefaultReactionParams {
     /** New emoji reaction */
-    reaction: ReactionIn;
+    reaction: TypeReactionIn;
   }
   export interface MessagesTranslateTextParams {
     /** If the text is a chat message, the peer ID */
@@ -38318,7 +38614,7 @@ export namespace Api {
     /** A list of message IDs to translate */
     id?: int[];
     /** A list of styled messages to translate */
-    text?: TextWithEntitiesIn[];
+    text?: TypeTextWithEntitiesIn[];
     /** Two-letter ISO 639-1 language code of the language to which the message is translated */
     toLang: string;
     tone?: string;
@@ -38353,7 +38649,7 @@ export namespace Api {
     /** Optional search query */
     q: string;
     /** Message filter */
-    filter: MessagesFilterIn;
+    filter: TypeMessagesFilterIn;
     /** Maximum number of results to return (max 100). */
     limit: int;
   }
@@ -38391,11 +38687,11 @@ export namespace Api {
     /** If the web app was opened from the attachment menu using a attachment menu deep link , start_param should contain the data from the startattach parameter. */
     startParam?: string;
     /** Theme parameters » */
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
     /** Short name of the application; 0-64 English letters, digits, and underscores */
     platform: string;
     /** If set, indicates that the inline message that will be sent by the bot on behalf of the user once the web app interaction is terminated should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Open the web app as the specified peer, sending the resulting the message as the specified peer. */
     sendAs?: Api.TypeEntityLike;
   }
@@ -38409,7 +38705,7 @@ export namespace Api {
     /** Web app interaction ID obtained from messages.requestWebView */
     queryId: long;
     /** If set, indicates that the inline message that will be sent by the bot on behalf of the user once the web app interaction is terminated should be sent in reply to the specified message or story. */
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
     /** Open the web app as the specified peer */
     sendAs?: Api.TypeEntityLike;
   }
@@ -38429,7 +38725,7 @@ export namespace Api {
     /** Deprecated. */
     startParam?: string;
     /** Theme parameters » */
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
     /** Short name of the application; 0-64 English letters, digits, and underscores */
     platform: string;
   }
@@ -38437,7 +38733,7 @@ export namespace Api {
     /** Webview interaction ID obtained from messages.requestWebView */
     botQueryId: string;
     /** Message to send */
-    result: InputBotInlineResultIn;
+    result: TypeInputBotInlineResultIn;
   }
   export interface MessagesSendWebViewDataParams {
     /** Bot that owns the web app */
@@ -38544,7 +38840,7 @@ export namespace Api {
   }
   export interface MessagesGetBotAppParams {
     /** Bot app information obtained from a Direct Mini App deep link » . */
-    app: InputBotAppIn;
+    app: TypeInputBotAppIn;
     /** Hash used for caching, for more info click here */
     hash: long;
   }
@@ -38558,11 +38854,11 @@ export namespace Api {
     /** If the client has clicked on the link in a Telegram chat, pass the chat's peer information; otherwise pass the bot's peer information, instead. */
     peer: Api.TypeEntityLike;
     /** The app obtained by invoking messages.getBotApp as specified in the direct Mini App deep link docs. */
-    app: InputBotAppIn;
+    app: TypeInputBotAppIn;
     /** If the startapp query string parameter is present in the direct Mini App deep link , pass it to start_param . */
     startParam?: string;
     /** Theme parameters » */
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
     /** Short name of the application; 0-64 English letters, digits, and underscores */
     platform: string;
   }
@@ -38574,9 +38870,9 @@ export namespace Api {
     /** The private chat where the wallpaper will be set */
     peer: Api.TypeEntityLike;
     /** The wallpaper » , obtained as described in the wallpaper documentation » ; must not be provided when installing a wallpaper obtained from a messageActionSetChatWallPaper service message ( id must be provided, instead). */
-    wallpaper?: InputWallPaperIn;
+    wallpaper?: TypeInputWallPaperIn;
     /** Wallpaper settings, obtained as described in the wallpaper documentation » or from messageActionSetChatWallPaper . wallpaper . settings . */
-    settings?: WallPaperSettingsIn;
+    settings?: TypeWallPaperSettingsIn;
     /** If the wallpaper was obtained from a messageActionSetChatWallPaper service message, must contain the ID of that message. */
     id?: int;
   }
@@ -38656,7 +38952,7 @@ export namespace Api {
   }
   export interface MessagesUpdateSavedReactionTagParams {
     /** Reaction associated to the tag */
-    reaction: ReactionIn;
+    reaction: TypeReactionIn;
     /** Tag description, max 12 UTF-8 characters; to remove the description call the method without setting this flag. */
     title?: string;
   }
@@ -38740,7 +39036,7 @@ export namespace Api {
     /** Message ID */
     msgId: MessageIDLike;
     /** Fact-check (maximum UTF-8 length specified in appConfig.factcheck_length_limit ). */
-    text: TextWithEntitiesIn;
+    text: TypeTextWithEntitiesIn;
   }
   export interface MessagesDeleteFactCheckParams {
     /** Peer where the message was sent. */
@@ -38766,7 +39062,7 @@ export namespace Api {
     /** Start parameter, if opening from a Main Mini App link » . */
     startParam?: string;
     /** Theme parameters » */
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
     /** Short name of the application; 0-64 English letters, digits, and underscores */
     platform: string;
   }
@@ -38780,7 +39076,7 @@ export namespace Api {
     /** Unique client message ID required to prevent message resending. Note : this argument must be composed of a 64-bit integer where the lower 32 bits are random, and the higher 32 bits are equal to the current unixtime , i.e. uint64_t random_id = (time() << 32) | ((uint64_t)random_uint32_t()) : this differs from the random_id format of all other methods in the API, which just take 64 random bits. */
     randomId?: long;
     /** Each post with star reactions has a leaderboard with the top senders, but users can opt out of appearing there if they prefer more privacy. Not populating this field will use the default reaction privacy, stored on the server and synced to clients using updatePaidReactionPrivacy (see here for more info). */
-    private?: PaidReactionPrivacyIn;
+    private?: TypePaidReactionPrivacyIn;
   }
   export interface MessagesTogglePaidReactionPrivacyParams {
     /** The channel */
@@ -38788,7 +39084,7 @@ export namespace Api {
     /** The ID of the message to which we sent the paid reactions */
     msgId: MessageIDLike;
     /** If true, makes the current anonymous in the top sender leaderboard for this message; otherwise, does the opposite. */
-    private: PaidReactionPrivacyIn;
+    private: TypePaidReactionPrivacyIn;
   }
   export interface MessagesViewSponsoredMessageParams {
     /** The ad's unique ID. */
@@ -38816,11 +39112,11 @@ export namespace Api {
   }
   export interface MessagesSavePreparedInlineMessageParams {
     /** The message */
-    result: InputBotInlineResultIn;
+    result: TypeInputBotInlineResultIn;
     /** The user to whom the web_app_send_prepared_message event event will be sent */
     userId: Api.TypeEntityLike;
     /** Types of chats where this message can be sent */
-    peerTypes?: InlineQueryPeerTypeIn[];
+    peerTypes?: TypeInlineQueryPeerTypeIn[];
   }
   export interface MessagesGetPreparedInlineMessageParams {
     /** The bot that owns the mini app that emitted the web_app_send_prepared_message event */
@@ -38882,7 +39178,7 @@ export namespace Api {
     /** ID of the message with the todo list. */
     msgId: MessageIDLike;
     /** Items to append. */
-    list: TodoItemIn[];
+    list: TypeTodoItemIn[];
   }
   export interface MessagesToggleSuggestedPostApprovalParams {
     /** Reject the suggested post. */
@@ -38948,7 +39244,7 @@ export namespace Api {
   export interface MessagesEditChatCreatorParams {
     peer: Api.TypeEntityLike;
     userId: Api.TypeEntityLike;
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
   }
   export interface MessagesGetFutureChatCreatorAfterLeaveParams {
     peer: Api.TypeEntityLike;
@@ -38968,22 +39264,22 @@ export namespace Api {
   export interface MessagesComposeMessageWithAIParams {
     proofread?: boolean;
     emojify?: boolean;
-    text: TextWithEntitiesIn;
+    text: TypeTextWithEntitiesIn;
     translateToLang?: string;
-    tone?: InputAiComposeToneIn;
+    tone?: TypeInputAiComposeToneIn;
   }
   export interface MessagesReportReadMetricsParams {
     peer: Api.TypeEntityLike;
-    metrics: InputMessageReadMetricIn[];
+    metrics: TypeInputMessageReadMetricIn[];
   }
   export interface MessagesReportMusicListenParams {
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
     listenedDuration: int;
   }
   export interface MessagesAddPollAnswerParams {
     peer: Api.TypeEntityLike;
     msgId: MessageIDLike;
-    answer: PollAnswerIn;
+    answer: TypePollAnswerIn;
   }
   export interface MessagesDeletePollAnswerParams {
     peer: Api.TypeEntityLike;
@@ -39005,7 +39301,7 @@ export namespace Api {
   }
   export interface MessagesSetBotGuestChatResultParams {
     queryId: long;
-    result: InputBotInlineResultIn;
+    result: TypeInputBotInlineResultIn;
   }
   export interface MessagesDeleteParticipantReactionsParams {
     peer: Api.TypeEntityLike;
@@ -39030,20 +39326,20 @@ export namespace Api {
   export interface MessagesTranslateRichMessageParams {
     peer?: Api.TypeEntityLike;
     id?: int[];
-    text?: InputRichMessageIn[];
+    text?: TypeInputRichMessageIn[];
     toLang: string;
     tone?: string;
   }
   export interface MessagesComposeRichMessageWithAIParams {
     proofread?: boolean;
     emojify?: boolean;
-    text?: InputRichMessageIn;
+    text?: TypeInputRichMessageIn;
     translateToLang?: string;
-    tone?: InputAiComposeToneIn;
+    tone?: TypeInputAiComposeToneIn;
   }
   export interface MessagesRequestChatJoinWebViewParams {
     queryId: long;
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
     platform: string;
   }
   export interface UpdatesGetDifferenceParams {
@@ -39066,7 +39362,7 @@ export namespace Api {
     /** The channel */
     channel: Api.TypeEntityLike;
     /** Messsage filter */
-    filter: ChannelMessagesFilterIn;
+    filter: TypeChannelMessagesFilterIn;
     /** Persistent timestamp (see updates ) */
     pts: int;
     /** How many updates to fetch, max 100000 Ordinary (non-bot) users are supposed to pass 10-100 */
@@ -39078,7 +39374,7 @@ export namespace Api {
     /** Can contain info of a bot we own, to change the profile photo of that bot, instead of the current user. */
     bot?: Api.TypeEntityLike;
     /** Input photo */
-    id: InputPhotoIn;
+    id: TypeInputPhotoIn;
   }
   export interface PhotosUploadProfilePhotoParams {
     /** If set, the chosen profile photo will be shown to users that can't display your main profile photo due to your privacy settings. */
@@ -39086,17 +39382,17 @@ export namespace Api {
     /** Can contain info of a bot we own, to change the profile photo of that bot, instead of the current user. */
     bot?: Api.TypeEntityLike;
     /** Profile photo */
-    file?: InputFileIn;
+    file?: TypeInputFileIn;
     /** Animated profile picture video */
-    video?: InputFileIn;
+    video?: TypeInputFileIn;
     /** Floating point UNIX timestamp in seconds, indicating the frame of the video/sticker that should be used as static preview; can only be used if video or video_emoji_markup is set. */
     videoStartTs?: double;
     /** Animated sticker profile picture, must contain either a videoSizeEmojiMarkup or a videoSizeStickerMarkup constructor. */
-    videoEmojiMarkup?: VideoSizeIn;
+    videoEmojiMarkup?: TypeVideoSizeIn;
   }
   export interface PhotosDeletePhotosParams {
     /** Input photos to delete */
-    id: InputPhotoIn[];
+    id: TypeInputPhotoIn[];
   }
   export interface PhotosGetUserPhotosParams {
     /** User ID */
@@ -39116,13 +39412,13 @@ export namespace Api {
     /** The contact */
     userId: Api.TypeEntityLike;
     /** Profile photo */
-    file?: InputFileIn;
+    file?: TypeInputFileIn;
     /** Animated profile picture video */
-    video?: InputFileIn;
+    video?: TypeInputFileIn;
     /** Floating point UNIX timestamp in seconds, indicating the frame of the video/sticker that should be used as static preview; can only be used if video or video_emoji_markup is set. */
     videoStartTs?: double;
     /** Animated sticker profile picture, must contain either a videoSizeEmojiMarkup or a videoSizeStickerMarkup constructor. */
-    videoEmojiMarkup?: VideoSizeIn;
+    videoEmojiMarkup?: TypeVideoSizeIn;
   }
   export interface UploadSaveFilePartParams {
     /** Random file identifier created by the client */
@@ -39138,7 +39434,7 @@ export namespace Api {
     /** Whether the current client supports CDN downloads */
     cdnSupported?: boolean;
     /** File location */
-    location: InputFileLocationIn;
+    location: TypeInputFileLocationIn;
     /** Number of bytes to be skipped */
     offset: long;
     /** Number of bytes to be returned */
@@ -39156,7 +39452,7 @@ export namespace Api {
   }
   export interface UploadGetWebFileParams {
     /** The file to download */
-    location: InputWebFileLocationIn;
+    location: TypeInputWebFileLocationIn;
     /** Number of bytes to be skipped */
     offset: int;
     /** Number of bytes to be returned */
@@ -39184,7 +39480,7 @@ export namespace Api {
   }
   export interface UploadGetFileHashesParams {
     /** File */
-    location: InputFileLocationIn;
+    location: TypeInputFileLocationIn;
     /** Offset from which to get file hashes */
     offset: long;
   }
@@ -39204,7 +39500,7 @@ export namespace Api {
   }
   export interface HelpAcceptTermsOfServiceParams {
     /** ID of terms of service */
-    id: DataJSONIn;
+    id: TypeDataJSONIn;
   }
   export interface HelpGetDeepLinkInfoParams {
     /** Path component of a tg: link */
@@ -39216,7 +39512,7 @@ export namespace Api {
   }
   export interface HelpSaveAppLogParams {
     /** List of input events */
-    events: InputAppEventIn[];
+    events: TypeInputAppEventIn[];
   }
   export interface HelpGetPassportConfigParams {
     /** Hash used for caching, for more info click here . */
@@ -39232,7 +39528,7 @@ export namespace Api {
     /** Message */
     message: string;
     /** Message entities for styled text */
-    entities: MessageEntityIn[];
+    entities: TypeMessageEntityIn[];
   }
   export interface HelpHidePromoDataParams {
     /** Peer to hide */
@@ -39286,13 +39582,13 @@ export namespace Api {
     /** Channel/supergroup */
     channel: Api.TypeEntityLike;
     /** IDs of messages to get */
-    id: InputMessageIn[];
+    id: TypeInputMessageIn[];
   }
   export interface ChannelsGetParticipantsParams {
     /** Channel */
     channel: Api.TypeEntityLike;
     /** Which participant types to fetch */
-    filter: ChannelParticipantsFilterIn;
+    filter: TypeChannelParticipantsFilterIn;
     /** Offset */
     offset: int;
     /** Limit */
@@ -39328,7 +39624,7 @@ export namespace Api {
     /** Channel description */
     about: string;
     /** Geogroup location, see here » for more info on geogroups. */
-    geoPoint?: InputGeoPointIn;
+    geoPoint?: TypeInputGeoPointIn;
     /** Geogroup address, see here » for more info on geogroups. */
     address?: string;
     /** Time-to-live of all messages that will be sent in the supergroup: once message.date+message.ttl_period === time(), the message will be deleted on the server, and must be deleted locally as well. You can use messages.setDefaultHistoryTTL to edit this value later. */
@@ -39340,7 +39636,7 @@ export namespace Api {
     /** The ID of the user whose admin rights should be modified */
     userId: Api.TypeEntityLike;
     /** The admin rights */
-    adminRights: ChatAdminRightsIn;
+    adminRights: TypeChatAdminRightsIn;
     /** Indicates the role (rank) of the admin in the group: just an arbitrary string */
     rank?: string;
   }
@@ -39354,7 +39650,7 @@ export namespace Api {
     /** Channel/supergroup whose photo should be edited */
     channel: Api.TypeEntityLike;
     /** New photo */
-    photo: InputChatPhotoIn;
+    photo: TypeInputChatPhotoIn;
   }
   export interface ChannelsCheckUsernameParams {
     /** The channel/supergroup that will assigned the specified username */
@@ -39419,7 +39715,7 @@ export namespace Api {
     /** Participant to ban */
     participant: Api.TypeEntityLike;
     /** The banned rights */
-    bannedRights: ChatBannedRightsIn;
+    bannedRights: TypeChatBannedRightsIn;
   }
   export interface ChannelsGetAdminLogParams {
     /** Channel */
@@ -39427,7 +39723,7 @@ export namespace Api {
     /** Search query, can be empty */
     q: string;
     /** Event filter */
-    eventsFilter?: ChannelAdminLogEventsFilterIn;
+    eventsFilter?: TypeChannelAdminLogEventsFilterIn;
     /** Only show events from these admins */
     admins?: Api.TypeEntityLike[];
     /** Maximum ID of message to return (see pagination ) */
@@ -39441,7 +39737,7 @@ export namespace Api {
     /** Supergroup */
     channel: Api.TypeEntityLike;
     /** The stickerset to associate */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
   }
   export interface ChannelsReadMessageContentsParams {
     /** Channel/supergroup */
@@ -39477,7 +39773,7 @@ export namespace Api {
     /** Geogroup */
     channel: Api.TypeEntityLike;
     /** New geolocation */
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     /** Address string */
     address: string;
   }
@@ -39586,7 +39882,7 @@ export namespace Api {
     /** The channel/supergroup, must have at least channel_emoji_status_level_min / group_emoji_status_level_min boosts. */
     channel: Api.TypeEntityLike;
     /** Emoji status to set */
-    emojiStatus: EmojiStatusIn;
+    emojiStatus: TypeEmojiStatusIn;
   }
   export interface ChannelsSetBoostsToUnblockRestrictionsParams {
     /** The supergroup. */
@@ -39598,7 +39894,7 @@ export namespace Api {
     /** The supergroup */
     channel: Api.TypeEntityLike;
     /** The custom emoji stickerset to associate to the supergroup */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
   }
   export interface ChannelsRestrictSponsoredMessagesParams {
     /** The channel. */
@@ -39650,37 +39946,37 @@ export namespace Api {
     /** The channel. */
     channel: Api.TypeEntityLike;
     /** The tab to set as main tab. */
-    tab: ProfileTabIn;
+    tab: TypeProfileTabIn;
   }
   export interface BotsSendCustomRequestParams {
     /** The method name */
     customMethod: string;
     /** JSON-serialized method parameters */
-    params: DataJSONIn;
+    params: TypeDataJSONIn;
   }
   export interface BotsAnswerWebhookJSONQueryParams {
     /** Identifier of a custom query */
     queryId: long;
     /** JSON-serialized answer to the query */
-    data: DataJSONIn;
+    data: TypeDataJSONIn;
   }
   export interface BotsSetBotCommandsParams {
     /** Command scope */
-    scope: BotCommandScopeIn;
+    scope: TypeBotCommandScopeIn;
     /** Language code */
     langCode: string;
     /** Bot commands */
-    commands: BotCommandIn[];
+    commands: TypeBotCommandIn[];
   }
   export interface BotsResetBotCommandsParams {
     /** Command scope */
-    scope: BotCommandScopeIn;
+    scope: TypeBotCommandScopeIn;
     /** Language code */
     langCode: string;
   }
   export interface BotsGetBotCommandsParams {
     /** Command scope */
-    scope: BotCommandScopeIn;
+    scope: TypeBotCommandScopeIn;
     /** Language code */
     langCode: string;
   }
@@ -39688,7 +39984,7 @@ export namespace Api {
     /** User ID */
     userId: Api.TypeEntityLike;
     /** Bot menu button action */
-    button: BotMenuButtonIn;
+    button: TypeBotMenuButtonIn;
   }
   export interface BotsGetBotMenuButtonParams {
     /** User ID or empty for the default menu button. */
@@ -39696,11 +39992,11 @@ export namespace Api {
   }
   export interface BotsSetBotBroadcastDefaultAdminRightsParams {
     /** Admin rights */
-    adminRights: ChatAdminRightsIn;
+    adminRights: TypeChatAdminRightsIn;
   }
   export interface BotsSetBotGroupDefaultAdminRightsParams {
     /** Admin rights */
-    adminRights: ChatAdminRightsIn;
+    adminRights: TypeChatAdminRightsIn;
   }
   export interface BotsSetBotInfoParams {
     /** If called by a user, must contain the peer of a bot we own. */
@@ -39748,7 +40044,7 @@ export namespace Api {
     /** Identifier of the custom method to invoke */
     customMethod: string;
     /** Method parameters */
-    params: DataJSONIn;
+    params: TypeDataJSONIn;
   }
   export interface BotsGetPopularAppBotsParams {
     /** Offset for pagination , initially an empty string, then re-use the next_offset returned by the previous query. */
@@ -39762,7 +40058,7 @@ export namespace Api {
     /** ISO 639-1 language code, indicating the localization of the preview to add. */
     langCode: string;
     /** The photo/video preview, uploaded using messages.uploadMedia . */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
   }
   export interface BotsEditPreviewMediaParams {
     /** The bot that owns the Main Mini App. */
@@ -39770,9 +40066,9 @@ export namespace Api {
     /** ISO 639-1 language code, indicating the localization of the preview to edit. */
     langCode: string;
     /** The photo/video preview to replace, previously fetched as specified here » . */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
     /** The new photo/video preview, uploaded using messages.uploadMedia . */
-    newMedia: InputMediaIn;
+    newMedia: TypeInputMediaIn;
   }
   export interface BotsDeletePreviewMediaParams {
     /** The bot that owns the Main Mini App. */
@@ -39780,7 +40076,7 @@ export namespace Api {
     /** ISO 639-1 language code, indicating the localization of the preview to delete. */
     langCode: string;
     /** The photo/video preview to delete, previously fetched as specified here » . */
-    media: InputMediaIn[];
+    media: TypeInputMediaIn[];
   }
   export interface BotsReorderPreviewMediasParams {
     /** The bot that owns the Main Mini App. */
@@ -39788,7 +40084,7 @@ export namespace Api {
     /** ISO 639-1 language code, indicating the localization of the previews to reorder. */
     langCode: string;
     /** New order of the previews. */
-    order: InputMediaIn[];
+    order: TypeInputMediaIn[];
   }
   export interface BotsGetPreviewInfoParams {
     /** The bot that owns the Main Mini App. */
@@ -39804,7 +40100,7 @@ export namespace Api {
     /** The user whose emoji status should be changed */
     userId: Api.TypeEntityLike;
     /** The emoji status */
-    emojiStatus: EmojiStatusIn;
+    emojiStatus: TypeEmojiStatusIn;
   }
   export interface BotsToggleUserEmojiStatusPermissionParams {
     /** The bot */
@@ -39857,7 +40153,7 @@ export namespace Api {
   }
   export interface BotsRequestWebViewButtonParams {
     userId: Api.TypeEntityLike;
-    button: KeyboardButtonIn;
+    button: TypeKeyboardButtonIn;
   }
   export interface BotsGetRequestedWebViewButtonParams {
     bot: Api.TypeEntityLike;
@@ -39873,13 +40169,13 @@ export namespace Api {
   }
   export interface BotsSetJoinChatResultsParams {
     queryId: long;
-    result: JoinChatBotResultIn;
+    result: TypeJoinChatBotResultIn;
   }
   export interface PaymentsGetPaymentFormParams {
     /** Invoice */
-    invoice: InputInvoiceIn;
+    invoice: TypeInputInvoiceIn;
     /** Theme parameters » */
-    themeParams?: DataJSONIn;
+    themeParams?: TypeDataJSONIn;
   }
   export interface PaymentsGetPaymentReceiptParams {
     /** The peer where the payment receipt was sent */
@@ -39891,21 +40187,21 @@ export namespace Api {
     /** Save order information to re-use it for future orders */
     save?: boolean;
     /** Invoice */
-    invoice: InputInvoiceIn;
+    invoice: TypeInputInvoiceIn;
     /** Requested order information */
-    info: PaymentRequestedInfoIn;
+    info: TypePaymentRequestedInfoIn;
   }
   export interface PaymentsSendPaymentFormParams {
     /** Form ID */
     formId: long;
     /** Invoice */
-    invoice: InputInvoiceIn;
+    invoice: TypeInputInvoiceIn;
     /** ID of saved and validated order info */
     requestedInfoId?: string;
     /** Chosen shipping option ID */
     shippingOptionId?: string;
     /** Payment credentials */
-    credentials: InputPaymentCredentialsIn;
+    credentials: TypeInputPaymentCredentialsIn;
     /** Tip, in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45 pass amount = 145 . See the exp parameter in currencies.json , it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). */
     tipAmount?: long;
   }
@@ -39921,19 +40217,19 @@ export namespace Api {
   }
   export interface PaymentsExportInvoiceParams {
     /** Invoice */
-    invoiceMedia: InputMediaIn;
+    invoiceMedia: TypeInputMediaIn;
   }
   export interface PaymentsAssignAppStoreTransactionParams {
     /** Receipt */
     receipt: bytes;
     /** Payment purpose */
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface PaymentsAssignPlayMarketTransactionParams {
     /** Receipt */
-    receipt: DataJSONIn;
+    receipt: TypeDataJSONIn;
     /** Payment purpose */
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface PaymentsGetPremiumGiftCodeOptionsParams {
     /** The channel that will start the giveaway */
@@ -39959,7 +40255,7 @@ export namespace Api {
     /** The prepaid giveaway ID. */
     giveawayId: long;
     /** Giveway parameters */
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface PaymentsGetStarsStatusParams {
     /** If set, returns the channel/ad revenue balance in nanotons. */
@@ -39989,7 +40285,7 @@ export namespace Api {
     /** Payment form ID */
     formId: long;
     /** Invoice */
-    invoice: InputInvoiceIn;
+    invoice: TypeInputInvoiceIn;
   }
   export interface PaymentsRefundStarsChargeParams {
     /** User to refund. */
@@ -40013,7 +40309,7 @@ export namespace Api {
     /** The amount of stars or nanotons to withdraw. */
     amount?: long;
     /** 2FA password, see here » for more info. */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
   }
   export interface PaymentsGetStarsRevenueAdsAccountUrlParams {
     /** Channel or bot that owns the stars. */
@@ -40025,7 +40321,7 @@ export namespace Api {
     /** Channel or bot. */
     peer: Api.TypeEntityLike;
     /** Transaction IDs. */
-    id: InputStarsTransactionIn[];
+    id: TypeInputStarsTransactionIn[];
   }
   export interface PaymentsGetStarsGiftOptionsParams {
     /** Receiver of the gift (optional). */
@@ -40061,11 +40357,11 @@ export namespace Api {
     /** If set, hides the gift from our profile. */
     unsave?: boolean;
     /** The gift to display or remove. */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
   }
   export interface PaymentsConvertStarGiftParams {
     /** The gift to convert. */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
   }
   export interface PaymentsBotCancelStarsSubscriptionParams {
     /** If not set, disables autorenewal of the subscriptions, and prevents the user from reactivating the subscription once the current period expires: a subscription cancelled by the bot will have the starsSubscription . bot_canceled flag set. The bot can can partially undo this operation by setting this flag: this will allow the user to reactivate the subscription. */
@@ -40125,11 +40421,11 @@ export namespace Api {
     /** Set this flag to keep the original gift text, sender and receiver in the upgraded gift as a starGiftAttributeOriginalDetails attribute. */
     keepOriginalDetails?: boolean;
     /** The gift to upgrade */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
   }
   export interface PaymentsTransferStarGiftParams {
     /** The gift to transfer. */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
     /** Destination peer. */
     toId: Api.TypeEntityLike;
   }
@@ -40165,13 +40461,13 @@ export namespace Api {
   }
   export interface PaymentsGetSavedStarGiftParams {
     /** List of gifts to fetch info about. */
-    stargift: InputSavedStarGiftIn[];
+    stargift: TypeInputSavedStarGiftIn[];
   }
   export interface PaymentsGetStarGiftWithdrawalUrlParams {
     /** The collectible gift to export. */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
     /** The current user's 2FA password, passed as specified here » . */
-    password: InputCheckPasswordSRPIn;
+    password: TypeInputCheckPasswordSRPIn;
   }
   export interface PaymentsToggleChatStarGiftNotificationsParams {
     /** Whether to enable or disable reception of notifications in the form of messageActionStarGiftUnique and messageActionStarGift service messages from the channel. */
@@ -40183,11 +40479,11 @@ export namespace Api {
     /** The peer where to pin the gift. */
     peer: Api.TypeEntityLike;
     /** The gift to pin. */
-    stargift: InputSavedStarGiftIn[];
+    stargift: TypeInputSavedStarGiftIn[];
   }
   export interface PaymentsCanPurchaseStoreParams {
     /** Payment purpose. */
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface PaymentsGetResaleStarGiftsParams {
     /** Sort gifts by price (ascending). */
@@ -40201,7 +40497,7 @@ export namespace Api {
     /** Mandatory identifier of the base gift from which the collectible gift was upgraded. */
     giftId: long;
     /** Optionally filter gifts with the specified attributes. If no attributes of a specific type are specified, all attributes of that type are allowed. */
-    attributes?: StarGiftAttributeIdIn[];
+    attributes?: TypeStarGiftAttributeIdIn[];
     /** Offset for pagination. If not equal to an empty string, payments.resaleStarGifts . counters will not be set to avoid returning the counters every time a new page is fetched. */
     offset: string;
     /** Maximum number of results to return, see pagination */
@@ -40209,9 +40505,9 @@ export namespace Api {
   }
   export interface PaymentsUpdateStarGiftPriceParams {
     /** The gift to resell. */
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
     /** Resale price of the gift. */
-    resellAmount: StarsAmountIn;
+    resellAmount: TypeStarsAmountIn;
   }
   export interface PaymentsCreateStarGiftCollectionParams {
     /** Peer where to create the collection. */
@@ -40219,7 +40515,7 @@ export namespace Api {
     /** Title of the collection. */
     title: string;
     /** Gifts added to the collection. */
-    stargift: InputSavedStarGiftIn[];
+    stargift: TypeInputSavedStarGiftIn[];
   }
   export interface PaymentsUpdateStarGiftCollectionParams {
     /** Peer that owns the collection. */
@@ -40229,11 +40525,11 @@ export namespace Api {
     /** Title of the collection, to rename the collection. */
     title?: string;
     /** Can contain a list of gifts to remove from the collection. */
-    deleteStargift?: InputSavedStarGiftIn[];
+    deleteStargift?: TypeInputSavedStarGiftIn[];
     /** Can contain a list of gifts to add to the collection. */
-    addStargift?: InputSavedStarGiftIn[];
+    addStargift?: TypeInputSavedStarGiftIn[];
     /** Can contain the new gift order. */
-    order?: InputSavedStarGiftIn[];
+    order?: TypeInputSavedStarGiftIn[];
   }
   export interface PaymentsReorderStarGiftCollectionsParams {
     /** The owned peer. */
@@ -40262,7 +40558,7 @@ export namespace Api {
     giftId: long;
   }
   export interface PaymentsGetStarGiftAuctionStateParams {
-    auction: InputStarGiftAuctionIn;
+    auction: TypeInputStarGiftAuctionIn;
     version: int;
   }
   export interface PaymentsGetStarGiftAuctionAcquiredGiftsParams {
@@ -40278,7 +40574,7 @@ export namespace Api {
   export interface PaymentsSendStarGiftOfferParams {
     peer: Api.TypeEntityLike;
     slug: string;
-    price: StarsAmountIn;
+    price: TypeStarsAmountIn;
     duration: int;
     randomId?: long;
     allowPaidStars?: long;
@@ -40292,7 +40588,7 @@ export namespace Api {
     limit: int;
   }
   export interface PaymentsCraftStarGiftParams {
-    stargift: InputSavedStarGiftIn[];
+    stargift: TypeInputSavedStarGiftIn[];
   }
   export interface StickersCreateStickerSetParams {
     /** Whether this is a mask stickerset */
@@ -40308,33 +40604,33 @@ export namespace Api {
     /** Short name of sticker set, to be used in sticker deep links » . Can contain only english letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and, if called by a bot , must end in "_by_<bot_username>" . <bot_username> is case insensitive. 1-64 characters. */
     shortName: string;
     /** Thumbnail */
-    thumb?: InputDocumentIn;
+    thumb?: TypeInputDocumentIn;
     /** Stickers */
-    stickers: InputStickerSetItemIn[];
+    stickers: TypeInputStickerSetItemIn[];
     /** Used when importing stickers using the sticker import SDKs , specifies the name of the software that created the stickers */
     software?: string;
   }
   export interface StickersRemoveStickerFromSetParams {
     /** The sticker to remove */
-    sticker: InputDocumentIn;
+    sticker: TypeInputDocumentIn;
   }
   export interface StickersChangeStickerPositionParams {
     /** The sticker */
-    sticker: InputDocumentIn;
+    sticker: TypeInputDocumentIn;
     /** The new position of the sticker, zero-based */
     position: int;
   }
   export interface StickersAddStickerToSetParams {
     /** The stickerset */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     /** The sticker */
-    sticker: InputStickerSetItemIn;
+    sticker: TypeInputStickerSetItemIn;
   }
   export interface StickersSetStickerSetThumbParams {
     /** Stickerset */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     /** Thumbnail (only for normal stickersets, not custom emoji stickersets). */
-    thumb?: InputDocumentIn;
+    thumb?: TypeInputDocumentIn;
     /** Only for custom emoji stickersets , ID of a custom emoji present in the set to use as thumbnail; pass 0 to fallback to the first custom emoji of the set. */
     thumbDocumentId?: long;
   }
@@ -40348,29 +40644,29 @@ export namespace Api {
   }
   export interface StickersChangeStickerParams {
     /** The sticker */
-    sticker: InputDocumentIn;
+    sticker: TypeInputDocumentIn;
     /** If set, updates the emoji list associated to the sticker */
     emoji?: string;
     /** If set, updates the mask coordinates */
-    maskCoords?: MaskCoordsIn;
+    maskCoords?: TypeMaskCoordsIn;
     /** If set, updates the sticker keywords (separated by commas). Can't be provided for mask stickers. */
     keywords?: string;
   }
   export interface StickersRenameStickerSetParams {
     /** Stickerset to rename */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     /** New stickerset title */
     title: string;
   }
   export interface StickersDeleteStickerSetParams {
     /** Stickerset to delete */
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
   }
   export interface StickersReplaceStickerParams {
     /** Old sticker document. */
-    sticker: InputDocumentIn;
+    sticker: TypeInputDocumentIn;
     /** New sticker. */
-    newSticker: InputStickerSetItemIn;
+    newSticker: TypeInputStickerSetItemIn;
   }
   export interface PhoneRequestCallParams {
     /** Whether to start a video call */
@@ -40382,39 +40678,39 @@ export namespace Api {
     /** Parameter for E2E encryption key exchange » */
     gAHash: bytes;
     /** Phone call settings */
-    protocol: PhoneCallProtocolIn;
+    protocol: TypePhoneCallProtocolIn;
   }
   export interface PhoneAcceptCallParams {
     /** The call to accept */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Parameter for E2E encryption key exchange » */
     gB: bytes;
     /** Phone call settings */
-    protocol: PhoneCallProtocolIn;
+    protocol: TypePhoneCallProtocolIn;
   }
   export interface PhoneConfirmCallParams {
     /** The phone call */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Parameter for E2E encryption key exchange » */
     gA: bytes;
     /** Key fingerprint */
     keyFingerprint: long;
     /** Phone call settings */
-    protocol: PhoneCallProtocolIn;
+    protocol: TypePhoneCallProtocolIn;
   }
   export interface PhoneReceivedCallParams {
     /** The phone call we're currently in */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
   }
   export interface PhoneDiscardCallParams {
     /** Whether this is a video call */
     video?: boolean;
     /** The phone call */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Call duration */
     duration: int;
     /** Why was the call discarded */
-    reason: PhoneCallDiscardReasonIn;
+    reason: TypePhoneCallDiscardReasonIn;
     /** Preferred libtgvoip relay ID */
     connectionId: long;
   }
@@ -40422,7 +40718,7 @@ export namespace Api {
     /** Whether the user decided on their own initiative to rate the call */
     userInitiative?: boolean;
     /** The call to rate */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Rating in 1-5 stars */
     rating: int;
     /** An additional comment */
@@ -40430,13 +40726,13 @@ export namespace Api {
   }
   export interface PhoneSaveCallDebugParams {
     /** Phone call */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Debug statistics obtained from libtgvoip */
-    debug: DataJSONIn;
+    debug: TypeDataJSONIn;
   }
   export interface PhoneSendSignalingDataParams {
     /** Phone call */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Signaling payload */
     data: bytes;
   }
@@ -40458,7 +40754,7 @@ export namespace Api {
     /** If set, the user's video will be disabled by default upon joining. */
     videoStopped?: boolean;
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Join the group call, presenting yourself as the specified user/channel */
     joinAs: Api.TypeEntityLike;
     /** The invitation hash from the invite link » , if provided allows speaking in a livestream or muted group chat. */
@@ -40468,29 +40764,29 @@ export namespace Api {
     /** The block containing an appropriate e2e.chain.changeSetGroupState event . */
     block?: bytes;
     /** WebRTC parameters */
-    params: DataJSONIn;
+    params: TypeDataJSONIn;
   }
   export interface PhoneLeaveGroupCallParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Your source ID */
     source: int;
   }
   export interface PhoneInviteToGroupCallParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** The users to invite. */
     users: Api.TypeEntityLike[];
   }
   export interface PhoneDiscardGroupCallParams {
     /** The group call to terminate */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneToggleGroupCallSettingsParams {
     /** Invalidate existing invite links */
     resetInviteHash?: boolean;
     /** Group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Whether all users will that join this group call are muted by default upon joining the group call */
     joinMuted?: Bool;
     messagesEnabled?: Bool;
@@ -40498,13 +40794,13 @@ export namespace Api {
   }
   export interface PhoneGetGroupCallParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Maximum number of results to return, see pagination */
     limit: int;
   }
   export interface PhoneGetGroupParticipantsParams {
     /** Group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** If specified, will fetch group participant info about the specified peers */
     ids: Api.TypeEntityLike[];
     /** If specified, will fetch group participant info about the specified WebRTC source IDs */
@@ -40516,7 +40812,7 @@ export namespace Api {
   }
   export interface PhoneCheckGroupCallParams {
     /** Group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Source IDs */
     sources: int[];
   }
@@ -40526,7 +40822,7 @@ export namespace Api {
     /** Whether to also record video streams */
     video?: boolean;
     /** The group call or livestream */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Recording title */
     title?: string;
     /** If video stream recording is enabled, whether to record in portrait or landscape mode */
@@ -40534,7 +40830,7 @@ export namespace Api {
   }
   export interface PhoneEditGroupCallParticipantParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** The group call participant (can also be the user itself) */
     participant: Api.TypeEntityLike;
     /** Whether to mute or unmute the specified participant */
@@ -40552,7 +40848,7 @@ export namespace Api {
   }
   export interface PhoneEditGroupCallTitleParams {
     /** Group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** New title */
     title: string;
   }
@@ -40564,17 +40860,17 @@ export namespace Api {
     /** For livestreams or muted group chats, if set, users that join using this link will be able to speak without explicitly requesting permission by (for example by raising their hand). */
     canSelfUnmute?: boolean;
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneToggleGroupCallStartSubscriptionParams {
     /** Scheduled group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Enable or disable subscription */
     subscribed: Bool;
   }
   export interface PhoneStartScheduledGroupCallParams {
     /** The scheduled group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneSaveDefaultGroupCallJoinAsParams {
     /** The dialog */
@@ -40584,17 +40880,17 @@ export namespace Api {
   }
   export interface PhoneJoinGroupCallPresentationParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** WebRTC parameters */
-    params: DataJSONIn;
+    params: TypeDataJSONIn;
   }
   export interface PhoneLeaveGroupCallPresentationParams {
     /** The group call */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneGetGroupCallStreamChannelsParams {
     /** Group call or livestream */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneGetGroupCallStreamRtmpUrlParams {
     liveStory?: boolean;
@@ -40605,9 +40901,9 @@ export namespace Api {
   }
   export interface PhoneSaveCallLogParams {
     /** Phone call */
-    peer: InputPhoneCallIn;
+    peer: TypeInputPhoneCallIn;
     /** Logs */
-    file: InputFileIn;
+    file: TypeInputFileIn;
   }
   export interface PhoneCreateConferenceCallParams {
     /** If set, mute our microphone when joining the call (can only be used if join is set). */
@@ -40623,7 +40919,7 @@ export namespace Api {
     /** Initial blockchain block (can only be used if join is set). */
     block?: bytes;
     /** Parameters from tgcalls (can only be used if join is set). */
-    params?: DataJSONIn;
+    params?: TypeDataJSONIn;
   }
   export interface PhoneDeleteConferenceCallParticipantsParams {
     /** Whether this is a removal of members that already left the conference call. */
@@ -40631,7 +40927,7 @@ export namespace Api {
     /** Whether this is a forced removal of active members in a conference call. */
     kick?: boolean;
     /** The conference call. */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** IDs of users to remove. */
     ids: long[];
     /** The block containing an appropriate e2e.chain.changeSetGroupState event */
@@ -40639,7 +40935,7 @@ export namespace Api {
   }
   export interface PhoneSendConferenceCallBroadcastParams {
     /** The conference where to broadcast the block. */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** The block to broadcast. */
     block: bytes;
   }
@@ -40647,7 +40943,7 @@ export namespace Api {
     /** Invite the user to also turn on their video feed. */
     video?: boolean;
     /** The conference call. */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** The user to invite. */
     userId: Api.TypeEntityLike;
   }
@@ -40657,7 +40953,7 @@ export namespace Api {
   }
   export interface PhoneGetGroupCallChainBlocksParams {
     /** The conference. */
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     /** Subchain ID. */
     subChainId: int;
     /** Offset for pagination. */
@@ -40666,31 +40962,31 @@ export namespace Api {
     limit: int;
   }
   export interface PhoneSendGroupCallMessageParams {
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     randomId?: long;
-    message: TextWithEntitiesIn;
+    message: TypeTextWithEntitiesIn;
     allowPaidStars?: long;
     sendAs?: Api.TypeEntityLike;
   }
   export interface PhoneSendGroupCallEncryptedMessageParams {
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     encryptedMessage: bytes;
   }
   export interface PhoneDeleteGroupCallMessagesParams {
     reportSpam?: boolean;
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     messages: int[];
   }
   export interface PhoneDeleteGroupCallParticipantMessagesParams {
     reportSpam?: boolean;
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     participant: Api.TypeEntityLike;
   }
   export interface PhoneGetGroupCallStarsParams {
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface PhoneSaveDefaultSendAsParams {
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     sendAs: Api.TypeEntityLike;
   }
   export interface LangpackGetLangPackParams {
@@ -40727,7 +41023,7 @@ export namespace Api {
   }
   export interface FoldersEditPeerFoldersParams {
     /** New peer list */
-    folderPeers: InputFolderPeerIn[];
+    folderPeers: TypeInputFolderPeerIn[];
   }
   export interface StatsGetBroadcastStatsParams {
     /** Whether to enable dark theme for graph colors */
@@ -40790,7 +41086,7 @@ export namespace Api {
   }
   export interface ChatlistsExportChatlistInviteParams {
     /** The folder to export */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
     /** An optional name for the link */
     title: string;
     /** The list of channels, group and supergroups to share with the link. Basic groups will automatically be converted to supergroups when invoking the method. */
@@ -40798,13 +41094,13 @@ export namespace Api {
   }
   export interface ChatlistsDeleteExportedInviteParams {
     /** The related folder */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
     /** slug obtained from the chat folder deep link » . */
     slug: string;
   }
   export interface ChatlistsEditExportedInviteParams {
     /** Folder ID */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
     /** slug obtained from the chat folder deep link » . */
     slug: string;
     /** If set, sets a new name for the link */
@@ -40814,7 +41110,7 @@ export namespace Api {
   }
   export interface ChatlistsGetExportedInvitesParams {
     /** The folder */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
   }
   export interface ChatlistsCheckChatlistInviteParams {
     /** slug obtained from the chat folder deep link » */
@@ -40828,25 +41124,25 @@ export namespace Api {
   }
   export interface ChatlistsGetChatlistUpdatesParams {
     /** The folder */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
   }
   export interface ChatlistsJoinChatlistUpdatesParams {
     /** The folder */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
     /** List of new chats to join, fetched using chatlists.getChatlistUpdates and filtered as specified in the documentation » . */
     peers: Api.TypeEntityLike[];
   }
   export interface ChatlistsHideChatlistUpdatesParams {
     /** The folder */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
   }
   export interface ChatlistsGetLeaveChatlistSuggestionsParams {
     /** Folder ID */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
   }
   export interface ChatlistsLeaveChatlistParams {
     /** Folder ID */
-    chatlist: InputChatlistIn;
+    chatlist: TypeInputChatlistIn;
     /** Also leave the specified channels and groups */
     peers: Api.TypeEntityLike[];
   }
@@ -40864,15 +41160,15 @@ export namespace Api {
     /** The peer to send the story as. */
     peer: Api.TypeEntityLike;
     /** The story media. */
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
     /** Media areas associated to the story, see here » for more info. */
-    mediaAreas?: MediaAreaIn[];
+    mediaAreas?: TypeMediaAreaIn[];
     /** Story caption. */
     caption?: string;
     /** Message entities for styled text , if allowed by the stories_entities client configuration parameter » . */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** Privacy rules for the story, indicating who can or can't view the story. */
-    privacyRules: InputPrivacyRuleIn[];
+    privacyRules: TypeInputPrivacyRuleIn[];
     /** Unique client message ID required to prevent message resending. */
     randomId?: long;
     /** Period after which the story is moved to archive (and to the profile if pinned is set), in seconds; must be one of 6 * 3600 , 12 * 3600 , 86400 , or 2 * 86400 for Telegram Premium users, and 86400 otherwise. */
@@ -40883,7 +41179,7 @@ export namespace Api {
     fwdFromStory?: int;
     /** If set, adds the story to the specified albums. */
     albums?: int[];
-    music?: InputDocumentIn;
+    music?: TypeInputDocumentIn;
   }
   export interface StoriesEditStoryParams {
     /** Peer where the story was posted. */
@@ -40891,16 +41187,16 @@ export namespace Api {
     /** ID of story to edit. */
     id: int;
     /** If specified, replaces the story media. */
-    media?: InputMediaIn;
+    media?: TypeInputMediaIn;
     /** Media areas associated to the story, see here » for more info. */
-    mediaAreas?: MediaAreaIn[];
+    mediaAreas?: TypeMediaAreaIn[];
     /** If specified, replaces the story caption. */
     caption?: string;
     /** Message entities for styled text in the caption , if allowed by the stories_entities client configuration parameter » . */
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     /** If specified, alters the privacy settings » of the story, changing who can or can't view the story. */
-    privacyRules?: InputPrivacyRuleIn[];
-    music?: InputDocumentIn;
+    privacyRules?: TypeInputPrivacyRuleIn[];
+    music?: TypeInputDocumentIn;
   }
   export interface StoriesDeleteStoriesParams {
     /** Channel/user from where to delete stories. */
@@ -41016,7 +41312,7 @@ export namespace Api {
     /** ID of the story to react to */
     storyId: int;
     /** Reaction */
-    reaction: ReactionIn;
+    reaction: TypeReactionIn;
   }
   export interface StoriesGetPeerStoriesParams {
     /** Peer whose stories should be fetched */
@@ -41040,7 +41336,7 @@ export namespace Api {
     /** Story ID */
     id: int;
     /** Get only reactions of this type */
-    reaction?: ReactionIn;
+    reaction?: TypeReactionIn;
     /** Offset for pagination (taken from the next_offset field of the returned stories.StoryReactionsList ); empty in the first request. */
     offset?: string;
     /** Maximum number of results to return, see pagination */
@@ -41056,7 +41352,7 @@ export namespace Api {
     /** Hashtag (without the # ) */
     hashtag?: string;
     /** A mediaAreaGeoPoint or a mediaAreaVenue . Note mediaAreaGeoPoint areas may be searched only if they have an associated address . */
-    area?: MediaAreaIn;
+    area?: TypeMediaAreaIn;
     /** If set, returns only stories posted by this peer. */
     peer?: Api.TypeEntityLike;
     /** Offset for pagination : initially an empty string, then the next_offset from the previously returned stories.foundStories . */
@@ -41120,8 +41416,8 @@ export namespace Api {
     rtmpStream?: boolean;
     peer: Api.TypeEntityLike;
     caption?: string;
-    entities?: MessageEntityIn[];
-    privacyRules: InputPrivacyRuleIn[];
+    entities?: TypeMessageEntityIn[];
+    privacyRules: TypeInputPrivacyRuleIn[];
     randomId?: long;
     messagesEnabled?: Bool;
     sendPaidMessagesStars?: long;
@@ -41168,7 +41464,7 @@ export namespace Api {
   }
   export interface FragmentGetCollectibleInfoParams {
     /** Collectible to fetch info about. */
-    collectible: InputCollectibleIn;
+    collectible: TypeInputCollectibleIn;
   }
   export interface AicomposeCreateToneParams {
     displayAuthor?: boolean;
@@ -41177,27 +41473,27 @@ export namespace Api {
     prompt: string;
   }
   export interface AicomposeUpdateToneParams {
-    tone: InputAiComposeToneIn;
+    tone: TypeInputAiComposeToneIn;
     displayAuthor?: Bool;
     emojiId?: long;
     title?: string;
     prompt?: string;
   }
   export interface AicomposeSaveToneParams {
-    tone: InputAiComposeToneIn;
+    tone: TypeInputAiComposeToneIn;
     unsave: Bool;
   }
   export interface AicomposeDeleteToneParams {
-    tone: InputAiComposeToneIn;
+    tone: TypeInputAiComposeToneIn;
   }
   export interface AicomposeGetToneParams {
-    tone: InputAiComposeToneIn;
+    tone: TypeInputAiComposeToneIn;
   }
   export interface AicomposeGetTonesParams {
     hash: long;
   }
   export interface AicomposeGetToneExampleParams {
-    tone: InputAiComposeToneIn;
+    tone: TypeInputAiComposeToneIn;
     num: int;
   }
   export interface CommunitiesCreateParams {
@@ -41241,19 +41537,23 @@ export namespace Api {
     participant: Api.TypeEntityLike;
   }
   export interface EphemeralSendMessageParams {
-    peer: Api.TypeEntityLike;
+    invertMedia?: boolean;
+    welcome?: boolean;
+    anchor?: boolean;
+    noforwards?: boolean;
+    peer?: Api.TypeEntityLike;
     receiverId: Api.TypeEntityLike;
     queryId?: long;
     message: string;
-    entities?: MessageEntityIn[];
-    media?: InputMediaIn;
-    replyMarkup?: ReplyMarkupIn;
-    richMessage?: InputRichMessageIn;
+    entities?: TypeMessageEntityIn[];
+    media?: TypeInputMediaIn;
+    replyMarkup?: TypeReplyMarkupIn;
+    richMessage?: TypeInputRichMessageIn;
     randomId?: long;
-    replyTo?: InputReplyToIn;
+    replyTo?: TypeInputReplyToIn;
   }
   export interface EphemeralDeleteMessageParams {
-    peer: Api.TypeEntityLike;
+    peer?: Api.TypeEntityLike;
     receiverId: Api.TypeEntityLike;
     id: int;
   }
@@ -41267,6 +41567,29 @@ export namespace Api {
     peer: Api.TypeEntityLike;
     id: int;
     data?: bytes;
+  }
+  export interface EphemeralEditMessageParams {
+    invertMedia?: boolean;
+    welcome?: boolean;
+    peer?: Api.TypeEntityLike;
+    receiverId: Api.TypeEntityLike;
+    id: int;
+    message?: string;
+    media?: TypeInputMediaIn;
+    entities?: TypeMessageEntityIn[];
+    replyMarkup?: TypeReplyMarkupIn;
+    richMessage?: TypeInputRichMessageIn;
+  }
+  export interface EphemeralDeleteWelcomeMessageParams {
+    peer: Api.TypeEntityLike;
+    id: int;
+  }
+  export interface EphemeralDeleteAllWelcomeMessagesParams {
+    peer: Api.TypeEntityLike;
+  }
+  export interface EphemeralGetWelcomeMessagesParams {
+    peer: Api.TypeEntityLike;
+    hash: long;
   }
   export interface ReqPqParams {
     nonce: int128;
@@ -42035,16 +42358,16 @@ export namespace Api {
   }
   export interface JsonArrayIn {
     _: "jsonArray";
-    value: JSONValueIn[];
+    value: TypeJSONValueIn[];
   }
   export interface JsonObjectIn {
     _: "jsonObject";
-    value: JSONObjectValueIn[];
+    value: TypeJSONObjectValueIn[];
   }
   export interface JsonObjectValueIn {
     _?: "jsonObjectValue";
     key: string;
-    value: JSONValueIn;
+    value: TypeJSONValueIn;
   }
   export interface MessageRangeIn {
     _?: "messageRange";
@@ -42086,11 +42409,11 @@ export namespace Api {
   }
   export interface AccountPasswordInputSettingsIn {
     _?: "account.passwordInputSettings";
-    newAlgo?: PasswordKdfAlgoIn;
+    newAlgo?: TypePasswordKdfAlgoIn;
     newPasswordHash?: bytes;
     hint?: string;
     email?: string;
-    newSecureSettings?: SecureSecretSettingsIn;
+    newSecureSettings?: TypeSecureSecretSettingsIn;
   }
   export interface PasswordKdfAlgoUnknownIn {
     _: "passwordKdfAlgoUnknown";
@@ -42104,7 +42427,7 @@ export namespace Api {
   }
   export interface SecureSecretSettingsIn {
     _?: "secureSecretSettings";
-    secureAlgo: SecurePasswordKdfAlgoIn;
+    secureAlgo: TypeSecurePasswordKdfAlgoIn;
     secureSecret: bytes;
     secureSecretId: long;
   }
@@ -42123,11 +42446,11 @@ export namespace Api {
     _: "inputPasskeyCredentialPublicKey";
     id: string;
     rawId: string;
-    response: InputPasskeyResponseIn;
+    response: TypeInputPasskeyResponseIn;
   }
   export interface InputPasskeyResponseRegisterIn {
     _: "inputPasskeyResponseRegister";
-    clientData: DataJSONIn;
+    clientData: TypeDataJSONIn;
     attestationData: bytes;
   }
   export interface DataJSONIn {
@@ -42136,7 +42459,7 @@ export namespace Api {
   }
   export interface InputPasskeyResponseLoginIn {
     _: "inputPasskeyResponseLogin";
-    clientData: DataJSONIn;
+    clientData: TypeDataJSONIn;
     authenticatorData: bytes;
     signature: bytes;
     userHandle: string;
@@ -42150,10 +42473,10 @@ export namespace Api {
     showPreviews?: Bool;
     silent?: Bool;
     muteUntil?: int;
-    sound?: NotificationSoundIn;
+    sound?: TypeNotificationSoundIn;
     storiesMuted?: Bool;
     storiesHideSender?: Bool;
-    storiesSound?: NotificationSoundIn;
+    storiesSound?: TypeNotificationSoundIn;
   }
   export interface NotificationSoundDefaultIn {
     _: "notificationSoundDefault";
@@ -42250,7 +42573,7 @@ export namespace Api {
   }
   export interface InputPrivacyValueAllowUsersIn {
     _: "inputPrivacyValueAllowUsers";
-    users: InputUserIn[];
+    users: TypeInputUserIn[];
   }
   export interface InputUserEmptyIn {
     _: "inputUserEmpty";
@@ -42265,7 +42588,7 @@ export namespace Api {
   }
   export interface InputUserFromMessageIn {
     _: "inputUserFromMessage";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     msgId: int;
     userId: long;
   }
@@ -42291,13 +42614,13 @@ export namespace Api {
   }
   export interface InputPeerUserFromMessageIn {
     _: "inputPeerUserFromMessage";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     msgId: int;
     userId: long;
   }
   export interface InputPeerChannelFromMessageIn {
     _: "inputPeerChannelFromMessage";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     msgId: int;
     channelId: long;
   }
@@ -42309,7 +42632,7 @@ export namespace Api {
   }
   export interface InputPrivacyValueDisallowUsersIn {
     _: "inputPrivacyValueDisallowUsers";
-    users: InputUserIn[];
+    users: TypeInputUserIn[];
   }
   export interface InputPrivacyValueAllowChatParticipantsIn {
     _: "inputPrivacyValueAllowChatParticipants";
@@ -42376,14 +42699,14 @@ export namespace Api {
   }
   export interface InputSecureValueIn {
     _?: "inputSecureValue";
-    type: SecureValueTypeIn;
-    data?: SecureDataIn;
-    frontSide?: InputSecureFileIn;
-    reverseSide?: InputSecureFileIn;
-    selfie?: InputSecureFileIn;
-    translation?: InputSecureFileIn[];
-    files?: InputSecureFileIn[];
-    plainData?: SecurePlainDataIn;
+    type: TypeSecureValueTypeIn;
+    data?: TypeSecureDataIn;
+    frontSide?: TypeInputSecureFileIn;
+    reverseSide?: TypeInputSecureFileIn;
+    selfie?: TypeInputSecureFileIn;
+    translation?: TypeInputSecureFileIn[];
+    files?: TypeInputSecureFileIn[];
+    plainData?: TypeSecurePlainDataIn;
   }
   export interface SecureDataIn {
     _?: "secureData";
@@ -42414,7 +42737,7 @@ export namespace Api {
   }
   export interface SecureValueHashIn {
     _?: "secureValueHash";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     hash: bytes;
   }
   export interface SecureCredentialsEncryptedIn {
@@ -42462,7 +42785,7 @@ export namespace Api {
   }
   export interface InputFileStoryDocumentIn {
     _: "inputFileStoryDocument";
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
   }
   export interface InputDocumentEmptyIn {
     _: "inputDocumentEmpty";
@@ -42502,12 +42825,12 @@ export namespace Api {
   export interface InputThemeSettingsIn {
     _?: "inputThemeSettings";
     messageColorsAnimated?: boolean;
-    baseTheme: BaseThemeIn;
+    baseTheme: TypeBaseThemeIn;
     accentColor: int;
     outboxAccentColor?: int;
     messageColors?: int[];
-    wallpaper?: InputWallPaperIn;
-    wallpaperSettings?: WallPaperSettingsIn;
+    wallpaper?: TypeInputWallPaperIn;
+    wallpaperSettings?: TypeWallPaperSettingsIn;
   }
   export interface BaseThemeClassicIn {
     _: "baseThemeClassic";
@@ -42542,7 +42865,7 @@ export namespace Api {
     newNoncontactPeersRequirePremium?: boolean;
     displayGiftsButton?: boolean;
     noncontactPeersPaidStars?: long;
-    disallowedGifts?: DisallowedGiftsSettingsIn;
+    disallowedGifts?: TypeDisallowedGiftsSettingsIn;
   }
   export interface DisallowedGiftsSettingsIn {
     _?: "disallowedGiftsSettings";
@@ -42616,7 +42939,7 @@ export namespace Api {
     _?: "businessWorkHours";
     openNow?: boolean;
     timezoneId: string;
-    weeklyOpen: BusinessWeeklyOpenIn[];
+    weeklyOpen: TypeBusinessWeeklyOpenIn[];
   }
   export interface BusinessWeeklyOpenIn {
     _?: "businessWeeklyOpen";
@@ -42635,7 +42958,7 @@ export namespace Api {
   export interface InputBusinessGreetingMessageIn {
     _?: "inputBusinessGreetingMessage";
     shortcutId: int;
-    recipients: InputBusinessRecipientsIn;
+    recipients: TypeInputBusinessRecipientsIn;
     noActivityDays: int;
   }
   export interface InputBusinessRecipientsIn {
@@ -42645,14 +42968,14 @@ export namespace Api {
     contacts?: boolean;
     nonContacts?: boolean;
     excludeSelected?: boolean;
-    users?: InputUserIn[];
+    users?: TypeInputUserIn[];
   }
   export interface InputBusinessAwayMessageIn {
     _?: "inputBusinessAwayMessage";
     offlineOnly?: boolean;
     shortcutId: int;
-    schedule: BusinessAwayMessageScheduleIn;
-    recipients: InputBusinessRecipientsIn;
+    schedule: TypeBusinessAwayMessageScheduleIn;
+    recipients: TypeInputBusinessRecipientsIn;
   }
   export interface BusinessAwayMessageScheduleAlwaysIn {
     _: "businessAwayMessageScheduleAlways";
@@ -42689,14 +43012,14 @@ export namespace Api {
     contacts?: boolean;
     nonContacts?: boolean;
     excludeSelected?: boolean;
-    users?: InputUserIn[];
-    excludeUsers?: InputUserIn[];
+    users?: TypeInputUserIn[];
+    excludeUsers?: TypeInputUserIn[];
   }
   export interface InputBusinessIntroIn {
     _?: "inputBusinessIntro";
     title: string;
     description: string;
-    sticker?: InputDocumentIn;
+    sticker?: TypeInputDocumentIn;
   }
   export interface BirthdayIn {
     _?: "birthday";
@@ -42707,7 +43030,7 @@ export namespace Api {
   export interface InputBusinessChatLinkIn {
     _?: "inputBusinessChatLink";
     message: string;
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     title?: string;
   }
   export interface MessageEntityUnknownIn {
@@ -42777,7 +43100,7 @@ export namespace Api {
     _: "inputMessageEntityMentionName";
     offset: int;
     length: int;
-    userId: InputUserIn;
+    userId: TypeInputUserIn;
   }
   export interface MessageEntityPhoneIn {
     _: "messageEntityPhone";
@@ -42851,10 +43174,10 @@ export namespace Api {
   }
   export interface ReactionsNotifySettingsIn {
     _?: "reactionsNotifySettings";
-    messagesNotifyFrom?: ReactionNotificationsFromIn;
-    storiesNotifyFrom?: ReactionNotificationsFromIn;
-    pollVotesNotifyFrom?: ReactionNotificationsFromIn;
-    sound: NotificationSoundIn;
+    messagesNotifyFrom?: TypeReactionNotificationsFromIn;
+    storiesNotifyFrom?: TypeReactionNotificationsFromIn;
+    pollVotesNotifyFrom?: TypeReactionNotificationsFromIn;
+    sound: TypeNotificationSoundIn;
     showPreviews: Bool;
   }
   export interface ReactionNotificationsFromContactsIn {
@@ -42889,56 +43212,56 @@ export namespace Api {
   }
   export interface SecureValueErrorDataIn {
     _: "secureValueErrorData";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     dataHash: bytes;
     field: string;
     text: string;
   }
   export interface SecureValueErrorFrontSideIn {
     _: "secureValueErrorFrontSide";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes;
     text: string;
   }
   export interface SecureValueErrorReverseSideIn {
     _: "secureValueErrorReverseSide";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes;
     text: string;
   }
   export interface SecureValueErrorSelfieIn {
     _: "secureValueErrorSelfie";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes;
     text: string;
   }
   export interface SecureValueErrorFileIn {
     _: "secureValueErrorFile";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes;
     text: string;
   }
   export interface SecureValueErrorFilesIn {
     _: "secureValueErrorFiles";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes[];
     text: string;
   }
   export interface SecureValueErrorIn {
     _: "secureValueError";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     hash: bytes;
     text: string;
   }
   export interface SecureValueErrorTranslationFileIn {
     _: "secureValueErrorTranslationFile";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes;
     text: string;
   }
   export interface SecureValueErrorTranslationFilesIn {
     _: "secureValueErrorTranslationFiles";
-    type: SecureValueTypeIn;
+    type: TypeSecureValueTypeIn;
     fileHash: bytes[];
     text: string;
   }
@@ -42948,12 +43271,12 @@ export namespace Api {
     phone: string;
     firstName: string;
     lastName: string;
-    note?: TextWithEntitiesIn;
+    note?: TypeTextWithEntitiesIn;
   }
   export interface TextWithEntitiesIn {
     _?: "textWithEntities";
     text: string;
-    entities: MessageEntityIn[];
+    entities: TypeMessageEntityIn[];
   }
   export interface TopPeerCategoryBotsPMIn {
     _: "topPeerCategoryBotsPM";
@@ -43128,7 +43451,7 @@ export namespace Api {
     _: "sendMessageEmojiInteraction";
     emoticon: string;
     msgId: int;
-    interaction: DataJSONIn;
+    interaction: TypeDataJSONIn;
   }
   export interface SendMessageEmojiInteractionSeenIn {
     _: "sendMessageEmojiInteractionSeen";
@@ -43136,29 +43459,33 @@ export namespace Api {
   }
   export interface SendMessageTextDraftActionIn {
     _: "sendMessageTextDraftAction";
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
-    text: TextWithEntitiesIn;
+    text: TypeTextWithEntitiesIn;
   }
   export interface InputSendMessageRichMessageDraftActionIn {
     _: "inputSendMessageRichMessageDraftAction";
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
-    richMessage: InputRichMessageIn;
+    richMessage: TypeInputRichMessageIn;
   }
   export interface InputRichMessageIn {
     _: "inputRichMessage";
     rtl?: boolean;
     noautolink?: boolean;
-    blocks: PageBlockIn[];
-    photos?: InputPhotoIn[];
-    documents?: InputDocumentIn[];
-    users?: InputUserIn[];
+    blocks: TypePageBlockIn[];
+    photos?: TypeInputPhotoIn[];
+    documents?: TypeInputDocumentIn[];
+    users?: TypeInputUserIn[];
   }
   export interface PageBlockUnsupportedIn {
     _: "pageBlockUnsupported";
   }
   export interface PageBlockTitleIn {
     _: "pageBlockTitle";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextEmptyIn {
     _: "textEmpty";
@@ -43169,54 +43496,54 @@ export namespace Api {
   }
   export interface TextBoldIn {
     _: "textBold";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextItalicIn {
     _: "textItalic";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextUnderlineIn {
     _: "textUnderline";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextStrikeIn {
     _: "textStrike";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextFixedIn {
     _: "textFixed";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextUrlIn {
     _: "textUrl";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     url: string;
     webpageId: long;
   }
   export interface TextEmailIn {
     _: "textEmail";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     email: string;
   }
   export interface TextConcatIn {
     _: "textConcat";
-    texts: RichTextIn[];
+    texts: TypeRichTextIn[];
   }
   export interface TextSubscriptIn {
     _: "textSubscript";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextSuperscriptIn {
     _: "textSuperscript";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextMarkedIn {
     _: "textMarked";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextPhoneIn {
     _: "textPhone";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     phone: string;
   }
   export interface TextImageIn {
@@ -43227,7 +43554,7 @@ export namespace Api {
   }
   export interface TextAnchorIn {
     _: "textAnchor";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     name: string;
   }
   export interface TextMathIn {
@@ -43241,43 +43568,43 @@ export namespace Api {
   }
   export interface TextSpoilerIn {
     _: "textSpoiler";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextMentionIn {
     _: "textMention";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextHashtagIn {
     _: "textHashtag";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextBotCommandIn {
     _: "textBotCommand";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextCashtagIn {
     _: "textCashtag";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextAutoUrlIn {
     _: "textAutoUrl";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextAutoEmailIn {
     _: "textAutoEmail";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextAutoPhoneIn {
     _: "textAutoPhone";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextBankCardIn {
     _: "textBankCard";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface TextMentionNameIn {
     _: "textMentionName";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     userId: long;
   }
   export interface TextDateIn {
@@ -43288,43 +43615,127 @@ export namespace Api {
     shortDate?: boolean;
     longDate?: boolean;
     dayOfWeek?: boolean;
-    text: RichTextIn;
+    text: TypeRichTextIn;
     date: int;
   }
   export interface TextDiffIn {
     _: "textDiff";
-    text: RichTextIn;
-    oldText: RichTextIn;
+    text: TypeRichTextIn;
+    oldText: TypeRichTextIn;
+  }
+  export interface TextButtonIn {
+    _: "textButton";
+    text: TypeRichTextIn;
+    type: TypeInlineButtonTypeIn;
+    style?: TypeRichButtonStyleIn;
+  }
+  export interface InlineButtonTypeUrlIn {
+    _: "inlineButtonTypeUrl";
+    url: string;
+  }
+  export interface InlineButtonTypeUrlAuthIn {
+    _: "inlineButtonTypeUrlAuth";
+    fwdText?: string;
+    url: string;
+    buttonId: int;
+  }
+  export interface InputInlineButtonTypeUrlAuthIn {
+    _: "inputInlineButtonTypeUrlAuth";
+    requestWriteAccess?: boolean;
+    fwdText?: string;
+    url: string;
+    bot?: TypeInputUserIn;
+  }
+  export interface InlineButtonTypeWebViewIn {
+    _: "inlineButtonTypeWebView";
+    url: string;
+  }
+  export interface InlineButtonTypeCallbackIn {
+    _: "inlineButtonTypeCallback";
+    requiresPassword?: boolean;
+    data: bytes;
+  }
+  export interface InlineButtonTypeGameIn {
+    _: "inlineButtonTypeGame";
+  }
+  export interface InlineButtonTypeBuyIn {
+    _: "inlineButtonTypeBuy";
+  }
+  export interface InlineButtonTypeSwitchInlineIn {
+    _: "inlineButtonTypeSwitchInline";
+    samePeer?: boolean;
+    query: string;
+    peerTypes?: TypeInlineQueryPeerTypeIn[];
+  }
+  export interface InlineQueryPeerTypeSameBotPMIn {
+    _: "inlineQueryPeerTypeSameBotPM";
+  }
+  export interface InlineQueryPeerTypePMIn {
+    _: "inlineQueryPeerTypePM";
+  }
+  export interface InlineQueryPeerTypeChatIn {
+    _: "inlineQueryPeerTypeChat";
+  }
+  export interface InlineQueryPeerTypeMegagroupIn {
+    _: "inlineQueryPeerTypeMegagroup";
+  }
+  export interface InlineQueryPeerTypeBroadcastIn {
+    _: "inlineQueryPeerTypeBroadcast";
+  }
+  export interface InlineQueryPeerTypeBotPMIn {
+    _: "inlineQueryPeerTypeBotPM";
+  }
+  export interface InlineButtonTypeUserProfileIn {
+    _: "inlineButtonTypeUserProfile";
+    userId: long;
+  }
+  export interface InputInlineButtonTypeUserProfileIn {
+    _: "inputInlineButtonTypeUserProfile";
+    userId: TypeInputUserIn;
+  }
+  export interface InlineButtonTypeCopyIn {
+    _: "inlineButtonTypeCopy";
+    copyText: string;
+  }
+  export interface InlineButtonTypeDisabledIn {
+    _: "inlineButtonTypeDisabled";
+  }
+  export interface RichButtonStyleIn {
+    _?: "richButtonStyle";
+    bgPrimary?: boolean;
+    bgDanger?: boolean;
+    bgSuccess?: boolean;
+    link?: boolean;
   }
   export interface PageBlockSubtitleIn {
     _: "pageBlockSubtitle";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockAuthorDateIn {
     _: "pageBlockAuthorDate";
-    author: RichTextIn;
+    author: TypeRichTextIn;
     publishedDate: int;
   }
   export interface PageBlockHeaderIn {
     _: "pageBlockHeader";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockSubheaderIn {
     _: "pageBlockSubheader";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockParagraphIn {
     _: "pageBlockParagraph";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockPreformattedIn {
     _: "pageBlockPreformatted";
-    text: RichTextIn;
+    text: TypeRichTextIn;
     language: string;
   }
   export interface PageBlockFooterIn {
     _: "pageBlockFooter";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockDividerIn {
     _: "pageBlockDivider";
@@ -43335,42 +43746,43 @@ export namespace Api {
   }
   export interface PageBlockListIn {
     _: "pageBlockList";
-    items: PageListItemIn[];
+    items: TypePageListItemIn[];
   }
   export interface PageListItemTextIn {
     _: "pageListItemText";
     checkbox?: boolean;
     checked?: boolean;
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageListItemBlocksIn {
     _: "pageListItemBlocks";
     checkbox?: boolean;
     checked?: boolean;
-    blocks: PageBlockIn[];
+    blocks: TypePageBlockIn[];
   }
   export interface PageBlockBlockquoteIn {
     _: "pageBlockBlockquote";
-    text: RichTextIn;
-    caption: RichTextIn;
+    collapsed?: boolean;
+    text: TypeRichTextIn;
+    caption: TypeRichTextIn;
   }
   export interface PageBlockPullquoteIn {
     _: "pageBlockPullquote";
-    text: RichTextIn;
-    caption: RichTextIn;
+    text: TypeRichTextIn;
+    caption: TypeRichTextIn;
   }
   export interface PageBlockPhotoIn {
     _: "pageBlockPhoto";
     spoiler?: boolean;
     photoId: long;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
     url?: string;
     webpageId?: long;
   }
   export interface PageCaptionIn {
     _?: "pageCaption";
-    text: RichTextIn;
-    credit: RichTextIn;
+    text: TypeRichTextIn;
+    credit: TypeRichTextIn;
   }
   export interface PageBlockVideoIn {
     _: "pageBlockVideo";
@@ -43378,11 +43790,11 @@ export namespace Api {
     loop?: boolean;
     spoiler?: boolean;
     videoId: long;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockCoverIn {
     _: "pageBlockCover";
-    cover: PageBlockIn;
+    cover: TypePageBlockIn;
   }
   export interface PageBlockEmbedIn {
     _: "pageBlockEmbed";
@@ -43393,7 +43805,7 @@ export namespace Api {
     posterPhotoId?: long;
     w?: int;
     h?: int;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockEmbedPostIn {
     _: "pageBlockEmbedPost";
@@ -43402,22 +43814,22 @@ export namespace Api {
     authorPhotoId: long;
     author: string;
     date: int;
-    blocks: PageBlockIn[];
-    caption: PageCaptionIn;
+    blocks: TypePageBlockIn[];
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockCollageIn {
     _: "pageBlockCollage";
-    items: PageBlockIn[];
-    caption: PageCaptionIn;
+    items: TypePageBlockIn[];
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockSlideshowIn {
     _: "pageBlockSlideshow";
-    items: PageBlockIn[];
-    caption: PageCaptionIn;
+    items: TypePageBlockIn[];
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockChannelIn {
     _: "pageBlockChannel";
-    channel: ChatIn;
+    channel: TypeChatIn;
   }
   export interface ChatEmptyIn {
     _: "chatEmpty";
@@ -43433,13 +43845,13 @@ export namespace Api {
     noforwards?: boolean;
     id: long;
     title: string;
-    photo: ChatPhotoIn;
+    photo: TypeChatPhotoIn;
     participantsCount: int;
     date: int;
     version: int;
-    migratedTo?: InputChannelIn;
-    adminRights?: ChatAdminRightsIn;
-    defaultBannedRights?: ChatBannedRightsIn;
+    migratedTo?: TypeInputChannelIn;
+    adminRights?: TypeChatAdminRightsIn;
+    defaultBannedRights?: TypeChatBannedRightsIn;
   }
   export interface ChatPhotoEmptyIn {
     _: "chatPhotoEmpty";
@@ -43461,7 +43873,7 @@ export namespace Api {
   }
   export interface InputChannelFromMessageIn {
     _: "inputChannelFromMessage";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     msgId: int;
     channelId: long;
   }
@@ -43485,6 +43897,7 @@ export namespace Api {
     manageDirectMessages?: boolean;
     manageRanks?: boolean;
     manageLinkedPeers?: boolean;
+    manageWelcomeMessages?: boolean;
   }
   export interface ChatBannedRightsIn {
     _?: "chatBannedRights";
@@ -43552,18 +43965,18 @@ export namespace Api {
     accessHash?: long;
     title: string;
     username?: string;
-    photo: ChatPhotoIn;
+    photo: TypeChatPhotoIn;
     date: int;
-    restrictionReason?: RestrictionReasonIn[];
-    adminRights?: ChatAdminRightsIn;
-    bannedRights?: ChatBannedRightsIn;
-    defaultBannedRights?: ChatBannedRightsIn;
+    restrictionReason?: TypeRestrictionReasonIn[];
+    adminRights?: TypeChatAdminRightsIn;
+    bannedRights?: TypeChatBannedRightsIn;
+    defaultBannedRights?: TypeChatBannedRightsIn;
     participantsCount?: int;
-    usernames?: UsernameIn[];
-    storiesMaxId?: RecentStoryIn;
-    color?: PeerColorIn;
-    profileColor?: PeerColorIn;
-    emojiStatus?: EmojiStatusIn;
+    usernames?: TypeUsernameIn[];
+    storiesMaxId?: TypeRecentStoryIn;
+    color?: TypePeerColorIn;
+    profileColor?: TypePeerColorIn;
+    emojiStatus?: TypeEmojiStatusIn;
     level?: int;
     subscriptionUntilDate?: int;
     botVerificationIcon?: long;
@@ -43613,30 +44026,31 @@ export namespace Api {
     id: long;
     accessHash?: long;
     title: string;
-    photo: ChatPhotoIn;
+    photo: TypeChatPhotoIn;
     date: int;
-    adminRights?: ChatAdminRightsIn;
-    defaultBannedRights?: ChatBannedRightsIn;
+    adminRights?: TypeChatAdminRightsIn;
+    defaultBannedRights?: TypeChatBannedRightsIn;
   }
   export interface PageBlockAudioIn {
     _: "pageBlockAudio";
     audioId: long;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockKickerIn {
     _: "pageBlockKicker";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockTableIn {
     _: "pageBlockTable";
     bordered?: boolean;
     striped?: boolean;
-    title: RichTextIn;
-    rows: PageTableRowIn[];
+    compact?: boolean;
+    title: TypeRichTextIn;
+    rows: TypePageTableRowIn[];
   }
   export interface PageTableRowIn {
     _?: "pageTableRow";
-    cells: PageTableCellIn[];
+    cells: TypePageTableCellIn[];
   }
   export interface PageTableCellIn {
     _?: "pageTableCell";
@@ -43645,14 +44059,14 @@ export namespace Api {
     alignRight?: boolean;
     valignMiddle?: boolean;
     valignBottom?: boolean;
-    text?: RichTextIn;
+    text?: TypeRichTextIn;
     colspan?: int;
     rowspan?: int;
   }
   export interface PageBlockOrderedListIn {
     _: "pageBlockOrderedList";
     reversed?: boolean;
-    items: PageListOrderedItemIn[];
+    items: TypePageListOrderedItemIn[];
     start?: int;
     type?: string;
   }
@@ -43661,7 +44075,7 @@ export namespace Api {
     checkbox?: boolean;
     checked?: boolean;
     num?: string;
-    text: RichTextIn;
+    text: TypeRichTextIn;
     value?: int;
     type?: string;
   }
@@ -43670,20 +44084,20 @@ export namespace Api {
     checkbox?: boolean;
     checked?: boolean;
     num?: string;
-    blocks: PageBlockIn[];
+    blocks: TypePageBlockIn[];
     value?: int;
     type?: string;
   }
   export interface PageBlockDetailsIn {
     _: "pageBlockDetails";
     open?: boolean;
-    blocks: PageBlockIn[];
-    title: RichTextIn;
+    blocks: TypePageBlockIn[];
+    title: TypeRichTextIn;
   }
   export interface PageBlockRelatedArticlesIn {
     _: "pageBlockRelatedArticles";
-    title: RichTextIn;
-    articles: PageRelatedArticleIn[];
+    title: TypeRichTextIn;
+    articles: TypePageRelatedArticleIn[];
   }
   export interface PageRelatedArticleIn {
     _?: "pageRelatedArticle";
@@ -43697,11 +44111,11 @@ export namespace Api {
   }
   export interface PageBlockMapIn {
     _: "pageBlockMap";
-    geo: GeoPointIn;
+    geo: TypeGeoPointIn;
     zoom: int;
     w: int;
     h: int;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
   }
   export interface GeoPointEmptyIn {
     _: "geoPointEmpty";
@@ -43715,27 +44129,27 @@ export namespace Api {
   }
   export interface PageBlockHeading1In {
     _: "pageBlockHeading1";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockHeading2In {
     _: "pageBlockHeading2";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockHeading3In {
     _: "pageBlockHeading3";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockHeading4In {
     _: "pageBlockHeading4";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockHeading5In {
     _: "pageBlockHeading5";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockHeading6In {
     _: "pageBlockHeading6";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface PageBlockMathIn {
     _: "pageBlockMath";
@@ -43743,57 +44157,77 @@ export namespace Api {
   }
   export interface PageBlockThinkingIn {
     _: "pageBlockThinking";
-    text: RichTextIn;
+    text: TypeRichTextIn;
   }
   export interface InputPageBlockMapIn {
     _: "inputPageBlockMap";
-    geo: InputGeoPointIn;
+    geo: TypeInputGeoPointIn;
     zoom: int;
     w: int;
     h: int;
-    caption: PageCaptionIn;
+    caption: TypePageCaptionIn;
   }
   export interface PageBlockBlockquoteBlocksIn {
     _: "pageBlockBlockquoteBlocks";
-    blocks: PageBlockIn[];
-    caption: RichTextIn;
+    blocks: TypePageBlockIn[];
+    caption: TypeRichTextIn;
+  }
+  export interface PageBlockButtonRowIn {
+    _: "pageBlockButtonRow";
+    alignLeft?: boolean;
+    alignCenter?: boolean;
+    alignRight?: boolean;
+    buttons: TypePageButtonIn[];
+  }
+  export interface PageButtonIn {
+    _?: "pageButton";
+    text: TypeRichTextIn;
+    type: TypeInlineButtonTypeIn;
+    style?: TypeRichButtonStyleIn;
+  }
+  export interface PageBlockDocumentIn {
+    _: "pageBlockDocument";
+    documentId: long;
+    caption: TypePageCaptionIn;
   }
   export interface InputRichMessageHTMLIn {
     _: "inputRichMessageHTML";
     rtl?: boolean;
     noautolink?: boolean;
     html: string;
-    files?: InputRichFileIn[];
+    files?: TypeInputRichFileIn[];
   }
   export interface InputRichFilePhotoIn {
     _: "inputRichFilePhoto";
     id: string;
-    photo: InputPhotoIn;
+    photo: TypeInputPhotoIn;
   }
   export interface InputRichFileDocumentIn {
     _: "inputRichFileDocument";
     id: string;
-    document: InputDocumentIn;
+    document: TypeInputDocumentIn;
   }
   export interface InputRichMessageMarkdownIn {
     _: "inputRichMessageMarkdown";
     rtl?: boolean;
     noautolink?: boolean;
     markdown: string;
-    files?: InputRichFileIn[];
+    files?: TypeInputRichFileIn[];
   }
   export interface SendMessageRichMessageDraftActionIn {
     _: "sendMessageRichMessageDraftAction";
+    canStop?: boolean;
+    keepOnStop?: boolean;
     randomId?: long;
-    richMessage: RichMessageIn;
+    richMessage: TypeRichMessageIn;
   }
   export interface RichMessageIn {
     _?: "richMessage";
     rtl?: boolean;
     part?: boolean;
-    blocks: PageBlockIn[];
-    photos: PhotoIn[];
-    documents: DocumentIn[];
+    blocks: TypePageBlockIn[];
+    photos: TypePhotoIn[];
+    documents: TypeDocumentIn[];
   }
   export interface PhotoEmptyIn {
     _: "photoEmpty";
@@ -43806,8 +44240,8 @@ export namespace Api {
     accessHash: long;
     fileReference: bytes;
     date: int;
-    sizes: PhotoSizeIn[];
-    videoSizes?: VideoSizeIn[];
+    sizes: TypePhotoSizeIn[];
+    videoSizes?: TypeVideoSizeIn[];
     dcId: int;
   }
   export interface PhotoSizeEmptyIn {
@@ -43860,7 +44294,7 @@ export namespace Api {
   }
   export interface VideoSizeStickerMarkupIn {
     _: "videoSizeStickerMarkup";
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     stickerId: long;
     backgroundColors: int[];
   }
@@ -43916,10 +44350,10 @@ export namespace Api {
     date: int;
     mimeType: string;
     size: long;
-    thumbs?: PhotoSizeIn[];
-    videoThumbs?: VideoSizeIn[];
+    thumbs?: TypePhotoSizeIn[];
+    videoThumbs?: TypeVideoSizeIn[];
     dcId: int;
-    attributes: DocumentAttributeIn[];
+    attributes: TypeDocumentAttributeIn[];
   }
   export interface DocumentAttributeImageSizeIn {
     _: "documentAttributeImageSize";
@@ -43933,8 +44367,8 @@ export namespace Api {
     _: "documentAttributeSticker";
     mask?: boolean;
     alt: string;
-    stickerset: InputStickerSetIn;
-    maskCoords?: MaskCoordsIn;
+    stickerset: TypeInputStickerSetIn;
+    maskCoords?: TypeMaskCoordsIn;
   }
   export interface MaskCoordsIn {
     _?: "maskCoords";
@@ -43975,28 +44409,32 @@ export namespace Api {
     free?: boolean;
     textColor?: boolean;
     alt: string;
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
+  }
+  export interface SendMessageStopDraftActionIn {
+    _: "sendMessageStopDraftAction";
+    randomId?: long;
   }
   export interface InputReplyToMessageIn {
     _: "inputReplyToMessage";
     replyToMsgId: int;
     topMsgId?: int;
-    replyToPeerId?: InputPeerIn;
+    replyToPeerId?: TypeInputPeerIn;
     quoteText?: string;
-    quoteEntities?: MessageEntityIn[];
+    quoteEntities?: TypeMessageEntityIn[];
     quoteOffset?: int;
-    monoforumPeerId?: InputPeerIn;
+    monoforumPeerId?: TypeInputPeerIn;
     todoItemId?: int;
     pollOption?: bytes;
   }
   export interface InputReplyToStoryIn {
     _: "inputReplyToStory";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     storyId: int;
   }
   export interface InputReplyToMonoForumIn {
     _: "inputReplyToMonoForum";
-    monoforumPeerId: InputPeerIn;
+    monoforumPeerId: TypeInputPeerIn;
   }
   export interface InputReplyToEphemeralMessageIn {
     _: "inputReplyToEphemeralMessage";
@@ -44018,17 +44456,19 @@ export namespace Api {
     singleUse?: boolean;
     selective?: boolean;
     persistent?: boolean;
-    rows: KeyboardButtonRowIn[];
+    forceReply?: boolean;
+    rows: TypeKeyboardButtonRowIn[];
     placeholder?: string;
   }
   export interface KeyboardButtonRowIn {
     _?: "keyboardButtonRow";
-    buttons: KeyboardButtonIn[];
+    buttons: TypeKeyboardButtonIn[];
   }
   export interface KeyboardButtonIn {
-    _: "keyboardButton";
-    style?: KeyboardButtonStyleIn;
+    _?: "keyboardButton";
+    style?: TypeKeyboardButtonStyleIn;
     text: string;
+    type: TypeButtonTypeIn;
   }
   export interface KeyboardButtonStyleIn {
     _?: "keyboardButtonStyle";
@@ -44037,118 +44477,23 @@ export namespace Api {
     bgSuccess?: boolean;
     icon?: long;
   }
-  export interface KeyboardButtonUrlIn {
-    _: "keyboardButtonUrl";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    url: string;
+  export interface ButtonTypeDefaultIn {
+    _: "buttonTypeDefault";
   }
-  export interface KeyboardButtonCallbackIn {
-    _: "keyboardButtonCallback";
-    requiresPassword?: boolean;
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    data: bytes;
+  export interface ButtonTypeRequestPhoneIn {
+    _: "buttonTypeRequestPhone";
   }
-  export interface KeyboardButtonRequestPhoneIn {
-    _: "keyboardButtonRequestPhone";
-    style?: KeyboardButtonStyleIn;
-    text: string;
+  export interface ButtonTypeRequestGeoLocationIn {
+    _: "buttonTypeRequestGeoLocation";
   }
-  export interface KeyboardButtonRequestGeoLocationIn {
-    _: "keyboardButtonRequestGeoLocation";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-  }
-  export interface KeyboardButtonSwitchInlineIn {
-    _: "keyboardButtonSwitchInline";
-    samePeer?: boolean;
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    query: string;
-    peerTypes?: InlineQueryPeerTypeIn[];
-  }
-  export interface InlineQueryPeerTypeSameBotPMIn {
-    _: "inlineQueryPeerTypeSameBotPM";
-  }
-  export interface InlineQueryPeerTypePMIn {
-    _: "inlineQueryPeerTypePM";
-  }
-  export interface InlineQueryPeerTypeChatIn {
-    _: "inlineQueryPeerTypeChat";
-  }
-  export interface InlineQueryPeerTypeMegagroupIn {
-    _: "inlineQueryPeerTypeMegagroup";
-  }
-  export interface InlineQueryPeerTypeBroadcastIn {
-    _: "inlineQueryPeerTypeBroadcast";
-  }
-  export interface InlineQueryPeerTypeBotPMIn {
-    _: "inlineQueryPeerTypeBotPM";
-  }
-  export interface KeyboardButtonGameIn {
-    _: "keyboardButtonGame";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-  }
-  export interface KeyboardButtonBuyIn {
-    _: "keyboardButtonBuy";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-  }
-  export interface KeyboardButtonUrlAuthIn {
-    _: "keyboardButtonUrlAuth";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    fwdText?: string;
-    url: string;
-    buttonId: int;
-  }
-  export interface InputKeyboardButtonUrlAuthIn {
-    _: "inputKeyboardButtonUrlAuth";
-    requestWriteAccess?: boolean;
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    fwdText?: string;
-    url: string;
-    bot: InputUserIn;
-  }
-  export interface KeyboardButtonRequestPollIn {
-    _: "keyboardButtonRequestPoll";
-    style?: KeyboardButtonStyleIn;
+  export interface ButtonTypeRequestPollIn {
+    _: "buttonTypeRequestPoll";
     quiz?: Bool;
-    text: string;
   }
-  export interface InputKeyboardButtonUserProfileIn {
-    _: "inputKeyboardButtonUserProfile";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    userId: InputUserIn;
-  }
-  export interface KeyboardButtonUserProfileIn {
-    _: "keyboardButtonUserProfile";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    userId: long;
-  }
-  export interface KeyboardButtonWebViewIn {
-    _: "keyboardButtonWebView";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    url: string;
-  }
-  export interface KeyboardButtonSimpleWebViewIn {
-    _: "keyboardButtonSimpleWebView";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    url: string;
-  }
-  export interface KeyboardButtonRequestPeerIn {
-    _: "keyboardButtonRequestPeer";
-    style?: KeyboardButtonStyleIn;
-    text: string;
+  export interface ButtonTypeRequestPeerIn {
+    _: "buttonTypeRequestPeer";
     buttonId: int;
-    peerType: RequestPeerTypeIn;
+    peerType: TypeRequestPeerTypeIn;
     maxQuantity: int;
   }
   export interface RequestPeerTypeUserIn {
@@ -44162,15 +44507,15 @@ export namespace Api {
     botParticipant?: boolean;
     hasUsername?: Bool;
     forum?: Bool;
-    userAdminRights?: ChatAdminRightsIn;
-    botAdminRights?: ChatAdminRightsIn;
+    userAdminRights?: TypeChatAdminRightsIn;
+    botAdminRights?: TypeChatAdminRightsIn;
   }
   export interface RequestPeerTypeBroadcastIn {
     _: "requestPeerTypeBroadcast";
     creator?: boolean;
     hasUsername?: Bool;
-    userAdminRights?: ChatAdminRightsIn;
-    botAdminRights?: ChatAdminRightsIn;
+    userAdminRights?: TypeChatAdminRightsIn;
+    botAdminRights?: TypeChatAdminRightsIn;
   }
   export interface RequestPeerTypeCreateBotIn {
     _: "requestPeerTypeCreateBot";
@@ -44178,26 +44523,33 @@ export namespace Api {
     suggestedName?: string;
     suggestedUsername?: string;
   }
-  export interface InputKeyboardButtonRequestPeerIn {
-    _: "inputKeyboardButtonRequestPeer";
+  export interface InputButtonTypeRequestPeerIn {
+    _: "inputButtonTypeRequestPeer";
     nameRequested?: boolean;
     usernameRequested?: boolean;
     photoRequested?: boolean;
-    style?: KeyboardButtonStyleIn;
-    text: string;
     buttonId: int;
-    peerType: RequestPeerTypeIn;
+    peerType: TypeRequestPeerTypeIn;
     maxQuantity: int;
   }
-  export interface KeyboardButtonCopyIn {
-    _: "keyboardButtonCopy";
-    style?: KeyboardButtonStyleIn;
-    text: string;
-    copyText: string;
+  export interface ButtonTypeSimpleWebViewIn {
+    _: "buttonTypeSimpleWebView";
+    url: string;
   }
   export interface ReplyInlineMarkupIn {
     _: "replyInlineMarkup";
-    rows: KeyboardButtonRowIn[];
+    forceReply?: boolean;
+    rows: TypeKeyboardInlineButtonRowIn[];
+  }
+  export interface KeyboardInlineButtonRowIn {
+    _?: "keyboardInlineButtonRow";
+    buttons: TypeKeyboardInlineButtonIn[];
+  }
+  export interface KeyboardInlineButtonIn {
+    _?: "keyboardInlineButton";
+    style?: TypeKeyboardButtonStyleIn;
+    text: string;
+    type: TypeInlineButtonTypeIn;
   }
   export interface InputQuickReplyShortcutIn {
     _: "inputQuickReplyShortcut";
@@ -44211,7 +44563,7 @@ export namespace Api {
     _?: "suggestedPost";
     accepted?: boolean;
     rejected?: boolean;
-    price?: StarsAmountIn;
+    price?: TypeStarsAmountIn;
     scheduleDate?: int;
   }
   export interface StarsAmountIn {
@@ -44230,22 +44582,22 @@ export namespace Api {
     _: "inputMediaUploadedPhoto";
     spoiler?: boolean;
     livePhoto?: boolean;
-    file: InputFileIn;
-    stickers?: InputDocumentIn[];
+    file: TypeInputFileIn;
+    stickers?: TypeInputDocumentIn[];
     ttlSeconds?: int;
-    video?: InputDocumentIn;
+    video?: TypeInputDocumentIn;
   }
   export interface InputMediaPhotoIn {
     _: "inputMediaPhoto";
     spoiler?: boolean;
     livePhoto?: boolean;
-    id: InputPhotoIn;
+    id: TypeInputPhotoIn;
     ttlSeconds?: int;
-    video?: InputDocumentIn;
+    video?: TypeInputDocumentIn;
   }
   export interface InputMediaGeoPointIn {
     _: "inputMediaGeoPoint";
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
   }
   export interface InputMediaContactIn {
     _: "inputMediaContact";
@@ -44259,27 +44611,27 @@ export namespace Api {
     nosoundVideo?: boolean;
     forceFile?: boolean;
     spoiler?: boolean;
-    file: InputFileIn;
-    thumb?: InputFileIn;
+    file: TypeInputFileIn;
+    thumb?: TypeInputFileIn;
     mimeType: string;
-    attributes: DocumentAttributeIn[];
-    stickers?: InputDocumentIn[];
-    videoCover?: InputPhotoIn;
+    attributes: TypeDocumentAttributeIn[];
+    stickers?: TypeInputDocumentIn[];
+    videoCover?: TypeInputPhotoIn;
     videoTimestamp?: int;
     ttlSeconds?: int;
   }
   export interface InputMediaDocumentIn {
     _: "inputMediaDocument";
     spoiler?: boolean;
-    id: InputDocumentIn;
-    videoCover?: InputPhotoIn;
+    id: TypeInputDocumentIn;
+    videoCover?: TypeInputPhotoIn;
     videoTimestamp?: int;
     ttlSeconds?: int;
     query?: string;
   }
   export interface InputMediaVenueIn {
     _: "inputMediaVenue";
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     title: string;
     address: string;
     provider: string;
@@ -44297,12 +44649,12 @@ export namespace Api {
     spoiler?: boolean;
     url: string;
     ttlSeconds?: int;
-    videoCover?: InputPhotoIn;
+    videoCover?: TypeInputPhotoIn;
     videoTimestamp?: int;
   }
   export interface InputMediaGameIn {
     _: "inputMediaGame";
-    id: InputGameIn;
+    id: TypeInputGameIn;
   }
   export interface InputGameIDIn {
     _: "inputGameID";
@@ -44311,27 +44663,27 @@ export namespace Api {
   }
   export interface InputGameShortNameIn {
     _: "inputGameShortName";
-    botId: InputUserIn;
+    botId: TypeInputUserIn;
     shortName: string;
   }
   export interface InputMediaInvoiceIn {
     _: "inputMediaInvoice";
     title: string;
     description: string;
-    photo?: InputWebDocumentIn;
-    invoice: InvoiceIn;
+    photo?: TypeInputWebDocumentIn;
+    invoice: TypeInvoiceIn;
     payload: bytes;
     provider?: string;
-    providerData: DataJSONIn;
+    providerData: TypeDataJSONIn;
     startParam?: string;
-    extendedMedia?: InputMediaIn;
+    extendedMedia?: TypeInputMediaIn;
   }
   export interface InputWebDocumentIn {
     _?: "inputWebDocument";
     url: string;
     size: int;
     mimeType: string;
-    attributes: DocumentAttributeIn[];
+    attributes: TypeDocumentAttributeIn[];
   }
   export interface InvoiceIn {
     _?: "invoice";
@@ -44345,7 +44697,7 @@ export namespace Api {
     emailToProvider?: boolean;
     recurring?: boolean;
     currency: string;
-    prices: LabeledPriceIn[];
+    prices: TypeLabeledPriceIn[];
     maxTipAmount?: long;
     suggestedTipAmounts?: long[];
     termsUrl?: string;
@@ -44359,19 +44711,19 @@ export namespace Api {
   export interface InputMediaGeoLiveIn {
     _: "inputMediaGeoLive";
     stopped?: boolean;
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     heading?: int;
     period?: int;
     proximityNotificationRadius?: int;
   }
   export interface InputMediaPollIn {
     _: "inputMediaPoll";
-    poll: PollIn;
+    poll: TypePollIn;
     correctAnswers?: int[];
-    attachedMedia?: InputMediaIn;
+    attachedMedia?: TypeInputMediaIn;
     solution?: string;
-    solutionEntities?: MessageEntityIn[];
-    solutionMedia?: InputMediaIn;
+    solutionEntities?: TypeMessageEntityIn[];
+    solutionMedia?: TypeInputMediaIn;
   }
   export interface PollIn {
     _?: "poll";
@@ -44386,8 +44738,8 @@ export namespace Api {
     hideResultsUntilClose?: boolean;
     creator?: boolean;
     subscribersOnly?: boolean;
-    question: TextWithEntitiesIn;
-    answers: PollAnswerIn[];
+    question: TypeTextWithEntitiesIn;
+    answers: TypePollAnswerIn[];
     closePeriod?: int;
     closeDate?: int;
     countriesIso2?: string[];
@@ -44395,10 +44747,10 @@ export namespace Api {
   }
   export interface PollAnswerIn {
     _: "pollAnswer";
-    text: TextWithEntitiesIn;
+    text: TypeTextWithEntitiesIn;
     option: bytes;
-    media?: MessageMediaIn;
-    addedBy?: PeerIn;
+    media?: TypeMessageMediaIn;
+    addedBy?: TypePeerIn;
     date?: int;
   }
   export interface MessageMediaEmptyIn {
@@ -44408,13 +44760,13 @@ export namespace Api {
     _: "messageMediaPhoto";
     spoiler?: boolean;
     livePhoto?: boolean;
-    photo?: PhotoIn;
+    photo?: TypePhotoIn;
     ttlSeconds?: int;
-    video?: DocumentIn;
+    video?: TypeDocumentIn;
   }
   export interface MessageMediaGeoIn {
     _: "messageMediaGeo";
-    geo: GeoPointIn;
+    geo: TypeGeoPointIn;
   }
   export interface MessageMediaContactIn {
     _: "messageMediaContact";
@@ -44434,9 +44786,9 @@ export namespace Api {
     video?: boolean;
     round?: boolean;
     voice?: boolean;
-    document?: DocumentIn;
-    altDocuments?: DocumentIn[];
-    videoCover?: PhotoIn;
+    document?: TypeDocumentIn;
+    altDocuments?: TypeDocumentIn[];
+    videoCover?: TypePhotoIn;
     videoTimestamp?: int;
     ttlSeconds?: int;
   }
@@ -44446,7 +44798,7 @@ export namespace Api {
     forceSmallMedia?: boolean;
     manual?: boolean;
     safe?: boolean;
-    webpage: WebPageIn;
+    webpage: TypeWebPageIn;
   }
   export interface WebPageEmptyIn {
     _: "webPageEmpty";
@@ -44471,16 +44823,16 @@ export namespace Api {
     siteName?: string;
     title?: string;
     description?: string;
-    photo?: PhotoIn;
+    photo?: TypePhotoIn;
     embedUrl?: string;
     embedType?: string;
     embedWidth?: int;
     embedHeight?: int;
     duration?: int;
     author?: string;
-    document?: DocumentIn;
-    cachedPage?: PageIn;
-    attributes?: WebPageAttributeIn[];
+    document?: TypeDocumentIn;
+    cachedPage?: TypePageIn;
+    attributes?: TypeWebPageAttributeIn[];
   }
   export interface PageIn {
     _?: "page";
@@ -44488,24 +44840,24 @@ export namespace Api {
     rtl?: boolean;
     v2?: boolean;
     url: string;
-    blocks: PageBlockIn[];
-    photos: PhotoIn[];
-    documents: DocumentIn[];
+    blocks: TypePageBlockIn[];
+    photos: TypePhotoIn[];
+    documents: TypeDocumentIn[];
     views?: int;
   }
   export interface WebPageAttributeThemeIn {
     _: "webPageAttributeTheme";
-    documents?: DocumentIn[];
-    settings?: ThemeSettingsIn;
+    documents?: TypeDocumentIn[];
+    settings?: TypeThemeSettingsIn;
   }
   export interface ThemeSettingsIn {
     _?: "themeSettings";
     messageColorsAnimated?: boolean;
-    baseTheme: BaseThemeIn;
+    baseTheme: TypeBaseThemeIn;
     accentColor: int;
     outboxAccentColor?: int;
     messageColors?: int[];
-    wallpaper?: WallPaperIn;
+    wallpaper?: TypeWallPaperIn;
   }
   export interface WallPaperIn {
     _: "wallPaper";
@@ -44516,21 +44868,21 @@ export namespace Api {
     dark?: boolean;
     accessHash: long;
     slug: string;
-    document: DocumentIn;
-    settings?: WallPaperSettingsIn;
+    document: TypeDocumentIn;
+    settings?: TypeWallPaperSettingsIn;
   }
   export interface WallPaperNoFileIn {
     _: "wallPaperNoFile";
     id: long;
     default?: boolean;
     dark?: boolean;
-    settings?: WallPaperSettingsIn;
+    settings?: TypeWallPaperSettingsIn;
   }
   export interface WebPageAttributeStoryIn {
     _: "webPageAttributeStory";
-    peer: PeerIn;
+    peer: TypePeerIn;
     id: int;
-    story?: StoryItemIn;
+    story?: TypeStoryItemIn;
   }
   export interface PeerUserIn {
     _: "peerUser";
@@ -44569,30 +44921,30 @@ export namespace Api {
     out?: boolean;
     id: int;
     date: int;
-    fromId?: PeerIn;
-    fwdFrom?: StoryFwdHeaderIn;
+    fromId?: TypePeerIn;
+    fwdFrom?: TypeStoryFwdHeaderIn;
     expireDate: int;
     caption?: string;
-    entities?: MessageEntityIn[];
-    media: MessageMediaIn;
-    mediaAreas?: MediaAreaIn[];
-    privacy?: PrivacyRuleIn[];
-    views?: StoryViewsIn;
-    sentReaction?: ReactionIn;
+    entities?: TypeMessageEntityIn[];
+    media: TypeMessageMediaIn;
+    mediaAreas?: TypeMediaAreaIn[];
+    privacy?: TypePrivacyRuleIn[];
+    views?: TypeStoryViewsIn;
+    sentReaction?: TypeReactionIn;
     albums?: int[];
-    music?: DocumentIn;
+    music?: TypeDocumentIn;
   }
   export interface StoryFwdHeaderIn {
     _?: "storyFwdHeader";
     modified?: boolean;
-    from?: PeerIn;
+    from?: TypePeerIn;
     fromName?: string;
     storyId?: int;
   }
   export interface MediaAreaVenueIn {
     _: "mediaAreaVenue";
-    coordinates: MediaAreaCoordinatesIn;
-    geo: GeoPointIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
+    geo: TypeGeoPointIn;
     title: string;
     address: string;
     provider: string;
@@ -44610,15 +44962,15 @@ export namespace Api {
   }
   export interface InputMediaAreaVenueIn {
     _: "inputMediaAreaVenue";
-    coordinates: MediaAreaCoordinatesIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
     queryId: long;
     resultId: string;
   }
   export interface MediaAreaGeoPointIn {
     _: "mediaAreaGeoPoint";
-    coordinates: MediaAreaCoordinatesIn;
-    geo: GeoPointIn;
-    address?: GeoPointAddressIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
+    geo: TypeGeoPointIn;
+    address?: TypeGeoPointAddressIn;
   }
   export interface GeoPointAddressIn {
     _?: "geoPointAddress";
@@ -44631,36 +44983,36 @@ export namespace Api {
     _: "mediaAreaSuggestedReaction";
     dark?: boolean;
     flipped?: boolean;
-    coordinates: MediaAreaCoordinatesIn;
-    reaction: ReactionIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
+    reaction: TypeReactionIn;
   }
   export interface MediaAreaChannelPostIn {
     _: "mediaAreaChannelPost";
-    coordinates: MediaAreaCoordinatesIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
     channelId: long;
     msgId: int;
   }
   export interface InputMediaAreaChannelPostIn {
     _: "inputMediaAreaChannelPost";
-    coordinates: MediaAreaCoordinatesIn;
-    channel: InputChannelIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
+    channel: TypeInputChannelIn;
     msgId: int;
   }
   export interface MediaAreaUrlIn {
     _: "mediaAreaUrl";
-    coordinates: MediaAreaCoordinatesIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
     url: string;
   }
   export interface MediaAreaWeatherIn {
     _: "mediaAreaWeather";
-    coordinates: MediaAreaCoordinatesIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
     emoji: string;
     temperatureC: double;
     color: int;
   }
   export interface MediaAreaStarGiftIn {
     _: "mediaAreaStarGift";
-    coordinates: MediaAreaCoordinatesIn;
+    coordinates: TypeMediaAreaCoordinatesIn;
     slug: string;
   }
   export interface PrivacyValueAllowContactsIn {
@@ -44708,25 +45060,25 @@ export namespace Api {
     hasViewers?: boolean;
     viewsCount: int;
     forwardsCount?: int;
-    reactions?: ReactionCountIn[];
+    reactions?: TypeReactionCountIn[];
     reactionsCount?: int;
     recentViewers?: long[];
   }
   export interface ReactionCountIn {
     _?: "reactionCount";
     chosenOrder?: int;
-    reaction: ReactionIn;
+    reaction: TypeReactionIn;
     count: int;
   }
   export interface WebPageAttributeStickerSetIn {
     _: "webPageAttributeStickerSet";
     emojis?: boolean;
     textColor?: boolean;
-    stickers: DocumentIn[];
+    stickers: TypeDocumentIn[];
   }
   export interface WebPageAttributeUniqueStarGiftIn {
     _: "webPageAttributeUniqueStarGift";
-    gift: StarGiftIn;
+    gift: TypeStarGiftIn;
   }
   export interface StarGiftIn {
     _: "starGift";
@@ -44738,7 +45090,7 @@ export namespace Api {
     peerColorAvailable?: boolean;
     auction?: boolean;
     id: long;
-    sticker: DocumentIn;
+    sticker: TypeDocumentIn;
     stars: long;
     availabilityRemains?: int;
     availabilityTotal?: int;
@@ -44749,7 +45101,7 @@ export namespace Api {
     upgradeStars?: long;
     resellMinStars?: long;
     title?: string;
-    releasedBy?: PeerIn;
+    releasedBy?: TypePeerIn;
     perUserTotal?: int;
     perUserRemains?: int;
     lockedUntilDate?: int;
@@ -44757,7 +45109,7 @@ export namespace Api {
     giftsPerRound?: int;
     auctionStartDate?: int;
     upgradeVariants?: int;
-    background?: StarGiftBackgroundIn;
+    background?: TypeStarGiftBackgroundIn;
   }
   export interface StarGiftBackgroundIn {
     _?: "starGiftBackground";
@@ -44777,21 +45129,21 @@ export namespace Api {
     title: string;
     slug: string;
     num: int;
-    ownerId?: PeerIn;
+    ownerId?: TypePeerIn;
     ownerName?: string;
     ownerAddress?: string;
-    attributes: StarGiftAttributeIn[];
+    attributes: TypeStarGiftAttributeIn[];
     availabilityIssued: int;
     availabilityTotal: int;
     giftAddress?: string;
-    resellAmount?: StarsAmountIn[];
-    releasedBy?: PeerIn;
+    resellAmount?: TypeStarsAmountIn[];
+    releasedBy?: TypePeerIn;
     valueAmount?: long;
     valueCurrency?: string;
     valueUsdAmount?: long;
-    themePeer?: PeerIn;
-    peerColor?: PeerColorIn;
-    hostId?: PeerIn;
+    themePeer?: TypePeerIn;
+    peerColor?: TypePeerColorIn;
+    hostId?: TypePeerIn;
     offerMinStars?: int;
     craftChancePermille?: int;
   }
@@ -44799,8 +45151,8 @@ export namespace Api {
     _: "starGiftAttributeModel";
     crafted?: boolean;
     name: string;
-    document: DocumentIn;
-    rarity: StarGiftAttributeRarityIn;
+    document: TypeDocumentIn;
+    rarity: TypeStarGiftAttributeRarityIn;
   }
   export interface StarGiftAttributeRarityIn {
     _: "starGiftAttributeRarity";
@@ -44821,8 +45173,8 @@ export namespace Api {
   export interface StarGiftAttributePatternIn {
     _: "starGiftAttributePattern";
     name: string;
-    document: DocumentIn;
-    rarity: StarGiftAttributeRarityIn;
+    document: TypeDocumentIn;
+    rarity: TypeStarGiftAttributeRarityIn;
   }
   export interface StarGiftAttributeBackdropIn {
     _: "starGiftAttributeBackdrop";
@@ -44832,22 +45184,22 @@ export namespace Api {
     edgeColor: int;
     patternColor: int;
     textColor: int;
-    rarity: StarGiftAttributeRarityIn;
+    rarity: TypeStarGiftAttributeRarityIn;
   }
   export interface StarGiftAttributeOriginalDetailsIn {
     _: "starGiftAttributeOriginalDetails";
-    senderId?: PeerIn;
-    recipientId: PeerIn;
+    senderId?: TypePeerIn;
+    recipientId: TypePeerIn;
     date: int;
-    message?: TextWithEntitiesIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface WebPageAttributeStarGiftCollectionIn {
     _: "webPageAttributeStarGiftCollection";
-    icons: DocumentIn[];
+    icons: TypeDocumentIn[];
   }
   export interface WebPageAttributeStarGiftAuctionIn {
     _: "webPageAttributeStarGiftAuction";
-    gift: StarGiftIn;
+    gift: TypeStarGiftIn;
     endDate: int;
   }
   export interface WebPageAttributeAiComposeToneIn {
@@ -44860,7 +45212,7 @@ export namespace Api {
   }
   export interface MessageMediaVenueIn {
     _: "messageMediaVenue";
-    geo: GeoPointIn;
+    geo: TypeGeoPointIn;
     title: string;
     address: string;
     provider: string;
@@ -44869,7 +45221,7 @@ export namespace Api {
   }
   export interface MessageMediaGameIn {
     _: "messageMediaGame";
-    game: GameIn;
+    game: TypeGameIn;
   }
   export interface GameIn {
     _?: "game";
@@ -44878,8 +45230,8 @@ export namespace Api {
     shortName: string;
     title: string;
     description: string;
-    photo: PhotoIn;
-    document?: DocumentIn;
+    photo: TypePhotoIn;
+    document?: TypeDocumentIn;
   }
   export interface MessageMediaInvoiceIn {
     _: "messageMediaInvoice";
@@ -44887,12 +45239,12 @@ export namespace Api {
     test?: boolean;
     title: string;
     description: string;
-    photo?: WebDocumentIn;
+    photo?: TypeWebDocumentIn;
     receiptMsgId?: int;
     currency: string;
     totalAmount: long;
     startParam: string;
-    extendedMedia?: MessageExtendedMediaIn;
+    extendedMedia?: TypeMessageExtendedMediaIn;
   }
   export interface WebDocumentIn {
     _: "webDocument";
@@ -44900,50 +45252,50 @@ export namespace Api {
     accessHash: long;
     size: int;
     mimeType: string;
-    attributes: DocumentAttributeIn[];
+    attributes: TypeDocumentAttributeIn[];
   }
   export interface WebDocumentNoProxyIn {
     _: "webDocumentNoProxy";
     url: string;
     size: int;
     mimeType: string;
-    attributes: DocumentAttributeIn[];
+    attributes: TypeDocumentAttributeIn[];
   }
   export interface MessageExtendedMediaPreviewIn {
     _: "messageExtendedMediaPreview";
     w?: int;
     h?: int;
-    thumb?: PhotoSizeIn;
+    thumb?: TypePhotoSizeIn;
     videoDuration?: int;
   }
   export interface MessageExtendedMediaIn {
     _: "messageExtendedMedia";
-    media: MessageMediaIn;
+    media: TypeMessageMediaIn;
   }
   export interface MessageMediaGeoLiveIn {
     _: "messageMediaGeoLive";
-    geo: GeoPointIn;
+    geo: TypeGeoPointIn;
     heading?: int;
     period: int;
     proximityNotificationRadius?: int;
   }
   export interface MessageMediaPollIn {
     _: "messageMediaPoll";
-    poll: PollIn;
-    results: PollResultsIn;
-    attachedMedia?: MessageMediaIn;
+    poll: TypePollIn;
+    results: TypePollResultsIn;
+    attachedMedia?: TypeMessageMediaIn;
   }
   export interface PollResultsIn {
     _?: "pollResults";
     min?: boolean;
     hasUnreadVotes?: boolean;
     canViewStats?: boolean;
-    results?: PollAnswerVotersIn[];
+    results?: TypePollAnswerVotersIn[];
     totalVoters?: int;
-    recentVoters?: PeerIn[];
+    recentVoters?: TypePeerIn[];
     solution?: string;
-    solutionEntities?: MessageEntityIn[];
-    solutionMedia?: MessageMediaIn;
+    solutionEntities?: TypeMessageEntityIn[];
+    solutionMedia?: TypeMessageMediaIn;
   }
   export interface PollAnswerVotersIn {
     _?: "pollAnswerVoters";
@@ -44951,13 +45303,13 @@ export namespace Api {
     correct?: boolean;
     option: bytes;
     voters?: int;
-    recentVoters?: PeerIn[];
+    recentVoters?: TypePeerIn[];
   }
   export interface MessageMediaDiceIn {
     _: "messageMediaDice";
     value: int;
     emoticon: string;
-    gameOutcome?: MessagesEmojiGameOutcomeIn;
+    gameOutcome?: TypeMessagesEmojiGameOutcomeIn;
   }
   export interface MessagesEmojiGameOutcomeIn {
     _?: "messages.emojiGameOutcome";
@@ -44968,9 +45320,9 @@ export namespace Api {
   export interface MessageMediaStoryIn {
     _: "messageMediaStory";
     viaMention?: boolean;
-    peer: PeerIn;
+    peer: TypePeerIn;
     id: int;
-    story?: StoryItemIn;
+    story?: TypeStoryItemIn;
   }
   export interface MessageMediaGiveawayIn {
     _: "messageMediaGiveaway";
@@ -45002,35 +45354,35 @@ export namespace Api {
   export interface MessageMediaPaidMediaIn {
     _: "messageMediaPaidMedia";
     starsAmount: long;
-    extendedMedia: MessageExtendedMediaIn[];
+    extendedMedia: TypeMessageExtendedMediaIn[];
   }
   export interface MessageMediaToDoIn {
     _: "messageMediaToDo";
-    todo: TodoListIn;
-    completions?: TodoCompletionIn[];
+    todo: TypeTodoListIn;
+    completions?: TypeTodoCompletionIn[];
   }
   export interface TodoListIn {
     _?: "todoList";
     othersCanAppend?: boolean;
     othersCanComplete?: boolean;
-    title: TextWithEntitiesIn;
-    list: TodoItemIn[];
+    title: TypeTextWithEntitiesIn;
+    list: TypeTodoItemIn[];
   }
   export interface TodoItemIn {
     _?: "todoItem";
     id: int;
-    title: TextWithEntitiesIn;
+    title: TypeTextWithEntitiesIn;
   }
   export interface TodoCompletionIn {
     _?: "todoCompletion";
     id: int;
-    completedBy: PeerIn;
+    completedBy: TypePeerIn;
     date: int;
   }
   export interface MessageMediaVideoStreamIn {
     _: "messageMediaVideoStream";
     rtmpStream?: boolean;
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
   }
   export interface InputGroupCallIn {
     _: "inputGroupCall";
@@ -45047,8 +45399,8 @@ export namespace Api {
   }
   export interface InputPollAnswerIn {
     _: "inputPollAnswer";
-    text: TextWithEntitiesIn;
-    media?: InputMediaIn;
+    text: TypeTextWithEntitiesIn;
+    media?: TypeInputMediaIn;
   }
   export interface InputMediaDiceIn {
     _: "inputMediaDice";
@@ -45056,7 +45408,7 @@ export namespace Api {
   }
   export interface InputMediaStoryIn {
     _: "inputMediaStory";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     id: int;
   }
   export interface InputMediaWebPageIn {
@@ -45069,12 +45421,12 @@ export namespace Api {
   export interface InputMediaPaidMediaIn {
     _: "inputMediaPaidMedia";
     starsAmount: long;
-    extendedMedia: InputMediaIn[];
+    extendedMedia: TypeInputMediaIn[];
     payload?: string;
   }
   export interface InputMediaTodoIn {
     _: "inputMediaTodo";
-    todo: TodoListIn;
+    todo: TypeTodoListIn;
   }
   export interface InputMediaStakeDiceIn {
     _: "inputMediaStakeDice";
@@ -45087,14 +45439,14 @@ export namespace Api {
   }
   export interface InputChatUploadedPhotoIn {
     _: "inputChatUploadedPhoto";
-    file?: InputFileIn;
-    video?: InputFileIn;
+    file?: TypeInputFileIn;
+    video?: TypeInputFileIn;
     videoStartTs?: double;
-    videoEmojiMarkup?: VideoSizeIn;
+    videoEmojiMarkup?: TypeVideoSizeIn;
   }
   export interface InputChatPhotoIn {
     _: "inputChatPhoto";
-    id: InputPhotoIn;
+    id: TypeInputPhotoIn;
   }
   export interface InputEncryptedChatIn {
     _?: "inputEncryptedChat";
@@ -45134,42 +45486,42 @@ export namespace Api {
     title?: string;
     description?: string;
     url?: string;
-    thumb?: InputWebDocumentIn;
-    content?: InputWebDocumentIn;
-    sendMessage: InputBotInlineMessageIn;
+    thumb?: TypeInputWebDocumentIn;
+    content?: TypeInputWebDocumentIn;
+    sendMessage: TypeInputBotInlineMessageIn;
   }
   export interface InputBotInlineMessageMediaAutoIn {
     _: "inputBotInlineMessageMediaAuto";
     invertMedia?: boolean;
     message: string;
-    entities?: MessageEntityIn[];
-    replyMarkup?: ReplyMarkupIn;
+    entities?: TypeMessageEntityIn[];
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageTextIn {
     _: "inputBotInlineMessageText";
     noWebpage?: boolean;
     invertMedia?: boolean;
     message: string;
-    entities?: MessageEntityIn[];
-    replyMarkup?: ReplyMarkupIn;
+    entities?: TypeMessageEntityIn[];
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageMediaGeoIn {
     _: "inputBotInlineMessageMediaGeo";
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     heading?: int;
     period?: int;
     proximityNotificationRadius?: int;
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageMediaVenueIn {
     _: "inputBotInlineMessageMediaVenue";
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     title: string;
     address: string;
     provider: string;
     venueId: string;
     venueType: string;
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageMediaContactIn {
     _: "inputBotInlineMessageMediaContact";
@@ -45177,22 +45529,22 @@ export namespace Api {
     firstName: string;
     lastName: string;
     vcard: string;
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageGameIn {
     _: "inputBotInlineMessageGame";
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageMediaInvoiceIn {
     _: "inputBotInlineMessageMediaInvoice";
     title: string;
     description: string;
-    photo?: InputWebDocumentIn;
-    invoice: InvoiceIn;
+    photo?: TypeInputWebDocumentIn;
+    invoice: TypeInvoiceIn;
     payload: bytes;
     provider: string;
-    providerData: DataJSONIn;
-    replyMarkup?: ReplyMarkupIn;
+    providerData: TypeDataJSONIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageMediaWebPageIn {
     _: "inputBotInlineMessageMediaWebPage";
@@ -45201,21 +45553,21 @@ export namespace Api {
     forceSmallMedia?: boolean;
     optional?: boolean;
     message: string;
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
     url: string;
-    replyMarkup?: ReplyMarkupIn;
+    replyMarkup?: TypeReplyMarkupIn;
   }
   export interface InputBotInlineMessageRichMessageIn {
     _: "inputBotInlineMessageRichMessage";
-    replyMarkup?: ReplyMarkupIn;
-    richMessage: InputRichMessageIn;
+    replyMarkup?: TypeReplyMarkupIn;
+    richMessage: TypeInputRichMessageIn;
   }
   export interface InputBotInlineResultPhotoIn {
     _: "inputBotInlineResultPhoto";
     id: string;
     type: string;
-    photo: InputPhotoIn;
-    sendMessage: InputBotInlineMessageIn;
+    photo: TypeInputPhotoIn;
+    sendMessage: TypeInputBotInlineMessageIn;
   }
   export interface InputBotInlineResultDocumentIn {
     _: "inputBotInlineResultDocument";
@@ -45223,14 +45575,14 @@ export namespace Api {
     type: string;
     title?: string;
     description?: string;
-    document: InputDocumentIn;
-    sendMessage: InputBotInlineMessageIn;
+    document: TypeInputDocumentIn;
+    sendMessage: TypeInputBotInlineMessageIn;
   }
   export interface InputBotInlineResultGameIn {
     _: "inputBotInlineResultGame";
     id: string;
     shortName: string;
-    sendMessage: InputBotInlineMessageIn;
+    sendMessage: TypeInputBotInlineMessageIn;
   }
   export interface InlineBotSwitchPMIn {
     _?: "inlineBotSwitchPM";
@@ -45257,24 +45609,24 @@ export namespace Api {
   }
   export interface InputStickeredMediaPhotoIn {
     _: "inputStickeredMediaPhoto";
-    id: InputPhotoIn;
+    id: TypeInputPhotoIn;
   }
   export interface InputStickeredMediaDocumentIn {
     _: "inputStickeredMediaDocument";
-    id: InputDocumentIn;
+    id: TypeInputDocumentIn;
   }
   export interface ShippingOptionIn {
     _?: "shippingOption";
     id: string;
     title: string;
-    prices: LabeledPriceIn[];
+    prices: TypeLabeledPriceIn[];
   }
   export interface InputSingleMediaIn {
     _?: "inputSingleMedia";
-    media: InputMediaIn;
+    media: TypeInputMediaIn;
     randomId?: long;
     message: string;
-    entities?: MessageEntityIn[];
+    entities?: TypeMessageEntityIn[];
   }
   export interface DialogFilterIn {
     _: "dialogFilter";
@@ -45288,12 +45640,12 @@ export namespace Api {
     excludeArchived?: boolean;
     titleNoanimate?: boolean;
     id: int;
-    title: TextWithEntitiesIn;
+    title: TypeTextWithEntitiesIn;
     emoticon?: string;
     color?: int;
-    pinnedPeers: InputPeerIn[];
-    includePeers: InputPeerIn[];
-    excludePeers: InputPeerIn[];
+    pinnedPeers: TypeInputPeerIn[];
+    includePeers: TypeInputPeerIn[];
+    excludePeers: TypeInputPeerIn[];
   }
   export interface DialogFilterDefaultIn {
     _: "dialogFilterDefault";
@@ -45303,11 +45655,11 @@ export namespace Api {
     hasMyInvites?: boolean;
     titleNoanimate?: boolean;
     id: int;
-    title: TextWithEntitiesIn;
+    title: TypeTextWithEntitiesIn;
     emoticon?: string;
     color?: int;
-    pinnedPeers: InputPeerIn[];
-    includePeers: InputPeerIn[];
+    pinnedPeers: TypeInputPeerIn[];
+    includePeers: TypeInputPeerIn[];
   }
   export interface InputChatThemeEmptyIn {
     _: "inputChatThemeEmpty";
@@ -45329,7 +45681,7 @@ export namespace Api {
   }
   export interface ChatReactionsSomeIn {
     _: "chatReactionsSome";
-    reactions: ReactionIn[];
+    reactions: TypeReactionIn[];
   }
   export interface InputBotAppIDIn {
     _: "inputBotAppID";
@@ -45338,7 +45690,7 @@ export namespace Api {
   }
   export interface InputBotAppShortNameIn {
     _: "inputBotAppShortName";
-    botId: InputUserIn;
+    botId: TypeInputUserIn;
     shortName: string;
   }
   export interface PaidReactionPrivacyDefaultIn {
@@ -45349,7 +45701,7 @@ export namespace Api {
   }
   export interface PaidReactionPrivacyPeerIn {
     _: "paidReactionPrivacyPeer";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
   }
   export interface InputAiComposeToneDefaultIn {
     _: "inputAiComposeToneDefault";
@@ -45383,7 +45735,7 @@ export namespace Api {
   export interface ChannelMessagesFilterIn {
     _: "channelMessagesFilter";
     excludeNewMessages?: boolean;
-    ranges: MessageRangeIn[];
+    ranges: TypeMessageRangeIn[];
   }
   export interface InputFileLocationIn {
     _: "inputFileLocation";
@@ -45431,17 +45783,17 @@ export namespace Api {
   export interface InputPeerPhotoFileLocationIn {
     _: "inputPeerPhotoFileLocation";
     big?: boolean;
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     photoId: long;
   }
   export interface InputStickerSetThumbIn {
     _: "inputStickerSetThumb";
-    stickerset: InputStickerSetIn;
+    stickerset: TypeInputStickerSetIn;
     thumbVersion: int;
   }
   export interface InputGroupCallStreamIn {
     _: "inputGroupCallStream";
-    call: InputGroupCallIn;
+    call: TypeInputGroupCallIn;
     timeMs: long;
     scale: int;
     videoChannel?: int;
@@ -45454,7 +45806,7 @@ export namespace Api {
   }
   export interface InputWebFileGeoPointLocationIn {
     _: "inputWebFileGeoPointLocation";
-    geoPoint: InputGeoPointIn;
+    geoPoint: TypeInputGeoPointIn;
     accessHash: long;
     w: int;
     h: int;
@@ -45464,7 +45816,7 @@ export namespace Api {
   export interface InputWebFileAudioAlbumThumbLocationIn {
     _: "inputWebFileAudioAlbumThumbLocation";
     small?: boolean;
-    document?: InputDocumentIn;
+    document?: TypeInputDocumentIn;
     title?: string;
     performer?: string;
   }
@@ -45473,7 +45825,7 @@ export namespace Api {
     time: double;
     type: string;
     peer: long;
-    data: JSONValueIn;
+    data: TypeJSONValueIn;
   }
   export interface ChannelParticipantsRecentIn {
     _: "channelParticipantsRecent";
@@ -45542,16 +45894,16 @@ export namespace Api {
   }
   export interface BotCommandScopePeerIn {
     _: "botCommandScopePeer";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
   }
   export interface BotCommandScopePeerAdminsIn {
     _: "botCommandScopePeerAdmins";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
   }
   export interface BotCommandScopePeerUserIn {
     _: "botCommandScopePeerUser";
-    peer: InputPeerIn;
-    userId: InputUserIn;
+    peer: TypeInputPeerIn;
+    userId: TypeInputUserIn;
   }
   export interface BotCommandIn {
     _?: "botCommand";
@@ -45585,7 +45937,7 @@ export namespace Api {
   }
   export interface InputInvoiceMessageIn {
     _: "inputInvoiceMessage";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     msgId: int;
   }
   export interface InputInvoiceSlugIn {
@@ -45594,8 +45946,8 @@ export namespace Api {
   }
   export interface InputInvoicePremiumGiftCodeIn {
     _: "inputInvoicePremiumGiftCode";
-    purpose: InputStorePaymentPurposeIn;
-    option: PremiumGiftCodeOptionIn;
+    purpose: TypeInputStorePaymentPurposeIn;
+    option: TypePremiumGiftCodeOptionIn;
   }
   export interface InputStorePaymentPremiumSubscriptionIn {
     _: "inputStorePaymentPremiumSubscription";
@@ -45604,24 +45956,24 @@ export namespace Api {
   }
   export interface InputStorePaymentGiftPremiumIn {
     _: "inputStorePaymentGiftPremium";
-    userId: InputUserIn;
+    userId: TypeInputUserIn;
     currency: string;
     amount: long;
   }
   export interface InputStorePaymentPremiumGiftCodeIn {
     _: "inputStorePaymentPremiumGiftCode";
-    users: InputUserIn[];
-    boostPeer?: InputPeerIn;
+    users: TypeInputUserIn[];
+    boostPeer?: TypeInputPeerIn;
     currency: string;
     amount: long;
-    message?: TextWithEntitiesIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface InputStorePaymentPremiumGiveawayIn {
     _: "inputStorePaymentPremiumGiveaway";
     onlyNewSubscribers?: boolean;
     winnersAreVisible?: boolean;
-    boostPeer: InputPeerIn;
-    additionalPeers?: InputPeerIn[];
+    boostPeer: TypeInputPeerIn;
+    additionalPeers?: TypeInputPeerIn[];
     countriesIso2?: string[];
     prizeDescription?: string;
     randomId?: long;
@@ -45634,11 +45986,11 @@ export namespace Api {
     stars: long;
     currency: string;
     amount: long;
-    spendPurposePeer?: InputPeerIn;
+    spendPurposePeer?: TypeInputPeerIn;
   }
   export interface InputStorePaymentStarsGiftIn {
     _: "inputStorePaymentStarsGift";
-    userId: InputUserIn;
+    userId: TypeInputUserIn;
     stars: long;
     currency: string;
     amount: long;
@@ -45648,8 +46000,8 @@ export namespace Api {
     onlyNewSubscribers?: boolean;
     winnersAreVisible?: boolean;
     stars: long;
-    boostPeer: InputPeerIn;
-    additionalPeers?: InputPeerIn[];
+    boostPeer: TypeInputPeerIn;
+    additionalPeers?: TypeInputPeerIn[];
     countriesIso2?: string[];
     prizeDescription?: string;
     randomId?: long;
@@ -45678,7 +46030,7 @@ export namespace Api {
   }
   export interface InputInvoiceStarsIn {
     _: "inputInvoiceStars";
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface InputInvoiceChatInviteSubscriptionIn {
     _: "inputInvoiceChatInviteSubscription";
@@ -45688,14 +46040,14 @@ export namespace Api {
     _: "inputInvoiceStarGift";
     hideName?: boolean;
     includeUpgrade?: boolean;
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     giftId: long;
-    message?: TextWithEntitiesIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface InputInvoiceStarGiftUpgradeIn {
     _: "inputInvoiceStarGiftUpgrade";
     keepOriginalDetails?: boolean;
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
   }
   export interface InputSavedStarGiftUserIn {
     _: "inputSavedStarGiftUser";
@@ -45703,7 +46055,7 @@ export namespace Api {
   }
   export interface InputSavedStarGiftChatIn {
     _: "inputSavedStarGiftChat";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     savedId: long;
   }
   export interface InputSavedStarGiftSlugIn {
@@ -45712,54 +46064,56 @@ export namespace Api {
   }
   export interface InputInvoiceStarGiftTransferIn {
     _: "inputInvoiceStarGiftTransfer";
-    stargift: InputSavedStarGiftIn;
-    toId: InputPeerIn;
+    stargift: TypeInputSavedStarGiftIn;
+    toId: TypeInputPeerIn;
   }
   export interface InputInvoicePremiumGiftStarsIn {
     _: "inputInvoicePremiumGiftStars";
-    userId: InputUserIn;
+    userId: TypeInputUserIn;
     months: int;
-    message?: TextWithEntitiesIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface InputInvoiceBusinessBotTransferStarsIn {
     _: "inputInvoiceBusinessBotTransferStars";
-    bot: InputUserIn;
+    bot: TypeInputUserIn;
     stars: long;
   }
   export interface InputInvoiceStarGiftResaleIn {
     _: "inputInvoiceStarGiftResale";
     ton?: boolean;
+    showName?: boolean;
     slug: string;
-    toId: InputPeerIn;
+    toId: TypeInputPeerIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface InputInvoiceStarGiftPrepaidUpgradeIn {
     _: "inputInvoiceStarGiftPrepaidUpgrade";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     hash: string;
   }
   export interface InputInvoicePremiumAuthCodeIn {
     _: "inputInvoicePremiumAuthCode";
-    purpose: InputStorePaymentPurposeIn;
+    purpose: TypeInputStorePaymentPurposeIn;
   }
   export interface InputInvoiceStarGiftDropOriginalDetailsIn {
     _: "inputInvoiceStarGiftDropOriginalDetails";
-    stargift: InputSavedStarGiftIn;
+    stargift: TypeInputSavedStarGiftIn;
   }
   export interface InputInvoiceStarGiftAuctionBidIn {
     _: "inputInvoiceStarGiftAuctionBid";
     hideName?: boolean;
     updateBid?: boolean;
-    peer?: InputPeerIn;
+    peer?: TypeInputPeerIn;
     giftId: long;
     bidAmount: long;
-    message?: TextWithEntitiesIn;
+    message?: TypeTextWithEntitiesIn;
   }
   export interface PaymentRequestedInfoIn {
     _?: "paymentRequestedInfo";
     name?: string;
     phone?: string;
     email?: string;
-    shippingAddress?: PostAddressIn;
+    shippingAddress?: TypePostAddressIn;
   }
   export interface PostAddressIn {
     _?: "postAddress";
@@ -45778,15 +46132,15 @@ export namespace Api {
   export interface InputPaymentCredentialsIn {
     _: "inputPaymentCredentials";
     save?: boolean;
-    data: DataJSONIn;
+    data: TypeDataJSONIn;
   }
   export interface InputPaymentCredentialsApplePayIn {
     _: "inputPaymentCredentialsApplePay";
-    paymentData: DataJSONIn;
+    paymentData: TypeDataJSONIn;
   }
   export interface InputPaymentCredentialsGooglePayIn {
     _: "inputPaymentCredentialsGooglePay";
-    paymentToken: DataJSONIn;
+    paymentToken: TypeDataJSONIn;
   }
   export interface InputStarsTransactionIn {
     _?: "inputStarsTransaction";
@@ -45815,9 +46169,9 @@ export namespace Api {
   }
   export interface InputStickerSetItemIn {
     _?: "inputStickerSetItem";
-    document: InputDocumentIn;
+    document: TypeInputDocumentIn;
     emoji: string;
-    maskCoords?: MaskCoordsIn;
+    maskCoords?: TypeMaskCoordsIn;
     keywords?: string;
   }
   export interface PhoneCallProtocolIn {
@@ -45851,7 +46205,7 @@ export namespace Api {
   }
   export interface InputFolderPeerIn {
     _?: "inputFolderPeer";
-    peer: InputPeerIn;
+    peer: TypeInputPeerIn;
     folderId: int;
   }
   export interface InputChatlistDialogFilterIn {
@@ -45866,193 +46220,199 @@ export namespace Api {
     _: "inputCollectiblePhone";
     phone: string;
   }
-  export type InputClientProxyIn = InputClientProxyIn;
-  export type JSONValueIn = JsonNullIn | JsonBoolIn | JsonNumberIn | JsonStringIn | JsonArrayIn | JsonObjectIn;
-  export type JSONObjectValueIn = JsonObjectValueIn;
-  export type MessageRangeIn = MessageRangeIn;
-  export type CodeSettingsIn = CodeSettingsIn;
-  export type EmailVerificationIn = EmailVerificationCodeIn | EmailVerificationGoogleIn | EmailVerificationAppleIn;
-  export type InputCheckPasswordSRPIn = InputCheckPasswordEmptyIn | InputCheckPasswordSRPIn;
-  export type AccountPasswordInputSettingsIn = AccountPasswordInputSettingsIn;
-  export type PasswordKdfAlgoIn = PasswordKdfAlgoUnknownIn | PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPowIn;
-  export type SecureSecretSettingsIn = SecureSecretSettingsIn;
-  export type SecurePasswordKdfAlgoIn = SecurePasswordKdfAlgoUnknownIn | SecurePasswordKdfAlgoPBKDF2HMACSHA512iter100000In | SecurePasswordKdfAlgoSHA512In;
-  export type InputPasskeyCredentialIn = InputPasskeyCredentialPublicKeyIn | InputPasskeyCredentialFirebasePNVIn;
-  export type InputPasskeyResponseIn = InputPasskeyResponseRegisterIn | InputPasskeyResponseLoginIn;
-  export type DataJSONIn = DataJSONIn;
-  export type InputPeerNotifySettingsIn = InputPeerNotifySettingsIn;
-  export type NotificationSoundIn = NotificationSoundDefaultIn | NotificationSoundNoneIn | NotificationSoundLocalIn | NotificationSoundRingtoneIn;
-  export type ReportReasonIn = InputReportReasonSpamIn | InputReportReasonViolenceIn | InputReportReasonPornographyIn | InputReportReasonChildAbuseIn | InputReportReasonOtherIn | InputReportReasonCopyrightIn | InputReportReasonGeoIrrelevantIn | InputReportReasonFakeIn | InputReportReasonIllegalDrugsIn | InputReportReasonPersonalDetailsIn;
-  export type InputPrivacyKeyIn = InputPrivacyKeyStatusTimestampIn | InputPrivacyKeyChatInviteIn | InputPrivacyKeyPhoneCallIn | InputPrivacyKeyPhoneP2PIn | InputPrivacyKeyForwardsIn | InputPrivacyKeyProfilePhotoIn | InputPrivacyKeyPhoneNumberIn | InputPrivacyKeyAddedByPhoneIn | InputPrivacyKeyVoiceMessagesIn | InputPrivacyKeyAboutIn | InputPrivacyKeyBirthdayIn | InputPrivacyKeyStarGiftsAutoSaveIn | InputPrivacyKeyNoPaidMessagesIn | InputPrivacyKeySavedMusicIn;
-  export type InputPrivacyRuleIn = InputPrivacyValueAllowContactsIn | InputPrivacyValueAllowAllIn | InputPrivacyValueAllowUsersIn | InputPrivacyValueDisallowContactsIn | InputPrivacyValueDisallowAllIn | InputPrivacyValueDisallowUsersIn | InputPrivacyValueAllowChatParticipantsIn | InputPrivacyValueDisallowChatParticipantsIn | InputPrivacyValueAllowCloseFriendsIn | InputPrivacyValueAllowPremiumIn | InputPrivacyValueAllowBotsIn | InputPrivacyValueDisallowBotsIn;
-  export type InputUserIn = InputUserEmptyIn | InputUserSelfIn | InputUserIn | InputUserFromMessageIn;
-  export type InputPeerIn = InputPeerEmptyIn | InputPeerSelfIn | InputPeerChatIn | InputPeerUserIn | InputPeerChannelIn | InputPeerUserFromMessageIn | InputPeerChannelFromMessageIn;
-  export type AccountDaysTTLIn = AccountDaysTTLIn;
-  export type SecureValueTypeIn = SecureValueTypePersonalDetailsIn | SecureValueTypePassportIn | SecureValueTypeDriverLicenseIn | SecureValueTypeIdentityCardIn | SecureValueTypeInternalPassportIn | SecureValueTypeAddressIn | SecureValueTypeUtilityBillIn | SecureValueTypeBankStatementIn | SecureValueTypeRentalAgreementIn | SecureValueTypePassportRegistrationIn | SecureValueTypeTemporaryRegistrationIn | SecureValueTypePhoneIn | SecureValueTypeEmailIn;
-  export type InputSecureValueIn = InputSecureValueIn;
-  export type SecureDataIn = SecureDataIn;
-  export type InputSecureFileIn = InputSecureFileUploadedIn | InputSecureFileIn;
-  export type SecurePlainDataIn = SecurePlainPhoneIn | SecurePlainEmailIn;
-  export type SecureValueHashIn = SecureValueHashIn;
-  export type SecureCredentialsEncryptedIn = SecureCredentialsEncryptedIn;
-  export type EmailVerifyPurposeIn = EmailVerifyPurposeLoginSetupIn | EmailVerifyPurposeLoginChangeIn | EmailVerifyPurposePassportIn;
-  export type InputWallPaperIn = InputWallPaperIn | InputWallPaperSlugIn | InputWallPaperNoFileIn;
-  export type InputFileIn = InputFileIn | InputFileBigIn | InputFileStoryDocumentIn;
-  export type InputDocumentIn = InputDocumentEmptyIn | InputDocumentIn;
-  export type WallPaperSettingsIn = WallPaperSettingsIn;
-  export type AutoDownloadSettingsIn = AutoDownloadSettingsIn;
-  export type InputThemeSettingsIn = InputThemeSettingsIn;
-  export type BaseThemeIn = BaseThemeClassicIn | BaseThemeDayIn | BaseThemeNightIn | BaseThemeTintedIn | BaseThemeArcticIn;
-  export type InputThemeIn = InputThemeIn | InputThemeSlugIn;
-  export type GlobalPrivacySettingsIn = GlobalPrivacySettingsIn;
-  export type DisallowedGiftsSettingsIn = DisallowedGiftsSettingsIn;
-  export type InputPhotoIn = InputPhotoEmptyIn | InputPhotoIn;
-  export type EmojiStatusIn = EmojiStatusEmptyIn | EmojiStatusIn | EmojiStatusCollectibleIn | InputEmojiStatusCollectibleIn;
-  export type AutoSaveSettingsIn = AutoSaveSettingsIn;
-  export type PeerColorIn = PeerColorIn | PeerColorCollectibleIn | InputPeerColorCollectibleIn;
-  export type BusinessWorkHoursIn = BusinessWorkHoursIn;
-  export type BusinessWeeklyOpenIn = BusinessWeeklyOpenIn;
-  export type InputGeoPointIn = InputGeoPointEmptyIn | InputGeoPointIn;
-  export type InputBusinessGreetingMessageIn = InputBusinessGreetingMessageIn;
-  export type InputBusinessRecipientsIn = InputBusinessRecipientsIn;
-  export type InputBusinessAwayMessageIn = InputBusinessAwayMessageIn;
-  export type BusinessAwayMessageScheduleIn = BusinessAwayMessageScheduleAlwaysIn | BusinessAwayMessageScheduleOutsideWorkHoursIn | BusinessAwayMessageScheduleCustomIn;
-  export type BusinessBotRightsIn = BusinessBotRightsIn;
-  export type InputBusinessBotRecipientsIn = InputBusinessBotRecipientsIn;
-  export type InputBusinessIntroIn = InputBusinessIntroIn;
-  export type BirthdayIn = BirthdayIn;
-  export type InputBusinessChatLinkIn = InputBusinessChatLinkIn;
-  export type MessageEntityIn = MessageEntityUnknownIn | MessageEntityMentionIn | MessageEntityHashtagIn | MessageEntityBotCommandIn | MessageEntityUrlIn | MessageEntityEmailIn | MessageEntityBoldIn | MessageEntityItalicIn | MessageEntityCodeIn | MessageEntityPreIn | MessageEntityTextUrlIn | MessageEntityMentionNameIn | InputMessageEntityMentionNameIn | MessageEntityPhoneIn | MessageEntityCashtagIn | MessageEntityUnderlineIn | MessageEntityStrikeIn | MessageEntityBankCardIn | MessageEntitySpoilerIn | MessageEntityCustomEmojiIn | MessageEntityBlockquoteIn | MessageEntityFormattedDateIn | MessageEntityDiffInsertIn | MessageEntityDiffReplaceIn | MessageEntityDiffDeleteIn;
-  export type ReactionsNotifySettingsIn = ReactionsNotifySettingsIn;
-  export type ReactionNotificationsFromIn = ReactionNotificationsFromContactsIn | ReactionNotificationsFromAllIn;
-  export type ProfileTabIn = ProfileTabPostsIn | ProfileTabGiftsIn | ProfileTabMediaIn | ProfileTabFilesIn | ProfileTabMusicIn | ProfileTabVoiceIn | ProfileTabLinksIn | ProfileTabGifsIn;
-  export type SecureValueErrorIn = SecureValueErrorDataIn | SecureValueErrorFrontSideIn | SecureValueErrorReverseSideIn | SecureValueErrorSelfieIn | SecureValueErrorFileIn | SecureValueErrorFilesIn | SecureValueErrorIn | SecureValueErrorTranslationFileIn | SecureValueErrorTranslationFilesIn;
-  export type InputContactIn = InputPhoneContactIn;
-  export type TextWithEntitiesIn = TextWithEntitiesIn;
-  export type TopPeerCategoryIn = TopPeerCategoryBotsPMIn | TopPeerCategoryBotsInlineIn | TopPeerCategoryCorrespondentsIn | TopPeerCategoryGroupsIn | TopPeerCategoryChannelsIn | TopPeerCategoryPhoneCallsIn | TopPeerCategoryForwardUsersIn | TopPeerCategoryForwardChatsIn | TopPeerCategoryBotsAppIn | TopPeerCategoryBotsGuestChatIn;
-  export type InputMessageIn = InputMessageIDIn | InputMessageReplyToIn | InputMessagePinnedIn | InputMessageCallbackQueryIn;
-  export type ReactionIn = ReactionEmptyIn | ReactionEmojiIn | ReactionCustomEmojiIn | ReactionPaidIn;
-  export type MessagesFilterIn = InputMessagesFilterEmptyIn | InputMessagesFilterPhotosIn | InputMessagesFilterVideoIn | InputMessagesFilterPhotoVideoIn | InputMessagesFilterDocumentIn | InputMessagesFilterUrlIn | InputMessagesFilterGifIn | InputMessagesFilterVoiceIn | InputMessagesFilterMusicIn | InputMessagesFilterChatPhotosIn | InputMessagesFilterPhoneCallsIn | InputMessagesFilterRoundVoiceIn | InputMessagesFilterRoundVideoIn | InputMessagesFilterMyMentionsIn | InputMessagesFilterGeoIn | InputMessagesFilterContactsIn | InputMessagesFilterPinnedIn | InputMessagesFilterPollIn;
-  export type SendMessageActionIn = SendMessageTypingActionIn | SendMessageCancelActionIn | SendMessageRecordVideoActionIn | SendMessageUploadVideoActionIn | SendMessageRecordAudioActionIn | SendMessageUploadAudioActionIn | SendMessageUploadPhotoActionIn | SendMessageUploadDocumentActionIn | SendMessageGeoLocationActionIn | SendMessageChooseContactActionIn | SendMessageGamePlayActionIn | SendMessageRecordRoundActionIn | SendMessageUploadRoundActionIn | SpeakingInGroupCallActionIn | SendMessageHistoryImportActionIn | SendMessageChooseStickerActionIn | SendMessageEmojiInteractionIn | SendMessageEmojiInteractionSeenIn | SendMessageTextDraftActionIn | InputSendMessageRichMessageDraftActionIn | SendMessageRichMessageDraftActionIn;
-  export type InputRichMessageIn = InputRichMessageIn | InputRichMessageHTMLIn | InputRichMessageMarkdownIn;
-  export type PageBlockIn = PageBlockUnsupportedIn | PageBlockTitleIn | PageBlockSubtitleIn | PageBlockAuthorDateIn | PageBlockHeaderIn | PageBlockSubheaderIn | PageBlockParagraphIn | PageBlockPreformattedIn | PageBlockFooterIn | PageBlockDividerIn | PageBlockAnchorIn | PageBlockListIn | PageBlockBlockquoteIn | PageBlockPullquoteIn | PageBlockPhotoIn | PageBlockVideoIn | PageBlockCoverIn | PageBlockEmbedIn | PageBlockEmbedPostIn | PageBlockCollageIn | PageBlockSlideshowIn | PageBlockChannelIn | PageBlockAudioIn | PageBlockKickerIn | PageBlockTableIn | PageBlockOrderedListIn | PageBlockDetailsIn | PageBlockRelatedArticlesIn | PageBlockMapIn | PageBlockHeading1In | PageBlockHeading2In | PageBlockHeading3In | PageBlockHeading4In | PageBlockHeading5In | PageBlockHeading6In | PageBlockMathIn | PageBlockThinkingIn | InputPageBlockMapIn | PageBlockBlockquoteBlocksIn;
-  export type RichTextIn = TextEmptyIn | TextPlainIn | TextBoldIn | TextItalicIn | TextUnderlineIn | TextStrikeIn | TextFixedIn | TextUrlIn | TextEmailIn | TextConcatIn | TextSubscriptIn | TextSuperscriptIn | TextMarkedIn | TextPhoneIn | TextImageIn | TextAnchorIn | TextMathIn | TextCustomEmojiIn | TextSpoilerIn | TextMentionIn | TextHashtagIn | TextBotCommandIn | TextCashtagIn | TextAutoUrlIn | TextAutoEmailIn | TextAutoPhoneIn | TextBankCardIn | TextMentionNameIn | TextDateIn | TextDiffIn;
-  export type PageListItemIn = PageListItemTextIn | PageListItemBlocksIn;
-  export type PageCaptionIn = PageCaptionIn;
-  export type ChatIn = ChatEmptyIn | ChatIn | ChatForbiddenIn | ChannelIn | ChannelForbiddenIn | CommunityForbiddenIn | CommunityIn;
-  export type ChatPhotoIn = ChatPhotoEmptyIn | ChatPhotoIn;
-  export type InputChannelIn = InputChannelEmptyIn | InputChannelIn | InputChannelFromMessageIn;
-  export type ChatAdminRightsIn = ChatAdminRightsIn;
-  export type ChatBannedRightsIn = ChatBannedRightsIn;
-  export type RestrictionReasonIn = RestrictionReasonIn;
-  export type UsernameIn = UsernameIn;
-  export type RecentStoryIn = RecentStoryIn;
-  export type PageTableRowIn = PageTableRowIn;
-  export type PageTableCellIn = PageTableCellIn;
-  export type PageListOrderedItemIn = PageListOrderedItemTextIn | PageListOrderedItemBlocksIn;
-  export type PageRelatedArticleIn = PageRelatedArticleIn;
-  export type GeoPointIn = GeoPointEmptyIn | GeoPointIn;
-  export type InputRichFileIn = InputRichFilePhotoIn | InputRichFileDocumentIn;
-  export type RichMessageIn = RichMessageIn;
-  export type PhotoIn = PhotoEmptyIn | PhotoIn;
-  export type PhotoSizeIn = PhotoSizeEmptyIn | PhotoSizeIn | PhotoCachedSizeIn | PhotoStrippedSizeIn | PhotoSizeProgressiveIn | PhotoPathSizeIn;
-  export type VideoSizeIn = VideoSizeIn | VideoSizeEmojiMarkupIn | VideoSizeStickerMarkupIn;
-  export type InputStickerSetIn = InputStickerSetEmptyIn | InputStickerSetIDIn | InputStickerSetShortNameIn | InputStickerSetAnimatedEmojiIn | InputStickerSetDiceIn | InputStickerSetAnimatedEmojiAnimationsIn | InputStickerSetPremiumGiftsIn | InputStickerSetEmojiGenericAnimationsIn | InputStickerSetEmojiDefaultStatusesIn | InputStickerSetEmojiDefaultTopicIconsIn | InputStickerSetEmojiChannelDefaultStatusesIn | InputStickerSetTonGiftsIn;
-  export type DocumentIn = DocumentEmptyIn | DocumentIn;
-  export type DocumentAttributeIn = DocumentAttributeImageSizeIn | DocumentAttributeAnimatedIn | DocumentAttributeStickerIn | DocumentAttributeVideoIn | DocumentAttributeAudioIn | DocumentAttributeFilenameIn | DocumentAttributeHasStickersIn | DocumentAttributeCustomEmojiIn;
-  export type MaskCoordsIn = MaskCoordsIn;
-  export type InputReplyToIn = InputReplyToMessageIn | InputReplyToStoryIn | InputReplyToMonoForumIn | InputReplyToEphemeralMessageIn;
-  export type ReplyMarkupIn = ReplyKeyboardHideIn | ReplyKeyboardForceReplyIn | ReplyKeyboardMarkupIn | ReplyInlineMarkupIn;
-  export type KeyboardButtonRowIn = KeyboardButtonRowIn;
-  export type KeyboardButtonIn = KeyboardButtonIn | KeyboardButtonUrlIn | KeyboardButtonCallbackIn | KeyboardButtonRequestPhoneIn | KeyboardButtonRequestGeoLocationIn | KeyboardButtonSwitchInlineIn | KeyboardButtonGameIn | KeyboardButtonBuyIn | KeyboardButtonUrlAuthIn | InputKeyboardButtonUrlAuthIn | KeyboardButtonRequestPollIn | InputKeyboardButtonUserProfileIn | KeyboardButtonUserProfileIn | KeyboardButtonWebViewIn | KeyboardButtonSimpleWebViewIn | KeyboardButtonRequestPeerIn | InputKeyboardButtonRequestPeerIn | KeyboardButtonCopyIn;
-  export type KeyboardButtonStyleIn = KeyboardButtonStyleIn;
-  export type InlineQueryPeerTypeIn = InlineQueryPeerTypeSameBotPMIn | InlineQueryPeerTypePMIn | InlineQueryPeerTypeChatIn | InlineQueryPeerTypeMegagroupIn | InlineQueryPeerTypeBroadcastIn | InlineQueryPeerTypeBotPMIn;
-  export type RequestPeerTypeIn = RequestPeerTypeUserIn | RequestPeerTypeChatIn | RequestPeerTypeBroadcastIn | RequestPeerTypeCreateBotIn;
-  export type InputQuickReplyShortcutIn = InputQuickReplyShortcutIn | InputQuickReplyShortcutIdIn;
-  export type SuggestedPostIn = SuggestedPostIn;
-  export type StarsAmountIn = StarsAmountIn | StarsTonAmountIn;
-  export type InputMediaIn = InputMediaEmptyIn | InputMediaUploadedPhotoIn | InputMediaPhotoIn | InputMediaGeoPointIn | InputMediaContactIn | InputMediaUploadedDocumentIn | InputMediaDocumentIn | InputMediaVenueIn | InputMediaPhotoExternalIn | InputMediaDocumentExternalIn | InputMediaGameIn | InputMediaInvoiceIn | InputMediaGeoLiveIn | InputMediaPollIn | InputMediaDiceIn | InputMediaStoryIn | InputMediaWebPageIn | InputMediaPaidMediaIn | InputMediaTodoIn | InputMediaStakeDiceIn;
-  export type InputGameIn = InputGameIDIn | InputGameShortNameIn;
-  export type InputWebDocumentIn = InputWebDocumentIn;
-  export type InvoiceIn = InvoiceIn;
-  export type LabeledPriceIn = LabeledPriceIn;
-  export type PollIn = PollIn;
-  export type PollAnswerIn = PollAnswerIn | InputPollAnswerIn;
-  export type MessageMediaIn = MessageMediaEmptyIn | MessageMediaPhotoIn | MessageMediaGeoIn | MessageMediaContactIn | MessageMediaUnsupportedIn | MessageMediaDocumentIn | MessageMediaWebPageIn | MessageMediaVenueIn | MessageMediaGameIn | MessageMediaInvoiceIn | MessageMediaGeoLiveIn | MessageMediaPollIn | MessageMediaDiceIn | MessageMediaStoryIn | MessageMediaGiveawayIn | MessageMediaGiveawayResultsIn | MessageMediaPaidMediaIn | MessageMediaToDoIn | MessageMediaVideoStreamIn;
-  export type WebPageIn = WebPageEmptyIn | WebPagePendingIn | WebPageIn | WebPageNotModifiedIn;
-  export type PageIn = PageIn;
-  export type WebPageAttributeIn = WebPageAttributeThemeIn | WebPageAttributeStoryIn | WebPageAttributeStickerSetIn | WebPageAttributeUniqueStarGiftIn | WebPageAttributeStarGiftCollectionIn | WebPageAttributeStarGiftAuctionIn | WebPageAttributeAiComposeToneIn;
-  export type ThemeSettingsIn = ThemeSettingsIn;
-  export type WallPaperIn = WallPaperIn | WallPaperNoFileIn;
-  export type PeerIn = PeerUserIn | PeerChatIn | PeerChannelIn;
-  export type StoryItemIn = StoryItemDeletedIn | StoryItemSkippedIn | StoryItemIn;
-  export type StoryFwdHeaderIn = StoryFwdHeaderIn;
-  export type MediaAreaIn = MediaAreaVenueIn | InputMediaAreaVenueIn | MediaAreaGeoPointIn | MediaAreaSuggestedReactionIn | MediaAreaChannelPostIn | InputMediaAreaChannelPostIn | MediaAreaUrlIn | MediaAreaWeatherIn | MediaAreaStarGiftIn;
-  export type MediaAreaCoordinatesIn = MediaAreaCoordinatesIn;
-  export type GeoPointAddressIn = GeoPointAddressIn;
-  export type PrivacyRuleIn = PrivacyValueAllowContactsIn | PrivacyValueAllowAllIn | PrivacyValueAllowUsersIn | PrivacyValueDisallowContactsIn | PrivacyValueDisallowAllIn | PrivacyValueDisallowUsersIn | PrivacyValueAllowChatParticipantsIn | PrivacyValueDisallowChatParticipantsIn | PrivacyValueAllowCloseFriendsIn | PrivacyValueAllowPremiumIn | PrivacyValueAllowBotsIn | PrivacyValueDisallowBotsIn;
-  export type StoryViewsIn = StoryViewsIn;
-  export type ReactionCountIn = ReactionCountIn;
-  export type StarGiftIn = StarGiftIn | StarGiftUniqueIn;
-  export type StarGiftBackgroundIn = StarGiftBackgroundIn;
-  export type StarGiftAttributeIn = StarGiftAttributeModelIn | StarGiftAttributePatternIn | StarGiftAttributeBackdropIn | StarGiftAttributeOriginalDetailsIn;
-  export type StarGiftAttributeRarityIn = StarGiftAttributeRarityIn | StarGiftAttributeRarityUncommonIn | StarGiftAttributeRarityRareIn | StarGiftAttributeRarityEpicIn | StarGiftAttributeRarityLegendaryIn;
-  export type GameIn = GameIn;
-  export type WebDocumentIn = WebDocumentIn | WebDocumentNoProxyIn;
-  export type MessageExtendedMediaIn = MessageExtendedMediaPreviewIn | MessageExtendedMediaIn;
-  export type PollResultsIn = PollResultsIn;
-  export type PollAnswerVotersIn = PollAnswerVotersIn;
-  export type MessagesEmojiGameOutcomeIn = MessagesEmojiGameOutcomeIn;
-  export type TodoListIn = TodoListIn;
-  export type TodoItemIn = TodoItemIn;
-  export type TodoCompletionIn = TodoCompletionIn;
-  export type InputGroupCallIn = InputGroupCallIn | InputGroupCallSlugIn | InputGroupCallInviteMessageIn;
-  export type InputChatPhotoIn = InputChatPhotoEmptyIn | InputChatUploadedPhotoIn | InputChatPhotoIn;
-  export type InputEncryptedChatIn = InputEncryptedChatIn;
-  export type InputEncryptedFileIn = InputEncryptedFileEmptyIn | InputEncryptedFileUploadedIn | InputEncryptedFileIn | InputEncryptedFileBigUploadedIn;
-  export type StarsSubscriptionPricingIn = StarsSubscriptionPricingIn;
-  export type InputBotInlineResultIn = InputBotInlineResultIn | InputBotInlineResultPhotoIn | InputBotInlineResultDocumentIn | InputBotInlineResultGameIn;
-  export type InputBotInlineMessageIn = InputBotInlineMessageMediaAutoIn | InputBotInlineMessageTextIn | InputBotInlineMessageMediaGeoIn | InputBotInlineMessageMediaVenueIn | InputBotInlineMessageMediaContactIn | InputBotInlineMessageGameIn | InputBotInlineMessageMediaInvoiceIn | InputBotInlineMessageMediaWebPageIn | InputBotInlineMessageRichMessageIn;
-  export type InlineBotSwitchPMIn = InlineBotSwitchPMIn;
-  export type InlineBotWebViewIn = InlineBotWebViewIn;
-  export type InputBotInlineMessageIDIn = InputBotInlineMessageIDIn | InputBotInlineMessageID64In;
-  export type InputStickeredMediaIn = InputStickeredMediaPhotoIn | InputStickeredMediaDocumentIn;
-  export type ShippingOptionIn = ShippingOptionIn;
-  export type InputSingleMediaIn = InputSingleMediaIn;
-  export type DialogFilterIn = DialogFilterIn | DialogFilterDefaultIn | DialogFilterChatlistIn;
-  export type InputChatThemeIn = InputChatThemeEmptyIn | InputChatThemeIn | InputChatThemeUniqueGiftIn;
-  export type ChatReactionsIn = ChatReactionsNoneIn | ChatReactionsAllIn | ChatReactionsSomeIn;
-  export type InputBotAppIn = InputBotAppIDIn | InputBotAppShortNameIn;
-  export type PaidReactionPrivacyIn = PaidReactionPrivacyDefaultIn | PaidReactionPrivacyAnonymousIn | PaidReactionPrivacyPeerIn;
-  export type InputAiComposeToneIn = InputAiComposeToneDefaultIn | InputAiComposeToneIDIn | InputAiComposeToneSlugIn | InputAiComposeToneSingleUseIn;
-  export type InputMessageReadMetricIn = InputMessageReadMetricIn;
-  export type ChannelMessagesFilterIn = ChannelMessagesFilterEmptyIn | ChannelMessagesFilterIn;
-  export type InputFileLocationIn = InputFileLocationIn | InputEncryptedFileLocationIn | InputDocumentFileLocationIn | InputSecureFileLocationIn | InputTakeoutFileLocationIn | InputPhotoFileLocationIn | InputPhotoLegacyFileLocationIn | InputPeerPhotoFileLocationIn | InputStickerSetThumbIn | InputGroupCallStreamIn;
-  export type InputWebFileLocationIn = InputWebFileLocationIn | InputWebFileGeoPointLocationIn | InputWebFileAudioAlbumThumbLocationIn;
-  export type InputAppEventIn = InputAppEventIn;
-  export type ChannelParticipantsFilterIn = ChannelParticipantsRecentIn | ChannelParticipantsAdminsIn | ChannelParticipantsKickedIn | ChannelParticipantsBotsIn | ChannelParticipantsBannedIn | ChannelParticipantsSearchIn | ChannelParticipantsContactsIn | ChannelParticipantsMentionsIn;
-  export type ChannelAdminLogEventsFilterIn = ChannelAdminLogEventsFilterIn;
-  export type BotCommandScopeIn = BotCommandScopeDefaultIn | BotCommandScopeUsersIn | BotCommandScopeChatsIn | BotCommandScopeChatAdminsIn | BotCommandScopePeerIn | BotCommandScopePeerAdminsIn | BotCommandScopePeerUserIn;
-  export type BotCommandIn = BotCommandIn;
-  export type BotMenuButtonIn = BotMenuButtonDefaultIn | BotMenuButtonCommandsIn | BotMenuButtonIn;
-  export type JoinChatBotResultIn = JoinChatBotResultApprovedIn | JoinChatBotResultDeclinedIn | JoinChatBotResultQueuedIn | JoinChatBotResultWebViewIn;
-  export type InputInvoiceIn = InputInvoiceMessageIn | InputInvoiceSlugIn | InputInvoicePremiumGiftCodeIn | InputInvoiceStarsIn | InputInvoiceChatInviteSubscriptionIn | InputInvoiceStarGiftIn | InputInvoiceStarGiftUpgradeIn | InputInvoiceStarGiftTransferIn | InputInvoicePremiumGiftStarsIn | InputInvoiceBusinessBotTransferStarsIn | InputInvoiceStarGiftResaleIn | InputInvoiceStarGiftPrepaidUpgradeIn | InputInvoicePremiumAuthCodeIn | InputInvoiceStarGiftDropOriginalDetailsIn | InputInvoiceStarGiftAuctionBidIn;
-  export type InputStorePaymentPurposeIn = InputStorePaymentPremiumSubscriptionIn | InputStorePaymentGiftPremiumIn | InputStorePaymentPremiumGiftCodeIn | InputStorePaymentPremiumGiveawayIn | InputStorePaymentStarsTopupIn | InputStorePaymentStarsGiftIn | InputStorePaymentStarsGiveawayIn | InputStorePaymentAuthCodeIn;
-  export type PremiumGiftCodeOptionIn = PremiumGiftCodeOptionIn;
-  export type InputSavedStarGiftIn = InputSavedStarGiftUserIn | InputSavedStarGiftChatIn | InputSavedStarGiftSlugIn;
-  export type PaymentRequestedInfoIn = PaymentRequestedInfoIn;
-  export type PostAddressIn = PostAddressIn;
-  export type InputPaymentCredentialsIn = InputPaymentCredentialsSavedIn | InputPaymentCredentialsIn | InputPaymentCredentialsApplePayIn | InputPaymentCredentialsGooglePayIn;
-  export type InputStarsTransactionIn = InputStarsTransactionIn;
-  export type StarGiftAttributeIdIn = StarGiftAttributeIdModelIn | StarGiftAttributeIdPatternIn | StarGiftAttributeIdBackdropIn;
-  export type InputStarGiftAuctionIn = InputStarGiftAuctionIn | InputStarGiftAuctionSlugIn;
-  export type InputStickerSetItemIn = InputStickerSetItemIn;
-  export type PhoneCallProtocolIn = PhoneCallProtocolIn;
-  export type InputPhoneCallIn = InputPhoneCallIn;
-  export type PhoneCallDiscardReasonIn = PhoneCallDiscardReasonMissedIn | PhoneCallDiscardReasonDisconnectIn | PhoneCallDiscardReasonHangupIn | PhoneCallDiscardReasonBusyIn | PhoneCallDiscardReasonMigrateConferenceCallIn;
-  export type InputFolderPeerIn = InputFolderPeerIn;
-  export type InputChatlistIn = InputChatlistDialogFilterIn;
-  export type InputCollectibleIn = InputCollectibleUsernameIn | InputCollectiblePhoneIn;
+  export type TypeInputClientProxyIn = InputClientProxyIn;
+  export type TypeJSONValueIn = JsonNullIn | JsonBoolIn | JsonNumberIn | JsonStringIn | JsonArrayIn | JsonObjectIn;
+  export type TypeJSONObjectValueIn = JsonObjectValueIn;
+  export type TypeMessageRangeIn = MessageRangeIn;
+  export type TypeCodeSettingsIn = CodeSettingsIn;
+  export type TypeEmailVerificationIn = EmailVerificationCodeIn | EmailVerificationGoogleIn | EmailVerificationAppleIn;
+  export type TypeInputCheckPasswordSRPIn = InputCheckPasswordEmptyIn | InputCheckPasswordSRPIn;
+  export type TypeAccountPasswordInputSettingsIn = AccountPasswordInputSettingsIn;
+  export type TypePasswordKdfAlgoIn = PasswordKdfAlgoUnknownIn | PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPowIn;
+  export type TypeSecureSecretSettingsIn = SecureSecretSettingsIn;
+  export type TypeSecurePasswordKdfAlgoIn = SecurePasswordKdfAlgoUnknownIn | SecurePasswordKdfAlgoPBKDF2HMACSHA512iter100000In | SecurePasswordKdfAlgoSHA512In;
+  export type TypeInputPasskeyCredentialIn = InputPasskeyCredentialPublicKeyIn | InputPasskeyCredentialFirebasePNVIn;
+  export type TypeInputPasskeyResponseIn = InputPasskeyResponseRegisterIn | InputPasskeyResponseLoginIn;
+  export type TypeDataJSONIn = DataJSONIn;
+  export type TypeInputPeerNotifySettingsIn = InputPeerNotifySettingsIn;
+  export type TypeNotificationSoundIn = NotificationSoundDefaultIn | NotificationSoundNoneIn | NotificationSoundLocalIn | NotificationSoundRingtoneIn;
+  export type TypeReportReasonIn = InputReportReasonSpamIn | InputReportReasonViolenceIn | InputReportReasonPornographyIn | InputReportReasonChildAbuseIn | InputReportReasonOtherIn | InputReportReasonCopyrightIn | InputReportReasonGeoIrrelevantIn | InputReportReasonFakeIn | InputReportReasonIllegalDrugsIn | InputReportReasonPersonalDetailsIn;
+  export type TypeInputPrivacyKeyIn = InputPrivacyKeyStatusTimestampIn | InputPrivacyKeyChatInviteIn | InputPrivacyKeyPhoneCallIn | InputPrivacyKeyPhoneP2PIn | InputPrivacyKeyForwardsIn | InputPrivacyKeyProfilePhotoIn | InputPrivacyKeyPhoneNumberIn | InputPrivacyKeyAddedByPhoneIn | InputPrivacyKeyVoiceMessagesIn | InputPrivacyKeyAboutIn | InputPrivacyKeyBirthdayIn | InputPrivacyKeyStarGiftsAutoSaveIn | InputPrivacyKeyNoPaidMessagesIn | InputPrivacyKeySavedMusicIn;
+  export type TypeInputPrivacyRuleIn = InputPrivacyValueAllowContactsIn | InputPrivacyValueAllowAllIn | InputPrivacyValueAllowUsersIn | InputPrivacyValueDisallowContactsIn | InputPrivacyValueDisallowAllIn | InputPrivacyValueDisallowUsersIn | InputPrivacyValueAllowChatParticipantsIn | InputPrivacyValueDisallowChatParticipantsIn | InputPrivacyValueAllowCloseFriendsIn | InputPrivacyValueAllowPremiumIn | InputPrivacyValueAllowBotsIn | InputPrivacyValueDisallowBotsIn;
+  export type TypeInputUserIn = InputUserEmptyIn | InputUserSelfIn | InputUserIn | InputUserFromMessageIn;
+  export type TypeInputPeerIn = InputPeerEmptyIn | InputPeerSelfIn | InputPeerChatIn | InputPeerUserIn | InputPeerChannelIn | InputPeerUserFromMessageIn | InputPeerChannelFromMessageIn;
+  export type TypeAccountDaysTTLIn = AccountDaysTTLIn;
+  export type TypeSecureValueTypeIn = SecureValueTypePersonalDetailsIn | SecureValueTypePassportIn | SecureValueTypeDriverLicenseIn | SecureValueTypeIdentityCardIn | SecureValueTypeInternalPassportIn | SecureValueTypeAddressIn | SecureValueTypeUtilityBillIn | SecureValueTypeBankStatementIn | SecureValueTypeRentalAgreementIn | SecureValueTypePassportRegistrationIn | SecureValueTypeTemporaryRegistrationIn | SecureValueTypePhoneIn | SecureValueTypeEmailIn;
+  export type TypeInputSecureValueIn = InputSecureValueIn;
+  export type TypeSecureDataIn = SecureDataIn;
+  export type TypeInputSecureFileIn = InputSecureFileUploadedIn | InputSecureFileIn;
+  export type TypeSecurePlainDataIn = SecurePlainPhoneIn | SecurePlainEmailIn;
+  export type TypeSecureValueHashIn = SecureValueHashIn;
+  export type TypeSecureCredentialsEncryptedIn = SecureCredentialsEncryptedIn;
+  export type TypeEmailVerifyPurposeIn = EmailVerifyPurposeLoginSetupIn | EmailVerifyPurposeLoginChangeIn | EmailVerifyPurposePassportIn;
+  export type TypeInputWallPaperIn = InputWallPaperIn | InputWallPaperSlugIn | InputWallPaperNoFileIn;
+  export type TypeInputFileIn = InputFileIn | InputFileBigIn | InputFileStoryDocumentIn;
+  export type TypeInputDocumentIn = InputDocumentEmptyIn | InputDocumentIn;
+  export type TypeWallPaperSettingsIn = WallPaperSettingsIn;
+  export type TypeAutoDownloadSettingsIn = AutoDownloadSettingsIn;
+  export type TypeInputThemeSettingsIn = InputThemeSettingsIn;
+  export type TypeBaseThemeIn = BaseThemeClassicIn | BaseThemeDayIn | BaseThemeNightIn | BaseThemeTintedIn | BaseThemeArcticIn;
+  export type TypeInputThemeIn = InputThemeIn | InputThemeSlugIn;
+  export type TypeGlobalPrivacySettingsIn = GlobalPrivacySettingsIn;
+  export type TypeDisallowedGiftsSettingsIn = DisallowedGiftsSettingsIn;
+  export type TypeInputPhotoIn = InputPhotoEmptyIn | InputPhotoIn;
+  export type TypeEmojiStatusIn = EmojiStatusEmptyIn | EmojiStatusIn | EmojiStatusCollectibleIn | InputEmojiStatusCollectibleIn;
+  export type TypeAutoSaveSettingsIn = AutoSaveSettingsIn;
+  export type TypePeerColorIn = PeerColorIn | PeerColorCollectibleIn | InputPeerColorCollectibleIn;
+  export type TypeBusinessWorkHoursIn = BusinessWorkHoursIn;
+  export type TypeBusinessWeeklyOpenIn = BusinessWeeklyOpenIn;
+  export type TypeInputGeoPointIn = InputGeoPointEmptyIn | InputGeoPointIn;
+  export type TypeInputBusinessGreetingMessageIn = InputBusinessGreetingMessageIn;
+  export type TypeInputBusinessRecipientsIn = InputBusinessRecipientsIn;
+  export type TypeInputBusinessAwayMessageIn = InputBusinessAwayMessageIn;
+  export type TypeBusinessAwayMessageScheduleIn = BusinessAwayMessageScheduleAlwaysIn | BusinessAwayMessageScheduleOutsideWorkHoursIn | BusinessAwayMessageScheduleCustomIn;
+  export type TypeBusinessBotRightsIn = BusinessBotRightsIn;
+  export type TypeInputBusinessBotRecipientsIn = InputBusinessBotRecipientsIn;
+  export type TypeInputBusinessIntroIn = InputBusinessIntroIn;
+  export type TypeBirthdayIn = BirthdayIn;
+  export type TypeInputBusinessChatLinkIn = InputBusinessChatLinkIn;
+  export type TypeMessageEntityIn = MessageEntityUnknownIn | MessageEntityMentionIn | MessageEntityHashtagIn | MessageEntityBotCommandIn | MessageEntityUrlIn | MessageEntityEmailIn | MessageEntityBoldIn | MessageEntityItalicIn | MessageEntityCodeIn | MessageEntityPreIn | MessageEntityTextUrlIn | MessageEntityMentionNameIn | InputMessageEntityMentionNameIn | MessageEntityPhoneIn | MessageEntityCashtagIn | MessageEntityUnderlineIn | MessageEntityStrikeIn | MessageEntityBankCardIn | MessageEntitySpoilerIn | MessageEntityCustomEmojiIn | MessageEntityBlockquoteIn | MessageEntityFormattedDateIn | MessageEntityDiffInsertIn | MessageEntityDiffReplaceIn | MessageEntityDiffDeleteIn;
+  export type TypeReactionsNotifySettingsIn = ReactionsNotifySettingsIn;
+  export type TypeReactionNotificationsFromIn = ReactionNotificationsFromContactsIn | ReactionNotificationsFromAllIn;
+  export type TypeProfileTabIn = ProfileTabPostsIn | ProfileTabGiftsIn | ProfileTabMediaIn | ProfileTabFilesIn | ProfileTabMusicIn | ProfileTabVoiceIn | ProfileTabLinksIn | ProfileTabGifsIn;
+  export type TypeSecureValueErrorIn = SecureValueErrorDataIn | SecureValueErrorFrontSideIn | SecureValueErrorReverseSideIn | SecureValueErrorSelfieIn | SecureValueErrorFileIn | SecureValueErrorFilesIn | SecureValueErrorIn | SecureValueErrorTranslationFileIn | SecureValueErrorTranslationFilesIn;
+  export type TypeInputContactIn = InputPhoneContactIn;
+  export type TypeTextWithEntitiesIn = TextWithEntitiesIn;
+  export type TypeTopPeerCategoryIn = TopPeerCategoryBotsPMIn | TopPeerCategoryBotsInlineIn | TopPeerCategoryCorrespondentsIn | TopPeerCategoryGroupsIn | TopPeerCategoryChannelsIn | TopPeerCategoryPhoneCallsIn | TopPeerCategoryForwardUsersIn | TopPeerCategoryForwardChatsIn | TopPeerCategoryBotsAppIn | TopPeerCategoryBotsGuestChatIn;
+  export type TypeInputMessageIn = InputMessageIDIn | InputMessageReplyToIn | InputMessagePinnedIn | InputMessageCallbackQueryIn;
+  export type TypeReactionIn = ReactionEmptyIn | ReactionEmojiIn | ReactionCustomEmojiIn | ReactionPaidIn;
+  export type TypeMessagesFilterIn = InputMessagesFilterEmptyIn | InputMessagesFilterPhotosIn | InputMessagesFilterVideoIn | InputMessagesFilterPhotoVideoIn | InputMessagesFilterDocumentIn | InputMessagesFilterUrlIn | InputMessagesFilterGifIn | InputMessagesFilterVoiceIn | InputMessagesFilterMusicIn | InputMessagesFilterChatPhotosIn | InputMessagesFilterPhoneCallsIn | InputMessagesFilterRoundVoiceIn | InputMessagesFilterRoundVideoIn | InputMessagesFilterMyMentionsIn | InputMessagesFilterGeoIn | InputMessagesFilterContactsIn | InputMessagesFilterPinnedIn | InputMessagesFilterPollIn;
+  export type TypeSendMessageActionIn = SendMessageTypingActionIn | SendMessageCancelActionIn | SendMessageRecordVideoActionIn | SendMessageUploadVideoActionIn | SendMessageRecordAudioActionIn | SendMessageUploadAudioActionIn | SendMessageUploadPhotoActionIn | SendMessageUploadDocumentActionIn | SendMessageGeoLocationActionIn | SendMessageChooseContactActionIn | SendMessageGamePlayActionIn | SendMessageRecordRoundActionIn | SendMessageUploadRoundActionIn | SpeakingInGroupCallActionIn | SendMessageHistoryImportActionIn | SendMessageChooseStickerActionIn | SendMessageEmojiInteractionIn | SendMessageEmojiInteractionSeenIn | SendMessageTextDraftActionIn | InputSendMessageRichMessageDraftActionIn | SendMessageRichMessageDraftActionIn | SendMessageStopDraftActionIn;
+  export type TypeInputRichMessageIn = InputRichMessageIn | InputRichMessageHTMLIn | InputRichMessageMarkdownIn;
+  export type TypePageBlockIn = PageBlockUnsupportedIn | PageBlockTitleIn | PageBlockSubtitleIn | PageBlockAuthorDateIn | PageBlockHeaderIn | PageBlockSubheaderIn | PageBlockParagraphIn | PageBlockPreformattedIn | PageBlockFooterIn | PageBlockDividerIn | PageBlockAnchorIn | PageBlockListIn | PageBlockBlockquoteIn | PageBlockPullquoteIn | PageBlockPhotoIn | PageBlockVideoIn | PageBlockCoverIn | PageBlockEmbedIn | PageBlockEmbedPostIn | PageBlockCollageIn | PageBlockSlideshowIn | PageBlockChannelIn | PageBlockAudioIn | PageBlockKickerIn | PageBlockTableIn | PageBlockOrderedListIn | PageBlockDetailsIn | PageBlockRelatedArticlesIn | PageBlockMapIn | PageBlockHeading1In | PageBlockHeading2In | PageBlockHeading3In | PageBlockHeading4In | PageBlockHeading5In | PageBlockHeading6In | PageBlockMathIn | PageBlockThinkingIn | InputPageBlockMapIn | PageBlockBlockquoteBlocksIn | PageBlockButtonRowIn | PageBlockDocumentIn;
+  export type TypeRichTextIn = TextEmptyIn | TextPlainIn | TextBoldIn | TextItalicIn | TextUnderlineIn | TextStrikeIn | TextFixedIn | TextUrlIn | TextEmailIn | TextConcatIn | TextSubscriptIn | TextSuperscriptIn | TextMarkedIn | TextPhoneIn | TextImageIn | TextAnchorIn | TextMathIn | TextCustomEmojiIn | TextSpoilerIn | TextMentionIn | TextHashtagIn | TextBotCommandIn | TextCashtagIn | TextAutoUrlIn | TextAutoEmailIn | TextAutoPhoneIn | TextBankCardIn | TextMentionNameIn | TextDateIn | TextDiffIn | TextButtonIn;
+  export type TypeInlineButtonTypeIn = InlineButtonTypeUrlIn | InlineButtonTypeUrlAuthIn | InputInlineButtonTypeUrlAuthIn | InlineButtonTypeWebViewIn | InlineButtonTypeCallbackIn | InlineButtonTypeGameIn | InlineButtonTypeBuyIn | InlineButtonTypeSwitchInlineIn | InlineButtonTypeUserProfileIn | InputInlineButtonTypeUserProfileIn | InlineButtonTypeCopyIn | InlineButtonTypeDisabledIn;
+  export type TypeInlineQueryPeerTypeIn = InlineQueryPeerTypeSameBotPMIn | InlineQueryPeerTypePMIn | InlineQueryPeerTypeChatIn | InlineQueryPeerTypeMegagroupIn | InlineQueryPeerTypeBroadcastIn | InlineQueryPeerTypeBotPMIn;
+  export type TypeRichButtonStyleIn = RichButtonStyleIn;
+  export type TypePageListItemIn = PageListItemTextIn | PageListItemBlocksIn;
+  export type TypePageCaptionIn = PageCaptionIn;
+  export type TypeChatIn = ChatEmptyIn | ChatIn | ChatForbiddenIn | ChannelIn | ChannelForbiddenIn | CommunityForbiddenIn | CommunityIn;
+  export type TypeChatPhotoIn = ChatPhotoEmptyIn | ChatPhotoIn;
+  export type TypeInputChannelIn = InputChannelEmptyIn | InputChannelIn | InputChannelFromMessageIn;
+  export type TypeChatAdminRightsIn = ChatAdminRightsIn;
+  export type TypeChatBannedRightsIn = ChatBannedRightsIn;
+  export type TypeRestrictionReasonIn = RestrictionReasonIn;
+  export type TypeUsernameIn = UsernameIn;
+  export type TypeRecentStoryIn = RecentStoryIn;
+  export type TypePageTableRowIn = PageTableRowIn;
+  export type TypePageTableCellIn = PageTableCellIn;
+  export type TypePageListOrderedItemIn = PageListOrderedItemTextIn | PageListOrderedItemBlocksIn;
+  export type TypePageRelatedArticleIn = PageRelatedArticleIn;
+  export type TypeGeoPointIn = GeoPointEmptyIn | GeoPointIn;
+  export type TypePageButtonIn = PageButtonIn;
+  export type TypeInputRichFileIn = InputRichFilePhotoIn | InputRichFileDocumentIn;
+  export type TypeRichMessageIn = RichMessageIn;
+  export type TypePhotoIn = PhotoEmptyIn | PhotoIn;
+  export type TypePhotoSizeIn = PhotoSizeEmptyIn | PhotoSizeIn | PhotoCachedSizeIn | PhotoStrippedSizeIn | PhotoSizeProgressiveIn | PhotoPathSizeIn;
+  export type TypeVideoSizeIn = VideoSizeIn | VideoSizeEmojiMarkupIn | VideoSizeStickerMarkupIn;
+  export type TypeInputStickerSetIn = InputStickerSetEmptyIn | InputStickerSetIDIn | InputStickerSetShortNameIn | InputStickerSetAnimatedEmojiIn | InputStickerSetDiceIn | InputStickerSetAnimatedEmojiAnimationsIn | InputStickerSetPremiumGiftsIn | InputStickerSetEmojiGenericAnimationsIn | InputStickerSetEmojiDefaultStatusesIn | InputStickerSetEmojiDefaultTopicIconsIn | InputStickerSetEmojiChannelDefaultStatusesIn | InputStickerSetTonGiftsIn;
+  export type TypeDocumentIn = DocumentEmptyIn | DocumentIn;
+  export type TypeDocumentAttributeIn = DocumentAttributeImageSizeIn | DocumentAttributeAnimatedIn | DocumentAttributeStickerIn | DocumentAttributeVideoIn | DocumentAttributeAudioIn | DocumentAttributeFilenameIn | DocumentAttributeHasStickersIn | DocumentAttributeCustomEmojiIn;
+  export type TypeMaskCoordsIn = MaskCoordsIn;
+  export type TypeInputReplyToIn = InputReplyToMessageIn | InputReplyToStoryIn | InputReplyToMonoForumIn | InputReplyToEphemeralMessageIn;
+  export type TypeReplyMarkupIn = ReplyKeyboardHideIn | ReplyKeyboardForceReplyIn | ReplyKeyboardMarkupIn | ReplyInlineMarkupIn;
+  export type TypeKeyboardButtonRowIn = KeyboardButtonRowIn;
+  export type TypeKeyboardButtonIn = KeyboardButtonIn;
+  export type TypeKeyboardButtonStyleIn = KeyboardButtonStyleIn;
+  export type TypeButtonTypeIn = ButtonTypeDefaultIn | ButtonTypeRequestPhoneIn | ButtonTypeRequestGeoLocationIn | ButtonTypeRequestPollIn | ButtonTypeRequestPeerIn | InputButtonTypeRequestPeerIn | ButtonTypeSimpleWebViewIn;
+  export type TypeRequestPeerTypeIn = RequestPeerTypeUserIn | RequestPeerTypeChatIn | RequestPeerTypeBroadcastIn | RequestPeerTypeCreateBotIn;
+  export type TypeKeyboardInlineButtonRowIn = KeyboardInlineButtonRowIn;
+  export type TypeKeyboardInlineButtonIn = KeyboardInlineButtonIn;
+  export type TypeInputQuickReplyShortcutIn = InputQuickReplyShortcutIn | InputQuickReplyShortcutIdIn;
+  export type TypeSuggestedPostIn = SuggestedPostIn;
+  export type TypeStarsAmountIn = StarsAmountIn | StarsTonAmountIn;
+  export type TypeInputMediaIn = InputMediaEmptyIn | InputMediaUploadedPhotoIn | InputMediaPhotoIn | InputMediaGeoPointIn | InputMediaContactIn | InputMediaUploadedDocumentIn | InputMediaDocumentIn | InputMediaVenueIn | InputMediaPhotoExternalIn | InputMediaDocumentExternalIn | InputMediaGameIn | InputMediaInvoiceIn | InputMediaGeoLiveIn | InputMediaPollIn | InputMediaDiceIn | InputMediaStoryIn | InputMediaWebPageIn | InputMediaPaidMediaIn | InputMediaTodoIn | InputMediaStakeDiceIn;
+  export type TypeInputGameIn = InputGameIDIn | InputGameShortNameIn;
+  export type TypeInputWebDocumentIn = InputWebDocumentIn;
+  export type TypeInvoiceIn = InvoiceIn;
+  export type TypeLabeledPriceIn = LabeledPriceIn;
+  export type TypePollIn = PollIn;
+  export type TypePollAnswerIn = PollAnswerIn | InputPollAnswerIn;
+  export type TypeMessageMediaIn = MessageMediaEmptyIn | MessageMediaPhotoIn | MessageMediaGeoIn | MessageMediaContactIn | MessageMediaUnsupportedIn | MessageMediaDocumentIn | MessageMediaWebPageIn | MessageMediaVenueIn | MessageMediaGameIn | MessageMediaInvoiceIn | MessageMediaGeoLiveIn | MessageMediaPollIn | MessageMediaDiceIn | MessageMediaStoryIn | MessageMediaGiveawayIn | MessageMediaGiveawayResultsIn | MessageMediaPaidMediaIn | MessageMediaToDoIn | MessageMediaVideoStreamIn;
+  export type TypeWebPageIn = WebPageEmptyIn | WebPagePendingIn | WebPageIn | WebPageNotModifiedIn;
+  export type TypePageIn = PageIn;
+  export type TypeWebPageAttributeIn = WebPageAttributeThemeIn | WebPageAttributeStoryIn | WebPageAttributeStickerSetIn | WebPageAttributeUniqueStarGiftIn | WebPageAttributeStarGiftCollectionIn | WebPageAttributeStarGiftAuctionIn | WebPageAttributeAiComposeToneIn;
+  export type TypeThemeSettingsIn = ThemeSettingsIn;
+  export type TypeWallPaperIn = WallPaperIn | WallPaperNoFileIn;
+  export type TypePeerIn = PeerUserIn | PeerChatIn | PeerChannelIn;
+  export type TypeStoryItemIn = StoryItemDeletedIn | StoryItemSkippedIn | StoryItemIn;
+  export type TypeStoryFwdHeaderIn = StoryFwdHeaderIn;
+  export type TypeMediaAreaIn = MediaAreaVenueIn | InputMediaAreaVenueIn | MediaAreaGeoPointIn | MediaAreaSuggestedReactionIn | MediaAreaChannelPostIn | InputMediaAreaChannelPostIn | MediaAreaUrlIn | MediaAreaWeatherIn | MediaAreaStarGiftIn;
+  export type TypeMediaAreaCoordinatesIn = MediaAreaCoordinatesIn;
+  export type TypeGeoPointAddressIn = GeoPointAddressIn;
+  export type TypePrivacyRuleIn = PrivacyValueAllowContactsIn | PrivacyValueAllowAllIn | PrivacyValueAllowUsersIn | PrivacyValueDisallowContactsIn | PrivacyValueDisallowAllIn | PrivacyValueDisallowUsersIn | PrivacyValueAllowChatParticipantsIn | PrivacyValueDisallowChatParticipantsIn | PrivacyValueAllowCloseFriendsIn | PrivacyValueAllowPremiumIn | PrivacyValueAllowBotsIn | PrivacyValueDisallowBotsIn;
+  export type TypeStoryViewsIn = StoryViewsIn;
+  export type TypeReactionCountIn = ReactionCountIn;
+  export type TypeStarGiftIn = StarGiftIn | StarGiftUniqueIn;
+  export type TypeStarGiftBackgroundIn = StarGiftBackgroundIn;
+  export type TypeStarGiftAttributeIn = StarGiftAttributeModelIn | StarGiftAttributePatternIn | StarGiftAttributeBackdropIn | StarGiftAttributeOriginalDetailsIn;
+  export type TypeStarGiftAttributeRarityIn = StarGiftAttributeRarityIn | StarGiftAttributeRarityUncommonIn | StarGiftAttributeRarityRareIn | StarGiftAttributeRarityEpicIn | StarGiftAttributeRarityLegendaryIn;
+  export type TypeGameIn = GameIn;
+  export type TypeWebDocumentIn = WebDocumentIn | WebDocumentNoProxyIn;
+  export type TypeMessageExtendedMediaIn = MessageExtendedMediaPreviewIn | MessageExtendedMediaIn;
+  export type TypePollResultsIn = PollResultsIn;
+  export type TypePollAnswerVotersIn = PollAnswerVotersIn;
+  export type TypeMessagesEmojiGameOutcomeIn = MessagesEmojiGameOutcomeIn;
+  export type TypeTodoListIn = TodoListIn;
+  export type TypeTodoItemIn = TodoItemIn;
+  export type TypeTodoCompletionIn = TodoCompletionIn;
+  export type TypeInputGroupCallIn = InputGroupCallIn | InputGroupCallSlugIn | InputGroupCallInviteMessageIn;
+  export type TypeInputChatPhotoIn = InputChatPhotoEmptyIn | InputChatUploadedPhotoIn | InputChatPhotoIn;
+  export type TypeInputEncryptedChatIn = InputEncryptedChatIn;
+  export type TypeInputEncryptedFileIn = InputEncryptedFileEmptyIn | InputEncryptedFileUploadedIn | InputEncryptedFileIn | InputEncryptedFileBigUploadedIn;
+  export type TypeStarsSubscriptionPricingIn = StarsSubscriptionPricingIn;
+  export type TypeInputBotInlineResultIn = InputBotInlineResultIn | InputBotInlineResultPhotoIn | InputBotInlineResultDocumentIn | InputBotInlineResultGameIn;
+  export type TypeInputBotInlineMessageIn = InputBotInlineMessageMediaAutoIn | InputBotInlineMessageTextIn | InputBotInlineMessageMediaGeoIn | InputBotInlineMessageMediaVenueIn | InputBotInlineMessageMediaContactIn | InputBotInlineMessageGameIn | InputBotInlineMessageMediaInvoiceIn | InputBotInlineMessageMediaWebPageIn | InputBotInlineMessageRichMessageIn;
+  export type TypeInlineBotSwitchPMIn = InlineBotSwitchPMIn;
+  export type TypeInlineBotWebViewIn = InlineBotWebViewIn;
+  export type TypeInputBotInlineMessageIDIn = InputBotInlineMessageIDIn | InputBotInlineMessageID64In;
+  export type TypeInputStickeredMediaIn = InputStickeredMediaPhotoIn | InputStickeredMediaDocumentIn;
+  export type TypeShippingOptionIn = ShippingOptionIn;
+  export type TypeInputSingleMediaIn = InputSingleMediaIn;
+  export type TypeDialogFilterIn = DialogFilterIn | DialogFilterDefaultIn | DialogFilterChatlistIn;
+  export type TypeInputChatThemeIn = InputChatThemeEmptyIn | InputChatThemeIn | InputChatThemeUniqueGiftIn;
+  export type TypeChatReactionsIn = ChatReactionsNoneIn | ChatReactionsAllIn | ChatReactionsSomeIn;
+  export type TypeInputBotAppIn = InputBotAppIDIn | InputBotAppShortNameIn;
+  export type TypePaidReactionPrivacyIn = PaidReactionPrivacyDefaultIn | PaidReactionPrivacyAnonymousIn | PaidReactionPrivacyPeerIn;
+  export type TypeInputAiComposeToneIn = InputAiComposeToneDefaultIn | InputAiComposeToneIDIn | InputAiComposeToneSlugIn | InputAiComposeToneSingleUseIn;
+  export type TypeInputMessageReadMetricIn = InputMessageReadMetricIn;
+  export type TypeChannelMessagesFilterIn = ChannelMessagesFilterEmptyIn | ChannelMessagesFilterIn;
+  export type TypeInputFileLocationIn = InputFileLocationIn | InputEncryptedFileLocationIn | InputDocumentFileLocationIn | InputSecureFileLocationIn | InputTakeoutFileLocationIn | InputPhotoFileLocationIn | InputPhotoLegacyFileLocationIn | InputPeerPhotoFileLocationIn | InputStickerSetThumbIn | InputGroupCallStreamIn;
+  export type TypeInputWebFileLocationIn = InputWebFileLocationIn | InputWebFileGeoPointLocationIn | InputWebFileAudioAlbumThumbLocationIn;
+  export type TypeInputAppEventIn = InputAppEventIn;
+  export type TypeChannelParticipantsFilterIn = ChannelParticipantsRecentIn | ChannelParticipantsAdminsIn | ChannelParticipantsKickedIn | ChannelParticipantsBotsIn | ChannelParticipantsBannedIn | ChannelParticipantsSearchIn | ChannelParticipantsContactsIn | ChannelParticipantsMentionsIn;
+  export type TypeChannelAdminLogEventsFilterIn = ChannelAdminLogEventsFilterIn;
+  export type TypeBotCommandScopeIn = BotCommandScopeDefaultIn | BotCommandScopeUsersIn | BotCommandScopeChatsIn | BotCommandScopeChatAdminsIn | BotCommandScopePeerIn | BotCommandScopePeerAdminsIn | BotCommandScopePeerUserIn;
+  export type TypeBotCommandIn = BotCommandIn;
+  export type TypeBotMenuButtonIn = BotMenuButtonDefaultIn | BotMenuButtonCommandsIn | BotMenuButtonIn;
+  export type TypeJoinChatBotResultIn = JoinChatBotResultApprovedIn | JoinChatBotResultDeclinedIn | JoinChatBotResultQueuedIn | JoinChatBotResultWebViewIn;
+  export type TypeInputInvoiceIn = InputInvoiceMessageIn | InputInvoiceSlugIn | InputInvoicePremiumGiftCodeIn | InputInvoiceStarsIn | InputInvoiceChatInviteSubscriptionIn | InputInvoiceStarGiftIn | InputInvoiceStarGiftUpgradeIn | InputInvoiceStarGiftTransferIn | InputInvoicePremiumGiftStarsIn | InputInvoiceBusinessBotTransferStarsIn | InputInvoiceStarGiftResaleIn | InputInvoiceStarGiftPrepaidUpgradeIn | InputInvoicePremiumAuthCodeIn | InputInvoiceStarGiftDropOriginalDetailsIn | InputInvoiceStarGiftAuctionBidIn;
+  export type TypeInputStorePaymentPurposeIn = InputStorePaymentPremiumSubscriptionIn | InputStorePaymentGiftPremiumIn | InputStorePaymentPremiumGiftCodeIn | InputStorePaymentPremiumGiveawayIn | InputStorePaymentStarsTopupIn | InputStorePaymentStarsGiftIn | InputStorePaymentStarsGiveawayIn | InputStorePaymentAuthCodeIn;
+  export type TypePremiumGiftCodeOptionIn = PremiumGiftCodeOptionIn;
+  export type TypeInputSavedStarGiftIn = InputSavedStarGiftUserIn | InputSavedStarGiftChatIn | InputSavedStarGiftSlugIn;
+  export type TypePaymentRequestedInfoIn = PaymentRequestedInfoIn;
+  export type TypePostAddressIn = PostAddressIn;
+  export type TypeInputPaymentCredentialsIn = InputPaymentCredentialsSavedIn | InputPaymentCredentialsIn | InputPaymentCredentialsApplePayIn | InputPaymentCredentialsGooglePayIn;
+  export type TypeInputStarsTransactionIn = InputStarsTransactionIn;
+  export type TypeStarGiftAttributeIdIn = StarGiftAttributeIdModelIn | StarGiftAttributeIdPatternIn | StarGiftAttributeIdBackdropIn;
+  export type TypeInputStarGiftAuctionIn = InputStarGiftAuctionIn | InputStarGiftAuctionSlugIn;
+  export type TypeInputStickerSetItemIn = InputStickerSetItemIn;
+  export type TypePhoneCallProtocolIn = PhoneCallProtocolIn;
+  export type TypeInputPhoneCallIn = InputPhoneCallIn;
+  export type TypePhoneCallDiscardReasonIn = PhoneCallDiscardReasonMissedIn | PhoneCallDiscardReasonDisconnectIn | PhoneCallDiscardReasonHangupIn | PhoneCallDiscardReasonBusyIn | PhoneCallDiscardReasonMigrateConferenceCallIn;
+  export type TypeInputFolderPeerIn = InputFolderPeerIn;
+  export type TypeInputChatlistIn = InputChatlistDialogFilterIn;
+  export type TypeInputCollectibleIn = InputCollectibleUsernameIn | InputCollectiblePhoneIn;
 
   /**
    * Typed 1:1 facade over the raw MTProto methods.
@@ -46326,6 +46686,18 @@ export namespace Api {
        * @see https://core.telegram.org/method/auth.finishPasskeyLogin
        */
       finishPasskeyLogin(params: AuthFinishPasskeyLoginParams, opts?: ApiCallOptions): Promise<auth.TypeAuthorization>;
+      /**
+       * @see https://core.telegram.org/method/auth.initFirebasePnvLogin
+       */
+      initFirebasePnvLogin(params: AuthInitFirebasePnvLoginParams, opts?: ApiCallOptions): Promise<auth.TypeFirebasePnvIntent>;
+      /**
+       * @see https://core.telegram.org/method/auth.finishFirebasePnvLogin
+       */
+      finishFirebasePnvLogin(params: AuthFinishFirebasePnvLoginParams, opts?: ApiCallOptions): Promise<auth.TypeAuthorization>;
+      /**
+       * @see https://core.telegram.org/method/auth.firebasePnvSignUp
+       */
+      firebasePnvSignUp(params: AuthFirebasePnvSignUpParams, opts?: ApiCallOptions): Promise<auth.TypeAuthorization>;
     };
     account: {
       /**
@@ -51438,6 +51810,22 @@ export namespace Api {
        * @see https://core.telegram.org/method/ephemeral.getCallbackAnswer
        */
       getCallbackAnswer(params: EphemeralGetCallbackAnswerParams, opts?: ApiCallOptions): Promise<messages.TypeBotCallbackAnswer>;
+      /**
+       * @see https://core.telegram.org/method/ephemeral.editMessage
+       */
+      editMessage(params: EphemeralEditMessageParams, opts?: ApiCallOptions): Promise<Api.TypeUpdates>;
+      /**
+       * @see https://core.telegram.org/method/ephemeral.deleteWelcomeMessage
+       */
+      deleteWelcomeMessage(params: EphemeralDeleteWelcomeMessageParams, opts?: ApiCallOptions): Promise<Bool>;
+      /**
+       * @see https://core.telegram.org/method/ephemeral.deleteAllWelcomeMessages
+       */
+      deleteAllWelcomeMessages(params: EphemeralDeleteAllWelcomeMessagesParams, opts?: ApiCallOptions): Promise<Bool>;
+      /**
+       * @see https://core.telegram.org/method/ephemeral.getWelcomeMessages
+       */
+      getWelcomeMessages(params: EphemeralGetWelcomeMessagesParams, opts?: ApiCallOptions): Promise<ephemeral.TypeWelcomeMessages>;
     };
   }
   export type TypeEntityLike = EntityLike;
@@ -51461,7 +51849,7 @@ export namespace Api {
   export type TypeChatPhoto = ChatPhotoEmpty | ChatPhoto;
   export type TypeMessage = MessageEmpty | Message | MessageService;
   export type TypeMessageMedia = MessageMediaEmpty | MessageMediaPhoto | MessageMediaGeo | MessageMediaContact | MessageMediaUnsupported | MessageMediaDocument | MessageMediaWebPage | MessageMediaVenue | MessageMediaGame | MessageMediaInvoice | MessageMediaGeoLive | MessageMediaPoll | MessageMediaDice | MessageMediaStory | MessageMediaGiveaway | MessageMediaGiveawayResults | MessageMediaPaidMedia | MessageMediaToDo | MessageMediaVideoStream;
-  export type TypeMessageAction = MessageActionEmpty | MessageActionChatCreate | MessageActionChatEditTitle | MessageActionChatEditPhoto | MessageActionChatDeletePhoto | MessageActionChatAddUser | MessageActionChatDeleteUser | MessageActionChatJoinedByLink | MessageActionChannelCreate | MessageActionChatMigrateTo | MessageActionChannelMigrateFrom | MessageActionPinMessage | MessageActionHistoryClear | MessageActionGameScore | MessageActionPaymentSentMe | MessageActionPaymentSent | MessageActionPhoneCall | MessageActionScreenshotTaken | MessageActionCustomAction | MessageActionBotAllowed | MessageActionSecureValuesSentMe | MessageActionSecureValuesSent | MessageActionContactSignUp | MessageActionGeoProximityReached | MessageActionGroupCall | MessageActionInviteToGroupCall | MessageActionSetMessagesTTL | MessageActionGroupCallScheduled | MessageActionSetChatTheme | MessageActionChatJoinedByRequest | MessageActionWebViewDataSentMe | MessageActionWebViewDataSent | MessageActionGiftPremium | MessageActionTopicCreate | MessageActionTopicEdit | MessageActionSuggestProfilePhoto | MessageActionRequestedPeer | MessageActionSetChatWallPaper | MessageActionGiftCode | MessageActionGiveawayLaunch | MessageActionGiveawayResults | MessageActionBoostApply | MessageActionRequestedPeerSentMe | MessageActionPaymentRefunded | MessageActionGiftStars | MessageActionPrizeStars | MessageActionStarGift | MessageActionStarGiftUnique | MessageActionPaidMessagesRefunded | MessageActionPaidMessagesPrice | MessageActionConferenceCall | MessageActionTodoCompletions | MessageActionTodoAppendTasks | MessageActionSuggestedPostApproval | MessageActionSuggestedPostSuccess | MessageActionSuggestedPostRefund | MessageActionGiftTon | MessageActionSuggestBirthday | MessageActionStarGiftPurchaseOffer | MessageActionStarGiftPurchaseOfferDeclined | MessageActionNewCreatorPending | MessageActionChangeCreator | MessageActionNoForwardsToggle | MessageActionNoForwardsRequest | MessageActionPollAppendAnswer | MessageActionPollDeleteAnswer | MessageActionManagedBotCreated | MessageActionChangeCommunity;
+  export type TypeMessageAction = MessageActionEmpty | MessageActionChatCreate | MessageActionChatEditTitle | MessageActionChatEditPhoto | MessageActionChatDeletePhoto | MessageActionChatAddUser | MessageActionChatDeleteUser | MessageActionChatJoinedByLink | MessageActionChannelCreate | MessageActionChatMigrateTo | MessageActionChannelMigrateFrom | MessageActionPinMessage | MessageActionHistoryClear | MessageActionGameScore | MessageActionPaymentSentMe | MessageActionPaymentSent | MessageActionPhoneCall | MessageActionScreenshotTaken | MessageActionCustomAction | MessageActionBotAllowed | MessageActionSecureValuesSentMe | MessageActionSecureValuesSent | MessageActionContactSignUp | MessageActionGeoProximityReached | MessageActionGroupCall | MessageActionInviteToGroupCall | MessageActionSetMessagesTTL | MessageActionGroupCallScheduled | MessageActionSetChatTheme | MessageActionChatJoinedByRequest | MessageActionWebViewDataSentMe | MessageActionWebViewDataSent | MessageActionGiftPremium | MessageActionTopicCreate | MessageActionTopicEdit | MessageActionSuggestProfilePhoto | MessageActionRequestedPeer | MessageActionSetChatWallPaper | MessageActionGiftCode | MessageActionGiveawayLaunch | MessageActionGiveawayResults | MessageActionBoostApply | MessageActionRequestedPeerSentMe | MessageActionPaymentRefunded | MessageActionGiftStars | MessageActionPrizeStars | MessageActionStarGift | MessageActionStarGiftUnique | MessageActionPaidMessagesRefunded | MessageActionPaidMessagesPrice | MessageActionConferenceCall | MessageActionTodoCompletions | MessageActionTodoAppendTasks | MessageActionSuggestedPostApproval | MessageActionSuggestedPostSuccess | MessageActionSuggestedPostRefund | MessageActionGiftTon | MessageActionSuggestBirthday | MessageActionStarGiftPurchaseOffer | MessageActionStarGiftPurchaseOfferDeclined | MessageActionNewCreatorPending | MessageActionChangeCreator | MessageActionNoForwardsToggle | MessageActionNoForwardsRequest | MessageActionPollAppendAnswer | MessageActionPollDeleteAnswer | MessageActionManagedBotCreated | MessageActionChangeCommunity | MessageActionChatJoinedViaCommunity;
   export type TypeDialog = Dialog | DialogFolder | DialogCommunity;
   export type TypePhoto = PhotoEmpty | Photo;
   export type TypePhotoSize = PhotoSizeEmpty | PhotoSize | PhotoCachedSize | PhotoStrippedSize | PhotoSizeProgressive | PhotoPathSize;
@@ -51477,7 +51865,7 @@ export namespace Api {
   export type TypeImportedContact = ImportedContact;
   export type TypeContactStatus = ContactStatus;
   export type TypeMessagesFilter = InputMessagesFilterEmpty | InputMessagesFilterPhotos | InputMessagesFilterVideo | InputMessagesFilterPhotoVideo | InputMessagesFilterDocument | InputMessagesFilterUrl | InputMessagesFilterGif | InputMessagesFilterVoice | InputMessagesFilterMusic | InputMessagesFilterChatPhotos | InputMessagesFilterPhoneCalls | InputMessagesFilterRoundVoice | InputMessagesFilterRoundVideo | InputMessagesFilterMyMentions | InputMessagesFilterGeo | InputMessagesFilterContacts | InputMessagesFilterPinned | InputMessagesFilterPoll;
-  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewAuthorization | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateUser | UpdateAutoSaveSettings | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction | UpdateBotChatBoost | UpdateChannelViewForumAsMessages | UpdatePeerWallpaper | UpdateBotMessageReaction | UpdateBotMessageReactions | UpdateSavedDialogPinned | UpdatePinnedSavedDialogs | UpdateSavedReactionTags | UpdateSmsJob | UpdateQuickReplies | UpdateNewQuickReply | UpdateDeleteQuickReply | UpdateQuickReplyMessage | UpdateDeleteQuickReplyMessages | UpdateBotBusinessConnect | UpdateBotNewBusinessMessage | UpdateBotEditBusinessMessage | UpdateBotDeleteBusinessMessage | UpdateNewStoryReaction | UpdateStarsBalance | UpdateBusinessBotCallbackQuery | UpdateStarsRevenueStatus | UpdateBotPurchasedPaidMedia | UpdatePaidReactionPrivacy | UpdateSentPhoneCode | UpdateGroupCallChainBlocks | UpdateReadMonoForumInbox | UpdateReadMonoForumOutbox | UpdateMonoForumNoPaidException | UpdateGroupCallMessage | UpdateGroupCallEncryptedMessage | UpdatePinnedForumTopic | UpdatePinnedForumTopics | UpdateDeleteGroupCallMessages | UpdateStarGiftAuctionState | UpdateStarGiftAuctionUserState | UpdateEmojiGameInfo | UpdateStarGiftCraftFail | UpdateChatParticipantRank | UpdateManagedBot | UpdateBotGuestChatQuery | UpdateAiComposeTones | UpdateJoinChatWebViewDecision | UpdateNewBotConnection | UpdateWebBrowserSettings | UpdateWebBrowserException | UpdateNewEphemeralMessage | UpdateDeleteEphemeralMessages | UpdateEditEphemeralMessage | UpdateBotStarsSubscription;
+  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewAuthorization | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateUser | UpdateAutoSaveSettings | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction | UpdateBotChatBoost | UpdateChannelViewForumAsMessages | UpdatePeerWallpaper | UpdateBotMessageReaction | UpdateBotMessageReactions | UpdateSavedDialogPinned | UpdatePinnedSavedDialogs | UpdateSavedReactionTags | UpdateSmsJob | UpdateQuickReplies | UpdateNewQuickReply | UpdateDeleteQuickReply | UpdateQuickReplyMessage | UpdateDeleteQuickReplyMessages | UpdateBotBusinessConnect | UpdateBotNewBusinessMessage | UpdateBotEditBusinessMessage | UpdateBotDeleteBusinessMessage | UpdateNewStoryReaction | UpdateStarsBalance | UpdateBusinessBotCallbackQuery | UpdateStarsRevenueStatus | UpdateBotPurchasedPaidMedia | UpdatePaidReactionPrivacy | UpdateSentPhoneCode | UpdateGroupCallChainBlocks | UpdateReadMonoForumInbox | UpdateReadMonoForumOutbox | UpdateMonoForumNoPaidException | UpdateGroupCallMessage | UpdateGroupCallEncryptedMessage | UpdatePinnedForumTopic | UpdatePinnedForumTopics | UpdateDeleteGroupCallMessages | UpdateStarGiftAuctionState | UpdateStarGiftAuctionUserState | UpdateEmojiGameInfo | UpdateStarGiftCraftFail | UpdateChatParticipantRank | UpdateManagedBot | UpdateBotGuestChatQuery | UpdateAiComposeTones | UpdateJoinChatWebViewDecision | UpdateNewBotConnection | UpdateWebBrowserSettings | UpdateWebBrowserException | UpdateNewEphemeralMessage | UpdateDeleteEphemeralMessages | UpdateEditEphemeralMessage | UpdateEphemeralBotCallbackQuery | UpdateBotStarsSubscription;
   export type TypeUpdates = UpdatesTooLong | UpdateShortMessage | UpdateShortChatMessage | UpdateShort | UpdatesCombined | Updates | UpdateShortSentMessage;
   export type TypeDcOption = DcOption;
   export type TypeConfig = Config;
@@ -51490,7 +51878,7 @@ export namespace Api {
   export type TypeInputDocument = InputDocumentEmpty | InputDocument;
   export type TypeDocument = DocumentEmpty | Document;
   export type TypeNotifyPeer = NotifyPeer | NotifyUsers | NotifyChats | NotifyBroadcasts | NotifyForumTopic | NotifyCommunity;
-  export type TypeSendMessageAction = SendMessageTypingAction | SendMessageCancelAction | SendMessageRecordVideoAction | SendMessageUploadVideoAction | SendMessageRecordAudioAction | SendMessageUploadAudioAction | SendMessageUploadPhotoAction | SendMessageUploadDocumentAction | SendMessageGeoLocationAction | SendMessageChooseContactAction | SendMessageGamePlayAction | SendMessageRecordRoundAction | SendMessageUploadRoundAction | SpeakingInGroupCallAction | SendMessageHistoryImportAction | SendMessageChooseStickerAction | SendMessageEmojiInteraction | SendMessageEmojiInteractionSeen | SendMessageTextDraftAction | InputSendMessageRichMessageDraftAction | SendMessageRichMessageDraftAction;
+  export type TypeSendMessageAction = SendMessageTypingAction | SendMessageCancelAction | SendMessageRecordVideoAction | SendMessageUploadVideoAction | SendMessageRecordAudioAction | SendMessageUploadAudioAction | SendMessageUploadPhotoAction | SendMessageUploadDocumentAction | SendMessageGeoLocationAction | SendMessageChooseContactAction | SendMessageGamePlayAction | SendMessageRecordRoundAction | SendMessageUploadRoundAction | SpeakingInGroupCallAction | SendMessageHistoryImportAction | SendMessageChooseStickerAction | SendMessageEmojiInteraction | SendMessageEmojiInteractionSeen | SendMessageTextDraftAction | InputSendMessageRichMessageDraftAction | SendMessageRichMessageDraftAction | SendMessageStopDraftAction;
   export type TypeInputPrivacyKey = InputPrivacyKeyStatusTimestamp | InputPrivacyKeyChatInvite | InputPrivacyKeyPhoneCall | InputPrivacyKeyPhoneP2P | InputPrivacyKeyForwards | InputPrivacyKeyProfilePhoto | InputPrivacyKeyPhoneNumber | InputPrivacyKeyAddedByPhone | InputPrivacyKeyVoiceMessages | InputPrivacyKeyAbout | InputPrivacyKeyBirthday | InputPrivacyKeyStarGiftsAutoSave | InputPrivacyKeyNoPaidMessages | InputPrivacyKeySavedMusic;
   export type TypePrivacyKey = PrivacyKeyStatusTimestamp | PrivacyKeyChatInvite | PrivacyKeyPhoneCall | PrivacyKeyPhoneP2P | PrivacyKeyForwards | PrivacyKeyProfilePhoto | PrivacyKeyPhoneNumber | PrivacyKeyAddedByPhone | PrivacyKeyVoiceMessages | PrivacyKeyAbout | PrivacyKeyBirthday | PrivacyKeyStarGiftsAutoSave | PrivacyKeyNoPaidMessages | PrivacyKeySavedMusic;
   export type TypeInputPrivacyRule = InputPrivacyValueAllowContacts | InputPrivacyValueAllowAll | InputPrivacyValueAllowUsers | InputPrivacyValueDisallowContacts | InputPrivacyValueDisallowAll | InputPrivacyValueDisallowUsers | InputPrivacyValueAllowChatParticipants | InputPrivacyValueDisallowChatParticipants | InputPrivacyValueAllowCloseFriends | InputPrivacyValueAllowPremium | InputPrivacyValueAllowBots | InputPrivacyValueDisallowBots;
@@ -51507,7 +51895,7 @@ export namespace Api {
   export type TypeStickerSet = StickerSet;
   export type TypeBotCommand = BotCommand;
   export type TypeBotInfo = BotInfo;
-  export type TypeKeyboardButton = KeyboardButton | KeyboardButtonUrl | KeyboardButtonCallback | KeyboardButtonRequestPhone | KeyboardButtonRequestGeoLocation | KeyboardButtonSwitchInline | KeyboardButtonGame | KeyboardButtonBuy | KeyboardButtonUrlAuth | InputKeyboardButtonUrlAuth | KeyboardButtonRequestPoll | InputKeyboardButtonUserProfile | KeyboardButtonUserProfile | KeyboardButtonWebView | KeyboardButtonSimpleWebView | KeyboardButtonRequestPeer | InputKeyboardButtonRequestPeer | KeyboardButtonCopy;
+  export type TypeKeyboardButton = KeyboardButton;
   export type TypeKeyboardButtonRow = KeyboardButtonRow;
   export type TypeReplyMarkup = ReplyKeyboardHide | ReplyKeyboardForceReply | ReplyKeyboardMarkup | ReplyInlineMarkup;
   export type TypeMessageEntity = MessageEntityUnknown | MessageEntityMention | MessageEntityHashtag | MessageEntityBotCommand | MessageEntityUrl | MessageEntityEmail | MessageEntityBold | MessageEntityItalic | MessageEntityCode | MessageEntityPre | MessageEntityTextUrl | MessageEntityMentionName | InputMessageEntityMentionName | MessageEntityPhone | MessageEntityCashtag | MessageEntityUnderline | MessageEntityStrike | MessageEntityBankCard | MessageEntitySpoiler | MessageEntityCustomEmoji | MessageEntityBlockquote | MessageEntityFormattedDate | MessageEntityDiffInsert | MessageEntityDiffReplace | MessageEntityDiffDelete;
@@ -51534,8 +51922,8 @@ export namespace Api {
   export type TypeGame = Game;
   export type TypeInputGame = InputGameID | InputGameShortName;
   export type TypeHighScore = HighScore;
-  export type TypeRichText = TextEmpty | TextPlain | TextBold | TextItalic | TextUnderline | TextStrike | TextFixed | TextUrl | TextEmail | TextConcat | TextSubscript | TextSuperscript | TextMarked | TextPhone | TextImage | TextAnchor | TextMath | TextCustomEmoji | TextSpoiler | TextMention | TextHashtag | TextBotCommand | TextCashtag | TextAutoUrl | TextAutoEmail | TextAutoPhone | TextBankCard | TextMentionName | TextDate | TextDiff;
-  export type TypePageBlock = PageBlockUnsupported | PageBlockTitle | PageBlockSubtitle | PageBlockAuthorDate | PageBlockHeader | PageBlockSubheader | PageBlockParagraph | PageBlockPreformatted | PageBlockFooter | PageBlockDivider | PageBlockAnchor | PageBlockList | PageBlockBlockquote | PageBlockPullquote | PageBlockPhoto | PageBlockVideo | PageBlockCover | PageBlockEmbed | PageBlockEmbedPost | PageBlockCollage | PageBlockSlideshow | PageBlockChannel | PageBlockAudio | PageBlockKicker | PageBlockTable | PageBlockOrderedList | PageBlockDetails | PageBlockRelatedArticles | PageBlockMap | PageBlockHeading1 | PageBlockHeading2 | PageBlockHeading3 | PageBlockHeading4 | PageBlockHeading5 | PageBlockHeading6 | PageBlockMath | PageBlockThinking | InputPageBlockMap | PageBlockBlockquoteBlocks;
+  export type TypeRichText = TextEmpty | TextPlain | TextBold | TextItalic | TextUnderline | TextStrike | TextFixed | TextUrl | TextEmail | TextConcat | TextSubscript | TextSuperscript | TextMarked | TextPhone | TextImage | TextAnchor | TextMath | TextCustomEmoji | TextSpoiler | TextMention | TextHashtag | TextBotCommand | TextCashtag | TextAutoUrl | TextAutoEmail | TextAutoPhone | TextBankCard | TextMentionName | TextDate | TextDiff | TextButton;
+  export type TypePageBlock = PageBlockUnsupported | PageBlockTitle | PageBlockSubtitle | PageBlockAuthorDate | PageBlockHeader | PageBlockSubheader | PageBlockParagraph | PageBlockPreformatted | PageBlockFooter | PageBlockDivider | PageBlockAnchor | PageBlockList | PageBlockBlockquote | PageBlockPullquote | PageBlockPhoto | PageBlockVideo | PageBlockCover | PageBlockEmbed | PageBlockEmbedPost | PageBlockCollage | PageBlockSlideshow | PageBlockChannel | PageBlockAudio | PageBlockKicker | PageBlockTable | PageBlockOrderedList | PageBlockDetails | PageBlockRelatedArticles | PageBlockMap | PageBlockHeading1 | PageBlockHeading2 | PageBlockHeading3 | PageBlockHeading4 | PageBlockHeading5 | PageBlockHeading6 | PageBlockMath | PageBlockThinking | InputPageBlockMap | PageBlockBlockquoteBlocks | PageBlockButtonRow | PageBlockDocument;
   export type TypePhoneCallDiscardReason = PhoneCallDiscardReasonMissed | PhoneCallDiscardReasonDisconnect | PhoneCallDiscardReasonHangup | PhoneCallDiscardReasonBusy | PhoneCallDiscardReasonMigrateConferenceCall;
   export type TypeDataJSON = DataJSON;
   export type TypeLabeledPrice = LabeledPrice;
@@ -51825,6 +52213,12 @@ export namespace Api {
   export type TypeCommunityPeer = CommunityPeer;
   export type TypeCommunityPeerRequest = CommunityPeerRequest;
   export type TypeEphemeralMessage = EphemeralMessage;
+  export type TypeButtonType = ButtonTypeDefault | ButtonTypeRequestPhone | ButtonTypeRequestGeoLocation | ButtonTypeRequestPoll | ButtonTypeRequestPeer | InputButtonTypeRequestPeer | ButtonTypeSimpleWebView;
+  export type TypeInlineButtonType = InlineButtonTypeUrl | InlineButtonTypeUrlAuth | InputInlineButtonTypeUrlAuth | InlineButtonTypeWebView | InlineButtonTypeCallback | InlineButtonTypeGame | InlineButtonTypeBuy | InlineButtonTypeSwitchInline | InlineButtonTypeUserProfile | InputInlineButtonTypeUserProfile | InlineButtonTypeCopy | InlineButtonTypeDisabled;
+  export type TypeKeyboardInlineButton = KeyboardInlineButton;
+  export type TypeKeyboardInlineButtonRow = KeyboardInlineButtonRow;
+  export type TypeRichButtonStyle = RichButtonStyle;
+  export type TypePageButton = PageButton;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeBindAuthKeyInner = BindAuthKeyInner;
@@ -51853,7 +52247,7 @@ export namespace Api {
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockPublicKey | TlsBlockScope | TlsBlockPermutation | TlsBlockM | TlsBlockE | TlsBlockPadding;
   export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | InvokeWithReCaptcha | ReqPq | ReqPqMulti | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
-    | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail | auth.ReportMissingCode | auth.CheckPaidAuth | auth.InitPasskeyLogin | auth.FinishPasskeyLogin
+    | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail | auth.ReportMissingCode | auth.CheckPaidAuth | auth.InitPasskeyLogin | auth.FinishPasskeyLogin | auth.InitFirebasePnvLogin | auth.FinishFirebasePnvLogin | auth.FirebasePnvSignUp
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis | account.UpdateBusinessWorkHours | account.UpdateBusinessLocation | account.UpdateBusinessGreetingMessage | account.UpdateBusinessAwayMessage | account.UpdateConnectedBot | account.GetConnectedBots | account.GetBotBusinessConnection | account.UpdateBusinessIntro | account.ToggleConnectedBotPaused | account.DisablePeerConnectedBot | account.UpdateBirthday | account.CreateBusinessChatLink | account.EditBusinessChatLink | account.DeleteBusinessChatLink | account.GetBusinessChatLinks | account.ResolveBusinessChatLink | account.UpdatePersonalChannel | account.ToggleSponsoredMessages | account.GetReactionsNotifySettings | account.SetReactionsNotifySettings | account.GetCollectibleEmojiStatuses | account.GetPaidMessagesRevenue | account.ToggleNoPaidMessagesException | account.SetMainProfileTab | account.SaveMusic | account.GetSavedMusicIds | account.GetUniqueGiftChatThemes | account.InitPasskeyRegistration | account.RegisterPasskey | account.GetPasskeys | account.DeletePasskey | account.ConfirmBotConnection | account.GetWebBrowserSettings | account.UpdateWebBrowserSettings | account.ToggleWebBrowserSettingsException | account.DeleteWebBrowserSettingsExceptions
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetRequirementsToContact | users.GetSavedMusic | users.GetSavedMusicByID | users.SuggestBirthday
     | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.SetBlocked | contacts.GetBirthdays | contacts.GetSponsoredPeers | contacts.UpdateContactNote
@@ -51877,5 +52271,5 @@ export namespace Api {
     | fragment.GetCollectibleInfo
     | aicompose.CreateTone | aicompose.UpdateTone | aicompose.SaveTone | aicompose.DeleteTone | aicompose.GetTone | aicompose.GetTones | aicompose.GetToneExample
     | communities.Create | communities.TogglePeerLink | communities.GetJoinedCommunities | communities.ToggleCommunityCollapsedInDialogs | communities.GetPeerLinkRequests | communities.TogglePeerLinkRequestApproval | communities.ToggleAllPeerLinkRequestApproval | communities.ToggleParticipantBanned | communities.GetParticipantJoinedChats
-    | ephemeral.SendMessage | ephemeral.DeleteMessage | ephemeral.ReportMessage | ephemeral.GetCallbackAnswer;
+    | ephemeral.SendMessage | ephemeral.DeleteMessage | ephemeral.ReportMessage | ephemeral.GetCallbackAnswer | ephemeral.EditMessage | ephemeral.DeleteWelcomeMessage | ephemeral.DeleteAllWelcomeMessages | ephemeral.GetWelcomeMessages;
 }

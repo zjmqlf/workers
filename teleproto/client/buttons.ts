@@ -1,6 +1,7 @@
 import { Api } from "../tl";
 import type { ButtonLike } from "../define";
 import { Button } from "../tl/custom/button";
+import { InlineKeyboard, ReplyKeyboard } from "../tl/custom/keyboard";
 import { MessageButton } from "../tl/custom/messageButton";
 import { isArrayLike, unionId } from "../Helpers";
 
@@ -16,6 +17,13 @@ export function buildReplyMarkup(
     if (buttons == undefined) {
         return undefined;
     }
+    if (buttons instanceof InlineKeyboard || buttons instanceof ReplyKeyboard) {
+        const markup = buttons.build();
+        if (inlineOnly && markup instanceof Api.ReplyKeyboardMarkup) {
+            throw new Error("You cannot use non-inline buttons here");
+        }
+        return markup;
+    }
     if ("SUBCLASS_OF_ID" in buttons) {
         if (buttons.SUBCLASS_OF_ID == unionId("ReplyMarkup")) {
             return buttons as Api.TypeReplyMarkup;
@@ -29,11 +37,11 @@ export function buildReplyMarkup(
     }
     let isInline = false;
     let isNormal = false;
-    let resize = undefined;
-    const singleUse = false;
-    const selective = false;
+    let resize: boolean | undefined;
+    let singleUse: boolean | undefined;
+    let selective: boolean | undefined;
 
-    const rows = [];
+    const rows: ButtonLike[][] = [];
     // @ts-ignore
     for (const row of buttons) {
         const current = [];
@@ -43,45 +51,48 @@ export function buildReplyMarkup(
                     resize = button.resize;
                 }
                 if (button.singleUse != undefined) {
-                    resize = button.singleUse;
+                    singleUse = button.singleUse;
                 }
                 if (button.selective != undefined) {
-                    resize = button.selective;
+                    selective = button.selective;
                 }
                 button = button.button;
             } else if (button instanceof MessageButton) {
                 button = button.button;
             }
-            const inline = Button._isInline(button);
-            if (!isInline && inline) {
+            if (Button._isInline(button)) {
                 isInline = true;
-            }
-            if (!isNormal && inline) {
-                isNormal = false;
-            }
-            if (button.SUBCLASS_OF_ID == unionId("KeyboardButton")) {
+                current.push(button);
+            } else if (button instanceof Api.KeyboardButton) {
+                isNormal = true;
                 current.push(button);
             }
         }
-        if (current) {
-            rows.push(
-                new Api.KeyboardButtonRow({
-                    buttons: current,
-                })
-            );
+        if (current.length) {
+            rows.push(current);
         }
     }
     if (inlineOnly && isNormal) {
         throw new Error("You cannot use non-inline buttons here");
-    } else if (isInline === isNormal && isNormal) {
+    } else if (isInline && isNormal) {
         throw new Error("You cannot mix inline with normal buttons");
     } else if (isInline) {
         return new Api.ReplyInlineMarkup({
-            rows: rows,
+            rows: rows.map(
+                (buttons) =>
+                    new Api.KeyboardInlineButtonRow({
+                        buttons: buttons as Api.TypeKeyboardInlineButton[],
+                    })
+            ),
         });
     }
     return new Api.ReplyKeyboardMarkup({
-        rows: rows,
+        rows: rows.map(
+            (buttons) =>
+                new Api.KeyboardButtonRow({
+                    buttons: buttons as Api.TypeKeyboardButton[],
+                })
+        ),
         resize: resize,
         singleUse: singleUse,
         selective: selective,
