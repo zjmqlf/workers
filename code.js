@@ -11,6 +11,7 @@ const decoderrobot = [];
 const tebiejiebot = [];
 const mmyzybot = [];
 const MessengerIIbot = [];
+const XVNgkllbot = [];
 // const kkjmqmbot = [];
 const paniangbot = [];
 // const KodeXFilesbot = [];
@@ -33,6 +34,8 @@ const KodeXChatsINDbot = [];
 const MassFilesStoreBot = [];
 const betapahatitakbahagiabot = [];
 const QQfilebot = [];
+const yyjmq = [];
+const yyjmqhbot = [];
 const aotembot = [];
 const jiematopbot = [];
 const UUjiebot = [];
@@ -55,6 +58,7 @@ const teestpanbot = [];
 const atfileslinksbot = [];
 const lockHivebot = [];
 const tgdecoderbot = [];
+const amumushuangxiangbot = [];
 const tiantianziyoubot = [];
 const xiumi1bot = [];
 const zyxfileBot = [];
@@ -101,6 +105,7 @@ const mmyzybot2Regexp = /(mmyzy_bot_p:[A-Za-z0-9]{32})/g;   //mmyzybot
 const mmyzybot3Regexp = /(mmyzy_bot_d:[A-Za-z0-9]{32})/g;   //mmyzybot
 const mmyzybot4Regexp = /(mmyzy_bot_col:[A-Za-z0-9]{32})/g;   //mmyzybot
 const MessengerIIbotRegexp = /(MessengerIIbot_[A-Z0-9]{4}-[A-Z0-9]{4}_\d+P\d+V\d+D)/g;   //MessengerIIbot
+const XVNgkllbotRegexp = /(XVNgkllbot_[A-Z0-9]{15})/g;   //XVNgkllbot
 const paniangbot1Regexp = /(paniang_bot_v:[A-Za-z0-9]{32})/g;   //paniangbot
 const paniangbot2Regexp = /(paniang_bot_p:[A-Za-z0-9]{32})/g;   //paniangbot
 const paniangbot3Regexp = /(paniang_bot_d:[A-Za-z0-9]{32})/g;   //paniangbot
@@ -263,6 +268,20 @@ const QQld90bot4Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P_\d*V)/g;   //QQld90bot
 const QQld90bot5Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*P)/g;   //QQld90bot
 const QQld90bot6Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*V)/g;   //QQld90bot
 const QQld90bot7Regexp = /(QQld90_bot:[a-z0-9]{16}_\d*D)/g;   //QQld90bot
+const yyjmq1Regexp = /(yyjmq-[a-z0-9]{16}_\d*P\d*V\d*D)/g;   //yyjmq
+const yyjmq2Regexp = /(yyjmq-[a-z0-9]{16}_\d*P\d*V)/g;   //yyjmq
+const yyjmq3Regexp = /(yyjmq-[a-z0-9]{16}_\d*P\d*D)/g;   //yyjmq
+const yyjmq4Regexp = /(yyjmq-[a-z0-9]{16}_\d*V\d*D)/g;   //yyjmq
+const yyjmq5Regexp = /(yyjmq-[a-z0-9]{16}_\d*P)/g;   //yyjmq
+const yyjmq6Regexp = /(yyjmq-[a-z0-9]{16}_\d*V)/g;   //yyjmq
+const yyjmq7Regexp = /(yyjmq-[a-z0-9]{16}_\d*D)/g;   //yyjmq
+const yyjmqhbot1Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*P\d*V\d*D)/g;   //yyjmqhbot
+const yyjmqhbot2Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*P\d*V)/g;   //yyjmqhbot
+const yyjmqhbot3Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*P\d*D)/g;   //yyjmqhbot
+const yyjmqhbot4Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*V\d*D)/g;   //yyjmqhbot
+const yyjmqhbot5Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*P)/g;   //yyjmqhbot
+const yyjmqhbot6Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*V)/g;   //yyjmqhbot
+const yyjmqhbot7Regexp = /(yyjmqh_bot:[a-z0-9]{16}_\d*D)/g;   //yyjmqhbot
 const aotembotRegexp = /(aotem_bot:[\-_A-Za-z0-9]{16})/g;   //aotembot
 const jiematopbotRegexp = /(jiematopbot-[A-Za-z0-9]{18})/g;   //jiematopbot
 const UUjiebotRegexp = /(UUjiebot:[\-_A-Za-z0-9]{16})/g;   //UUjiebot
@@ -311,6 +330,7 @@ const lockHivebot3Regexp = /(LockHivebot_[A-Za-z0-9]{16})/g;   //lockHivebot
 const lockHivebot4Regexp = /(f_[A-Za-z0-9]{16})/g;   //lockHivebot
 const tgdecoderbotRegexp = /(decoder_\d+p_\d+v_\d+d_[A-Za-z0-9]{12})/g;   //tgdecoderbot
 // const tgdecoderbot1Regexp = /([a-z0-9]{32})/g;   //tgdecoderbot
+const amumushuangxiangbotRegexp = /(amumushuangxiangbot_palu_[A-Za-z0-9]{10})/g;   //amumushuangxiangbot
 const tiantianziyoubotRegexp = /(amumushuangxiangbot_tiantianziyoubot_[a-z0-9]{10})/g;   //tiantianziyoubot
 const xiumi1botRegexp = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u27BF]{16}/g;   //xiumi1bot
 const zyxfileBot1Regexp = /(zyxfiles-\d+v-\d+p-\d+d-[a-z0-9]{24})/g;   //zyxfileBot
@@ -883,6 +903,20 @@ try {
             for (let j = 0; j < MessengerIIbotMatchesLength; j++) {
               if (MessengerIIbotMatches[j]) {
                 MessengerIIbot.push(MessengerIIbotMatches[j]);
+              }
+            }
+          }
+        }
+
+        const XVNgkllbotMatches = str.match(XVNgkllbotRegexp);
+        // console.log(XVNgkllbotMatches);  //测试
+        if (XVNgkllbotMatches) {
+          const XVNgkllbotMatchesLength = XVNgkllbotMatches.length;
+          // console.log("XVNgkllbotMatchesLength : " + XVNgkllbotMatchesLength);  //测试
+          if (XVNgkllbotMatchesLength > 0) {
+            for (let j = 0; j < XVNgkllbotMatchesLength; j++) {
+              if (XVNgkllbotMatches[j]) {
+                XVNgkllbot.push(XVNgkllbotMatches[j]);
               }
             }
           }
@@ -3156,6 +3190,202 @@ try {
           }
         }
 
+        const yyjmq1Matches = str.match(yyjmq1Regexp);
+        // console.log(yyjmq1Matches);  //测试
+        if (yyjmq1Matches) {
+          const yyjmq1MatchesLength = yyjmq1Matches.length;
+          // console.log("yyjmq1MatchesLength : " + yyjmq1MatchesLength);  //测试
+          if (yyjmq1MatchesLength > 0) {
+            for (let j = 0; j < yyjmq1MatchesLength; j++) {
+              if (yyjmq1Matches[j]) {
+                yyjmq.push(yyjmq1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq2Matches = str.match(yyjmq2Regexp);
+        // console.log(yyjmq2Matches);  //测试
+        if (yyjmq2Matches) {
+          const yyjmq2MatchesLength = yyjmq2Matches.length;
+          // console.log("yyjmq2MatchesLength : " + yyjmq2MatchesLength);  //测试
+          if (yyjmq2MatchesLength > 0) {
+            for (let j = 0; j < yyjmq2MatchesLength; j++) {
+              if (yyjmq2Matches[j]) {
+                yyjmq.push(yyjmq2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq3Matches = str.match(yyjmq3Regexp);
+        // console.log(yyjmq3Matches);  //测试
+        if (yyjmq3Matches) {
+          const yyjmq3MatchesLength = yyjmq3Matches.length;
+          // console.log("yyjmq3MatchesLength : " + yyjmq3MatchesLength);  //测试
+          if (yyjmq3MatchesLength > 0) {
+            for (let j = 0; j < yyjmq3MatchesLength; j++) {
+              if (yyjmq3Matches[j]) {
+                yyjmq.push(yyjmq3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq4Matches = str.match(yyjmq4Regexp);
+        // console.log(yyjmq4Matches);  //测试
+        if (yyjmq4Matches) {
+          const yyjmq4MatchesLength = yyjmq4Matches.length;
+          // console.log("yyjmq4MatchesLength : " + yyjmq4MatchesLength);  //测试
+          if (yyjmq4MatchesLength > 0) {
+            for (let j = 0; j < yyjmq4MatchesLength; j++) {
+              if (yyjmq4Matches[j]) {
+                yyjmq.push(yyjmq4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq5Matches = str.match(yyjmq5Regexp);
+        // console.log(yyjmq5Matches);  //测试
+        if (yyjmq5Matches) {
+          const yyjmq5MatchesLength = yyjmq5Matches.length;
+          // console.log("yyjmq5MatchesLength : " + yyjmq5MatchesLength);  //测试
+          if (yyjmq5MatchesLength > 0) {
+            for (let j = 0; j < yyjmq5MatchesLength; j++) {
+              if (yyjmq5Matches[j]) {
+                yyjmq.push(yyjmq5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq6Matches = str.match(yyjmq6Regexp);
+        // console.log(yyjmq6Matches);  //测试
+        if (yyjmq6Matches) {
+          const yyjmq6MatchesLength = yyjmq6Matches.length;
+          // console.log("yyjmq6MatchesLength : " + yyjmq6MatchesLength);  //测试
+          if (yyjmq6MatchesLength > 0) {
+            for (let j = 0; j < yyjmq6MatchesLength; j++) {
+              if (yyjmq6Matches[j]) {
+                yyjmq.push(yyjmq6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmq7Matches = str.match(yyjmq7Regexp);
+        // console.log(yyjmq7Matches);  //测试
+        if (yyjmq7Matches) {
+          const yyjmq7MatchesLength = yyjmq7Matches.length;
+          // console.log("yyjmq7MatchesLength : " + yyjmq7MatchesLength);  //测试
+          if (yyjmq7MatchesLength > 0) {
+            for (let j = 0; j < yyjmq7MatchesLength; j++) {
+              if (yyjmq7Matches[j]) {
+                yyjmq.push(yyjmq7Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot1Matches = str.match(yyjmqhbot1Regexp);
+        // console.log(yyjmqhbot1Matches);  //测试
+        if (yyjmqhbot1Matches) {
+          const yyjmqhbot1MatchesLength = yyjmqhbot1Matches.length;
+          // console.log("yyjmqhbot1MatchesLength : " + yyjmqhbot1MatchesLength);  //测试
+          if (yyjmqhbot1MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot1MatchesLength; j++) {
+              if (yyjmqhbot1Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot1Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot2Matches = str.match(yyjmqhbot2Regexp);
+        // console.log(yyjmqhbot2Matches);  //测试
+        if (yyjmqhbot2Matches) {
+          const yyjmqhbot2MatchesLength = yyjmqhbot2Matches.length;
+          // console.log("yyjmqhbot2MatchesLength : " + yyjmqhbot2MatchesLength);  //测试
+          if (yyjmqhbot2MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot2MatchesLength; j++) {
+              if (yyjmqhbot2Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot2Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot3Matches = str.match(yyjmqhbot3Regexp);
+        // console.log(yyjmqhbot3Matches);  //测试
+        if (yyjmqhbot3Matches) {
+          const yyjmqhbot3MatchesLength = yyjmqhbot3Matches.length;
+          // console.log("yyjmqhbot3MatchesLength : " + yyjmqhbot3MatchesLength);  //测试
+          if (yyjmqhbot3MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot3MatchesLength; j++) {
+              if (yyjmqhbot3Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot3Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot4Matches = str.match(yyjmqhbot4Regexp);
+        // console.log(yyjmqhbot4Matches);  //测试
+        if (yyjmqhbot4Matches) {
+          const yyjmqhbot4MatchesLength = yyjmqhbot4Matches.length;
+          // console.log("yyjmqhbot4MatchesLength : " + yyjmqhbot4MatchesLength);  //测试
+          if (yyjmqhbot4MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot4MatchesLength; j++) {
+              if (yyjmqhbot4Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot4Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot5Matches = str.match(yyjmqhbot5Regexp);
+        // console.log(yyjmqhbot5Matches);  //测试
+        if (yyjmqhbot5Matches) {
+          const yyjmqhbot5MatchesLength = yyjmqhbot5Matches.length;
+          // console.log("yyjmqhbot5MatchesLength : " + yyjmqhbot5MatchesLength);  //测试
+          if (yyjmqhbot5MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot5MatchesLength; j++) {
+              if (yyjmqhbot5Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot5Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot6Matches = str.match(yyjmqhbot6Regexp);
+        // console.log(yyjmqhbot6Matches);  //测试
+        if (yyjmqhbot6Matches) {
+          const yyjmqhbot6MatchesLength = yyjmqhbot6Matches.length;
+          // console.log("yyjmqhbot6MatchesLength : " + yyjmqhbot6MatchesLength);  //测试
+          if (yyjmqhbot6MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot6MatchesLength; j++) {
+              if (yyjmqhbot6Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot6Matches[j]);
+              }
+            }
+          }
+        }
+
+        const yyjmqhbot7Matches = str.match(yyjmqhbot7Regexp);
+        // console.log(yyjmqhbot7Matches);  //测试
+        if (yyjmqhbot7Matches) {
+          const yyjmqhbot7MatchesLength = yyjmqhbot7Matches.length;
+          // console.log("yyjmqhbot7MatchesLength : " + yyjmqhbot7MatchesLength);  //测试
+          if (yyjmqhbot7MatchesLength > 0) {
+            for (let j = 0; j < yyjmqhbot7MatchesLength; j++) {
+              if (yyjmqhbot7Matches[j]) {
+                yyjmqhbot.push(yyjmqhbot7Matches[j]);
+              }
+            }
+          }
+        }
+
         const aotembotMatches = str.match(aotembotRegexp);
         // console.log(aotembotMatches);  //测试
         if (aotembotMatches) {
@@ -3828,6 +4058,20 @@ try {
         //   }
         // }
 
+        const amumushuangxiangbotMatches = str.match(amumushuangxiangbotRegexp);
+        // console.log(amumushuangxiangbotMatches);  //测试
+        if (amumushuangxiangbotMatches) {
+          const amumushuangxiangbotMatchesLength = amumushuangxiangbotMatches.length;
+          // console.log("amumushuangxiangbotMatchesLength : " + amumushuangxiangbotMatchesLength);  //测试
+          if (amumushuangxiangbotMatchesLength > 0) {
+            for (let j = 0; j < amumushuangxiangbotMatchesLength; j++) {
+              if (amumushuangxiangbotMatches[j]) {
+                amumushuangxiangbot.push(amumushuangxiangbotMatches[j]);
+              }
+            }
+          }
+        }
+
         const tiantianziyoubotMatches = str.match(tiantianziyoubotRegexp);
         // console.log(tiantianziyoubotMatches);  //测试
         if (tiantianziyoubotMatches) {
@@ -4473,6 +4717,29 @@ try {
     }
   }
 
+  all += XVNgkllbot.length;
+  console.log("XVNgkllbot : " + XVNgkllbot.length);  //测试
+  if (XVNgkllbot.length > 0) {
+    const data = fs.readFileSync("./code/XVNgkllbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...XVNgkllbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/XVNgkllbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err instanceof Error ? err.message : err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }
+
   all += paniangbot.length;
   console.log("paniangbot : " + paniangbot.length);  //测试
   if (paniangbot.length > 0) {
@@ -4979,6 +5246,52 @@ try {
     }
   }
 
+  all += yyjmq.length;
+  console.log("yyjmq : " + yyjmq.length);  //测试
+  if (yyjmq.length > 0) {
+    const data = fs.readFileSync("./code/yyjmq.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...yyjmq];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/yyjmq.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err instanceof Error ? err.message : err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }
+
+  all += yyjmqhbot.length;
+  console.log("yyjmqhbot : " + yyjmqhbot.length);  //测试
+  if (yyjmqhbot.length > 0) {
+    const data = fs.readFileSync("./code/yyjmqhbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...yyjmqhbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/yyjmqhbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err instanceof Error ? err.message : err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }
+
   all += aotembot.length;
   console.log("aotembot : " + aotembot.length);  //测试
   if (aotembot.length > 0) {
@@ -5473,6 +5786,29 @@ try {
       uniqueArr = [...new Set(uniqueArr)];
       if (uniqueArr.length > oldLength) {
         fs.writeFile("./code/tgdecoderbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
+          if (err) {
+            console.log(err instanceof Error ? err.message : err);
+          }
+        });
+      // } else {
+      //   console.log("没有新加数据");
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }
+
+  all += amumushuangxiangbot.length;
+  console.log("amumushuangxiangbot : " + amumushuangxiangbot.length);  //测试
+  if (amumushuangxiangbot.length > 0) {
+    const data = fs.readFileSync("./code/amumushuangxiangbot.txt", "utf-8");
+    try {
+      let uniqueArr = JSON.parse(data);
+      const oldLength = uniqueArr.length;
+      uniqueArr = [...uniqueArr, ...amumushuangxiangbot];
+      uniqueArr = [...new Set(uniqueArr)];
+      if (uniqueArr.length > oldLength) {
+        fs.writeFile("./code/amumushuangxiangbot.txt", JSON.stringify(uniqueArr, null, 2), function(err) {
           if (err) {
             console.log(err instanceof Error ? err.message : err);
           }

@@ -94,10 +94,10 @@
   "license": "MIT",
   "devDependencies": {
     "@types/mime": "^4.0.0",
-    "@types/node": "^25.6.0",
+    "@types/node": "^26.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3",
-    "wrangler": "4.114.0"
+    "typescript": "^7.0.2",
+    "wrangler": "4.127.1"
   },
   "dependencies": {
     "big-integer": "^1.6.52",
