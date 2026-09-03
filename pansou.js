@@ -1146,10 +1146,10 @@ export class WebSocketServer extends DurableObject {
             "date": new Date().getTime(),
           });
           if (txt) {
-            if (await this.ctx.storage.get(this.chatId + "|" + messageId)) {
-              // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : messageIndex已在数据库中");
-              this.sendMessage("grid", "nextMessage", "", "indexExist", false);
-            } else {
+            // if (await this.ctx.storage.get(this.chatId + "|" + messageId)) {
+            //   // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : messageIndex已在数据库中");
+            //   this.sendMessage("grid", "nextMessage", "", "indexExist", false);
+            // } else {
               const messageCount = await this.selectMessage(1, messageId);
               if (parseInt(messageCount) === 0) {
                 let webpage = "";
@@ -1166,12 +1166,12 @@ export class WebSocketServer extends DurableObject {
                   }
                 }
                 await this.insertMessage(1, messageId, txt, webpage, url);
-                await this.ctx.storage.put(this.chatId + "|" + messageId, "[]");
+                // await this.ctx.storage.put(this.chatId + "|" + messageId, "[]");
               } else {
                 // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : message已在数据库中");
                 this.sendMessage("grid", "nextMessage", "", "exist", false);
               }
-            }
+            // }
             this.offsetId += 1;
           } else {
             // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : 错误的消息");
@@ -2369,8 +2369,7 @@ export class WebSocketServer extends DurableObject {
       }
     // }
     if (command === "start") {
-      // await this.start(option);
-      await this.duplicate(option);  //测试
+      await this.start(option);
     } else if (command === "pause") {
       this.stop = 2;
     } else if (command === "close") {
