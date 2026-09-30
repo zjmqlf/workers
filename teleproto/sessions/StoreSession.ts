@@ -1,6 +1,7 @@
 import { MemorySession } from "./Memory";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
+import { resolve } from "path";
 import { Buffer } from "node:buffer";
 
 export class StoreSession extends MemorySession {

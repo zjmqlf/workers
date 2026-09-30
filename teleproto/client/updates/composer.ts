@@ -1,4 +1,5 @@
 import bigInt from "big-integer";
+import { setMaxListeners } from "events";
 import { Api } from "../../tl";
 import type { EntityLike } from "../../define";
 import type { TelegramClient } from "../TelegramClient";
@@ -6,13 +7,14 @@ import type { EventBuilder } from "../../events/common";
 import { _intoIdSet } from "../../events/common";
 import { getPeerId } from "../../Utils";
 import { isArrayLike } from "../../Helpers";
-import type { UpdateState } from "./manager";
+import type { UpdateState, ChannelPollingState } from "./manager";
 import { UpdateConnectionState } from "../../network";
+import { UpdateContext, type WithUpdateContext } from "./context";
 
 export type NextFn = () => Promise<void>;
 
 export type UpdateMiddleware<T = any> = (
-    update: T,
+    update: WithUpdateContext<T>,
     next: NextFn,
 ) => unknown | Promise<unknown>;
 
@@ -38,7 +40,7 @@ type UpdateFields = {
     channelId?: bigInt.BigInteger;
     chatId?: bigInt.BigInteger;
     userId?: bigInt.BigInteger;
-    peer?: Api.TypePeer;
+    peer?: Api.TypePeer | Api.TypeDialogPeer | Api.TypeNotifyPeer;
     message?: { peerId?: Api.TypePeer };
     _entities?: Map<string, Api.TypeUser | Api.TypeChat>;
     state?: Record<string, unknown>;
@@ -46,26 +48,29 @@ type UpdateFields = {
 
 const fieldsOf = (update: unknown): UpdateFields => (update ?? {}) as UpdateFields;
 
-export type UpdateOf<Name extends UpdateName> = Name extends keyof UpdateByName
-    ? UpdateByName[Name]
-    : UpdateConnectionState;
+export type UpdateOf<Name extends UpdateName> = WithUpdateContext<
+    Name extends keyof UpdateByName ? UpdateByName[Name] : UpdateConnectionState
+>;
 
 interface WatchEntry {
     chats: EntityLike[];
     channels: Set<string>;
     stopped: boolean;
     arming?: Promise<void>;
+    controller: AbortController;
+    retryTimer?: ReturnType<typeof setTimeout>;
+    retryDelay: number;
 }
 
 export interface WatchOptions {
     events?: UpdateName | UpdateName[] | EventBuilder;
-    func?: (update: AnyUpdate) => unknown | Promise<unknown>;
+    func?: (update: WithUpdateContext<AnyUpdate>) => unknown | Promise<unknown>;
 }
 
 export interface OnOptions {
     chats?: EntityLike | EntityLike[];
     blacklistChats?: boolean;
-    func?: (update: AnyUpdate) => unknown | Promise<unknown>;
+    func?: (update: WithUpdateContext<AnyUpdate>) => unknown | Promise<unknown>;
 }
 
 function nameOf(update: unknown): UpdateName | undefined {
@@ -121,8 +126,16 @@ function expandShortMessage(
 
 function peerOf(update: unknown): string | undefined {
     const fields = fieldsOf(update);
+    if (
+        fields.peer instanceof Api.DialogPeerCommunity ||
+        fields.peer instanceof Api.NotifyCommunity
+    ) {
+        return getPeerId(new Api.PeerChannel({ channelId: fields.peer.communityId }));
+    }
     const peer =
         fields.message?.peerId ??
+        (fields.peer instanceof Api.DialogPeer || fields.peer instanceof Api.NotifyPeer
+            ? fields.peer.peer : undefined) ??
         (fields.peer instanceof Api.PeerUser ||
             fields.peer instanceof Api.PeerChat ||
             fields.peer instanceof Api.PeerChannel
@@ -144,8 +157,10 @@ function peerOf(update: unknown): string | undefined {
 export class ClientUpdates {
     private readonly client: TelegramClient;
     private readonly chain: UpdateMiddleware[] = [];
+    private readonly registrations = new Map<UpdateMiddleware, UpdateMiddleware[]>();
     private readonly watches = new Set<WatchEntry>();
     private onError?: (error: Error, update?: AnyUpdate) => unknown;
+    private blockedAuthorization?: Error;
 
     constructor(client: TelegramClient) {
         this.client = client;
@@ -169,6 +184,7 @@ export class ClientUpdates {
     on<T = any>(
         builder: EventBuilder,
         handler: UpdateMiddleware<T> | UpdateMiddleware<T>[],
+        options?: OnOptions,
     ): Unsubscribe;
     on(
         target: UpdateName | UpdateName[] | EventBuilder,
@@ -177,7 +193,7 @@ export class ClientUpdates {
     ): Unsubscribe {
         const run = compose(handler);
         if (typeof target !== "string" && !Array.isArray(target)) {
-            return this.use(this.builderMiddleware(target, run));
+            return this.register(this.builderMiddleware(target, run, options), handler);
         }
         const names = new Set(
             (Array.isArray(target) ? target : [target]).map((name) =>
@@ -185,15 +201,30 @@ export class ClientUpdates {
             ),
         );
         const matchesChat = this.chatMatcher(options);
-        return this.use(async (update, next) => {
+        return this.register(async (update, next) => {
             const name = nameOf(update);
             if (!name || !names.has(name)) return next();
             if (!(await matchesChat(update))) return next();
             if (options.func && !(await options.func(update))) return next();
             await run(update, next);
-        });
+        }, handler);
     }
 
+    watch(
+        chats: EntityLike | EntityLike[],
+        handler?: UpdateMiddleware<UpdateOf<"newMessage" | "newChannelMessage">> | UpdateMiddleware<UpdateOf<"newMessage" | "newChannelMessage">>[],
+        options?: WatchOptions & { events?: undefined },
+    ): Unsubscribe;
+    watch<Name extends UpdateName>(
+        chats: EntityLike | EntityLike[],
+        handler: UpdateMiddleware<UpdateOf<Name>> | UpdateMiddleware<UpdateOf<Name>>[],
+        options: WatchOptions & { events: Name | Name[] },
+    ): Unsubscribe;
+    watch<T = any>(
+        chats: EntityLike | EntityLike[],
+        handler?: UpdateMiddleware<T> | UpdateMiddleware<T>[],
+        options?: WatchOptions,
+    ): Unsubscribe;
     watch(
         chats: EntityLike | EntityLike[],
         handler?: UpdateMiddleware | UpdateMiddleware[],
@@ -211,13 +242,18 @@ export class ClientUpdates {
                         chats: wanted,
                         func: options.func,
                     })
-                    : this.on(events, handler as UpdateMiddleware);
+                    : this.on(events, handler as UpdateMiddleware, {
+                        chats: wanted,
+                        func: options.func,
+                    });
         }
 
         const entry: WatchEntry = {
             chats: wanted,
             channels: new Set(),
             stopped: false,
+            controller: watchController(),
+            retryDelay: 1000,
         };
         this.watches.add(entry);
         void this.arm(entry);
@@ -227,63 +263,139 @@ export class ClientUpdates {
             entry.stopped = true;
             this.watches.delete(entry);
             offHandler?.();
-            for (const channelId of entry.channels) {
-                this.client.updateManager.releaseChannel(channelId);
-            }
+            entry.controller.abort();
+            if (entry.retryTimer) clearTimeout(entry.retryTimer);
             entry.channels.clear();
         };
     }
 
     private async arm(entry: WatchEntry): Promise<void> {
-        if (entry.stopped || entry.arming) return;
-        entry.arming = (async () => {
+        if (entry.stopped || entry.arming || this.blockedAuthorization || !this.client.updateManager.isRunning) return;
+        const controller = entry.controller;
+        const active = () => !controller.signal.aborted && !entry.stopped;
+        const task = (async () => {
             await this.client._connectedDeferred.promise;
+            if (!active() || !this.client.updateManager.isRunning) return;
+            let retry = false;
+            const pending: Promise<void>[] = [];
+            const pendingChannels = new Set<string>();
+            const failed = async (error: unknown) => {
+                if (!active()) return;
+                if (this._suspendAuthorization(error)) return;
+                const code = (error as { errorMessage?: string }).errorMessage;
+                retry ||= !(error instanceof TypeError || error instanceof RangeError) &&
+                    !["CHANNEL_PRIVATE", "CHANNEL_INVALID", "USERNAME_INVALID", "USERNAME_NOT_OCCUPIED", "PEER_ID_INVALID"].includes(code ?? "");
+                await this.reportError(error as Error, undefined);
+            };
             for (const chat of entry.chats) {
-                if (entry.stopped) return;
-                const input = await this.client.getInputEntity(chat);
-                if (!(input instanceof Api.InputPeerChannel)) continue;
-                const channelId = input.channelId.toString();
-                if (entry.channels.has(channelId)) continue;
-                await this.client.updateManager.watchChannel(
-                    channelId,
-                    new Api.InputChannel({
-                        channelId: input.channelId,
-                        accessHash: input.accessHash,
-                    }),
-                );
-                if (entry.stopped) {
-                    this.client.updateManager.releaseChannel(channelId);
-                    return;
+                if (!active()) return;
+                try {
+                    const input = await this.client.getInputEntity(chat);
+                    if (!active()) return;
+                    if (!(input instanceof Api.InputPeerChannel)) continue;
+                    const channelId = input.channelId.toString();
+                    if (entry.channels.has(channelId) || pendingChannels.has(channelId)) continue;
+                    pendingChannels.add(channelId);
+                    const subscription = this.client.updateManager.watchChannel(
+                        channelId,
+                        new Api.InputChannel({
+                            channelId: input.channelId,
+                            accessHash: input.accessHash,
+                        }),
+                        controller.signal,
+                    );
+                    pending.push(subscription.then(() => {
+                        if (active()) entry.channels.add(channelId);
+                    }).catch(failed));
+                } catch (error) {
+                    await failed(error);
                 }
-                entry.channels.add(channelId);
+            }
+            await Promise.all(pending);
+            if (retry && active()) {
+                entry.retryTimer = setTimeout(() => {
+                    entry.retryTimer = undefined;
+                    void this.arm(entry);
+                }, entry.retryDelay);
+                entry.retryTimer.unref?.();
+                entry.retryDelay = Math.min(entry.retryDelay * 2, 64000);
+            } else {
+                entry.retryDelay = 1000;
             }
         })();
+        entry.arming = task;
         try {
-            await entry.arming;
-        } catch (e) {
-            await this.reportError(e as Error, undefined);
+            await task;
+        } catch (error) {
+            this.client._log.error(`Error arming channel watch: ${error}`);
         } finally {
-            entry.arming = undefined;
+            if (entry.arming === task) entry.arming = undefined;
         }
     }
 
-    private rearmWatches(): void {
+    _pause(): void {
+        for (const entry of this.watches) {
+            entry.controller.abort();
+            entry.controller = watchController();
+            entry.channels.clear();
+            entry.arming = undefined;
+            if (entry.retryTimer) clearTimeout(entry.retryTimer);
+            entry.retryTimer = undefined;
+        }
+    }
+
+    _resume(): void {
+        if (this.blockedAuthorization) return;
         const alive = new Set(this.client.updateManager.watchedChannelIds());
         for (const entry of this.watches) {
             if (entry.stopped) continue;
             for (const channelId of [...entry.channels]) {
                 if (!alive.has(channelId)) entry.channels.delete(channelId);
             }
+            if (entry.retryTimer) clearTimeout(entry.retryTimer);
+            entry.retryTimer = undefined;
             if (entry.channels.size < entry.chats.length) void this.arm(entry);
         }
+    }
+
+    get authorizationError(): Error | undefined {
+        return this.blockedAuthorization;
+    }
+
+    _suspendAuthorization(error: unknown): boolean {
+        const code = (error as { errorMessage?: string })?.errorMessage;
+        if (![
+            "AUTH_KEY_UNREGISTERED", "AUTH_KEY_INVALID", "AUTH_KEY_DUPLICATED",
+            "SESSION_REVOKED", "SESSION_EXPIRED", "USER_DEACTIVATED", "USER_DEACTIVATED_BAN",
+        ].includes(code ?? "")) return false;
+        if (!this.blockedAuthorization) {
+            this.blockedAuthorization = error as Error;
+            this._pause();
+            void this.reportError(error as Error);
+        }
+        return true;
+    }
+
+    _resumeAuthorization(): void {
+        if (!this.blockedAuthorization || this.client._destroyed) return;
+        this.blockedAuthorization = undefined;
+        this._resume();
+        void this.client.updateManager.catchUp();
     }
 
     get watched(): string[] {
         return this.client.updateManager.watchedChannelIds();
     }
 
+    get polling(): ChannelPollingState {
+        return this.client.updateManager.polling;
+    }
+
     off(middleware: UpdateMiddleware): void {
         this.remove(middleware);
+        for (const [registered, handlers] of this.registrations) {
+            if (handlers.includes(middleware)) this.remove(registered);
+        }
     }
 
     catch(handler: (error: Error, update?: AnyUpdate) => unknown): this {
@@ -293,6 +405,20 @@ export class ClientUpdates {
 
     get handlers(): readonly UpdateMiddleware[] {
         return [...this.chain];
+    }
+
+    _destroy(): void {
+        for (const entry of this.watches) {
+            entry.stopped = true;
+            entry.controller.abort();
+            if (entry.retryTimer) clearTimeout(entry.retryTimer);
+            entry.channels.clear();
+        }
+        this.watches.clear();
+        this.chain.length = 0;
+        this.registrations.clear();
+        this.onError = undefined;
+        this.blockedAuthorization = undefined;
     }
 
     get state(): UpdateState | undefined {
@@ -309,7 +435,7 @@ export class ClientUpdates {
             update instanceof UpdateConnectionState &&
             update.state === UpdateConnectionState.connected
         ) {
-            this.rearmWatches();
+            this._resume();
         }
         if (!this.chain.length) return;
         const expanded = expandShortMessage(
@@ -327,19 +453,36 @@ export class ClientUpdates {
                 writable: true,
             });
         }
+        this.attachContext(update);
         const chain = [...this.chain];
-        const run = async (index: number): Promise<void> => {
-            if (index >= chain.length) return;
-            await chain[index]!(update, () => run(index + 1));
-        };
         try {
-            await run(0);
+            await runChain(chain, update, async () => {});
         } catch (e) {
             await this.reportError(e as Error, update);
         }
     }
 
+    private attachContext(event: object, update: AnyUpdate = event as AnyUpdate): void {
+        if ("context" in event) return;
+        let context: UpdateContext | undefined;
+        Object.defineProperty(event, "context", {
+            get: () => context ??= new UpdateContext(
+                this.client, peerOf(update), fieldsOf(update)._entities,
+            ),
+            enumerable: false,
+        });
+    }
+
+    private register(
+        middleware: UpdateMiddleware,
+        handler: UpdateMiddleware | UpdateMiddleware[],
+    ): Unsubscribe {
+        this.registrations.set(middleware, Array.isArray(handler) ? handler.slice() : [handler]);
+        return this.use(middleware);
+    }
+
     private remove(middleware: UpdateMiddleware): void {
+        this.registrations.delete(middleware);
         const index = this.chain.indexOf(middleware);
         if (index >= 0) this.chain.splice(index, 1);
     }
@@ -354,8 +497,12 @@ export class ClientUpdates {
             }
         }
         if (this.client._errorHandler) {
-            await this.client._errorHandler(error);
-            return;
+            try {
+                await this.client._errorHandler(error);
+                return;
+            } catch (handlerError) {
+                error = handlerError as Error;
+            }
         }
         this.client._log.error(`Error in the update chain: ${error}`);
     }
@@ -381,7 +528,9 @@ export class ClientUpdates {
     private builderMiddleware(
         builder: EventBuilder,
         run: UpdateMiddleware,
+        options: OnOptions,
     ): UpdateMiddleware {
+        const matchesChat = this.chatMatcher(options);
         builder.client = this.client;
         return async (update, next) => {
             if (!builder.resolved) await builder.resolve(this.client);
@@ -395,11 +544,14 @@ export class ClientUpdates {
             if (!event) return next();
             event._client = this.client;
             if ("_eventName" in event) {
-                event._setClient(this.client);
                 event.originalUpdate = update;
-                event._entities = update._entities;
+                event._entities = update._entities ?? new Map();
+                event._setClient(this.client);
             }
+            this.attachContext(event, update);
             if (!(await builder.filter(event))) return next();
+            if (!(await matchesChat(update))) return next();
+            if (options.func && !(await options.func(update))) return next();
             await run(event, next);
         };
     }
@@ -418,11 +570,26 @@ function compose(handler: UpdateMiddleware | UpdateMiddleware[]): UpdateMiddlewa
             throw new TypeError("Update handler must be a function");
         }
     }
-    return async (update, next) => {
-        const run = async (index: number): Promise<void> => {
-            if (index >= handlers.length) return next();
-            await handlers[index]!(update, () => run(index + 1));
-        };
-        await run(0);
+    return (update, next) => runChain(handlers, update, next);
+}
+
+async function runChain(
+    handlers: readonly UpdateMiddleware[],
+    update: AnyUpdate,
+    next: NextFn,
+): Promise<void> {
+    let last = -1;
+    const run = async (index: number): Promise<void> => {
+        if (index <= last) throw new Error("next() called multiple times");
+        last = index;
+        if (index >= handlers.length) return next();
+        await handlers[index]!(update, () => run(index + 1));
     };
+    await run(0);
+}
+
+function watchController(): AbortController {
+    const controller = new AbortController();
+    setMaxListeners(0, controller.signal);
+    return controller;
 }

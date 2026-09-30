@@ -23,7 +23,6 @@ import type { TelegramClient } from "../client/TelegramClient";
 import { LAYER } from "../tl/runtime/registry";
 import { PendingState } from "../extensions/PendingState";
 import MsgsAck = Api.MsgsAck;
-import { MessagePacker } from "../extensions/MessagePacker";
 
 const USE_INVOKE_AFTER_WITH = new Set([
     "messages.SendMessage",
@@ -58,6 +57,7 @@ interface DEFAULT_OPTIONS {
         update: UpdateConnectionState | Api.TypeUpdates
     ) => void;
     autoReconnectCallback?: () => Promise<void> | void;
+    lifecycleCallback?: (event: "connecting" | "connect" | "disconnect" | "reconnecting") => void;
     isMainSender: boolean;
     dcId: number;
     client: TelegramClient;
@@ -103,6 +103,7 @@ export class MTProtoSender {
     private readonly _authKeyCallback?: DEFAULT_OPTIONS["authKeyCallback"];
     public _updateCallback?: DEFAULT_OPTIONS["updateCallback"];
     private readonly _autoReconnectCallback?: DEFAULT_OPTIONS["autoReconnectCallback"];
+    private readonly _lifecycleCallback?: DEFAULT_OPTIONS["lifecycleCallback"];
     private readonly _isMainSender: boolean;
     private _lifecycle: SenderLifecycle = "disconnected";
     private _connectedAt = 0;
@@ -142,6 +143,7 @@ export class MTProtoSender {
         this._authKeyCallback = args.authKeyCallback;
         this._updateCallback = args.updateCallback;
         this._autoReconnectCallback = args.autoReconnectCallback;
+        this._lifecycleCallback = args.lifecycleCallback;
         this._isMainSender = args.isMainSender;
         this._client = args.client;
         this._onConnectionBreak = args.onConnectionBreak;
@@ -205,6 +207,7 @@ export class MTProtoSender {
             this._lifecycle = "connecting";
         }
         this._connection = connection;
+        this._lifecycleCallback?.("connecting");
         if (this._tempBinding) {
             this._tempBound = false;
             await this.authKey.setKey(undefined);
@@ -214,6 +217,7 @@ export class MTProtoSender {
         for (let attempt = 0; attempt < this._retries; attempt++) {
             try {
                 await this._connect();
+                this._lifecycleCallback?.("connect");
                 if (this._updateCallback) {
                     this._updateCallback(
                         this._client,
@@ -390,7 +394,19 @@ export class MTProtoSender {
         return true;
     }
 
+    cancelRequest(state: RequestState, reason: unknown): void {
+        state.cancelled = true;
+        for (let index = this._queued.length - 1; index >= 0; index--) {
+            if (this._queued[index] === state) this._queued.splice(index, 1);
+        }
+        if (state.msgId) this._pendingState.delete(state.msgId);
+        state.promise?.catch(() => {});
+        state.reject(reason);
+        state.finished.resolve();
+    }
+
     addStateToQueue(state: RequestState) {
+        if (state.cancelled) return;
         if (this._lifecycle === "dead") {
             state.reject(
                 new Error(
@@ -462,6 +478,7 @@ export class MTProtoSender {
     }
 
     private _requeue(states: RequestState[]) {
+        states = states.filter((state) => !state.cancelled);
         for (const state of states) {
             state.msgId = undefined;
             state.containerId = undefined;
@@ -485,6 +502,12 @@ export class MTProtoSender {
             await this._connectWithTimeout(connection);
             this._log.debug("Connection success!");
         }
+
+        if (this.userDisconnected || connection !== this._connection) {
+            await connection.disconnect();
+            throw new Error("Connection attempt cancelled");
+        }
+
         if (!this.authKey.getKey()) {
             const plain = new MTProtoPlainSender(connection, this._log);
             this._log.debug("New auth_key attempt ...");
@@ -510,6 +533,10 @@ export class MTProtoSender {
         }
         if (this._dcenter && !this._dcenter.salt.isZero()) {
             this._state.salt = this._dcenter.salt;
+        }
+        if (this.userDisconnected || connection !== this._connection) {
+            await connection.disconnect();
+            throw new Error("Connection attempt cancelled");
         }
         this._lifecycle = "connected";
         this._connectedAt = Date.now();
@@ -553,6 +580,7 @@ export class MTProtoSender {
 
     async _disconnect() {
         const connection = this._connection;
+        this._lifecycleCallback?.("disconnect");
         if (this._updateCallback) {
             this._updateCallback(
                 this._client,
@@ -658,6 +686,10 @@ export class MTProtoSender {
                 this._requeue(batch);
                 return;
             }
+            if (batch.some((state) => state.cancelled)) {
+                this._requeue(batch);
+                continue;
+            }
             try {
                 await io.connection.send(data);
             } catch (e) {
@@ -671,7 +703,7 @@ export class MTProtoSender {
                 return;
             }
             for (const state of batch) {
-                if (state.request.classType === "request") {
+                if (!state.cancelled && state.request.classType === "request") {
                     this._pendingState.set(state.msgId!, state);
                 }
             }

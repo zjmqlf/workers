@@ -1,4 +1,5 @@
 import bigInt from "big-integer";
+import { ChannelScheduler, ChannelPollCancelledError } from "./channelScheduler";
 import { Api } from "../../tl";
 import * as utils from "../../Utils";
 import { returnBigInt } from "../../Helpers";
@@ -25,7 +26,24 @@ interface PendingSeqUpdate {
     seq: number;
 }
 
+export interface ChannelPollingState {
+    pendingRequests: number;
+    activeRequests: number;
+    pausedUntil?: number;
+    channels: {
+        channelId: string;
+        lastPolledAt?: number;
+        lastDelayMs?: number;
+        nextPollAt?: number;
+    }[];
+}
+
 interface ChannelTracker {
+    initializing?: Promise<void>;
+    difference?: Promise<void>;
+    lastPolledAt?: number;
+    lastDelayMs?: number;
+    nextPollAt?: number;
     pts: PtsWaiter;
     timer?: ReturnType<typeof setTimeout>;
     inputChannel?: Api.TypeInputChannel;
@@ -92,20 +110,33 @@ export class UpdateManager {
     private readonly channelFailTimeoutS = new Map<string, number>();
     private readonly channelFailRetryTimers = new Map<string, ReturnType<typeof setTimeout>>();
     private readonly watchedChannels = new Map<string, number>();
+    private readonly channelScheduler: ChannelScheduler;
+    private readonly channelRequests = new WeakSet<object>();
 
     private running = false;
+    private generation = 0;
 
     constructor(client: TelegramClient) {
         this.client = client;
+        this.channelScheduler = new ChannelScheduler(client._channelPollRequestInterval, client._channelPollConcurrency);
         this.globalPts = this.makeGlobalWaiter();
     }
 
     start(): void {
         this.running = true;
+        this.channelScheduler.start();
+        this.client.updates._resume();
+    }
+
+    get isRunning(): boolean {
+        return this.running;
     }
 
     stop(): void {
         this.running = false;
+        this.generation++;
+        this.channelScheduler.stop();
+        this.client.updates._pause();
         this.globalPts.clearSkippedUpdates();
         this.globalPts.setRequesting(false);
         if (this.globalPtsTimer) {
@@ -125,10 +156,15 @@ export class UpdateManager {
         for (const tracker of this.channels.values()) {
             if (tracker.timer) clearTimeout(tracker.timer);
             if (tracker.pollTimer) clearTimeout(tracker.pollTimer);
+            tracker.timer = undefined;
+            tracker.pollTimer = undefined;
+            tracker.initializing = undefined;
+            tracker.difference = undefined;
+            tracker.nextPollAt = undefined;
             tracker.pts.clearSkippedUpdates();
             tracker.pts.setRequesting(false);
         }
-        this.channels.clear();
+        if (this.client._destroyed) this.channels.clear();
         this.watchedChannels.clear();
         this.pendingSeq.length = 0;
         this.fetchingDifference = false;
@@ -222,9 +258,12 @@ export class UpdateManager {
     }
 
     async catchUp(): Promise<void> {
+        const generation = this.generation;
+        if (!this.isCurrent(generation) || this.client.updates.authorizationError) return;
         try {
             if (!this.state) {
                 const s = await this.client.api.updates.getState();
+                if (!this.isCurrent(generation)) return;
                 this.state = { pts: s.pts, qts: s.qts, date: s.date, seq: s.seq };
                 this.globalPts.init(s.pts);
                 this.client._log.debug("Initialized update state");
@@ -234,26 +273,69 @@ export class UpdateManager {
             await this.fetchCommonDifference();
             this.client._log.debug("Catch up complete");
         } catch (e) {
+            if (!this.isCurrent(generation)) return;
+            if (this.client.updates._suspendAuthorization(e)) return;
             this.client._log.error(`Error during catch up: ${e}`);
         }
     }
 
-    async watchChannel(channelId: string, inputChannel: Api.TypeInputChannel): Promise<void> {
+    async watchChannel(
+        channelId: string,
+        inputChannel: Api.TypeInputChannel,
+        signal?: AbortSignal,
+    ): Promise<void> {
+        if (signal?.aborted) return;
+        const generation = this.generation;
+        if (!this.isCurrent(generation)) throw new Error("Update manager is stopped");
         const watching = this.watchedChannels.get(channelId) ?? 0;
         this.watchedChannels.set(channelId, watching + 1);
-        if (watching > 0) return;
-
         const tracker = this.getOrCreateChannel(channelId);
         tracker.inputChannel = inputChannel;
-        if (!tracker.pts.inited()) {
-            try {
-                tracker.pts.init(await this.readChannelPts(inputChannel));
-            } catch (e) {
+        let released = false;
+        const release = () => {
+            if (released) return;
+            released = true;
+            if (this.isCurrent(generation) && this.channels.get(channelId) === tracker) {
                 this.releaseChannel(channelId);
-                throw e;
             }
+        };
+        if (!tracker.initializing && (watching === 0 || !tracker.pts.inited())) {
+            const task = (async () => {
+                if (!tracker.pts.inited()) {
+                    const pts = await this.readChannelPts(inputChannel);
+                    if (!this.isCurrent(generation) || !this.watchedChannels.has(channelId) ||
+                        this.channels.get(channelId) !== tracker) return;
+                    if (!tracker.pts.inited()) tracker.pts.init(pts);
+                }
+                await this.fetchChannelDifference(channelId, { keepAlive: true });
+            })();
+            tracker.initializing = task;
+            void task.finally(() => {
+                if (tracker.initializing === task) tracker.initializing = undefined;
+            }).catch(() => {});
         }
-        await this.fetchChannelDifference(channelId, { keepAlive: true });
+        let onAbort: (() => void) | undefined;
+        try {
+            const task = tracker.initializing ?? Promise.resolve();
+            if (signal) {
+                await new Promise<void>((resolve, reject) => {
+                    onAbort = () => {
+                        release();
+                        signal.removeEventListener("abort", onAbort!);
+                        resolve();
+                    };
+                    signal.addEventListener("abort", onAbort, { once: true });
+                    if (signal.aborted) onAbort();
+                    task.then(resolve, reject);
+                });
+            } else {
+                await task;
+            }
+        } catch (error) {
+            release();
+            if (onAbort) signal?.removeEventListener("abort", onAbort);
+            throw error;
+        }
     }
 
     releaseChannel(channelId: string): void {
@@ -264,7 +346,13 @@ export class UpdateManager {
             return;
         }
         this.watchedChannels.delete(channelId);
+        this.channelScheduler.cancel(channelId);
+        const retry = this.channelFailRetryTimers.get(channelId);
+        if (retry) clearTimeout(retry);
+        this.channelFailRetryTimers.delete(channelId);
+        this.channelFailTimeoutS.delete(channelId);
         const tracker = this.channels.get(channelId);
+        if (tracker) tracker.nextPollAt = undefined;
         if (tracker?.pollTimer) {
             clearTimeout(tracker.pollTimer);
             tracker.pollTimer = undefined;
@@ -275,8 +363,61 @@ export class UpdateManager {
         return [...this.watchedChannels.keys()];
     }
 
+    get polling(): ChannelPollingState {
+        return {
+            ...this.channelScheduler.state,
+            channels: this.watchedChannelIds().map((channelId) => {
+                const tracker = this.channels.get(channelId);
+                return {
+                    channelId,
+                    lastPolledAt: tracker?.lastPolledAt,
+                    lastDelayMs: tracker?.lastDelayMs,
+                    nextPollAt: tracker?.nextPollAt,
+                };
+            }),
+        };
+    }
+
+    handleChannelFloodWait(request: object, seconds: number): boolean {
+        if (!this.channelRequests.has(request)) return false;
+        if (Number.isFinite(seconds) && seconds > 0) this.channelScheduler.pause(seconds * 1000);
+        return true;
+    }
+
+    private invokeChannel<R extends Api.AnyRequest>(channelId: string, create: () => R): Promise<R["__response"]> {
+        const generation = this.generation;
+        const queuedAt = Date.now();
+        return this.channelScheduler.schedule(channelId, async () => {
+            if (!this.isCurrent(generation)) throw new ChannelPollCancelledError();
+            if (this.client.updates.authorizationError) throw this.client.updates.authorizationError;
+            const request = create();
+            this.channelRequests.add(request);
+            const tracker = this.channels.get(channelId);
+            if (tracker && request instanceof Api.updates.GetChannelDifference) {
+                tracker.pts.setRequesting(true);
+                tracker.lastPolledAt = Date.now();
+                tracker.lastDelayMs = tracker.lastPolledAt - queuedAt;
+            }
+            try {
+                return await this.client.invoke(request);
+            } catch (error) {
+                if (this.isCurrent(generation)) {
+                    this.client.updates._suspendAuthorization(error);
+                    const flood = error as { errorMessage?: string; seconds?: number };
+                    if (/^FLOOD_(?:PREMIUM_)?WAIT(?:_|$)/.test(flood.errorMessage ?? "")) {
+                        this.handleChannelFloodWait(request, flood.seconds ?? 0);
+                    }
+                }
+                throw error;
+            } finally {
+                this.channelRequests.delete(request);
+            }
+        });
+    }
+
     private async readChannelPts(inputChannel: Api.TypeInputChannel): Promise<number> {
-        const full = await this.client.invoke(
+        const channelId = (inputChannel as Api.InputChannel).channelId.toString();
+        const full = await this.invokeChannel(channelId, () =>
             new Api.channels.GetFullChannel({ channel: inputChannel }),
         );
         this.client._entityCache.add(full);
@@ -287,13 +428,16 @@ export class UpdateManager {
     }
 
     async ensureState(): Promise<void> {
-        if (this.state) return;
+        const generation = this.generation;
+        if (this.state || !this.isCurrent(generation) || this.client.updates.authorizationError) return;
         try {
             const s = await this.client.api.updates.getState();
+            if (!this.isCurrent(generation)) return;
             this.state = { pts: s.pts, qts: s.qts, date: s.date, seq: s.seq };
             this.globalPts.init(s.pts);
             this.lastUpdateTime = Date.now();
-        } catch {
+        } catch (error) {
+            if (this.isCurrent(generation)) this.client.updates._suspendAuthorization(error);
         }
     }
 
@@ -387,15 +531,7 @@ export class UpdateManager {
         }
 
         if (update instanceof Api.UpdateChannelTooLong) {
-            const channelId = update.channelId.toString();
-            const tracker = this.getOrCreateChannel(channelId);
-            const serverPts = update.pts;
-            if (!tracker.pts.inited()) {
-                if (serverPts !== undefined) tracker.pts.init(serverPts);
-            } else if (serverPts === undefined || tracker.pts.current() < serverPts) {
-                this.client._log.debug(`UpdateChannelTooLong ch=${channelId}; requesting diff`);
-                void this.fetchChannelDifference(channelId);
-            }
+            void this.recoverChannel(update);
             return;
         }
 
@@ -458,7 +594,24 @@ export class UpdateManager {
         this.dispatch(update, payload);
     }
 
+    private isCurrent(generation: number): boolean {
+        return this.running && this.generation === generation;
+    }
+
+    private async recoverChannel(update: Api.UpdateChannelTooLong): Promise<void> {
+        const channelId = update.channelId.toString();
+        const tracker = this.getOrCreateChannel(channelId);
+        if (!tracker.pts.inited()) {
+            if (update.pts === undefined) return;
+            tracker.pts.init(update.pts);
+        } else if (update.pts !== undefined && tracker.pts.current() >= update.pts) {
+            return;
+        }
+        await this.fetchChannelDifference(channelId);
+    }
+
     private dispatch(update: Api.TypeUpdate, payload: DispatchPayload): void {
+        if (!this.running) return;
         if (this.isDuplicateMessage(update)) {
             this.client._log.debug("Skip duplicate message update (already dispatched)");
             return;
@@ -530,7 +683,10 @@ export class UpdateManager {
                     }
                     return;
                 }
-                if (this.globalPtsTimer) clearTimeout(this.globalPtsTimer);
+                if (this.globalPtsTimer) {
+                    if (ms > 1) return;
+                    clearTimeout(this.globalPtsTimer);
+                }
                 this.globalPtsTimer = setTimeout(() => {
                     this.globalPtsTimer = undefined;
                     this.scheduleCommonDifference();
@@ -557,7 +713,10 @@ export class UpdateManager {
                     }
                     return;
                 }
-                if (t.timer) clearTimeout(t.timer);
+                if (t.timer) {
+                    if (ms > 1) return;
+                    clearTimeout(t.timer);
+                }
                 t.timer = setTimeout(() => {
                     t.timer = undefined;
                     void this.fetchChannelDifference(channelId);
@@ -577,14 +736,18 @@ export class UpdateManager {
     }
 
     private async fetchCommonDifference(): Promise<void> {
-        if (this.fetchingDifference || !this.state) return;
+        const generation = this.generation;
+        if (!this.isCurrent(generation) || this.client.updates.authorizationError || this.fetchingDifference || this.failRetryTimer || !this.state) return;
         this.fetchingDifference = true;
         this.globalPts.setRequesting(true);
         let failed = false;
         try {
-            await this.fetchDifferenceLoop();
+            await this.fetchDifferenceLoop(generation);
+            if (!this.isCurrent(generation)) return;
             this.failTimeoutS = FAIL_DIFFERENCE_INITIAL_S;
         } catch (e) {
+            if (!this.isCurrent(generation)) return;
+            if (this.client.updates._suspendAuthorization(e)) return;
             const msg = (e as { errorMessage?: string })?.errorMessage;
             if (msg === "PERSISTENT_TIMESTAMP_INVALID") {
                 this.client._log.warn("Common pts is invalid; reinitializing update state");
@@ -595,10 +758,11 @@ export class UpdateManager {
                 this.client._log.warn(`fetchCommonDifference: ${e}`);
             }
         } finally {
-            this.globalPts.setRequesting(false);
-            if (this.state) this.globalPts.init(this.state.pts);
-            this.fetchingDifference = false;
-            this.drainPendingSeq();
+            if (this.isCurrent(generation)) {
+                this.globalPts.setRequesting(false);
+                if (this.state) this.globalPts.init(this.state.pts);
+                this.fetchingDifference = false;
+            }
         }
         if (failed && this.running) {
             const delayMs = this.failTimeoutS * 1000;
@@ -609,12 +773,13 @@ export class UpdateManager {
                 this.scheduleCommonDifference();
             }, delayMs);
         }
+        this.drainPendingSeq();
     }
 
-    private async fetchDifferenceLoop(): Promise<void> {
+    private async fetchDifferenceLoop(generation: number): Promise<void> {
         if (!this.state) return;
         let fetching = true;
-        while (fetching) {
+        while (fetching && this.isCurrent(generation)) {
             const diff: Api.updates.TypeDifference =
                 await this.client.api.updates.getDifference({
                     pts: this.state.pts,
@@ -622,16 +787,19 @@ export class UpdateManager {
                     qts: this.state.qts,
                 });
 
+            if (!this.isCurrent(generation)) return;
             if (diff instanceof Api.updates.DifferenceEmpty) {
                 this.state.date = diff.date;
                 this.state.seq = diff.seq;
                 fetching = false;
             } else if (diff instanceof Api.updates.Difference) {
-                await this.processDifference(diff);
+                await this.processDifference(diff, generation);
+                if (!this.isCurrent(generation)) return;
                 this.state = { ...diff.state };
                 fetching = false;
             } else if (diff instanceof Api.updates.DifferenceSlice) {
-                await this.processDifference(diff);
+                await this.processDifference(diff, generation);
+                if (!this.isCurrent(generation)) return;
                 this.state = { ...diff.intermediateState };
             } else if (diff instanceof Api.updates.DifferenceTooLong) {
                 this.state.pts = diff.pts;
@@ -641,10 +809,14 @@ export class UpdateManager {
         }
     }
 
-    private async processDifference(diff: Api.updates.Difference | Api.updates.DifferenceSlice): Promise<void> {
+    private async processDifference(
+        diff: Api.updates.Difference | Api.updates.DifferenceSlice,
+        generation = this.generation,
+    ): Promise<void> {
         const entities = this.collectEntities(diff.users, diff.chats);
         this.client._entityCache.add(diff);
         await this.saveEntities(diff);
+        if (!this.isCurrent(generation)) return;
 
         for (const message of diff.newMessages) {
             if (message instanceof Api.Message || message instanceof Api.MessageService) {
@@ -655,7 +827,12 @@ export class UpdateManager {
             }
         }
         for (const update of diff.otherUpdates) {
-            this.dispatch(update, { others: diff.otherUpdates, entities });
+            if (update instanceof Api.UpdateChannelTooLong) {
+                await this.recoverChannel(update);
+                if (!this.isCurrent(generation)) return;
+            } else {
+                this.dispatch(update, { others: diff.otherUpdates, entities });
+            }
         }
     }
 
@@ -685,24 +862,44 @@ export class UpdateManager {
         }
     }
 
-    private async fetchChannelDifference(
+    private fetchChannelDifference(
         channelId: string,
         opts: { keepAlive?: boolean } = {},
     ): Promise<void> {
+        const tracker = this.channels.get(channelId);
+        if (!tracker) return Promise.resolve();
+        if (tracker.difference) return tracker.difference;
+        const task = this.fetchChannelDifferenceOnce(channelId, opts);
+        tracker.difference = task;
+        void task.finally(() => {
+            if (tracker.difference === task) tracker.difference = undefined;
+        }).catch(() => {});
+        return task;
+    }
+
+    private async fetchChannelDifferenceOnce(
+        channelId: string,
+        opts: { keepAlive?: boolean } = {},
+    ): Promise<void> {
+        const generation = this.generation;
+        if (!this.isCurrent(generation) || this.client.updates.authorizationError) return;
         const tracker = this.channels.get(channelId);
         if (!tracker || tracker.pts.requesting()) return;
         if (!tracker.pts.inited()) return;
         if (this.channelFailRetryTimers.has(channelId)) return;
 
+        const current = () => this.isCurrent(generation) && this.channels.get(channelId) === tracker;
+        const active = () => current() && (!opts.keepAlive || this.watchedChannels.has(channelId));
         if (tracker.pollTimer) {
             clearTimeout(tracker.pollTimer);
             tracker.pollTimer = undefined;
         }
-        tracker.pts.setRequesting(true);
+        tracker.nextPollAt = undefined;
         let failed = false;
         let serverTimeoutS: number | undefined;
         try {
             const inputChannel = await this.resolveChannel(channelId, tracker);
+            if (!active()) return;
             if (!inputChannel) {
                 this.client._log.warn(`Cannot resolve channel ${channelId}; skipping diff`);
                 return;
@@ -710,8 +907,8 @@ export class UpdateManager {
             tracker.inputChannel = inputChannel;
 
             let fetching = true;
-            while (fetching) {
-                const diff = await this.client.invoke(
+            while (fetching && active()) {
+                const diff = await this.invokeChannel(channelId, () =>
                     new Api.updates.GetChannelDifference({
                         channel: inputChannel,
                         filter: new Api.ChannelMessagesFilterEmpty(),
@@ -720,15 +917,17 @@ export class UpdateManager {
                         force: opts.keepAlive ? undefined : true,
                     }),
                 );
+                if (!active()) return;
                 if (diff.timeout !== undefined) serverTimeoutS = diff.timeout;
 
                 if (diff instanceof Api.updates.ChannelDifferenceEmpty) {
                     if (diff.pts) tracker.pts.init(diff.pts);
-                    fetching = false;
+                    fetching = !diff.final;
                 } else if (diff instanceof Api.updates.ChannelDifference) {
                     const entities = this.collectEntities(diff.users, diff.chats);
                     this.client._entityCache.add(diff);
                     await this.saveEntities(diff);
+                    if (!active()) return;
 
                     for (const message of diff.newMessages) {
                         if (message instanceof Api.Message || message instanceof Api.MessageService) {
@@ -751,6 +950,7 @@ export class UpdateManager {
                     const entities = this.collectEntities(diff.users, diff.chats);
                     this.client._entityCache.add(diff);
                     await this.saveEntities(diff);
+                    if (!active()) return;
                     const included = diff.messages.filter(
                         (m): m is Api.Message | Api.MessageService =>
                             m instanceof Api.Message || m instanceof Api.MessageService,
@@ -762,11 +962,13 @@ export class UpdateManager {
                             { others: null, entities },
                         );
                     }
-                    fetching = false;
+                    fetching = !diff.final;
                 }
             }
             this.channelFailTimeoutS.delete(channelId);
         } catch (e) {
+            if (!active() || e instanceof ChannelPollCancelledError) return;
+            if (this.client.updates._suspendAuthorization(e)) return;
             const msg = (e as { errorMessage?: string })?.errorMessage;
             if (msg === "CHANNEL_PRIVATE" || msg === "CHANNEL_INVALID") {
                 this.client._log.info(
@@ -783,16 +985,21 @@ export class UpdateManager {
             failed = true;
             this.client._log.warn(`fetchChannelDifference ${channelId}: ${e}`);
         } finally {
-            tracker.pts.setRequesting(false);
+            if (current()) tracker.pts.setRequesting(false);
         }
+        if (!active()) return;
         if (!failed) this.scheduleChannelPoll(channelId, serverTimeoutS);
-        if (failed && this.running) {
-            const delayMs = (this.channelFailTimeoutS.get(channelId) ?? FAIL_DIFFERENCE_INITIAL_S) * 1000;
+        if (failed && this.running && (!opts.keepAlive || this.watchedChannels.has(channelId))) {
+            const delayMs = Math.max(
+                (this.channelFailTimeoutS.get(channelId) ?? FAIL_DIFFERENCE_INITIAL_S) * 1000,
+                (this.channelScheduler.state.pausedUntil ?? 0) - Date.now(),
+            );
+            tracker.nextPollAt = Date.now() + delayMs;
             this.bumpChannelFailTimeout(channelId);
             this.client._log.debug(`Retry channel ${channelId} difference in ${delayMs}ms`);
             const timer = setTimeout(() => {
                 this.channelFailRetryTimers.delete(channelId);
-                void this.fetchChannelDifference(channelId);
+                void this.fetchChannelDifference(channelId, opts);
             }, delayMs);
             this.channelFailRetryTimers.set(channelId, timer);
         }
@@ -823,6 +1030,7 @@ export class UpdateManager {
             serverTimeoutS !== undefined && serverTimeoutS > 0
                 ? serverTimeoutS * 1000
                 : this.client._channelPollInterval;
+        tracker.nextPollAt = Date.now() + delayMs;
         tracker.pollTimer = setTimeout(() => {
             tracker.pollTimer = undefined;
             void this.fetchChannelDifference(channelId, { keepAlive: true });
@@ -837,6 +1045,7 @@ export class UpdateManager {
 
     private dropChannel(channelId: string): void {
         this.watchedChannels.delete(channelId);
+        this.channelScheduler.cancel(channelId);
         const tracker = this.channels.get(channelId);
         if (tracker) {
             if (tracker.timer) clearTimeout(tracker.timer);

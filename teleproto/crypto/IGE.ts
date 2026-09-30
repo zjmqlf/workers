@@ -43,10 +43,10 @@ const Rcon = [
   }
   for (let i = 0; i < 256; i++) {
     const j = InvSbox[i];
-    const m9 = (xtime(xtime(xtime(j))) ^ j) & 0xff; // 9��j
-    const mb = (xtime(xtime(xtime(j))) ^ xtime(j) ^ j) & 0xff; // 11��j
-    const md = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ j) & 0xff; // 13��j
-    const me = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ xtime(j)) & 0xff; // 14��j
+    const m9 = (xtime(xtime(xtime(j))) ^ j) & 0xff;
+    const mb = (xtime(xtime(xtime(j))) ^ xtime(j) ^ j) & 0xff;
+    const md = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ j) & 0xff;
+    const me = (xtime(xtime(xtime(j))) ^ xtime(xtime(j)) ^ xtime(j)) & 0xff;
     Td0[i] = ((me << 24) | (m9 << 16) | (md << 8) | mb) >>> 0;
     Td1[i] = ((mb << 24) | (me << 16) | (m9 << 8) | md) >>> 0;
     Td2[i] = ((md << 24) | (mb << 16) | (me << 8) | m9) >>> 0;

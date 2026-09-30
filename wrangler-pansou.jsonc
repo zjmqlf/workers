@@ -6,7 +6,7 @@
     "APP_NAME": "pansou",
     "API_ID": "21979386",
     "API_HASH": "f89dbd720d7b2b2b843ae9aea2e4f02f",
-    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjExOAG7QuaYapy3jH7ns+/wVOJ4CCXhdGH59nwADEZPzBrw9oZRRDXG4MTejOMLVCqre1OWdkN2K3UgWtAzJDDnUiiJTQ0PA89yzhyPM3IzWNUvemtlhQnJ41pgs2HU8Fz5MfuP9gyXgE3cVfTLFkfKfz2vtFrDhjd6dE2eKdrNWF2YkoxDI33T+Nng4ht5JGrbyAKxgSVuIVZ3XqvAQ206Eu4ASwLW+dsjCeTmAxfnN4/RNySkbPGPWTMOOpMdLCfmA+0Hcm8lg5kFqTKkr8vTontkwPnPD8p3J6iZ+rhlWqlnQjWzKU23YqiEi7adlgEx1hYdSp7EwjyEHc48zyHvVLFdyw=="
+    "SESSION_STRING": "1BQANOTEuMTA4LjU2LjEyMwG7f8mIG4JcXSpePzbiecgk+4cnBkpw6ug8WrTc+gAO5pdywzPnOh0aPO/JDO+X+zsLpUYIKk0lV4wTRTQ8bXx6WcGaZzPhKvDYtxG2UBn+pJyiLG5XIEkeUaPBWlYFMgyc34P+PWaaxeCdSQEwc33wx4BlGNXluJJbUrFi9m6Dci5EBOsUGPeggRTI3wt6/+RgEYiKzJH7n5rN5LXjbhCpHKXLOz7KzhLu92sGEZGDuAA0xqCwpgDYFCi0TjjM8l6dW74zrKLMFFdSkcis14TcaTkCU7hnVUqWgsHvN76xdntCLtUd5U0XExz6BOLT5B0FceC1ee1RMPEw63EDGo4Seg=="
   },
   "compatibility_date": "2026-08-04",
   "compatibility_flags": [
@@ -79,8 +79,8 @@
     */
     {
       "binding": "PANSOUDB",
-      "database_name": "pansou9",
-      "database_id": "6354d842-e811-49d9-898f-3e03cd1ad8bb"
+      "database_name": "pansou10",
+      "database_id": "fc9e0dc7-1fa9-4ad4-a59d-297827cefe80"
     }
   ],
   "durable_objects": {

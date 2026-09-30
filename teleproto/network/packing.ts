@@ -1,7 +1,8 @@
-import { BinaryWriter, Logger } from "../extensions";
+import { BinaryWriter } from "../extensions/BinaryWriter";
+import type { Logger } from "../extensions/Logger";
 import { MessageContainer, TLMessage } from "../tl/core";
-import { MTProtoState } from "./MTProtoState";
-import { RequestState } from "./RequestState";
+import type { MTProtoState } from "./MTProtoState";
+import type { RequestState } from "./RequestState";
 import { Buffer } from "node:buffer";
 
 export interface PackedBatch {
@@ -23,6 +24,7 @@ export async function packRequestBatch(
         batch.length < MessageContainer.MAXIMUM_LENGTH
     ) {
         const request = queued.shift()!;
+        if (request.cancelled) continue;
         size += request.data.length + TLMessage.SIZE_OVERHEAD;
         if (size <= MessageContainer.MAXIMUM_SIZE) {
             request.msgId = await state.writeDataAsMessage(

@@ -13,6 +13,7 @@ import {
     FileMigrateError,
     FloodWaitError,
     FloodTestPhoneWaitError,
+    TimedOutError,
 } from "../errors";
 import type { TelegramBaseClient } from "../client/telegramBaseClient";
 import { Buffer } from "node:buffer";
@@ -226,7 +227,7 @@ export class MediaScheduler {
                     continue;
                 }
                 if (isFlood(err)) continue;
-                if (err?.errorMessage === "TIMEOUT") continue;
+                if (err instanceof TimedOutError || err?.errorMessage === "TIMEOUT") continue;
                 throw err;
             }
         }
@@ -256,7 +257,7 @@ export class MediaScheduler {
                 if (err instanceof MediaAbortError) throw err;
                 if (err instanceof SlotRemovedError) continue;
                 if (isFlood(err)) continue;
-                if (err?.errorMessage === "TIMEOUT") continue;
+                if (err instanceof TimedOutError || err?.errorMessage === "TIMEOUT") continue;
                 throw err;
             }
         }

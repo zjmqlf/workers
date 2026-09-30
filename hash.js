@@ -95,8 +95,9 @@ export class WebSocketServer extends DurableObject {
   filterType = 0;
   filter = Api.InputMessagesFilterVideo;
   //filterTitle = "媒体";
-  errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
-  messageArray = [];
+  manyErrorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";  manyErrorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+  writeErrorMessage = "D1_ERROR: Your account has exceeded D1's free tier daily row write limit. Upgrade to a paid plan or wait until tomorrow (midnight UTC) to continue. See https://developers.cloudflare.com/d1/platform/limits/ for more details.";
+  readErrorMessage = "D1_ERROR: Your account has exceeded D1's free tier daily row read limit. Upgrade to a paid plan or wait until tomorrow (midnight UTC) to continue. See https://developers.cloudflare.com/d1/platform/limits/ for more details.";  messageArray = [];
   cacheMessage = null;
   batchMessage = [];
   dialogArray = [];
@@ -203,7 +204,9 @@ export class WebSocketServer extends DurableObject {
       // this.error = false;
       this.fromPeer = null;
       this.messageArray = [];
-      this.errorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+      this.manyErrorMessage = "Too many API requests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits";
+      this.writeErrorMessage = "D1_ERROR: Your account has exceeded D1's free tier daily row write limit. Upgrade to a paid plan or wait until tomorrow (midnight UTC) to continue. See https://developers.cloudflare.com/d1/platform/limits/ for more details.";
+      this.readErrorMessage = "D1_ERROR: Your account has exceeded D1's free tier daily row read limit. Upgrade to a paid plan or wait until tomorrow (midnight UTC) to continue. See https://developers.cloudflare.com/d1/platform/limits/ for more details.";
       this.filter = Api.InputMessagesFilterVideo;
       //this.filterTitle = "媒体";
       this.cacheMessage = null;
@@ -558,10 +561,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("getConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "getConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -644,10 +653,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("updateConfig : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "updateConfig", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -748,10 +763,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("noExistChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "noExistChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -973,10 +994,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ") : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "nextChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1017,10 +1044,17 @@ export class WebSocketServer extends DurableObject {
           tryCount += 1;
           // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
           this.sendMessage("log", "getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-          if (err.message === this.errorMessage) {
+          if (err.message === this.manyErrorMessage) {
             this.stop = 2;
             this.broadcast({
               "result": "pause",
+            });
+            await this.close();
+            break;
+          } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+            this.stop = 2;
+            this.broadcast({
+              "result": "over",
             });
             await this.close();
             break;
@@ -1068,10 +1102,17 @@ export class WebSocketServer extends DurableObject {
             tryCount += 1;
             // console.log("(" + this.currentStep + ")getChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
             this.sendMessage("log", "getChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-            if (err.message === this.errorMessage) {
+            if (err.message === this.manyErrorMessage) {
               this.stop = 2;
               this.broadcast({
                 "result": "pause",
+              });
+              await this.close();
+              break;
+            } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+              this.stop = 2;
+              this.broadcast({
+                "result": "over",
               });
               await this.close();
               break;
@@ -1138,10 +1179,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")updateChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "updateChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1458,10 +1505,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("grid", "selectMedia", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1506,10 +1559,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMedia : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("grid", "insertMedia", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1581,10 +1640,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectPhoto : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("grid", "selectPhoto", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1629,10 +1694,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : (" + photoLength +"/" + photoIndex + ") insertPhoto : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendPhoto("insertPhoto", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, photoIndex, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1704,10 +1775,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("grid", "selectMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -1758,10 +1835,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : insertMessage : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("grid", "insertMessage", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -2524,10 +2607,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("selectChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -2572,10 +2661,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("insertChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);;
       this.sendMessage("log", "insertChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -2631,10 +2726,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")setChat : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "setChat", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, null, true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -2796,10 +2897,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectMediaIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectMediaIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {
@@ -2855,10 +2962,16 @@ export class WebSocketServer extends DurableObject {
     } catch (err) {
       // console.log("(" + this.currentStep + ")[" + messageLength +"/" + messageIndex + "] " + this.offsetId + " : selectPhotoIndex : " + err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err);
       this.sendMessage("log", "selectPhotoIndex", err instanceof Error ? (err.name ? err.name + " : " : "") + err.message : err, "try", true);
-      if (err.message === this.errorMessage) {
+      if (err.message === this.manyErrorMessage) {
         this.stop = 2;
         this.broadcast({
           "result": "pause",
+        });
+        await this.close();
+      } else if (err.message === this.writeErrorMessage || err.message === this.readErrorMessage) {
+        this.stop = 2;
+        this.broadcast({
+          "result": "over",
         });
         await this.close();
       } else {

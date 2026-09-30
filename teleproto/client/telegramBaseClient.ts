@@ -26,10 +26,14 @@ import { LAYER } from "../tl/runtime/registry";
 import { LogLevel } from "../extensions/Logger";
 import { Deferred } from "../extensions/Deferred";
 import { UpdateManager } from "./updates/manager";
+import type { ClientUpdates } from "./updates/composer";
 import { installMessageBehaviour } from "../tl/custom/message";
 
 const SESSION_IDLE_TIMEOUT_MS = 60_000;
 const SESSION_STARTUP_DELAY_MS = 800;
+
+type LifecycleEvent = "connecting" | "connect" | "disconnect" | "reconnecting" | "reconnect" | "destroy";
+type LifecycleHandler = () => void | Promise<void>;
 
 const PROD_DEFAULT_DC_ID = 2;
 const TEST_DEFAULT_DC_ID = 2;
@@ -104,6 +108,8 @@ export interface TelegramClientParams {
         sessionStartupDelayMs?: number;
     };
     channelPollInterval?: number;
+    channelPollRequestInterval?: number;
+    channelPollConcurrency?: number;
     entityCache?: EntityCacheOptions;
 }
 
@@ -125,7 +131,9 @@ const clientParamsDefault = {
     appVersion: "",
     langCode: "en",
     systemLangCode: "en",
-    channelPollInterval: 5000,
+    channelPollInterval: 1000,
+    channelPollRequestInterval: 250,
+    channelPollConcurrency: 2,
     _securityChecks: true,
 };
 
@@ -155,6 +163,8 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _eventBuilders: [EventBuilder, CallableFunction][];
     public _entityCache: EntityCache;
     public _channelPollInterval: number;
+    public _channelPollRequestInterval: number;
+    public _channelPollConcurrency: number;
     public _lastRequest?: number;
     public _lastReceivedAt = 0;
     public _parseMode?: ParseInterface;
@@ -170,6 +180,10 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     _loopStarted: boolean;
     _reconnecting: boolean;
     _destroyed: boolean;
+    protected _updates?: ClientUpdates;
+    private readonly _lifecycleHandlers = new Map<LifecycleEvent, Set<LifecycleHandler>>();
+    private _connectionEvent: LifecycleEvent = "disconnect";
+    private _destroyTask?: Promise<void>;
     _isSwitchingDc: boolean;
     _maxConcurrentDownloads: number;
     _securityChecks: boolean;
@@ -215,6 +229,17 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._reconnectRetries = clientParams.reconnectRetries!;
         this._retryDelay = clientParams.retryDelay || 0;
         this._channelPollInterval = clientParams.channelPollInterval!;
+        this._channelPollRequestInterval = clientParams.channelPollRequestInterval!;
+        this._channelPollConcurrency = clientParams.channelPollConcurrency!;
+        for (const [name, value] of [
+            ["channelPollInterval", this._channelPollInterval],
+            ["channelPollRequestInterval", this._channelPollRequestInterval],
+            ["channelPollConcurrency", this._channelPollConcurrency],
+        ] as const) {
+            if (!Number.isSafeInteger(value) || value <= 0) {
+                throw new RangeError(`${name} must be a positive safe integer`);
+            }
+        }
         this._timeout = clientParams.timeout!;
         this._autoReconnect = clientParams.autoReconnect!;
         this._maxConcurrentDownloads = clientParams.maxConcurrentDownloads || 1;
@@ -332,6 +357,64 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._sender && this._sender.isConnected();
     }
 
+    onConnecting(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("connecting", handler);
+    }
+
+    onConnect(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("connect", handler);
+    }
+
+    onDisconnect(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("disconnect", handler);
+    }
+
+    onReconnecting(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("reconnecting", handler);
+    }
+
+    onReconnect(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("reconnect", handler);
+    }
+
+    onDestroy(handler: LifecycleHandler): () => void {
+        return this._subscribeLifecycle("destroy", handler);
+    }
+
+    private _subscribeLifecycle(event: LifecycleEvent, handler: LifecycleHandler): () => void {
+        if (typeof handler !== "function") throw new TypeError("Lifecycle handler must be a function");
+        if (this._destroyed) throw new Error("Cannot subscribe to a destroyed client");
+        let handlers = this._lifecycleHandlers.get(event);
+        if (!handlers) this._lifecycleHandlers.set(event, handlers = new Set());
+        handlers.add(handler);
+        return () => { handlers!.delete(handler); };
+    }
+
+    _handleConnectionLifecycle(event: "connecting" | "connect" | "disconnect" | "reconnecting"): void {
+        if (this._destroyed && event !== "disconnect") return;
+        if (event === this._connectionEvent) return;
+        this._connectionEvent = event;
+        this._emitLifecycle(event);
+    }
+
+    protected _emitLifecycle(event: LifecycleEvent): void {
+        for (const handler of this._lifecycleHandlers.get(event) ?? []) {
+            void Promise.resolve().then(() => {
+                if (this._destroyed && event !== "destroy" && event !== "disconnect") return;
+                return handler();
+            }).catch(async (error) => {
+                this._log.error(`${event} handler failed`, error);
+                if (this._errorHandler) {
+                    try {
+                        await this._errorHandler(error);
+                    } catch (handlerError) {
+                        this._log.error("Lifecycle error handler failed", handlerError);
+                    }
+                }
+            });
+        }
+    }
+
     async disconnect() {
         await this._disconnect();
         await this._media.purge();
@@ -361,12 +444,19 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         await this._sender?.disconnect();
     }
 
-    async destroy() {
+    destroy(): Promise<void> {
+        if (this._destroyTask) return this._destroyTask;
         this._destroyed = true;
-        await this.disconnect();
-        await this._media.close();
-        await this._network.close();
-        this._eventBuilders = [];
+        this._destroyTask = (async () => {
+            await this.disconnect();
+            await this._media.close();
+            await this._network.close();
+            this._eventBuilders = [];
+            this._updates?._destroy();
+            this._emitLifecycle("destroy");
+            this._lifecycleHandlers.clear();
+        })();
+        return this._destroyTask;
     }
 
     async _authKeyCallback(authKey: AuthKey | undefined, dcId: number) {

@@ -3,7 +3,7 @@ import type { Entity, EntityLike } from "../define";
 import { ChatGetter } from "../tl/custom";
 import type { TelegramClient } from "../client/TelegramClient";
 import { isArrayLike, returnBigInt, unionId } from "../Helpers";
-import { getPeerId } from "../Utils";
+import { _getEntityPair, getPeerId } from "../Utils";
 import { SenderGetter } from "../tl/custom/senderGetter";
 import bigInt from "big-integer";
 import { parseID } from "../Utils";
@@ -155,6 +155,11 @@ export class EventCommon extends ChatGetter {
 
     _setClient(client: TelegramClient) {
         this._client = client;
+        if (this.chatId) {
+            [this._chat, this._inputChat] = _getEntityPair(
+                this.chatId.toString(), this._entities, client._entityCache
+            );
+        }
     }
 
     get client() {
@@ -182,6 +187,11 @@ export class EventCommonSender extends SenderGetter {
 
     _setClient(client: TelegramClient) {
         this._client = client;
+        if (this.chatId) {
+            [this._chat, this._inputChat] = _getEntityPair(
+                this.chatId.toString(), this._entities, client._entityCache
+            );
+        }
     }
 
     get client() {

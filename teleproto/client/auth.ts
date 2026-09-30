@@ -21,11 +21,44 @@ export type EmailVerificationResult =
     | { type: "google"; token: string }
     | { type: "apple"; token: string };
 
+export type CodeDeliveryType =
+    | "app"
+    | "sms"
+    | "call"
+    | "flashCall"
+    | "missedCall"
+    | "fragment"
+    | "smsWord"
+    | "smsPhrase";
+
+export type NextCodeDeliveryType =
+    | "sms"
+    | "call"
+    | "flashCall"
+    | "missedCall"
+    | "fragment";
+
+export interface SentCodeInfo {
+    type: CodeDeliveryType;
+    length?: number;
+    pattern?: string;
+    prefix?: string;
+    url?: string;
+    beginning?: string;
+    nextType?: NextCodeDeliveryType;
+    timeout?: number;
+    resend: () => Promise<SentCodeInfo>;
+    raw: Api.auth.SentCode;
+}
+
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
-    phoneCode: (isCodeViaApp?: boolean) => Promise<string>;
+    phoneCode: (isCodeViaApp?: boolean, info?: SentCodeInfo) => Promise<string>;
     password?: (hint?: string) => Promise<string>;
     firstAndLastNames?: () => Promise<[string, string?]>;
+    acceptTermsOfService?: (
+        termsOfService: Api.help.TermsOfService
+    ) => Promise<boolean>;
     qrCode?: (qrCode: { token: Buffer; expires: number }) => Promise<void>;
     onError: (err: Error) => Promise<boolean> | void;
     forceSMS?: boolean;
@@ -126,203 +159,435 @@ export async function signInUser(
     apiCredentials: ApiCredentials,
     authParams: UserAuthParams
 ): Promise<Api.TypeUser> {
-    let phoneNumber: string = "";
-    let phoneCodeHash: string = "";
-    let isCodeViaApp = false;
-
-    while (1) {
-        try {
-            if (typeof authParams.phoneNumber === "function") {
-                try {
-                    phoneNumber = await authParams.phoneNumber();
-                } catch (err: any) {
-                    if (err.errorMessage === "RESTART_AUTH_WITH_QR") {
-                        return client.signInUserWithQrCode(
-                            apiCredentials,
-                            authParams
-                        );
-                    }
-
-                    throw err;
-                }
-            } else {
-                phoneNumber = authParams.phoneNumber;
-            }
-            const sendCodeResult = await client.sendCode(
+    try {
+        while (1) {
+            const request = await requestLoginCode(
+                client,
                 apiCredentials,
-                phoneNumber,
-                authParams.forceSMS,
-                authParams.reCaptchaCallback
+                authParams
             );
-            phoneCodeHash = sendCodeResult.phoneCodeHash;
-            isCodeViaApp = sendCodeResult.isCodeViaApp;
-
-            if (typeof phoneCodeHash !== "string") {
-                throw new Error("Failed to retrieve phone code hash");
+            if (request === "qr") {
+                return client.signInUserWithQrCode(apiCredentials, authParams);
             }
+            if (!request) continue;
 
-            if (sendCodeResult.emailRequired) {
-                if (!authParams.emailAddress || !authParams.emailVerification) {
-                    throw new Error(
-                        "Email verification required but emailAddress or emailVerification callback not provided"
-                    );
-                }
+            const user = await completeSignIn(
+                client,
+                authParams,
+                request.phoneNumber,
+                request.sentCode
+            );
+            if (user) return user;
+        }
+    } catch (err: any) {
+        if (err.errorMessage === "SESSION_PASSWORD_NEEDED") {
+            return client.signInWithPassword(apiCredentials, authParams);
+        }
+        throw err;
+    }
+    return undefined!;
+}
 
-                const email = await authParams.emailAddress();
+const RESTART_SIGN_IN_ERRORS = new Set([
+    "PHONE_CODE_EXPIRED",
+    "PHONE_NUMBER_INVALID",
+    "PHONE_NUMBER_BANNED",
+]);
 
-                const emailCodeResult = await sendVerifyEmailCode(
-                    client,
-                    phoneNumber,
-                    phoneCodeHash,
-                    email
-                );
+const RESTART_SIGN_UP_ERRORS = new Set([
+    ...RESTART_SIGN_IN_ERRORS,
+    "PHONE_CODE_EMPTY",
+    "PHONE_CODE_INVALID",
+    "PHONE_NUMBER_OCCUPIED",
+]);
 
-                const verification = await authParams.emailVerification({
-                    ...sendCodeResult.emailOptions,
-                    emailPattern: emailCodeResult.emailPattern,
-                    codeLength: emailCodeResult.length,
-                });
+async function stepFailed(
+    authParams: UserAuthParams,
+    err: any,
+    restartErrors: Set<string>
+): Promise<"retry" | "restart"> {
+    if (
+        err.errorMessage === "SESSION_PASSWORD_NEEDED" ||
+        err.message === "AUTH_USER_CANCEL"
+    ) {
+        throw err;
+    }
+    const restart = restartErrors.has(err.errorMessage);
+    if (restart && typeof authParams.phoneNumber !== "function") {
+        throw err;
+    }
+    if (await authParams.onError(err)) {
+        throw new Error("AUTH_USER_CANCEL");
+    }
+    return restart ? "restart" : "retry";
+}
 
-                const verifyResult = await verifyEmail(
-                    client,
-                    phoneNumber,
-                    phoneCodeHash,
-                    verification
-                );
-
-                if (verifyResult.sentCode instanceof Api.auth.SentCode) {
-                    phoneCodeHash = verifyResult.sentCode.phoneCodeHash;
-                    isCodeViaApp =
-                        verifyResult.sentCode.type instanceof
-                        Api.auth.SentCodeTypeApp;
-                }
-            } else if (sendCodeResult.emailCodeSent) {
-                if (!authParams.emailVerification) {
-                    throw new Error(
-                        "Email code sent but emailVerification callback not provided"
-                    );
-                }
-
-                const verification = await authParams.emailVerification(
-                    sendCodeResult.emailOptions || {}
-                );
-
-                const verifyResult = await verifyEmail(
-                    client,
-                    phoneNumber,
-                    phoneCodeHash,
-                    verification
-                );
-
-                if (verifyResult.sentCode instanceof Api.auth.SentCode) {
-                    phoneCodeHash = verifyResult.sentCode.phoneCodeHash;
-                    isCodeViaApp =
-                        verifyResult.sentCode.type instanceof
-                        Api.auth.SentCodeTypeApp;
-                }
-            }
-
-            break;
-        } catch (err: any) {
-            if (typeof authParams.phoneNumber !== "function") {
+async function requestLoginCode(
+    client: TelegramClient,
+    apiCredentials: ApiCredentials,
+    authParams: UserAuthParams
+): Promise<
+    | { phoneNumber: string; sentCode: Api.auth.TypeSentCode }
+    | "qr"
+    | undefined
+> {
+    try {
+        let phoneNumber: string;
+        if (typeof authParams.phoneNumber === "function") {
+            try {
+                phoneNumber = await authParams.phoneNumber();
+            } catch (err: any) {
+                if (err.errorMessage === "RESTART_AUTH_WITH_QR") return "qr";
                 throw err;
             }
+        } else {
+            phoneNumber = authParams.phoneNumber;
+        }
 
-            const shouldWeStop = await authParams.onError(err);
-            if (shouldWeStop) {
-                throw new Error("AUTH_USER_CANCEL");
+        let sentCode = await requestCode(
+            client,
+            apiCredentials,
+            phoneNumber,
+            authParams.reCaptchaCallback
+        );
+        if (authParams.forceSMS) {
+            sentCode = await preferSms(client, phoneNumber, sentCode);
+        }
+        return { phoneNumber, sentCode };
+    } catch (err: any) {
+        if (err.errorMessage === "AUTH_RESTART") return undefined;
+        if (
+            err.errorMessage === "SESSION_PASSWORD_NEEDED" ||
+            err.message === "AUTH_USER_CANCEL" ||
+            typeof authParams.phoneNumber !== "function"
+        ) {
+            throw err;
+        }
+        if (await authParams.onError(err)) {
+            throw new Error("AUTH_USER_CANCEL");
+        }
+        return undefined;
+    }
+}
+
+async function completeSignIn(
+    client: TelegramClient,
+    authParams: UserAuthParams,
+    phoneNumber: string,
+    sentCode: Api.auth.TypeSentCode | undefined
+): Promise<Api.TypeUser | undefined> {
+    while (sentCode) {
+        if (sentCode instanceof Api.auth.SentCodeSuccess) {
+            return finishAuthorization(
+                client,
+                authParams,
+                phoneNumber,
+                "",
+                sentCode.authorization
+            );
+        }
+        if (sentCode instanceof Api.auth.SentCodePaymentRequired) {
+            throw new Error(
+                "Telegram requires a payment to send the login code to this number, which only official apps support"
+            );
+        }
+
+        const { type, phoneCodeHash } = sentCode;
+        if (type instanceof Api.auth.SentCodeTypeSetUpEmailRequired) {
+            sentCode = await setUpLoginEmail(
+                client,
+                authParams,
+                phoneNumber,
+                phoneCodeHash,
+                type
+            );
+            continue;
+        }
+
+        const signedIn =
+            type instanceof Api.auth.SentCodeTypeEmailCode
+                ? await signInWithEmailCode(
+                      client,
+                      authParams,
+                      phoneNumber,
+                      phoneCodeHash,
+                      type
+                  )
+                : await signInWithPhoneCode(
+                      client,
+                      authParams,
+                      phoneNumber,
+                      sentCode
+                  );
+        if (!signedIn) return undefined;
+
+        return finishAuthorization(
+            client,
+            authParams,
+            phoneNumber,
+            signedIn.phoneCodeHash,
+            signedIn.authorization
+        );
+    }
+    return undefined;
+}
+
+async function setUpLoginEmail(
+    client: TelegramClient,
+    authParams: UserAuthParams,
+    phoneNumber: string,
+    phoneCodeHash: string,
+    type: Api.auth.SentCodeTypeSetUpEmailRequired
+): Promise<Api.auth.TypeSentCode | undefined> {
+    if (!authParams.emailAddress || !authParams.emailVerification) {
+        throw new Error(
+            "Telegram requires a login email for this account: pass emailAddress and emailVerification to sign in"
+        );
+    }
+
+    while (1) {
+        let sentEmailCode: SentEmailCodeResult;
+        try {
+            const email = await authParams.emailAddress();
+            sentEmailCode = await sendVerifyEmailCode(
+                client,
+                phoneNumber,
+                phoneCodeHash,
+                email
+            );
+        } catch (err: any) {
+            const next = await stepFailed(
+                authParams,
+                err,
+                RESTART_SIGN_IN_ERRORS
+            );
+            if (next === "restart") {
+                return undefined;
+            }
+            continue;
+        }
+
+        while (1) {
+            try {
+                const verification = await authParams.emailVerification({
+                    googleSigninAllowed: type.googleSigninAllowed,
+                    appleSigninAllowed: type.appleSigninAllowed,
+                    emailPattern: sentEmailCode.emailPattern,
+                    codeLength: sentEmailCode.length,
+                });
+                const { sentCode } = await verifyEmail(
+                    client,
+                    phoneNumber,
+                    phoneCodeHash,
+                    verification
+                );
+                return sentCode;
+            } catch (err: any) {
+                const next = await stepFailed(
+                    authParams,
+                    err,
+                    RESTART_SIGN_IN_ERRORS
+                );
+                if (next === "restart") {
+                    return undefined;
+                }
             }
         }
     }
+    return undefined;
+}
 
-    let phoneCode;
-    let isRegistrationRequired = false;
-    let termsOfService;
+async function signInWithEmailCode(
+    client: TelegramClient,
+    authParams: UserAuthParams,
+    phoneNumber: string,
+    phoneCodeHash: string,
+    type: Api.auth.SentCodeTypeEmailCode
+): Promise<
+    | { phoneCodeHash: string; authorization: Api.auth.TypeAuthorization }
+    | undefined
+> {
+    if (!authParams.emailVerification) {
+        throw new Error(
+            "Telegram sent the login code to the account email: pass emailVerification to sign in"
+        );
+    }
 
     while (1) {
         try {
-            try {
-                phoneCode = await authParams.phoneCode(isCodeViaApp);
-            } catch (err: any) {
-                if (err.errorMessage === "RESTART_AUTH") {
-                    return client.signInUser(apiCredentials, authParams);
-                }
+            const verification = await authParams.emailVerification({
+                googleSigninAllowed: type.googleSigninAllowed,
+                appleSigninAllowed: type.appleSigninAllowed,
+                emailPattern: type.emailPattern,
+                codeLength: type.length,
+                resetAvailablePeriod: type.resetAvailablePeriod,
+                resetPendingDate: type.resetPendingDate,
+            });
+            const authorization = await client.invoke(
+                new Api.auth.SignIn({
+                    phoneNumber,
+                    phoneCodeHash,
+                    emailVerification: toEmailVerification(verification),
+                })
+            );
+            return { phoneCodeHash, authorization };
+        } catch (err: any) {
+            const next = await stepFailed(
+                authParams,
+                err,
+                RESTART_SIGN_IN_ERRORS
+            );
+            if (next === "restart") {
+                return undefined;
             }
+        }
+    }
+    return undefined;
+}
 
+async function signInWithPhoneCode(
+    client: TelegramClient,
+    authParams: UserAuthParams,
+    phoneNumber: string,
+    sentCode: Api.auth.SentCode
+): Promise<
+    | { phoneCodeHash: string; authorization: Api.auth.TypeAuthorization }
+    | undefined
+> {
+    let current = sentCode;
+    let resendAuthorization: Api.auth.TypeAuthorization | undefined;
+    const resend = async (): Promise<SentCodeInfo> => {
+        const next = await resendCode(client, phoneNumber, current);
+        if (next instanceof Api.auth.SentCodeSuccess) {
+            resendAuthorization = next.authorization;
+            throw new Error("Login completed while resending the code");
+        }
+        if (!(next instanceof Api.auth.SentCode)) {
+            throw new Error("Unexpected resend result " + next.className);
+        }
+        const info = toSentCodeInfo(next, resend);
+        current = next;
+        return info;
+    };
+
+    while (1) {
+        try {
+            const info = toSentCodeInfo(current, resend);
+            let phoneCode: string;
+            try {
+                phoneCode = await authParams.phoneCode(
+                    info.type === "app",
+                    info
+                );
+            } catch (err: any) {
+                if (!resendAuthorization && err.errorMessage === "RESTART_AUTH") {
+                    return undefined;
+                }
+                throw err;
+            }
+            if (resendAuthorization) {
+                return {
+                    phoneCodeHash: current.phoneCodeHash,
+                    authorization: resendAuthorization,
+                };
+            }
             if (!phoneCode) {
                 throw new Error("Code is empty");
             }
 
-            const result = await client.invoke(
+            const authorization = await client.invoke(
                 new Api.auth.SignIn({
                     phoneNumber,
-                    phoneCodeHash,
+                    phoneCodeHash: current.phoneCodeHash,
                     phoneCode,
                 })
             );
-
-            if (result instanceof Api.auth.AuthorizationSignUpRequired) {
-                isRegistrationRequired = true;
-                termsOfService = result.termsOfService;
-                break;
-            }
-
-            return result.user;
+            return { phoneCodeHash: current.phoneCodeHash, authorization };
         } catch (err: any) {
-            if (err.errorMessage === "SESSION_PASSWORD_NEEDED") {
-                return client.signInWithPassword(apiCredentials, authParams);
-            } else {
-                const shouldWeStop = await authParams.onError(err);
-                if (shouldWeStop) {
-                    throw new Error("AUTH_USER_CANCEL");
-                }
+            if (resendAuthorization) {
+                return {
+                    phoneCodeHash: current.phoneCodeHash,
+                    authorization: resendAuthorization,
+                };
+            }
+            const next = await stepFailed(
+                authParams,
+                err,
+                RESTART_SIGN_IN_ERRORS
+            );
+            if (next === "restart") {
+                return undefined;
             }
         }
     }
+    return undefined;
+}
 
-    if (isRegistrationRequired) {
-        while (1) {
-            try {
-                let lastName;
-                let firstName = "first name";
-                if (authParams.firstAndLastNames) {
-                    const result = await authParams.firstAndLastNames();
-                    firstName = result[0];
-                    lastName = result[1];
-                }
-                if (!firstName) {
-                    throw new Error("First name is required");
-                }
+async function finishAuthorization(
+    client: TelegramClient,
+    authParams: UserAuthParams,
+    phoneNumber: string,
+    phoneCodeHash: string,
+    authorization: Api.auth.TypeAuthorization
+): Promise<Api.TypeUser | undefined> {
+    if (authorization instanceof Api.auth.Authorization) {
+        return authorization.user;
+    }
+    if (!authParams.firstAndLastNames) {
+        throw new Error(
+            "No account is registered with this phone number: pass firstAndLastNames to sign up"
+        );
+    }
 
-                const { user } = (await client.invoke(
-                    new Api.auth.SignUp({
-                        phoneNumber,
-                        phoneCodeHash,
-                        firstName,
-                        lastName,
-                    })
-                )) as Api.auth.Authorization;
+    const { termsOfService } = authorization;
+    if (termsOfService && authParams.acceptTermsOfService) {
+        if (!(await authParams.acceptTermsOfService(termsOfService))) {
+            throw new Error("AUTH_USER_CANCEL");
+        }
+    }
 
-                if (termsOfService) {
-                    await client.invoke(
-                        new Api.help.AcceptTermsOfService({
-                            id: termsOfService.id,
-                        })
+    while (1) {
+        try {
+            const [firstName, lastName] = await authParams.firstAndLastNames();
+            if (!firstName) {
+                throw new Error("First name is required");
+            }
+
+            const { user } = (await client.invoke(
+                new Api.auth.SignUp({
+                    phoneNumber,
+                    phoneCodeHash,
+                    firstName,
+                    lastName: lastName ?? "",
+                })
+            )) as Api.auth.Authorization;
+
+            if (termsOfService) {
+                if (!authParams.acceptTermsOfService) {
+                    client._log.warn(
+                        "Accepting the Telegram terms of service on behalf of the user: pass acceptTermsOfService to show them"
                     );
                 }
+                await client.invoke(
+                    new Api.help.AcceptTermsOfService({
+                        id: termsOfService.id,
+                    })
+                );
+            }
 
-                return user;
-            } catch (err: any) {
-                const shouldWeStop = await authParams.onError(err);
-                if (shouldWeStop) {
-                    throw new Error("AUTH_USER_CANCEL");
-                }
+            return user;
+        } catch (err: any) {
+            const next = await stepFailed(
+                authParams,
+                err,
+                RESTART_SIGN_UP_ERRORS
+            );
+            if (next === "restart") {
+                return undefined;
             }
         }
     }
-
-    await authParams.onError(new Error("Auth failed"));
-    return client.signInUser(apiCredentials, authParams);
+    return undefined;
 }
 
 function qrAbortError(): Error {
@@ -457,134 +722,17 @@ export async function sendCode(
     forceSMS = false,
     reCaptchaCallback?: (siteKey: string) => Promise<string>
 ): Promise<SendCodeResult> {
-    try {
-        const { apiId, apiHash } = apiCredentials;
-        const request = new Api.auth.SendCode({
-            phoneNumber,
-            apiId,
-            apiHash,
-            settings: new Api.CodeSettings({}),
-        });
-
-        let sendResult: any;
-
+    let sentCode = await requestCode(
+        client,
+        apiCredentials,
+        phoneNumber,
+        reCaptchaCallback
+    );
+    if (forceSMS) {
         try {
-            sendResult = await client.invoke(request);
+            sentCode = await preferSms(client, phoneNumber, sentCode);
         } catch (err: any) {
-            const match = err.errorMessage?.match(/RECAPTCHA_CHECK_.*(6Le[-\w]+)/);
-            if (match && reCaptchaCallback) {
-                const siteKey = match[1];
-                const token = await reCaptchaCallback(siteKey);
-                sendResult = await client.invoke(
-                    new Api.InvokeWithReCaptcha({
-                        token: token,
-                        query: request,
-                    })
-                );
-            } else {
-                throw err;
-            }
-        }
-
-        if (sendResult instanceof Api.auth.SentCodeSuccess)
-            throw new Error("logged in right after sending the code");
-
-        if (!(sendResult instanceof Api.auth.SentCode)) {
-            return {
-                phoneCodeHash: sendResult.phoneCodeHash,
-                isCodeViaApp: false,
-            };
-        }
-
-        if (
-            sendResult.type instanceof Api.auth.SentCodeTypeSetUpEmailRequired
-        ) {
-            return {
-                phoneCodeHash: sendResult.phoneCodeHash,
-                isCodeViaApp: false,
-                emailRequired: true,
-                emailOptions: {
-                    googleSigninAllowed: sendResult.type.googleSigninAllowed,
-                    appleSigninAllowed: sendResult.type.appleSigninAllowed,
-                },
-            };
-        }
-
-        if (sendResult.type instanceof Api.auth.SentCodeTypeEmailCode) {
-            return {
-                phoneCodeHash: sendResult.phoneCodeHash,
-                isCodeViaApp: false,
-                emailCodeSent: true,
-                emailOptions: {
-                    googleSigninAllowed: sendResult.type.googleSigninAllowed,
-                    appleSigninAllowed: sendResult.type.appleSigninAllowed,
-                    emailPattern: sendResult.type.emailPattern,
-                    codeLength: sendResult.type.length,
-                    resetAvailablePeriod: sendResult.type.resetAvailablePeriod,
-                    resetPendingDate: sendResult.type.resetPendingDate,
-                },
-            };
-        }
-
-        if (!forceSMS || sendResult.type instanceof Api.auth.SentCodeTypeSms) {
-            return {
-                phoneCodeHash: sendResult.phoneCodeHash,
-                isCodeViaApp: sendResult.type instanceof Api.auth.SentCodeTypeApp,
-            };
-        }
-
-        const resendResult = await client.invoke(
-            new Api.auth.ResendCode({
-                phoneNumber,
-                phoneCodeHash: sendResult.phoneCodeHash,
-            })
-        );
-        if (resendResult instanceof Api.auth.SentCodeSuccess)
-            throw new Error("logged in right after resending the code");
-
-        if (!(resendResult instanceof Api.auth.SentCode)) {
-            return {
-                phoneCodeHash: resendResult.phoneCodeHash,
-                isCodeViaApp: false,
-            };
-        }
-
-        if (
-            resendResult.type instanceof Api.auth.SentCodeTypeSetUpEmailRequired
-        ) {
-            return {
-                phoneCodeHash: resendResult.phoneCodeHash,
-                isCodeViaApp: false,
-                emailRequired: true,
-                emailOptions: {
-                    googleSigninAllowed: resendResult.type.googleSigninAllowed,
-                    appleSigninAllowed: resendResult.type.appleSigninAllowed,
-                },
-            };
-        }
-
-        if (resendResult.type instanceof Api.auth.SentCodeTypeEmailCode) {
-            return {
-                phoneCodeHash: resendResult.phoneCodeHash,
-                isCodeViaApp: false,
-                emailCodeSent: true,
-                emailOptions: {
-                    googleSigninAllowed: resendResult.type.googleSigninAllowed,
-                    appleSigninAllowed: resendResult.type.appleSigninAllowed,
-                    emailPattern: resendResult.type.emailPattern,
-                    codeLength: resendResult.type.length,
-                    resetAvailablePeriod: resendResult.type.resetAvailablePeriod,
-                    resetPendingDate: resendResult.type.resetPendingDate,
-                },
-            };
-        }
-
-        return {
-            phoneCodeHash: resendResult.phoneCodeHash,
-            isCodeViaApp: resendResult.type instanceof Api.auth.SentCodeTypeApp,
-        };
-    } catch (err: any) {
-        if (err.errorMessage === "AUTH_RESTART") {
+            if (err.errorMessage !== "AUTH_RESTART") throw err;
             return sendCode(
                 client,
                 apiCredentials,
@@ -592,9 +740,201 @@ export async function sendCode(
                 forceSMS,
                 reCaptchaCallback
             );
-        } else {
-            throw err;
         }
+    }
+
+    if (sentCode instanceof Api.auth.SentCodeSuccess) {
+        throw new Error("logged in right after sending the code");
+    }
+    if (!(sentCode instanceof Api.auth.SentCode)) {
+        return {
+            phoneCodeHash: sentCode.phoneCodeHash,
+            isCodeViaApp: false,
+        };
+    }
+
+    const { type, phoneCodeHash } = sentCode;
+    if (type instanceof Api.auth.SentCodeTypeSetUpEmailRequired) {
+        return {
+            phoneCodeHash,
+            isCodeViaApp: false,
+            emailRequired: true,
+            emailOptions: {
+                googleSigninAllowed: type.googleSigninAllowed,
+                appleSigninAllowed: type.appleSigninAllowed,
+            },
+        };
+    }
+    if (type instanceof Api.auth.SentCodeTypeEmailCode) {
+        return {
+            phoneCodeHash,
+            isCodeViaApp: false,
+            emailCodeSent: true,
+            emailOptions: {
+                googleSigninAllowed: type.googleSigninAllowed,
+                appleSigninAllowed: type.appleSigninAllowed,
+                emailPattern: type.emailPattern,
+                codeLength: type.length,
+                resetAvailablePeriod: type.resetAvailablePeriod,
+                resetPendingDate: type.resetPendingDate,
+            },
+        };
+    }
+    return {
+        phoneCodeHash,
+        isCodeViaApp: type instanceof Api.auth.SentCodeTypeApp,
+    };
+}
+
+async function requestCode(
+    client: TelegramClient,
+    apiCredentials: ApiCredentials,
+    phoneNumber: string,
+    reCaptchaCallback?: (siteKey: string) => Promise<string>
+): Promise<Api.auth.TypeSentCode> {
+    const { apiId, apiHash } = apiCredentials;
+    const request = new Api.auth.SendCode({
+        phoneNumber,
+        apiId,
+        apiHash,
+        settings: new Api.CodeSettings({}),
+    });
+
+    try {
+        return await client.invoke(request);
+    } catch (err: any) {
+        const match = err.errorMessage?.match(
+            /RECAPTCHA_CHECK_.*(6Le[-\w]+)/
+        );
+        if (match && reCaptchaCallback) {
+            const token = await reCaptchaCallback(match[1]);
+            return client.invoke(
+                new Api.InvokeWithReCaptcha({ token, query: request })
+            ) as Promise<Api.auth.TypeSentCode>;
+        }
+        if (err.errorMessage === "AUTH_RESTART") {
+            return requestCode(
+                client,
+                apiCredentials,
+                phoneNumber,
+                reCaptchaCallback
+            );
+        }
+        throw err;
+    }
+}
+
+async function resendCode(
+    client: TelegramClient,
+    phoneNumber: string,
+    sentCode: Api.auth.SentCode
+): Promise<Api.auth.TypeSentCode> {
+    if (!sentCode.nextType) {
+        throw new Error("The login code cannot be resent");
+    }
+    return client.invoke(
+        new Api.auth.ResendCode({
+            phoneNumber,
+            phoneCodeHash: sentCode.phoneCodeHash,
+        })
+    );
+}
+
+async function preferSms(
+    client: TelegramClient,
+    phoneNumber: string,
+    sentCode: Api.auth.TypeSentCode
+): Promise<Api.auth.TypeSentCode> {
+    if (
+        !(sentCode instanceof Api.auth.SentCode) ||
+        sentCode.type instanceof Api.auth.SentCodeTypeSms
+    ) {
+        return sentCode;
+    }
+    if (!(sentCode.nextType instanceof Api.auth.CodeTypeSms)) {
+        client._log.warn(
+            "forceSMS ignored: Telegram does not offer SMS as the next delivery method for this code"
+        );
+        return sentCode;
+    }
+    return resendCode(client, phoneNumber, sentCode);
+}
+
+function toSentCodeInfo(
+    sentCode: Api.auth.SentCode,
+    resend: () => Promise<SentCodeInfo>
+): SentCodeInfo {
+    const { type, nextType, timeout } = sentCode;
+    return {
+        ...toCodeDelivery(type),
+        nextType: nextType && toNextCodeDelivery(nextType),
+        timeout,
+        resend,
+        raw: sentCode,
+    };
+}
+
+function toCodeDelivery(
+    type: Api.auth.TypeSentCodeType
+): Omit<SentCodeInfo, "nextType" | "timeout" | "resend" | "raw"> {
+    if (type instanceof Api.auth.SentCodeTypeApp) {
+        return { type: "app", length: type.length };
+    }
+    if (
+        type instanceof Api.auth.SentCodeTypeSms ||
+        type instanceof Api.auth.SentCodeTypeFirebaseSms
+    ) {
+        return { type: "sms", length: type.length };
+    }
+    if (type instanceof Api.auth.SentCodeTypeCall) {
+        return { type: "call", length: type.length };
+    }
+    if (type instanceof Api.auth.SentCodeTypeFlashCall) {
+        return { type: "flashCall", pattern: type.pattern };
+    }
+    if (type instanceof Api.auth.SentCodeTypeMissedCall) {
+        return {
+            type: "missedCall",
+            prefix: type.prefix,
+            length: type.length,
+        };
+    }
+    if (type instanceof Api.auth.SentCodeTypeFragmentSms) {
+        return { type: "fragment", url: type.url, length: type.length };
+    }
+    if (type instanceof Api.auth.SentCodeTypeSmsWord) {
+        return { type: "smsWord", beginning: type.beginning };
+    }
+    if (type instanceof Api.auth.SentCodeTypeSmsPhrase) {
+        return { type: "smsPhrase", beginning: type.beginning };
+    }
+    throw new Error("Unexpected code delivery type " + type.className);
+}
+
+function toNextCodeDelivery(
+    nextType: Api.auth.TypeCodeType
+): NextCodeDeliveryType {
+    if (nextType instanceof Api.auth.CodeTypeSms) return "sms";
+    if (nextType instanceof Api.auth.CodeTypeCall) return "call";
+    if (nextType instanceof Api.auth.CodeTypeFlashCall) return "flashCall";
+    if (nextType instanceof Api.auth.CodeTypeMissedCall) return "missedCall";
+    return "fragment";
+}
+
+function toEmailVerification(
+    verification: EmailVerificationResult
+): Api.TypeEmailVerification {
+    switch (verification.type) {
+        case "code":
+            return new Api.EmailVerificationCode({ code: verification.code });
+        case "google":
+            return new Api.EmailVerificationGoogle({
+                token: verification.token,
+            });
+        case "apple":
+            return new Api.EmailVerificationApple({
+                token: verification.token,
+            });
     }
 }
 
@@ -755,33 +1095,13 @@ export async function verifyEmail(
     phoneCodeHash: string,
     verification: EmailVerificationResult
 ): Promise<EmailVerifiedLoginResult> {
-    let emailVerification: Api.TypeEmailVerification;
-
-    switch (verification.type) {
-        case "code":
-            emailVerification = new Api.EmailVerificationCode({
-                code: verification.code,
-            });
-            break;
-        case "google":
-            emailVerification = new Api.EmailVerificationGoogle({
-                token: verification.token,
-            });
-            break;
-        case "apple":
-            emailVerification = new Api.EmailVerificationApple({
-                token: verification.token,
-            });
-            break;
-    }
-
     const result = await client.invoke(
         new Api.account.VerifyEmail({
             purpose: new Api.EmailVerifyPurposeLoginSetup({
                 phoneNumber,
                 phoneCodeHash,
             }),
-            verification: emailVerification,
+            verification: toEmailVerification(verification),
         })
     );
 

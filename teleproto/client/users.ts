@@ -4,7 +4,6 @@ import { getPeerId as peerUtils, parseID } from "../Utils";
 import {
     _entityType,
     _EntityType,
-    sleep,
     isArrayLike,
     returnBigInt,
     unionId,
@@ -17,6 +16,7 @@ import bigInt from "big-integer";
 import { RequestState } from "../network/RequestState";
 import { MTProtoSender } from "../network";
 import type { SessionLease } from "../network/Network";
+import { RpcCallControl } from "./rpcControl";
 
 interface InvokeAttempt {
     client: TelegramClient;
@@ -25,6 +25,8 @@ interface InvokeAttempt {
     dcId?: number;
     sender: MTProtoSender;
     lease?: SessionLease;
+    control: RpcCallControl;
+    options: Api.ApiCallOptions;
 }
 
 type InvokeErrorPolicy = (e: any, ctx: InvokeAttempt) => Promise<boolean>;
@@ -42,7 +44,7 @@ const telegramInternalErrors: InvokeErrorPolicy = async (e, ctx) => {
     ctx.client._log.warn(
         `Telegram is having internal issues ${e.constructor.name}`
     );
-    await sleep(2000);
+    await ctx.control.sleep(2000);
     return true;
 };
 
@@ -55,13 +57,13 @@ const floodWait: InvokeErrorPolicy = async (e, ctx) => {
     ) {
         return false;
     }
-    if (e.seconds > ctx.client.floodSleepThreshold) {
+    if (e.seconds > (ctx.options.floodSleepThreshold ?? ctx.client.floodSleepThreshold)) {
         throw e;
     }
     ctx.client._log.info(
         `Sleeping for ${e.seconds}s on flood wait (Caused by ${ctx.request.className})`
     );
-    await sleep(e.seconds * 1000);
+    await ctx.control.sleep(e.seconds * 1000);
     return true;
 };
 
@@ -93,16 +95,21 @@ const dcMigration: InvokeErrorPolicy = async (e, ctx) => {
     const shouldRaise =
         e instanceof errors.PhoneMigrateError ||
         e instanceof errors.NetworkMigrateError;
-    if (shouldRaise && (await ctx.client.isUserAuthorized())) {
+    if (shouldRaise && (await ctx.control.wait(ctx.client.isUserAuthorized()))) {
         throw e;
     }
-    await ctx.client._switchDC(e.newDc);
+    ctx.control.check();
+    await ctx.control.wait(ctx.client._switchDC(e.newDc));
+    ctx.control.check();
     ctx.lease?.release();
     ctx.lease = undefined;
     if (ctx.dcId === undefined) {
         ctx.sender = ctx.client._sender!;
     } else {
-        ctx.lease = await ctx.client._leaseSender(ctx.dcId);
+        ctx.lease = await ctx.control.wait<SessionLease>(ctx.client._leaseSender(ctx.dcId).then((lease) => {
+            if (ctx.control.signal.aborted) lease.release();
+            return lease;
+        }));
         ctx.sender = ctx.lease.sender;
     }
     return true;
@@ -112,7 +119,7 @@ const msgWait: InvokeErrorPolicy = async (e, ctx) => {
     if (!(e instanceof errors.MsgWaitError)) {
         return false;
     }
-    await ctx.state.isReady();
+    await ctx.control.wait(ctx.state.isReady());
     ctx.state.after = undefined;
     return true;
 };
@@ -131,12 +138,14 @@ const reCaptcha: InvokeErrorPolicy = async (e, ctx) => {
     if (!match) {
         throw e;
     }
-    const token = await ctx.client._reCaptchaCallback(match[1]);
+    const token = await ctx.control.wait(ctx.client._reCaptchaCallback(match[1]));
+    ctx.control.check();
     const newRequest = new Api.InvokeWithReCaptcha({
         token: token,
         query: ctx.request,
     });
-    await newRequest.resolve(ctx.client, utils);
+    await ctx.control.wait(newRequest.resolve(ctx.client, utils));
+    ctx.control.check();
     ctx.state.request = newRequest;
     ctx.state.data = newRequest.getBytes();
     return true;
@@ -169,50 +178,47 @@ export async function invoke<R extends Api.AnyRequest>(
     client: TelegramClient,
     request: R,
     dcId?: number,
-    otherSender?: MTProtoSender | SessionLease
+    otherSender?: MTProtoSender | SessionLease,
+    options: Api.ApiCallOptions = {}
 ): Promise<R["__response"]> {
     if (request.classType !== "request") {
         throw new Error("You can only invoke MTProtoRequests");
     }
-    let sender = client._sender;
-    let lease: SessionLease | undefined;
-    if (dcId) {
-        lease = await client._leaseSender(dcId);
-        sender = lease.sender;
-    }
-    if (otherSender != undefined) {
-        sender =
-            otherSender instanceof MTProtoSender
-                ? otherSender
-                : (otherSender as unknown as SessionLease).sender;
-    }
-    if (sender == undefined) {
-        throw new Error(
-            "Cannot send requests while disconnected. You need to call .connect()"
-        );
-    }
-    if (sender.userDisconnected) {
-        throw new Error(
-            "Cannot send requests while disconnected. Please reconnect."
-        );
-    }
-
-    const ctx: InvokeAttempt = { client, request, state: undefined!, dcId, sender };
+    const control = new RpcCallControl(options);
+    const authorizationError = client.updates.authorizationError;
+    const ctx: InvokeAttempt = {
+        client, request, state: undefined!, dcId, sender: client._sender!, control, options,
+    };
     try {
-        await client._connectedDeferred.promise;
-
-        await request.resolve(client, utils);
-        client._lastRequest = new Date().getTime();
+        control.check();
+        if (dcId) {
+            ctx.lease = await control.wait<SessionLease>(client._leaseSender(dcId).then((lease) => {
+                if (control.signal.aborted) lease.release();
+                return lease;
+            }));
+            ctx.sender = ctx.lease.sender;
+        }
+        if (otherSender !== undefined) {
+            ctx.sender = otherSender instanceof MTProtoSender ? otherSender : otherSender.sender;
+        }
+        if (!ctx.sender || ctx.sender.userDisconnected) {
+            throw new Error("Cannot send requests while disconnected. Please connect first.");
+        }
+        await control.wait(client._connectedDeferred.promise);
+        control.check();
+        await control.wait(request.resolve(client, utils));
+        control.check();
+        client._lastRequest = Date.now();
         const state = new RequestState(request);
         ctx.state = state;
-        ctx.lease = lease;
-
+        const attempts = options.maxRetryCount === undefined ? client._requestRetries : options.maxRetryCount + 1;
         let attempt: number = 0;
-        for (attempt = 0; attempt < client._requestRetries; attempt++) {
+        for (attempt = 0; attempt < attempts; attempt++) {
+            control.check();
             ctx.sender.addStateToQueue(state);
 
             try {
-                const result = await state.promise;
+                const result = await control.wait(state.promise);
                 state.finished.resolve();
                 try {
                     await client.session.processEntities(result);
@@ -222,6 +228,11 @@ export async function invoke<R extends Api.AnyRequest>(
                 client._entityCache.add(result);
 
                 if (!dcId && !otherSender) {
+                    if (result instanceof Api.auth.Authorization || result instanceof Api.auth.LoginTokenSuccess ||
+                        (result instanceof Api.updates.State && authorizationError !== undefined &&
+                            authorizationError === client.updates.authorizationError)) {
+                        client.updates._resumeAuthorization();
+                    }
                     const sub = (result as { SUBCLASS_OF_ID?: number })
                         ?.SUBCLASS_OF_ID;
                     if (sub === unionId("Updates")) {
@@ -238,11 +249,15 @@ export async function invoke<R extends Api.AnyRequest>(
                             pts: number;
                             ptsCount: number;
                         };
-                        const channel = (
-                            request as unknown as {
-                                channel?: { channelId?: bigInt.BigInteger };
-                            }
-                        ).channel;
+                        type WrappedRequest = {
+                            query?: unknown;
+                            channel?: { channelId?: bigInt.BigInteger };
+                        };
+                        let affectedRequest = request as WrappedRequest;
+                        while ((affectedRequest.query as { classType?: string })?.classType === "request") {
+                            affectedRequest = affectedRequest.query as WrappedRequest;
+                        }
+                        const channel = affectedRequest.channel;
                         client.updateManager.applyAffected(
                             affected.pts,
                             affected.ptsCount,
@@ -253,6 +268,10 @@ export async function invoke<R extends Api.AnyRequest>(
 
                 return result;
             } catch (e: any) {
+                control.check();
+                if ((e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) &&
+                    client.updateManager.handleChannelFloodWait(request, e.seconds)) throw e;
+                if (attempt + 1 >= attempts) throw e;
                 let recovered = false;
                 for (const policy of INVOKE_ERROR_POLICIES) {
                     try {
@@ -267,13 +286,17 @@ export async function invoke<R extends Api.AnyRequest>(
                     state.finished.resolve();
                     throw e;
                 }
-                lease = ctx.lease;
             }
             state.resetPromise();
         }
         throw new Error(`Request was unsuccessful ${attempt} time(s)`);
     } finally {
-        (ctx.lease ?? lease)?.release();
+        if (ctx.state) {
+            if (control.signal.aborted) ctx.sender.cancelRequest(ctx.state, control.signal.reason);
+            ctx.state.finished.resolve();
+        }
+        ctx.lease?.release();
+        control.dispose();
     }
 }
 
@@ -500,16 +523,16 @@ export async function getInputEntity(
         });
     } else if (peer instanceof Api.PeerChannel) {
         try {
-            const channels = await client.api.channels.getChannels({
-                id: [
+            const channels = await _getChannelsWithCommunityFallback(client,
+                [
                     new Api.InputChannel({
                         channelId: peer.channelId,
                         accessHash: bigInt.zero,
                     }),
-                ],
-            });
+                ]
+            );
 
-            return utils.getInputPeer(channels.chats[0]);
+            return utils.getInputPeer(channels[0]);
         } catch (e) {
             client._log.error("Error while resolving channel entity", e);
             if (client._errorHandler) {
@@ -645,6 +668,22 @@ export async function _getPeer(client: TelegramClient, peer: EntityLike) {
 }
 
 export async function _getInputDialog(client: TelegramClient, dialog: any) {
+    if (dialog?.inputDialog) return _getInputDialog(client, dialog.inputDialog);
+    if (dialog instanceof Api.InputDialogPeerCommunity) {
+        dialog.community = utils.getInputChannel(await client.getInputEntity(dialog.community));
+        return dialog;
+    }
+    if (dialog instanceof Api.InputDialogPeerFolder) return dialog;
+    if (dialog instanceof Api.Community || dialog instanceof Api.CommunityForbidden) {
+        return utils.getInputDialog(dialog);
+    }
+    if (dialog instanceof Api.DialogCommunity || dialog instanceof Api.DialogPeerCommunity) {
+        return new Api.InputDialogPeerCommunity({
+            community: utils.getInputChannel(await client.getInputEntity(
+                new Api.PeerChannel({ channelId: dialog.communityId })
+            )),
+        });
+    }
     try {
         if (dialog.SUBCLASS_OF_ID == unionId("InputDialogPeer")) {
 
@@ -663,6 +702,22 @@ export async function _getInputDialog(client: TelegramClient, dialog: any) {
 }
 
 export async function _getInputNotify(client: TelegramClient, notify: any) {
+    if (notify instanceof Api.Community || notify instanceof Api.CommunityForbidden) {
+        return new Api.InputNotifyCommunity({
+            community: utils.getInputChannel(await client.getInputEntity(notify)),
+        });
+    }
+    if (notify instanceof Api.InputNotifyCommunity) {
+        notify.community = utils.getInputChannel(await client.getInputEntity(notify.community));
+        return notify;
+    }
+    if (notify instanceof Api.NotifyCommunity || notify instanceof Api.DialogCommunity) {
+        return new Api.InputNotifyCommunity({
+            community: utils.getInputChannel(await client.getInputEntity(
+                new Api.PeerChannel({ channelId: notify.communityId })
+            )),
+        });
+    }
     try {
         if (notify.SUBCLASS_OF_ID == unionId("InputNotifyPeer")) {
             if (notify instanceof Api.InputNotifyPeer) {

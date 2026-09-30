@@ -16,6 +16,7 @@ import * as updateMethods from "./updates/dispatch";
 import * as uploadMethods from "./uploads";
 import * as userMethods from "./users";
 import * as chatMethods from "./chats";
+import * as communityMethods from "./communities";
 import * as inviteLinkMethods from "./inviteLinks";
 import * as accountMethods from "./account";
 import * as contactMethods from "./contacts";
@@ -57,6 +58,12 @@ export class TelegramClient<
     S extends Session = Session
 > extends TelegramBaseClient<S> {
     private _updates?: ClientUpdates;
+    private readonly _reconnectHandlers = new Set<() => void | Promise<void>>();
+
+    onReconnect(handler: () => void | Promise<void>): () => void {
+        this._reconnectHandlers.add(handler);
+        return () => { this._reconnectHandlers.delete(handler); };
+    }
 
     get updates(): ClientUpdates {
         if (!this._updates) this._updates = new ClientUpdates(this);
@@ -841,6 +848,86 @@ export class TelegramClient<
         return accountMethods.setGlobalPrivacySettings(this, settings);
     }
 
+    createCommunity(params: communityMethods.CreateCommunityParams) {
+        return communityMethods.createCommunity(this, params);
+    }
+
+    getCommunity(community: EntityLike) {
+        return communityMethods.getCommunity(this, community);
+    }
+
+    getJoinedCommunities() {
+        return communityMethods.getJoinedCommunities(this);
+    }
+
+    getCommunityPeers(community: EntityLike) {
+        return communityMethods.getCommunityPeers(this, community);
+    }
+
+    setCommunityPeerLink(
+        community: EntityLike,
+        peer: EntityLike,
+        action: communityMethods.CommunityPeerLinkAction
+    ) {
+        return communityMethods.setCommunityPeerLink(this, community, peer, action);
+    }
+
+    setCommunityCollapsed(community: EntityLike, collapsed: boolean) {
+        return communityMethods.setCommunityCollapsed(this, community, collapsed);
+    }
+
+    iterCommunityPeerLinkRequests(
+        community: EntityLike,
+        params: communityMethods.IterCommunityPeerLinkRequestsParams = {}
+    ) {
+        return communityMethods.iterCommunityPeerLinkRequests(this, community, params);
+    }
+
+    getCommunityPeerLinkRequests(
+        community: EntityLike,
+        params: communityMethods.IterCommunityPeerLinkRequestsParams = {}
+    ) {
+        return communityMethods.getCommunityPeerLinkRequests(this, community, params);
+    }
+
+    setCommunityPeerLinkRequestApproval(
+        community: EntityLike,
+        peer: EntityLike,
+        approved: boolean
+    ) {
+        return communityMethods.setCommunityPeerLinkRequestApproval(
+            this, community, peer, approved
+        );
+    }
+
+    setAllCommunityPeerLinkRequestsApproval(community: EntityLike, approved: boolean) {
+        return communityMethods.setAllCommunityPeerLinkRequestsApproval(this, community, approved);
+    }
+
+    setCommunityParticipantBanned(
+        community: EntityLike,
+        participant: EntityLike,
+        banned: boolean
+    ) {
+        return communityMethods.setCommunityParticipantBanned(this, community, participant, banned);
+    }
+
+    getCommunityParticipantJoinedChats(community: EntityLike, participant: EntityLike) {
+        return communityMethods.getCommunityParticipantJoinedChats(this, community, participant);
+    }
+
+    pinCommunity(community: EntityLike, pinned = true) {
+        return communityMethods.pinCommunity(this, community, pinned);
+    }
+
+    getCommunityNotifySettings(community: EntityLike) {
+        return communityMethods.getCommunityNotifySettings(this, community);
+    }
+
+    updateCommunityNotifySettings(community: EntityLike, params: accountMethods.UpdateNotifySettingsParams) {
+        return communityMethods.updateCommunityNotifySettings(this, community, params);
+    }
+
     createForumTopic(
         entity: EntityLike,
         params: forumMethods.CreateForumTopicParams
@@ -1180,9 +1267,10 @@ export class TelegramClient<
 
     invoke<R extends Api.AnyRequest>(
         request: R,
-        dcId?: number
+        dcId?: number,
+        options?: Api.ApiCallOptions
     ): Promise<R["__response"]> {
-        return userMethods.invoke(this, request, dcId);
+        return userMethods.invoke(this, request, dcId ?? options?.dcId, undefined, options);
     }
     
     invokeWithSender<R extends Api.AnyRequest>(
@@ -1198,8 +1286,8 @@ export class TelegramClient<
         if (!this._apiProxy) {
             this._apiProxy = createApiProxy(
                 Api as unknown as Record<string, unknown>,
-                (request, dcId) =>
-                    this.invoke(request as Api.AnyRequest, dcId)
+                (request, options) =>
+                    this.invoke(request, options?.dcId, options)
             ) as Api.ApiFacade;
         }
         return this._apiProxy;
@@ -1272,10 +1360,25 @@ export class TelegramClient<
             _updateLoop(this);
             this._loopStarted = true;
         }
+        if (!this._destroyed && !this._sender?.userDisconnected) {
+            this._emitLifecycle("reconnect");
+        }
     }
 
-    async connect() {
+    connect(): Promise<boolean> {
+        if (this._destroyed) return Promise.reject(new Error("Cannot connect a destroyed client"));
+        if (this._connectTask) return this._connectTask;
+        const task = this._connectOnce();
+        this._connectTask = task;
+        void task.finally(() => {
+            if (this._connectTask === task) this._connectTask = undefined;
+        }).catch(() => {});
+        return task;
+    }
+
+    private async _connectOnce(): Promise<boolean> {
         await this._initSession();
+        if (this._destroyed) throw new Error("Cannot connect a destroyed client");
         if (this._sender === undefined) {
             const dcId = this.session.dcId || 4;
             const sessionKey = this.session.getAuthKey(dcId);
@@ -1286,8 +1389,6 @@ export class TelegramClient<
             if (sessionKey && sessionKey !== dcenter.authKey) {
                 await dcenter.authKey.setKey(sessionKey.getKey());
             }
-            // Dcenter is canonical per-DC state shared by main and pooled
-            // senders, so persist this very object rather than a copy.
             this.session.setAuthKey(dcenter.authKey, dcId);
             this._sender = new MTProtoSender(dcenter.authKey, {
                 logger: this._log,
@@ -1302,6 +1403,7 @@ export class TelegramClient<
                 client: this,
                 securityChecks: this._securityChecks,
                 autoReconnectCallback: this._handleReconnect.bind(this),
+                lifecycleCallback: this._handleConnectionLifecycle.bind(this),
                 reconnectRetries: this._reconnectRetries,
                 dcenter,
             });
@@ -1325,6 +1427,9 @@ export class TelegramClient<
         });
         this._log.info(`Using LAYER ${LAYER} for initial connect`);
         await this._connectSender(this._sender, this.session.dcId, connection);
+        if (this._destroyed || this._sender.userDisconnected) {
+            throw new Error("Connection attempt cancelled");
+        }
         this.session.setAuthKey(this._sender.authKey);
         this.session.save();
 
