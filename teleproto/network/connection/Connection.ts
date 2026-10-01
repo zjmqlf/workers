@@ -4,7 +4,6 @@ import type {
     SocketFactory,
     SocketInterface,
 } from "../../extensions/SocketInterface";
-import type { ProxyInterface } from "./TCPMTProxy";
 import { Buffer } from "node:buffer";
 
 interface ConnectionInterfaceParams {

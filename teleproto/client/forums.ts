@@ -3,6 +3,7 @@ import type { EntityLike } from "../define";
 import type { BigInteger } from "big-integer";
 import { generateRandomBigInt } from "../Helpers";
 import { Api } from "../tl";
+import { getInputChannel } from "../Utils";
 
 export interface CreateForumTopicParams {
     title: string;
@@ -139,7 +140,7 @@ export async function toggleForum(
 ) {
     const channel = await client.getInputEntity(entity);
     return client.api.channels.toggleForum({
-        channel: channel,
+        channel: getInputChannel(channel),
         enabled: enabled,
         tabs: tabs,
     });
@@ -152,7 +153,7 @@ export async function toggleViewForumAsMessages(
 ) {
     const channel = await client.getInputEntity(entity);
     return client.api.channels.toggleViewForumAsMessages({
-        channel: channel,
+        channel: getInputChannel(channel),
         enabled: enabled,
     });
 }

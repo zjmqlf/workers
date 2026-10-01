@@ -12,7 +12,7 @@ export class FullPacketCodec extends PacketCodec {
         this._sendCounter = 0;
     }
 
-    encodePacket(data: Buffer) {
+    encodePacket(data: Buffer): Buffer {
         const length = data.length + 12;
         const e = Buffer.alloc(8);
         e.writeInt32LE(length, 0);

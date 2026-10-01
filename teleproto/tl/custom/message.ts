@@ -738,7 +738,7 @@ export class CustomMessage extends SenderGetter {
         }
     }
 
-    async downloadMedia(params?: DownloadMediaInterface) {
+    async downloadMedia(params?: DownloadMediaInterface): Promise<string | Buffer | undefined> {
         if (this._client)
             return this._client.downloadMedia(this as any, params || {});
     }

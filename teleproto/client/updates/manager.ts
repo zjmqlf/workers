@@ -24,6 +24,8 @@ interface PendingSeqUpdate {
     update: Api.Updates | Api.UpdatesCombined;
     seqStart: number;
     seq: number;
+    payload: DispatchPayload;
+    updates: Api.TypeUpdate[];
 }
 
 export interface ChannelPollingState {
@@ -97,6 +99,10 @@ export class UpdateManager {
 
     private readonly client: TelegramClient;
     private readonly globalPts: PtsWaiter;
+    private readonly qts: PtsWaiter;
+    private qtsTimer?: NodeJS.Timeout;
+    private initializing?: Promise<void>;
+    private readonly beforeState: (Api.TypeUpdate | Api.TypeUpdates)[] = [];
     private globalPtsTimer?: ReturnType<typeof setTimeout>;
     private readonly channels = new Map<string, ChannelTracker>();
     private readonly pendingSeq: PendingSeqUpdate[] = [];
@@ -120,9 +126,11 @@ export class UpdateManager {
         this.client = client;
         this.channelScheduler = new ChannelScheduler(client._channelPollRequestInterval, client._channelPollConcurrency);
         this.globalPts = this.makeGlobalWaiter();
+        this.qts = this.makeGlobalWaiter(true);
     }
 
     start(): void {
+        if (this.running) return;
         this.running = true;
         this.channelScheduler.start();
         this.client.updates._resume();
@@ -132,11 +140,25 @@ export class UpdateManager {
         return this.running;
     }
 
+    reset(): void {
+        this.state = undefined;
+        this.lastUpdateTime = 0;
+        this.channels.clear();
+        this.recentMessageKeys.clear();
+        this.recentMessageQueue.length = 0;
+        this.globalPts.init(0);
+        this.qts.init(0);
+    }
+
     stop(): void {
         this.running = false;
         this.generation++;
         this.channelScheduler.stop();
         this.client.updates._pause();
+        this.initializing = undefined;
+        this.beforeState.length = 0;
+        this.qts.clearSkippedUpdates();
+        this.qts.setRequesting(false);
         this.globalPts.clearSkippedUpdates();
         this.globalPts.setRequesting(false);
         if (this.globalPtsTimer) {
@@ -181,10 +203,20 @@ export class UpdateManager {
 
             if (noDispatch) this.markNoDispatch(update);
 
+            const raw = update instanceof Api.UpdateShort ? update.update : update;
+            const stateful = update instanceof Api.Updates || update instanceof Api.UpdatesCombined ||
+                update instanceof Api.UpdateShortMessage || update instanceof Api.UpdateShortChatMessage ||
+                update instanceof Api.UpdateShortSentMessage || update instanceof Api.UpdatesTooLong ||
+                isCommonPtsUpdate(raw as Api.TypeUpdate) || isChannelPtsUpdate(raw as Api.TypeUpdate) || hasQts(raw as Api.TypeUpdate);
+            if (!this.state && stateful) {
+                this.beforeState.push(update);
+                void this.ensureState();
+                return;
+            }
+
             if (update instanceof Api.Updates || update instanceof Api.UpdatesCombined) {
                 this.handleContainer(update);
             } else if (update instanceof Api.UpdateShort) {
-                if (this.state) this.state.date = update.date;
                 this.feedUpdate(update.update, { others: null });
             } else if (update instanceof Api.UpdateShortMessage || update instanceof Api.UpdateShortChatMessage) {
                 this.handleShortMessage(update);
@@ -216,7 +248,7 @@ export class UpdateManager {
     }
 
     private handleShortSentMessage(update: Api.UpdateShortSentMessage): void {
-        if (!this.state || this.fetchingDifference) return;
+        if (!this.state) return;
         this.globalPts.updateAndApply(
             update.pts,
             update.ptsCount,
@@ -226,14 +258,13 @@ export class UpdateManager {
             },
             () => { },
         );
-        this.state.date = update.date;
+        this.state.date = Math.max(this.state.date, update.date);
     }
 
     applyAffected(pts: number, ptsCount: number, channelId?: string): void {
-        if (!this.running || !this.state || this.fetchingDifference) return;
+        if (!this.running || !this.state) return;
         if (channelId) {
             const tracker = this.getOrCreateChannel(channelId);
-            if (tracker.pts.requesting()) return;
             if (!tracker.pts.inited()) {
                 tracker.pts.init(pts);
                 return;
@@ -262,11 +293,7 @@ export class UpdateManager {
         if (!this.isCurrent(generation) || this.client.updates.authorizationError) return;
         try {
             if (!this.state) {
-                const s = await this.client.api.updates.getState();
-                if (!this.isCurrent(generation)) return;
-                this.state = { pts: s.pts, qts: s.qts, date: s.date, seq: s.seq };
-                this.globalPts.init(s.pts);
-                this.client._log.debug("Initialized update state");
+                await this.ensureState();
                 return;
             }
             this.client._log.debug("Catching up on missed updates...");
@@ -428,16 +455,26 @@ export class UpdateManager {
     }
 
     async ensureState(): Promise<void> {
+        if (this.initializing) return this.initializing;
         const generation = this.generation;
         if (this.state || !this.isCurrent(generation) || this.client.updates.authorizationError) return;
+        const task = (async () => {
+            try {
+                const state = await this.client.api.updates.getState();
+                if (!this.isCurrent(generation)) return;
+                this.refreshFromState(state);
+                this.lastUpdateTime = Date.now();
+                const pending = this.beforeState.splice(0);
+                for (const update of pending) this.onUpdates(update);
+            } catch (error) {
+                if (this.isCurrent(generation)) this.client.updates._suspendAuthorization(error);
+            }
+        })();
+        this.initializing = task;
         try {
-            const s = await this.client.api.updates.getState();
-            if (!this.isCurrent(generation)) return;
-            this.state = { pts: s.pts, qts: s.qts, date: s.date, seq: s.seq };
-            this.globalPts.init(s.pts);
-            this.lastUpdateTime = Date.now();
-        } catch (error) {
-            if (this.isCurrent(generation)) this.client.updates._suspendAuthorization(error);
+            await task;
+        } finally {
+            if (this.initializing === task) this.initializing = undefined;
         }
     }
 
@@ -448,9 +485,10 @@ export class UpdateManager {
             this.state.date = state.date;
             this.state.seq = state.seq;
         } else {
-            this.state = { ...state };
+            this.state = { pts: state.pts, qts: state.qts, date: state.date, seq: state.seq };
         }
         this.globalPts.init(state.pts);
+        this.qts.init(state.qts);
     }
 
     isStale(): boolean {
@@ -465,32 +503,33 @@ export class UpdateManager {
     }
 
     private handleContainer(update: Api.Updates | Api.UpdatesCombined): void {
-        if (this.state && update.seq !== 0) {
-            const seqStart = "seqStart" in update ? update.seqStart : update.seq;
-            const localSeq = this.state.seq;
-            if (seqStart !== 0) {
-                if (localSeq + 1 > seqStart) {
-                    this.client._log.debug(`Skip duplicate Updates container (seq=${seqStart})`);
-                    return;
-                }
-                if (localSeq + 1 < seqStart) {
-                    this.client._log.debug(`Seq gap (local=${localSeq}, start=${seqStart}); buffering`);
-                    this.pendingSeq.push({ update, seqStart, seq: update.seq });
-                    this.armSeqGapTimer();
-                    return;
-                }
+        const payload = { others: update.updates, entities: this.collectEntities(update.users, update.chats) };
+        const remaining: Api.TypeUpdate[] = [];
+        for (const item of update.updates) {
+            if (isCommonPtsUpdate(item) || isChannelPtsUpdate(item) || hasQts(item) || item instanceof Api.UpdateChannelTooLong) {
+                this.feedUpdate(item, payload);
+            } else {
+                remaining.push(item);
             }
-            this.state.seq = update.seq;
-            this.state.date = update.date;
         }
+        this.applySeq({ update, updates: remaining, payload, seqStart: "seqStart" in update ? update.seqStart : update.seq, seq: update.seq });
+        this.drainPendingSeq();
+    }
 
-        const entities = this.collectEntities(update.users, update.chats);
-        for (const u of update.updates) {
-            this.feedUpdate(u, { others: update.updates, entities });
+    private applySeq(entry: PendingSeqUpdate): void {
+        if (!this.state) return;
+        const { seqStart, seq, update } = entry;
+        if (seqStart !== 0 && seqStart <= this.state.seq) return;
+        if (this.fetchingDifference || (seqStart !== 0 && seqStart > this.state.seq + 1)) {
+            if (seqStart === 0 || !this.pendingSeq.some((pending) => pending.seqStart === seqStart && pending.seq === seq)) {
+                this.pendingSeq.push(entry);
+            }
+            if (!this.fetchingDifference) this.armSeqGapTimer();
+            return;
         }
-        if (this.state && update.seq !== 0) {
-            this.drainPendingSeq();
-        }
+        for (const item of entry.updates) this.feedUpdate(item, entry.payload);
+        if (seq !== 0) this.state.seq = seq;
+        this.state.date = Math.max(this.state.date, update.date);
     }
 
     private armSeqGapTimer(): void {
@@ -507,7 +546,6 @@ export class UpdateManager {
             this.dispatch(update as unknown as Api.TypeUpdate, { others: null });
             return;
         }
-        if (this.fetchingDifference) return;
         const applied = this.globalPts.updateAndApply(
             update.pts,
             update.ptsCount,
@@ -520,7 +558,7 @@ export class UpdateManager {
             },
         );
         if (applied) {
-            this.state.date = update.date;
+            this.state.date = Math.max(this.state.date, update.date);
         }
     }
 
@@ -536,7 +574,6 @@ export class UpdateManager {
         }
 
         if (isCommonPtsUpdate(update)) {
-            if (this.fetchingDifference) return;
             const u = update as Api.TypeUpdate & { pts: number; ptsCount: number };
             this.globalPts.updateAndApply(
                 u.pts,
@@ -559,7 +596,6 @@ export class UpdateManager {
                 return;
             }
             const tracker = this.getOrCreateChannel(channelId);
-            if (tracker.pts.requesting()) return;
             if (!tracker.pts.inited()) {
                 tracker.pts.init(u.pts);
                 this.dispatch(update, payload);
@@ -576,19 +612,11 @@ export class UpdateManager {
         }
 
         if (hasQts(update)) {
-            if (this.fetchingDifference) return;
-            const localQts = this.state.qts;
-            const qts = update.qts;
-            if (localQts + 1 > qts) {
-                this.client._log.debug(`Skip duplicate qts (local=${localQts}, qts=${qts})`);
-                return;
-            }
-            if (localQts + 1 < qts) {
-                this.client._log.debug(`Qts gap (local=${localQts}, qts=${qts}); requesting difference`);
-                this.scheduleCommonDifference();
-                return;
-            }
-            this.state.qts = qts;
+            this.qts.updateAndApply(update.qts, 1, { tag: "update", update }, (applied) => {
+                if (this.state) this.state.qts = this.qts.current();
+                this.dispatch(applied, payload);
+            }, () => {});
+            return;
         }
 
         this.dispatch(update, payload);
@@ -598,12 +626,15 @@ export class UpdateManager {
         return this.running && this.generation === generation;
     }
 
-    private async recoverChannel(update: Api.UpdateChannelTooLong): Promise<void> {
+    private async recoverChannel(update: Api.UpdateChannelTooLong, fromDifference = false): Promise<void> {
         const channelId = update.channelId.toString();
         const tracker = this.getOrCreateChannel(channelId);
         if (!tracker.pts.inited()) {
-            if (update.pts === undefined) return;
-            tracker.pts.init(update.pts);
+            if (!fromDifference) {
+                this.scheduleCommonDifference();
+                return;
+            }
+            tracker.pts.init(1);
         } else if (update.pts !== undefined && tracker.pts.current() >= update.pts) {
             return;
         }
@@ -673,22 +704,26 @@ export class UpdateManager {
         return entities;
     }
 
-    private makeGlobalWaiter(): PtsWaiter {
+    private makeGlobalWaiter(secondary = false): PtsWaiter {
+        const timer = secondary ? "qtsTimer" : "globalPtsTimer";
         const host: PtsWaiterHost = {
+            onApplied: (pts) => {
+                if (this.state) this.state[secondary ? "qts" : "pts"] = pts;
+            },
             onWaitForSkipped: (ms) => {
                 if (ms < 0) {
-                    if (this.globalPtsTimer) {
-                        clearTimeout(this.globalPtsTimer);
-                        this.globalPtsTimer = undefined;
+                    if (this[timer]) {
+                        clearTimeout(this[timer]);
+                        this[timer] = undefined;
                     }
                     return;
                 }
-                if (this.globalPtsTimer) {
+                if (this[timer]) {
                     if (ms > 1) return;
-                    clearTimeout(this.globalPtsTimer);
+                    clearTimeout(this[timer]);
                 }
-                this.globalPtsTimer = setTimeout(() => {
-                    this.globalPtsTimer = undefined;
+                this[timer] = setTimeout(() => {
+                    this[timer] = undefined;
                     this.scheduleCommonDifference();
                 }, ms);
             },
@@ -730,6 +765,10 @@ export class UpdateManager {
     }
 
     private scheduleCommonDifference(): void {
+        if (!this.state) {
+            void this.ensureState();
+            return;
+        }
         if (this.fetchingDifference) return;
         if (this.failRetryTimer) return;
         void this.fetchCommonDifference();
@@ -740,6 +779,7 @@ export class UpdateManager {
         if (!this.isCurrent(generation) || this.client.updates.authorizationError || this.fetchingDifference || this.failRetryTimer || !this.state) return;
         this.fetchingDifference = true;
         this.globalPts.setRequesting(true);
+        this.qts.setRequesting(true);
         let failed = false;
         try {
             await this.fetchDifferenceLoop(generation);
@@ -759,9 +799,13 @@ export class UpdateManager {
             }
         } finally {
             if (this.isCurrent(generation)) {
-                this.globalPts.setRequesting(false);
-                if (this.state) this.globalPts.init(this.state.pts);
+                if (this.state) {
+                    this.globalPts.init(this.state.pts, true);
+                    this.qts.init(this.state.qts, true);
+                }
                 this.fetchingDifference = false;
+                this.globalPts.setRequesting(false);
+                this.qts.setRequesting(false);
             }
         }
         if (failed && this.running) {
@@ -795,15 +839,15 @@ export class UpdateManager {
             } else if (diff instanceof Api.updates.Difference) {
                 await this.processDifference(diff, generation);
                 if (!this.isCurrent(generation)) return;
-                this.state = { ...diff.state };
+                this.state = { pts: diff.state.pts, qts: diff.state.qts, date: diff.state.date, seq: diff.state.seq };
                 fetching = false;
             } else if (diff instanceof Api.updates.DifferenceSlice) {
                 await this.processDifference(diff, generation);
                 if (!this.isCurrent(generation)) return;
-                this.state = { ...diff.intermediateState };
+                this.state = { pts: diff.intermediateState.pts, qts: diff.intermediateState.qts, date: diff.intermediateState.date, seq: diff.intermediateState.seq };
             } else if (diff instanceof Api.updates.DifferenceTooLong) {
+                if (diff.pts <= this.state.pts) throw new Error("getDifference did not advance PTS");
                 this.state.pts = diff.pts;
-                fetching = false;
                 this.client._log.warn("getDifference: too long, some updates may be lost");
             }
         }
@@ -826,10 +870,15 @@ export class UpdateManager {
                 );
             }
         }
+        for (const message of diff.newEncryptedMessages) {
+            this.dispatch(new Api.UpdateNewEncryptedMessage({ message, qts: 0 }), { others: null, entities });
+        }
         for (const update of diff.otherUpdates) {
             if (update instanceof Api.UpdateChannelTooLong) {
-                await this.recoverChannel(update);
+                await this.recoverChannel(update, true);
                 if (!this.isCurrent(generation)) return;
+            } else if (isChannelPtsUpdate(update)) {
+                this.feedUpdate(update, { others: diff.otherUpdates, entities });
             } else {
                 this.dispatch(update, { others: diff.otherUpdates, entities });
             }
@@ -837,27 +886,18 @@ export class UpdateManager {
     }
 
     private drainPendingSeq(): void {
-        if (!this.state) return;
+        if (!this.state || this.fetchingDifference) return;
         this.pendingSeq.sort((a, b) => a.seqStart - b.seqStart);
-        while (this.pendingSeq.length > 0) {
+        while (this.pendingSeq.length) {
             const entry = this.pendingSeq[0];
-            if (entry.seqStart <= this.state.seq) {
-                this.pendingSeq.shift();
-                continue;
-            }
-            if (entry.seqStart === this.state.seq + 1) {
-                this.pendingSeq.shift();
-                this.handleContainer(entry.update);
-                continue;
-            }
-            break;
+            if (entry.seqStart !== 0 && entry.seqStart > this.state.seq + 1) break;
+            this.pendingSeq.shift();
+            this.applySeq(entry);
         }
-        if (this.pendingSeq.length === 0) {
-            if (this.seqGapTimer) {
-                clearTimeout(this.seqGapTimer);
-                this.seqGapTimer = undefined;
-            }
-        } else {
+        if (!this.pendingSeq.length && this.seqGapTimer) {
+            clearTimeout(this.seqGapTimer);
+            this.seqGapTimer = undefined;
+        } else if (this.pendingSeq.length) {
             this.armSeqGapTimer();
         }
     }
@@ -921,7 +961,7 @@ export class UpdateManager {
                 if (diff.timeout !== undefined) serverTimeoutS = diff.timeout;
 
                 if (diff instanceof Api.updates.ChannelDifferenceEmpty) {
-                    if (diff.pts) tracker.pts.init(diff.pts);
+                    if (diff.pts) tracker.pts.init(diff.pts, true);
                     fetching = !diff.final;
                 } else if (diff instanceof Api.updates.ChannelDifference) {
                     const entities = this.collectEntities(diff.users, diff.chats);
@@ -940,12 +980,12 @@ export class UpdateManager {
                     for (const update of diff.otherUpdates) {
                         this.dispatch(update, { others: diff.otherUpdates, entities });
                     }
-                    tracker.pts.init(diff.pts);
+                    tracker.pts.init(diff.pts, true);
                     fetching = !diff.final;
                 } else if (diff instanceof Api.updates.ChannelDifferenceTooLong) {
                     this.client._log.warn(`Channel ${channelId} difference too long`);
                     if (diff.dialog instanceof Api.Dialog && diff.dialog.pts !== undefined) {
-                        tracker.pts.init(diff.dialog.pts);
+                        tracker.pts.init(diff.dialog.pts, true);
                     }
                     const entities = this.collectEntities(diff.users, diff.chats);
                     this.client._entityCache.add(diff);

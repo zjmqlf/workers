@@ -418,7 +418,7 @@ export function getInputChatPhoto(photo: any): Api.TypeInputChatPhoto {
     _raiseCastFail(photo, "InputChatPhoto");
 }
 
-export function strippedPhotoToJpg(stripped: Buffer) {
+export function strippedPhotoToJpg(stripped: Buffer): Buffer {
     if (stripped.length < 3 || stripped[0] !== 1) {
         return stripped;
     }

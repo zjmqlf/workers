@@ -47,7 +47,7 @@ export class BinaryReader {
         return readBigIntFromBuffer(buffer, true, signed);
     }
 
-    read(length = -1, checkLength = true) {
+    read(length = -1, checkLength = true): Buffer {
         if (length === -1) {
             length = this.stream.length - this.offset;
         }
@@ -62,11 +62,11 @@ export class BinaryReader {
         return result;
     }
 
-    getBuffer() {
+    getBuffer(): Buffer {
         return this.stream;
     }
 
-    tgReadBytes() {
+    tgReadBytes(): Buffer {
         const firstByte = this.readByte();
         let padding;
         let length;

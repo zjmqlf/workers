@@ -13,6 +13,10 @@ export class UpdateContext extends EventCommon {
         this._setClient(client);
     }
 
+    get peers(): ReadonlyMap<string, Entity> {
+        return this._entities;
+    }
+
     async getChat(): Promise<Entity | undefined> {
         if (!this.pendingChat) {
             this.pendingChat = super.getChat();

@@ -30,7 +30,7 @@ export class PromisedNetSockets {
             keepAliveInterval ?? DEFAULT_KEEP_ALIVE_INTERVAL;
     }
 
-    async readExactly(number: number) {
+    async readExactly(number: number): Promise<Buffer> {
         const parts: Buffer[] = [];
         let need = number;
         while (need > 0) {
@@ -41,7 +41,7 @@ export class PromisedNetSockets {
         return parts.length === 1 ? parts[0] : Buffer.concat(parts);
     }
 
-    async read(number: number) {
+    async read(number: number): Promise<Buffer> {
         if (this.closed) {
             throw new NetSocketClosedError();
         }
@@ -59,7 +59,7 @@ export class PromisedNetSockets {
         return toReturn;
     }
 
-    async readAll() {
+    async readAll(): Promise<Buffer> {
         if (this.closed || !(await this.canRead)) {
             throw new NetSocketClosedError();
         }

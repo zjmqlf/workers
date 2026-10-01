@@ -46,7 +46,7 @@ export class MTProtoState {
         this.receivedIds.clear();
     }
 
-    _calcKey(authKey: Buffer, msgKey: Buffer, client: boolean) {
+    _calcKey(authKey: Buffer, msgKey: Buffer, client: boolean): { key: Buffer; iv: Buffer } {
         const x = client ? 0 : 8;
         const sha256a = crypto
             .createHash("sha256")
@@ -106,7 +106,7 @@ export class MTProtoState {
         return msgId;
     }
 
-    async encryptMessageData(data: Buffer) {
+    async encryptMessageData(data: Buffer): Promise<Buffer> {
         if (!this.authKey) {
             throw new Error("Auth key unset");
         }

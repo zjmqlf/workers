@@ -16,7 +16,7 @@ export class GZIPPacked {
         this.classType = "constructor";
     }
 
-    static async gzipIfSmaller(contentRelated: boolean, data: Buffer) {
+    static async gzipIfSmaller(contentRelated: boolean, data: Buffer): Promise<Buffer> {
         if (contentRelated && data.length > 512) {
             const gzipped = await new GZIPPacked(data).toBytes();
             if (gzipped.length < data.length) {
@@ -26,15 +26,15 @@ export class GZIPPacked {
         return data;
     }
 
-    static gzip(input: Buffer) {
+    static gzip(input: Buffer): Buffer {
         return Buffer.from(input);
     }
 
-    static ungzip(input: Buffer) {
+    static ungzip(input: Buffer): Buffer {
         return unzipSync(input);
     }
 
-    async toBytes() {
+    async toBytes(): Promise<Buffer> {
         const g = Buffer.alloc(4);
         g.writeUInt32LE(GZIPPacked.CONSTRUCTOR_ID, 0);
         return Buffer.concat([
@@ -43,7 +43,7 @@ export class GZIPPacked {
         ]);
     }
 
-    static async read(reader: BinaryReader) {
+    static async read(reader: BinaryReader): Promise<Buffer> {
         const constructor = reader.readInt(false);
         if (constructor !== GZIPPacked.CONSTRUCTOR_ID) {
             throw new Error("not equal");

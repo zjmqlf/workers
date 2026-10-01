@@ -184,7 +184,7 @@ export class _ParticipantsIter extends RequestIter {
         if (ty == helpers._EntityType.CHANNEL) {
             if (showTotal) {
                 const channel = await this.client.api.channels.getFullChannel(
-                    { channel: entity }
+                    { channel: utils.getInputChannel(entity) }
                 );
                 if (channel.fullChat instanceof Api.ChannelFull) {
                     this.total = channel.fullChat.participantsCount;
@@ -645,7 +645,7 @@ export async function getParticipant(
     }
     const peer = await client.getInputEntity(participant);
     return client.api.channels.getParticipant({
-        channel: channel,
+        channel: utils.getInputChannel(channel),
         participant: peer,
     });
 }
@@ -664,7 +664,7 @@ export async function editTitle(
             })
         );
     }
-    return client.api.channels.editTitle({ channel: peer, title: title });
+    return client.api.channels.editTitle({ channel: utils.getInputChannel(peer), title: title });
 }
 
 export async function editPhoto(
@@ -721,7 +721,7 @@ export async function toggleSlowMode(
 ) {
     const channel = await client.getInputEntity(entity);
     return client.api.channels.toggleSlowMode({
-        channel: channel,
+        channel: utils.getInputChannel(channel),
         seconds: seconds,
     });
 }
@@ -804,7 +804,7 @@ export async function joinChannel(
     entity: EntityLike
 ) {
     const channel = await client.getInputEntity(entity);
-    return client.api.channels.joinChannel({ channel: channel });
+    return client.api.channels.joinChannel({ channel: utils.getInputChannel(channel) });
 }
 
 export async function importChatInvite(client: TelegramClient, link: string) {
@@ -815,7 +815,7 @@ export async function importChatInvite(client: TelegramClient, link: string) {
 
 export async function leaveChannel(client: TelegramClient, entity: EntityLike) {
     const channel = await client.getInputEntity(entity);
-    return client.api.channels.leaveChannel({ channel: channel });
+    return client.api.channels.leaveChannel({ channel: utils.getInputChannel(channel) });
 }
 
 export interface DeleteHistoryParams {
@@ -834,7 +834,7 @@ export async function deleteHistory(
     const peer = await client.getInputEntity(entity);
     if (helpers._entityType(peer) === helpers._EntityType.CHANNEL) {
         return client.api.channels.deleteHistory({
-            channel: peer,
+            channel: utils.getInputChannel(peer),
             maxId: params.maxId ?? 0,
             forEveryone: params.revoke,
         });

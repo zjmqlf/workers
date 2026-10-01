@@ -593,7 +593,7 @@ function getThumb(
 export async function _downloadCachedPhotoSize(
     size: Api.PhotoCachedSize | Api.PhotoStrippedSize,
     outputFile?: OutFile
-) {
+): Promise<string | Buffer | undefined> {
     let data: Buffer;
     if (size instanceof Api.PhotoStrippedSize) {
         data = strippedPhotoToJpg(size.bytes);
@@ -693,7 +693,7 @@ export async function downloadProfilePhoto(
     client: TelegramClient,
     entity: EntityLike,
     fileParams: DownloadProfilePhotoParams
-) {
+): Promise<string | Buffer | undefined> {
     let photo;
     if (typeof entity == "object" && "photo" in entity) {
         photo = entity.photo;

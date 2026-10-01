@@ -26,6 +26,7 @@ import { LAYER } from "../tl/runtime/registry";
 import { LogLevel } from "../extensions/Logger";
 import { Deferred } from "../extensions/Deferred";
 import { UpdateManager } from "./updates/manager";
+import { _clearUpdateQueue, _stopUpdateLoop } from "./updates/dispatch";
 import type { ClientUpdates } from "./updates/composer";
 import { installMessageBehaviour } from "../tl/custom/message";
 
@@ -165,6 +166,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _channelPollInterval: number;
     public _channelPollRequestInterval: number;
     public _channelPollConcurrency: number;
+    public readonly _sequentialUpdates: boolean;
     public _lastRequest?: number;
     public _lastReceivedAt = 0;
     public _parseMode?: ParseInterface;
@@ -199,6 +201,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         clientParams: TelegramClientParams
     ) {
         const explicitConnection = clientParams.connection !== undefined;
+        const explicitSocket = clientParams.networkSocket !== undefined;
         clientParams = { ...clientParamsDefault, ...clientParams };
         if (!apiId || !apiHash) {
             throw new Error("Your API ID or Hash cannot be empty or undefined");
@@ -224,6 +227,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         installMessageBehaviour();
         this._useIPV6 = clientParams.useIPV6!;
         this._requestRetries = clientParams.requestRetries!;
+        this._sequentialUpdates = !!clientParams.sequentialUpdates;
         this._downloadRetries = clientParams.downloadRetries!;
         this._connectionRetries = clientParams.connectionRetries!;
         this._reconnectRetries = clientParams.reconnectRetries!;
@@ -440,13 +444,14 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     }
 
     async _disconnect() {
-        this._loopStarted = false;
+        _stopUpdateLoop(this as unknown as TelegramClient);
         await this._sender?.disconnect();
     }
 
     destroy(): Promise<void> {
         if (this._destroyTask) return this._destroyTask;
         this._destroyed = true;
+        _clearUpdateQueue(this as unknown as TelegramClient);
         this._destroyTask = (async () => {
             await this.disconnect();
             await this._media.close();

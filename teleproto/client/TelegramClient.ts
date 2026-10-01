@@ -28,7 +28,7 @@ import * as folderMethods from "./folders";
 import * as stickerMethods from "./stickers";
 import type { BigInteger } from "big-integer";
 import type {
-    ButtonLike,
+    MarkupLike,
     Entity,
     EntityLike,
     FileLike,
@@ -124,7 +124,6 @@ export class TelegramClient<
         );
     }
 
-
     sendVerifyEmailCode(
         phoneNumber: string,
         phoneCodeHash: string,
@@ -217,12 +216,7 @@ export class TelegramClient<
     }
 
     buildReplyMarkup(
-        buttons:
-            | Api.TypeReplyMarkup
-            | undefined
-            | ButtonLike
-            | ButtonLike[]
-            | ButtonLike[][],
+        buttons: MarkupLike | undefined,
         inlineOnly: boolean = false
     ) {
         return buttonsMethods.buildReplyMarkup(buttons, inlineOnly);
@@ -231,7 +225,7 @@ export class TelegramClient<
     downloadFile(
         inputLocation: Api.TypeInputFileLocation,
         fileParams: downloadMethods.DownloadFileParams = {}
-    ) {
+    ): Promise<string | Buffer | undefined> {
         return downloadMethods.downloadFile(this, inputLocation, fileParams);
     }
 
@@ -242,7 +236,7 @@ export class TelegramClient<
             | string = {
             isBig: false,
         }
-    ) {
+    ): Promise<string | Buffer | undefined> {
         if (typeof downloadProfilePhotoParams === "string") {
             downloadProfilePhotoParams = {
                 outputFile: downloadProfilePhotoParams,
@@ -258,7 +252,7 @@ export class TelegramClient<
     downloadMedia(
         messageOrMedia: Api.Message | Api.TypeMessageMedia,
         downloadParams?: DownloadMediaInterface | string
-    ) {
+    ): Promise<string | Buffer | undefined> {
         if (typeof downloadParams === "string") {
             downloadParams = { outputFile: downloadParams };
         }
@@ -526,11 +520,11 @@ export class TelegramClient<
         return messageMethods.getRichMessage(this, entity, message);
     }
 
-    iterDialogs(iterDialogsParams: dialogMethods.IterDialogsParams = {}) {
+    iterDialogs<IncludeCommunities extends boolean = false>(iterDialogsParams: dialogMethods.IterDialogsParams<IncludeCommunities> = {}) {
         return dialogMethods.iterDialogs(this, iterDialogsParams);
     }
 
-    getDialogs(params: dialogMethods.IterDialogsParams = {}) {
+    getDialogs<IncludeCommunities extends boolean = false>(params: dialogMethods.IterDialogsParams<IncludeCommunities> = {}) {
         return dialogMethods.getDialogs(this, params);
     }
 
@@ -1200,7 +1194,7 @@ export class TelegramClient<
             | Api.MessageMediaPhoto
             | Api.TypeInputFileLocation,
         params?: downloadMethods.IterDownloadParams
-    ) {
+    ): AsyncGenerator<Buffer, void, unknown> {
         return downloadMethods.iterDownload(this, file, params);
     }
 
@@ -1286,8 +1280,8 @@ export class TelegramClient<
         if (!this._apiProxy) {
             this._apiProxy = createApiProxy(
                 Api as unknown as Record<string, unknown>,
-                (request, options) =>
-                    this.invoke(request, options?.dcId, options)
+                (request, dcId, options) =>
+                    this.invoke(request, dcId, options)
             ) as Api.ApiFacade;
         }
         return this._apiProxy;
@@ -1361,7 +1355,10 @@ export class TelegramClient<
             this._loopStarted = true;
         }
         if (!this._destroyed && !this._sender?.userDisconnected) {
-            this._emitLifecycle("reconnect");
+            await this.updateManager.catchUp();
+            if (!this._destroyed && !this._sender?.userDisconnected) {
+                this._emitLifecycle("reconnect");
+            }
         }
     }
 
@@ -1379,6 +1376,7 @@ export class TelegramClient<
     private async _connectOnce(): Promise<boolean> {
         await this._initSession();
         if (this._destroyed) throw new Error("Cannot connect a destroyed client");
+        const hasSessionKey = Boolean(this.session.getAuthKey(this.session.dcId)?.getKey());
         if (this._sender === undefined) {
             const dcId = this.session.dcId || 4;
             const sessionKey = this.session.getAuthKey(dcId);
@@ -1434,7 +1432,7 @@ export class TelegramClient<
         this.session.save();
 
         if (!this._loopStarted) {
-            _updateLoop(this);
+            _updateLoop(this, hasSessionKey);
             this._loopStarted = true;
         }
         this._connectedDeferred.resolve();

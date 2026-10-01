@@ -214,11 +214,8 @@ export class MemorySession extends Session {
 
     getEntityRowsById(id: string | bigInt.BigInteger, exact = true) {
         if (exact) {
-            for (const e of this._entities.values()) {
-                if (e[0] === id) {
-                    return [e[0], e[1]];
-                }
-            }
+            const row = this._entities.get(id.toString());
+            if (row) return [row[0], row[1]];
         } else {
             const ids = [
                 utils.getPeerId(new Api.PeerUser({ userId: returnBigInt(id) })),
@@ -250,7 +247,12 @@ export class MemorySession extends Session {
                 // @ts-ignore
                 return key;
             }
-            return utils.getInputPeer(key);
+            try {
+                return utils.getInputPeer(key);
+            } catch {
+                key = utils.getPeerId(key);
+                exact = true;
+            }
         } else {
             if (typeof key === "object") {
                 key = utils.getPeerId(key);

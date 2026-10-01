@@ -4,6 +4,7 @@ import type { TelegramClient } from "../TelegramClient";
 import { UpdateConnectionState } from "../../network";
 import type { Raw } from "../../events";
 import { getRandomInt, returnBigInt, sleep } from "../../Helpers";
+import { setTimeout as delay } from "node:timers/promises";
 
 const PING_INTERVAL = 9000;
 const PING_TIMEOUT = 10000;
@@ -85,11 +86,75 @@ export function _handleUpdate(
     }
 }
 
-export async function _dispatchUpdate(
+interface DispatchJob {
+    args: { update: UpdateConnectionState | any };
+    resolve: () => void;
+    reject: (error: unknown) => void;
+    next?: DispatchJob;
+}
+
+interface DispatchQueue {
+    head?: DispatchJob;
+    tail?: DispatchJob;
+}
+
+const dispatchQueues = new WeakMap<TelegramClient, DispatchQueue>();
+
+export function _clearUpdateQueue(client: TelegramClient): void {
+    const queue = dispatchQueues.get(client);
+    if (!queue) return;
+    while (queue.head) {
+        const job = queue.head;
+        queue.head = job.next;
+        job.next = undefined;
+        job.resolve();
+    }
+    queue.tail = undefined;
+}
+
+async function drainUpdates(client: TelegramClient, queue: DispatchQueue): Promise<void> {
+    while (queue.head) {
+        const job = queue.head;
+        queue.head = job.next;
+        job.next = undefined;
+        if (!queue.head) queue.tail = undefined;
+        try {
+            if (!client._destroyed) await dispatchUpdate(client, job.args);
+            job.resolve();
+        } catch (error) {
+            job.reject(error);
+        }
+    }
+    dispatchQueues.delete(client);
+}
+
+export function _dispatchUpdate(
+    client: TelegramClient,
+    args: { update: UpdateConnectionState | any },
+): Promise<void> {
+    if (client._destroyed) return Promise.resolve();
+    if (!client._sequentialUpdates) return dispatchUpdate(client, args);
+    return new Promise<void>((resolve, reject) => {
+        const job: DispatchJob = { args, resolve, reject };
+        const queue = dispatchQueues.get(client);
+        if (queue) {
+            if (queue.tail) queue.tail.next = job;
+            else queue.head = job;
+            queue.tail = job;
+        } else {
+            const queue = { head: job, tail: job };
+            dispatchQueues.set(client, queue);
+            void drainUpdates(client, queue);
+        }
+    });
+}
+
+async function dispatchUpdate(
     client: TelegramClient,
     args: { update: UpdateConnectionState | any },
 ): Promise<void> {
     for (const [builder, callback] of [...client._eventBuilders]) {
+        if (client._destroyed) return;
         if (!builder || !callback) {
             continue;
         }
@@ -141,24 +206,44 @@ export async function _dispatchUpdate(
                 } catch (e) {
                     if (e instanceof StopPropagation) break;
                     if (client._errorHandler) {
-                        await client._errorHandler(e as Error);
+                        try {
+                            await client._errorHandler(e as Error);
+                        } catch (error) {
+                            client._log.error(`Error in update error handler: ${error}`);
+                        }
                     }
                     client._log.error(`Error in event handler: ${e}`);
                 }
             }
         }
     }
-    await client.updates._dispatch(args.update);
+    if (!client._destroyed) await client.updates._dispatch(args.update);
 }
 
-export async function _updateLoop(client: TelegramClient) {
+const updateLoops = new WeakMap<TelegramClient, AbortController>();
+
+export function _stopUpdateLoop(client: TelegramClient): void {
+    updateLoops.get(client)?.abort();
+    updateLoops.delete(client);
+    client._loopStarted = false;
+}
+
+export async function _updateLoop(client: TelegramClient, catchUp = true) {
+    updateLoops.get(client)?.abort();
+    const controller = new AbortController();
+    updateLoops.set(client, controller);
+    const active = () => !controller.signal.aborted && !client._destroyed;
     client.updateManager.start();
-    await client.updateManager.ensureState();
+    if (catchUp) await client.updateManager.catchUp();
 
     let lastPongAt: number | undefined;
-    while (!client._destroyed) {
-        await sleep(PING_INTERVAL, true);
-        if (client._destroyed) break;
+    while (active()) {
+        try {
+            await delay(PING_INTERVAL, undefined, { signal: controller.signal, ref: false });
+        } catch {
+            break;
+        }
+        if (!active()) break;
         if (client._sender?.isReconnecting || client._isSwitchingDc) {
             lastPongAt = undefined;
             continue;
@@ -166,8 +251,9 @@ export async function _updateLoop(client: TelegramClient) {
         if (client.disconnected) break;
 
         try {
-            const ping = () =>
-                client._sender!.send(
+            const ping = () => {
+                if (!active()) throw new Error("Update loop stopped");
+                return client._sender!.send(
                     new Api.PingDelayDisconnect({
                         pingId: returnBigInt(
                             getRandomInt(
@@ -178,6 +264,7 @@ export async function _updateLoop(client: TelegramClient) {
                         disconnectDelay: PING_DISCONNECT_DELAY,
                     }),
                 );
+            };
 
             const pingAt = Date.now();
             const lastInterval = lastPongAt ? pingAt - lastPongAt : undefined;
@@ -189,25 +276,24 @@ export async function _updateLoop(client: TelegramClient) {
                     PING_FAIL_INTERVAL,
                 );
             } else {
-                let wakeUpWarningTimeout: ReturnType<typeof setTimeout> | undefined =
+                let wakeUpWarningTimeout: Timeout | undefined =
                     setTimeout(() => {
-                        _handleUpdate(client, UpdateConnectionState.disconnected);
+                        if (active()) _handleUpdate(client, UpdateConnectionState.disconnected);
                         wakeUpWarningTimeout = undefined;
                     }, PING_WAKE_UP_WARNING_TIMEOUT);
 
-                await timeout(ping, PING_WAKE_UP_TIMEOUT);
-
-                if (wakeUpWarningTimeout) {
-                    clearTimeout(wakeUpWarningTimeout);
-                    wakeUpWarningTimeout = undefined;
+                try {
+                    await timeout(ping, PING_WAKE_UP_TIMEOUT);
+                } finally {
+                    if (wakeUpWarningTimeout) clearTimeout(wakeUpWarningTimeout);
                 }
-                _handleUpdate(client, UpdateConnectionState.connected);
+                if (active()) _handleUpdate(client, UpdateConnectionState.connected);
             }
 
             lastPongAt = Date.now();
         } catch (err) {
             lastPongAt = undefined;
-            if (client._destroyed) break;
+            if (!active()) break;
 
             if (Date.now() - client._lastReceivedAt < PING_INTERVAL + PING_TIMEOUT) {
                 client._log.debug(`Ping timed out but transfer is active, ignoring`);
@@ -217,6 +303,7 @@ export async function _updateLoop(client: TelegramClient) {
             if (client._errorHandler) {
                 await client._errorHandler(err as Error);
             }
+            if (!active()) break;
             client._log.warn(`Ping failed: ${err}, reconnecting`);
 
             if (client._sender?.isReconnecting || client._isSwitchingDc) continue;
@@ -224,7 +311,9 @@ export async function _updateLoop(client: TelegramClient) {
             client._sender!.reconnect();
         }
 
+        if (!active()) break;
         await client.updateManager.recoverIfStale();
+        if (!active()) break;
 
         if (Date.now() - (client._lastRequest || 0) > 30 * 60 * 1000) {
             try {
@@ -235,9 +324,9 @@ export async function _updateLoop(client: TelegramClient) {
         }
     }
 
-    client._loopStarted = false;
-    if (client._destroyed) {
-        await client.disconnect();
+    if (updateLoops.get(client) === controller) {
+        _stopUpdateLoop(client);
+        if (client._destroyed) await client.disconnect();
     }
 }
 

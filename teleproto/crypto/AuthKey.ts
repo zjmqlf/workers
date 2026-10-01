@@ -56,7 +56,7 @@ export class AuthKey {
         }
     }
 
-    getKey() {
+    getKey(): Buffer | undefined {
         return this._key;
     }
 

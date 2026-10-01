@@ -44,7 +44,7 @@ PUBLIC_KEYS.forEach(({ fingerprint, ...keyInfo }) => {
     _serverKeys.set(fingerprint.toString(), keyInfo);
 });
 
-export async function encrypt(fingerprint: bigInt.BigInteger, data: Buffer) {
+export async function encrypt(fingerprint: bigInt.BigInteger, data: Buffer): Promise<Buffer | undefined> {
     const key = _serverKeys.get(fingerprint.toString());
     if (!key) {
         return undefined;

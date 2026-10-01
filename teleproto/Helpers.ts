@@ -119,7 +119,7 @@ export function bigIntMod(
     return n.remainder(m).add(m).remainder(m);
 }
 
-export function generateRandomBytes(count: number) {
+export function generateRandomBytes(count: number): Buffer {
     return Buffer.from(crypto.randomBytes(count));
 }
 
@@ -165,7 +165,7 @@ export function stripText(text: string, entities: Api.TypeMessageEntity[]) {
 export async function generateKeyDataFromNonce(
     serverNonceBigInt: bigInt.BigInteger,
     newNonceBigInt: bigInt.BigInteger
-) {
+): Promise<{ key: Buffer; iv: Buffer }> {
     const serverNonce = toSignedLittleBuffer(serverNonceBigInt, 16);
     const newNonce = toSignedLittleBuffer(newNonceBigInt, 32);
     const [hash1, hash2, hash3] = await Promise.all([
@@ -185,7 +185,7 @@ export async function generateKeyDataFromNonce(
     };
 }
 
-export function convertToLittle(buf: Buffer) {
+export function convertToLittle(buf: Buffer): Buffer {
     const correct = Buffer.alloc(buf.length * 4);
     for (let i = 0; i < buf.length; i++) {
         correct.writeUInt32BE(buf[i], i * 4);
@@ -231,7 +231,7 @@ export function modExp(
 export function getByteArray(
     integer: bigInt.BigInteger | number,
     signed = false
-) {
+): Buffer {
     const bits = integer.toString(2).length;
     const byteLength = Math.floor((bits + 8 - 1) / 8);
     return readBufferFromBigInt(
@@ -286,7 +286,7 @@ export const sleep = (ms: number, isUnref: boolean = false) =>
         isUnref ? setTimeout(resolve, ms).unref() : setTimeout(resolve, ms)
     );
 
-export function bufferXor(a: Buffer, b: Buffer) {
+export function bufferXor(a: Buffer, b: Buffer): Buffer {
     const res = [];
     for (let i = 0; i < a.length; i++) {
         res.push(a[i] ^ b[i]);
