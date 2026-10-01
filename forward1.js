@@ -2398,13 +2398,13 @@ export class WebSocketServer extends DurableObject {
                         } else {
                           if (chatResult.title !== title) {
                             if (chatResult.username !== username) {
-                              await this.setChat(clientIndex, tryCount, chatResult.Cindex, username, title);
+                              await this.setChat(clientIndex, 1, chatResult.Cindex, username, title);
                             } else {
-                              await this.setChat(clientIndex, tryCount, chatResult.Cindex, "", title);
+                              await this.setChat(clientIndex, 1, chatResult.Cindex, "", title);
                             }
                           } else {
                             if (chatResult.username !== username) {
-                              await this.setChat(clientIndex, tryCount, chatResult.Cindex, username, "");
+                              await this.setChat(clientIndex, 1, chatResult.Cindex, username, title);
                             }
                           }
                           // console.log("chat - " + count + " : chat已在数据库中 - " + title);
