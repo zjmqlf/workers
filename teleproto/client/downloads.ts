@@ -13,7 +13,8 @@ import {
     OrderedWriter,
 } from "../network/OrderedWriter";
 import { MediaAbortError } from "../network/MediaScheduler";
-import { createHash } from "node:crypto";
+import { sha256 } from "cifrante";
+import { asBuffer } from "../Helpers";
 import { Buffer } from "node:buffer";
 
 export interface progressCallback {
@@ -132,7 +133,7 @@ class FileHashChecker {
             }
             if (!expected) return;
             const block = data.subarray(o, Math.min(o + HASH_BLOCK, data.length));
-            const actual = createHash("sha256").update(block).digest();
+            const actual = asBuffer(sha256.sync(block));
             if (!actual.equals(expected)) {
                 throw new Error(
                     `File hash mismatch at offset ${abs} — corrupted part`
@@ -314,7 +315,7 @@ async function streamParallel(
     const inflight = new BoundedSemaphore(
         Math.max(
             1,
-            dl.maxSessions * Math.ceil(dl.maxWindow / Math.max(1, partSize))
+            dl.sessions * dl.inFlight
         )
     );
 

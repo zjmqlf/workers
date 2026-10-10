@@ -13,6 +13,8 @@ export class RequestState {
     public finished: Deferred;
     public promise: Promise<unknown> | undefined;
     public acknowledged: boolean;
+    public sentAt?: number;
+    public probedAt?: number;
     // @ts-ignore
     public resolve: (value?: any) => void;
     // @ts-ignore
@@ -20,7 +22,14 @@ export class RequestState {
     private _settled = true;
     cancelled = false;
 
-    constructor(request: Api.AnyRequest | Api.MsgsAck | Api.MsgsStateInfo) {
+    constructor(
+        request:
+            | Api.AnyRequest
+            | Api.MsgsAck
+            | Api.MsgsStateInfo
+            | Api.MsgsStateReq
+            | Api.MsgResendReq
+    ) {
         this.containerId = undefined;
         this.msgId = undefined;
         this.request = request;
@@ -54,5 +63,6 @@ export class RequestState {
                 reject(reason);
             };
         });
+        this.promise.catch(() => {});
     }
 }

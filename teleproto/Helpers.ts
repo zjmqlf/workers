@@ -2,28 +2,70 @@ import bigInt from "big-integer";
 import type { EntityLike } from "./define";
 import type { Api } from "./tl";
 import * as crypto from "node:crypto";
-import { Buffer } from "node:buffer";
+import zlib from "node:zlib";
+import { math, sha1 as hashSha1, sha256 as hashSha256 } from "cifrante";
+
+export function asBuffer(bytes: Uint8Array): Buffer {
+    return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
 
 export function readBigIntFromBuffer(
     buffer: Buffer,
     little = true,
     signed = false
 ): bigInt.BigInteger {
-    let randBuffer = Buffer.from(buffer);
-    const bytesNumber = randBuffer.length;
-    if (little) {
-        randBuffer = randBuffer.reverse();
+    if (!Buffer.isBuffer(buffer)) {
+        const view = buffer as Uint8Array;
+        buffer = Buffer.from(view.buffer, view.byteOffset, view.byteLength);
     }
-    let bigIntVar = bigInt(randBuffer.toString("hex"), 16) as bigInt.BigInteger;
-
-    if (signed && Math.floor(bigIntVar.toString(2).length / 8) >= bytesNumber) {
-        bigIntVar = bigIntVar.subtract(bigInt(2).pow(bigInt(bytesNumber * 8)));
+    if (buffer.length === 8) {
+        return bigInt(
+            little
+                ? signed
+                    ? buffer.readBigInt64LE(0)
+                    : buffer.readBigUInt64LE(0)
+                : signed
+                  ? buffer.readBigInt64BE(0)
+                  : buffer.readBigUInt64BE(0)
+        );
     }
-    return bigIntVar;
-}
+    let count8b = buffer.length/8 | 0;
+    let bytesLeft = buffer.length - count8b*8;
 
-export function generateRandomBigInt() {
-    return readBigIntFromBuffer(generateRandomBytes(8), false);
+    const bi64 = BigInt(64);
+    let resBigInt = BigInt(0);
+    let i = count8b;
+    while(i>0){
+        let bi = little ? buffer.readBigUInt64LE(buffer.length - (count8b-i+1)*8 )
+                        : buffer.readBigUint64BE((count8b-i)*8);
+        resBigInt = bi + (resBigInt << bi64);
+
+        --i;
+    }
+
+    const resBitLength = 8*buffer.length;
+
+    if(bytesLeft) {
+        if(buffer.length<8){
+            let buf8b = Buffer.allocUnsafe(8);
+            let writeIdx = little ?
+                  0
+                : 8-bytesLeft;
+            buffer.copy(buf8b, writeIdx, 0, bytesLeft);
+            buffer = buf8b;
+        }
+        let bi = little ?
+              buffer.readBigUInt64LE(0)
+            : buffer.readBigUint64BE(buffer.length-8);
+        bi = BigInt.asUintN(8*bytesLeft, bi);
+        resBigInt = bi + (resBigInt << BigInt(8*bytesLeft));
+    }
+
+    if(signed){
+        resBigInt = BigInt.asIntN(resBitLength, resBigInt);
+    }
+
+    return bigInt(resBigInt);
 }
 
 export function escapeRegex(string: string) {
@@ -62,17 +104,55 @@ export const isArrayLike = <T>(x: any): x is Array<T> =>
     typeof x !== "function" &&
     typeof x !== "string";
 
+function toNativeBigInt(
+    value: bigInt.BigInteger | string | number | bigint
+): bigint {
+    if (typeof value === "bigint") {
+        return value;
+    }
+    if (typeof value === "number") {
+        return BigInt(value);
+    }
+    const wrapped = returnBigInt(value) as unknown as { value?: unknown };
+    return typeof wrapped.value === "bigint"
+        ? wrapped.value
+        : BigInt(String(wrapped));
+}
+
+function bitLengthOf(value: bigint): number {
+    let bits = 0;
+    while (value > BigInt(0xffffffff)) {
+        value >>= BigInt(32);
+        bits += 32;
+    }
+    return bits + (32 - Math.clz32(Number(value)));
+}
+
+function writeUnsignedLE(buffer: Buffer, value: bigint, offset: number, length: number) {
+    let rest = value;
+    for (let done = 0; done < length; ) {
+        const count = Math.min(8, length - done);
+        if (count === 8) {
+            buffer.writeBigUInt64LE(BigInt.asUintN(64, rest), offset + done);
+        } else {
+            for (let i = 0; i < count; i++) {
+                buffer[offset + done + i] = Number(
+                    BigInt.asUintN(8, rest >> BigInt(8 * i))
+                );
+            }
+        }
+        rest >>= BigInt(8 * count);
+        done += count;
+    }
+}
+
 export function toSignedLittleBuffer(
     big: bigInt.BigInteger | string | number,
     number = 8
 ): Buffer {
-    const bigNumber = returnBigInt(big);
-    const byteArray = [];
-    for (let i = 0; i < number; i++) {
-        byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
-    }
-
-    return Buffer.from(byteArray as unknown as number[]);
+    const buffer = Buffer.allocUnsafe(number);
+    writeUnsignedLE(buffer, BigInt.asUintN(number * 8, toNativeBigInt(big)), 0, number);
+    return buffer;
 }
 
 export function readBufferFromBigInt(
@@ -81,31 +161,27 @@ export function readBufferFromBigInt(
     little = true,
     signed = false
 ): Buffer {
-    bigIntVar = bigInt(bigIntVar);
-    const bitLength = bigIntVar.bitLength().toJSNumber();
-    const bytes = Math.ceil(bitLength / 8);
-    if (bytesNumber < bytes) {
+    const value = toNativeBigInt(bigIntVar);
+    const bits = bytesNumber * 8;
+    const negative = value < BigInt(0);
+    const magnitude = negative ? -value - BigInt(1) : value;
+    if (bytesNumber < Math.ceil(bitLengthOf(magnitude) / 8)) {
         throw new Error("OverflowError: int too big to convert");
     }
-    if (!signed && bigIntVar.lesser(bigInt(0))) {
+    if (!signed && negative) {
         throw new Error("Cannot convert to unsigned");
     }
-    if (signed && bigIntVar.lesser(bigInt(0))) {
-        bigIntVar = bigInt(2)
-            .pow(bigInt(bytesNumber).multiply(8))
-            .add(bigIntVar);
-    }
-    const hex = bigIntVar.toString(16).padStart(bytesNumber * 2, "0");
-    let buffer = Buffer.from(hex, "hex");
-    if (little) {
-        buffer = buffer.reverse();
-    }
-
-    return buffer;
+    const buffer = Buffer.allocUnsafe(bytesNumber);
+    writeUnsignedLE(buffer, BigInt.asUintN(bits, value), 0, bytesNumber);
+    return little ? buffer : buffer.reverse();
 }
 
 export function generateRandomLong(signed = true) {
     return readBigIntFromBuffer(generateRandomBytes(8), true, signed);
+}
+
+export function generateRandomBigInt() {
+    return generateRandomLong(false);
 }
 
 export function mod(n: number, m: number) {
@@ -120,7 +196,7 @@ export function bigIntMod(
 }
 
 export function generateRandomBytes(count: number): Buffer {
-    return Buffer.from(crypto.randomBytes(count));
+    return crypto.randomBytes(count);
 }
 
 export function stripText(text: string, entities: Api.TypeMessageEntity[]) {
@@ -194,17 +270,13 @@ export function convertToLittle(buf: Buffer): Buffer {
 }
 
 export function sha1(data: Buffer): Promise<Buffer> {
-    const shaSum = crypto.createHash("sha1");
-    shaSum.update(data);
     // @ts-ignore
-    return shaSum.digest();
+    return asBuffer(hashSha1.sync(data));
 }
 
 export function sha256(data: Buffer): Promise<Buffer> {
-    const shaSum = crypto.createHash("sha256");
-    shaSum.update(data);
     // @ts-ignore
-    return shaSum.digest();
+    return asBuffer(hashSha256.sync(data));
 }
 
 export function modExp(
@@ -212,20 +284,18 @@ export function modExp(
     b: bigInt.BigInteger,
     n: bigInt.BigInteger
 ): bigInt.BigInteger {
-    a = a.remainder(n);
-    let result = bigInt.one;
-    let x = a;
-    while (b.greater(bigInt.zero)) {
-        const leastSignificantBit = b.remainder(bigInt(2));
-        b = b.divide(bigInt(2));
-        if (leastSignificantBit.eq(bigInt.one)) {
-            result = result.multiply(x);
-            result = result.remainder(n);
-        }
-        x = x.multiply(x);
-        x = x.remainder(n);
+    if (b.lesserOrEquals(bigInt.zero)) {
+        return bigInt.one;
     }
-    return result;
+    return bigInt(
+        math
+            .modPow(
+                BigInt(a.toString()),
+                BigInt(b.toString()),
+                BigInt(n.toString())
+            )
+            .toString()
+    );
 }
 
 export function getByteArray(
@@ -309,14 +379,21 @@ function makeCRCTable() {
 
 let crcTable: number[] | undefined = undefined;
 
-export function crc32(buf: Buffer | string) {
+const nativeCrc32 = (
+    zlib as { crc32?: (data: Buffer | string, value?: number) => number }
+).crc32;
+
+export function crc32(buf: Buffer | string, previous = 0) {
+    if (nativeCrc32) {
+        return nativeCrc32(buf, previous) >>> 0;
+    }
     if (!crcTable) {
         crcTable = makeCRCTable();
     }
     if (!Buffer.isBuffer(buf)) {
         buf = Buffer.from(buf);
     }
-    let crc = -1;
+    let crc = previous ^ -1;
 
     for (let index = 0; index < buf.length; index++) {
         const byte = buf[index];

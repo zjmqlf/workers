@@ -26,6 +26,7 @@ import * as forumMethods from "./forums";
 import * as storyMethods from "./stories";
 import * as folderMethods from "./folders";
 import * as stickerMethods from "./stickers";
+import * as walletMethods from "./wallet";
 import type { BigInteger } from "big-integer";
 import type {
     MarkupLike,
@@ -1161,6 +1162,73 @@ export class TelegramClient<
 
     getBotMenuButton(user: EntityLike) {
         return botMethods.getBotMenuButton(this, user);
+    }
+
+    addBotUsername(bot: EntityLike, username: string) {
+        return botMethods.addBotUsername(this, bot, username);
+    }
+
+    removeBotUsername(bot: EntityLike, username: string) {
+        return botMethods.removeBotUsername(this, bot, username);
+    }
+
+    checkBotUsername(username: string, params?: { additional?: boolean }) {
+        return botMethods.checkBotUsername(this, username, params);
+    }
+
+    setBotVerification(peer: EntityLike, params?: botMethods.SetBotVerificationParams) {
+        return botMethods.setBotVerification(this, peer, params);
+    }
+
+    getWallet() {
+        return walletMethods.getWallet(this);
+    }
+
+    getWalletAddresses(
+        users: EntityLike | EntityLike[],
+        params?: walletMethods.GetWalletAddressesParams
+    ) {
+        return walletMethods.getWalletAddresses(this, users, params);
+    }
+
+    iterWalletTransactions(params?: walletMethods.IterWalletTransactionsParams) {
+        return walletMethods.iterWalletTransactions(this, params);
+    }
+
+    getWalletTransactions(params?: walletMethods.IterWalletTransactionsParams) {
+        return walletMethods.getWalletTransactions(this, params);
+    }
+
+    getWalletTransactionsById(ids: string[]) {
+        return walletMethods.getWalletTransactionsById(this, ids);
+    }
+
+    getWalletTransactionsByHash(hashes: string[]) {
+        return walletMethods.getWalletTransactionsByHash(this, hashes);
+    }
+
+    iterWalletNfts(params?: walletMethods.IterWalletNftsParams) {
+        return walletMethods.iterWalletNfts(this, params);
+    }
+
+    getWalletNfts(params?: walletMethods.IterWalletNftsParams) {
+        return walletMethods.getWalletNfts(this, params);
+    }
+
+    sendWalletTransfer(user: EntityLike, params: walletMethods.SendWalletTransferParams) {
+        return walletMethods.sendWalletTransfer(this, user, params);
+    }
+
+    getTonConnectSessions() {
+        return walletMethods.getTonConnectSessions(this);
+    }
+
+    closeTonConnectSession(sessionId: BigInteger, params?: { body?: Buffer }) {
+        return walletMethods.closeTonConnectSession(this, sessionId, params);
+    }
+
+    getCurrencyRates() {
+        return walletMethods.getCurrencyRates(this);
     }
 
     translateText(params: messageMethods.TranslateTextParams) {

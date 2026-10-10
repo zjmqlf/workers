@@ -1,6 +1,6 @@
 import { Api } from "../tl";
 import type { TelegramClient } from "./TelegramClient";
-import { generateRandomBytes, readBigIntFromBuffer, unionId } from "../Helpers";
+import { generateRandomLong, unionId } from "../Helpers";
 import { getAppropriatedPartSize, getInputMedia, getMessageId } from "../Utils";
 import { EntityLike, FileLike, MarkupLike, MessageIDLike } from "../define";
 import path from "node:path";
@@ -18,10 +18,26 @@ interface OnProgress {
 }
 
 export interface UploadFileParams {
-    file: File | CustomFile;
+    file: NamedBlob | CustomFile;
     workers?: number;
     onProgress?: OnProgress;
     maxBufferSize?: number;
+}
+
+export interface NamedBlob {
+    name: string;
+    size: number;
+    arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+function isNamedBlob(value: unknown): value is NamedBlob {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        typeof (value as NamedBlob).arrayBuffer === "function" &&
+        typeof (value as NamedBlob).name === "string" &&
+        typeof (value as NamedBlob).size === "number"
+    );
 }
 
 export class CustomFile {
@@ -76,7 +92,7 @@ const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
 const BUFFER_SIZE_20MB = 20 * 1024 * 1024;
 
 async function getFileBuffer(
-    file: File | CustomFile,
+    file: NamedBlob | CustomFile,
     fileSize: number,
     maxBufferSize: number
 ): Promise<CustomBuffer> {
@@ -98,7 +114,7 @@ export async function uploadFile(
     let { workers } = fileParams;
 
     const { name, size } = file;
-    const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);
+    const fileId = generateRandomLong(true);
     const isLarge = size > LARGE_FILE_THRESHOLD;
 
     const partSize = getAppropriatedPartSize(bigInt(size)) * KB_TO_BYTES;
@@ -112,7 +128,7 @@ export async function uploadFile(
     const ul = client._media.opts.upload;
     let readAhead = Math.max(
         1,
-        ul.maxSessions * Math.ceil(ul.maxWindow / Math.max(1, partSize))
+        ul.sessions * ul.inFlight
     );
     if (workers && workers > 0) {
         readAhead = Math.min(readAhead, workers);
@@ -366,6 +382,7 @@ export async function _fileToMedia(
         !(file instanceof Api.InputFile) &&
         !(file instanceof Api.InputFileBig) &&
         !(file instanceof CustomFile) &&
+        !isNamedBlob(file) &&
         !("read" in file)
     ) {
         try {
@@ -426,19 +443,13 @@ export async function _fileToMedia(
                 (await fs.stat(file)).size,
                 file
             );
-        } else if (
-            (typeof File !== "undefined" && file instanceof File) ||
-            file instanceof CustomFile
-        ) {
+        } else if (isNamedBlob(file) || file instanceof CustomFile) {
             createdFile = file;
         } else {
-            let name;
-            if ("name" in file) {
-                // @ts-ignore
-                name = file.name;
-            } else {
-                name = "unnamed";
-            }
+            const name =
+                "name" in file && typeof file.name === "string"
+                    ? file.name
+                    : "unnamed";
             if (Buffer.isBuffer(file)) {
                 createdFile = new CustomFile(name, file.length, "", file);
             }
@@ -491,7 +502,7 @@ export async function _fileToMedia(
                     (await fs.stat(thumb)).size,
                     thumb
                 );
-            } else if (typeof File !== "undefined" && thumb instanceof File) {
+            } else if (isNamedBlob(thumb)) {
                 uploadedThumb = thumb;
             } else {
                 let name;
@@ -878,17 +889,15 @@ export async function sendFile(
     return client._getResponseMessage(request, result, entity) as Api.Message;
 }
 
-function fileToBuffer(file: File | CustomFile): Promise<Buffer> | Buffer {
-    if (typeof File !== "undefined" && file instanceof File) {
-        return new Response(file)
-            .arrayBuffer()
-            .then((ab) => Buffer.from(ab));
-    } else if (file instanceof CustomFile) {
+function fileToBuffer(file: NamedBlob | CustomFile): Promise<Buffer> | Buffer {
+    if (file instanceof CustomFile) {
         if (file.buffer != undefined) {
             return file.buffer;
         } else {
             return fs.readFile(file.path) as unknown as Buffer;
         }
+    } else if (isNamedBlob(file)) {
+        return file.arrayBuffer().then((ab) => Buffer.from(ab));
     } else {
         throw new Error("Could not create buffer from file " + file);
     }

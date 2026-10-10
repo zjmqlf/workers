@@ -3,14 +3,13 @@ import { Dcenter } from "./Dcenter";
 import {
     ShiftedDcId,
     bareDcId,
-    getDcIdShift,
     isDownloadDcId,
     isUploadDcId,
 } from "./core_types";
 import { TEMP_KEY_EXPIRES_IN } from "./TempAuthKey";
 import { AuthKey } from "../crypto/AuthKey";
 import { sleep } from "../Helpers";
-import type { MTProtoSender } from "./MTProtoSender";
+import type { ConnectionBreakReason, MTProtoSender } from "./MTProtoSender";
 import type { TelegramBaseClient } from "../client/telegramBaseClient";
 
 export interface NetworkOptions {
@@ -87,7 +86,12 @@ export class Network {
             idleTimeoutMs: this._opts.idleTimeoutMs,
             log: this._client._log,
             connect: async () => {
-
+                if (
+                    dcenter.authKey.getKey() ||
+                    this._client.session.getAuthKey(dcId)?.getKey()
+                ) {
+                    return this._gatedConnect(dcId, shiftedDcId, slot, dcenter);
+                }
                 const chain =
                     this._connectChains.get(dcId) ?? Promise.resolve();
                 const ours = chain.then(() =>
@@ -132,9 +136,10 @@ export class Network {
             const log = this._client._log;
             const sender = this._client._makeSender(
                 dcId,
-                () => this._onSenderBreak(shiftedDcId, slot),
+                (_dc, reason) =>
+                    this._onSenderBreak(shiftedDcId, slot, dcenter, reason),
                 useTemp ? new AuthKey() : dcenter.authKey,
-                false,
+                true,
                 useTemp
                     ? {
                           permAuthKey: dcenter.authKey,
@@ -150,6 +155,9 @@ export class Network {
                               );
                           },
                       }
+                    : undefined,
+                isMedia
+                    ? this._client._media?.opts.requestDeadlineMs
                     : undefined
             );
             return await this._client._connectSender(
@@ -163,19 +171,26 @@ export class Network {
         }
     }
 
-    private _onSenderBreak(shiftedDcId: ShiftedDcId, slot: SenderSlot): void {
-
+    private _onSenderBreak(
+        shiftedDcId: ShiftedDcId,
+        slot: SenderSlot,
+        dcenter: Dcenter,
+        reason: ConnectionBreakReason = "disconnected"
+    ): void {
         if (this._slots.get(shiftedDcId) === slot) {
             this._slots.delete(shiftedDcId);
         }
 
-        const shift = getDcIdShift(shiftedDcId);
         const dcId = bareDcId(shiftedDcId);
-        if (shift === 0 && dcId !== this._client.session.dcId) {
+        if (reason !== "disconnected") dcenter.needsImport = true;
+        if (reason === "auth-broken" && dcId !== this._client.session.dcId) {
+            dcenter.authKey.setKey(undefined).catch(() => {});
             this._client.session.setAuthKey(undefined, dcId);
         }
 
-        slot.markDead("auth-broken").catch(() => {});
+        slot.markDead(
+            reason === "disconnected" ? "disconnected" : "auth-broken"
+        ).catch(() => {});
     }
 
     async purge(): Promise<void> {

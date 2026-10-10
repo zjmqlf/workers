@@ -1,5 +1,4 @@
 import bigInt from "big-integer";
-
 import { Api } from "../tl";
 import { GZIPPacked, MessageContainer, RPCResult, TLMessage } from "../tl/core";
 import { BinaryReader, Logger } from "../extensions";
@@ -26,9 +25,12 @@ export interface SenderActions {
     ack(msgId: bigInt.BigInteger): void;
     enqueue(state: RequestState): void;
     requeue(states: RequestState[]): void;
+    resendBefore(firstMsgId: bigInt.BigInteger): void;
+    requestResend(msgIds: bigInt.BigInteger[]): void;
     onBadAuthKey(shouldSkipForMain: boolean): void;
     markNeedsInitConnection(): void;
     dispatchUpdate(update: Api.TypeUpdates): void;
+    onStateInfo(reqMsgId: bigInt.BigInteger, info: Buffer | string): void;
 }
 
 export class MtpDispatcher {
@@ -68,6 +70,8 @@ export class MtpDispatcher {
                 this.handleStateForgotten.bind(this),
             [Api.MsgsAllInfo.CONSTRUCTOR_ID.toString()]:
                 this.handleMsgAll.bind(this),
+            [Api.MsgsStateInfo.CONSTRUCTOR_ID.toString()]:
+                this.handleStateInfo.bind(this),
         };
     }
 
@@ -254,21 +258,33 @@ export class MtpDispatcher {
     }
 
     private handleDetailedInfo(message: TLMessage) {
-        const msgId = message.obj.answerMsgId;
-        this.sender.log.debug(`Handling detailed info for message ${msgId}`);
-        this.sender.ack(msgId);
+        const { msgId, answerMsgId } = message.obj;
+        this.sender.log.debug(`Handling detailed info for message ${answerMsgId}`);
+        if (
+            this.sender.pendingState.get(msgId) &&
+            !this.sender.state.hasReceived(answerMsgId)
+        ) {
+            this.sender.requestResend([answerMsgId]);
+        } else {
+            this.sender.ack(answerMsgId);
+        }
     }
 
     private handleNewDetailedInfo(message: TLMessage) {
-        const msgId = message.obj.answerMsgId;
+        const { answerMsgId } = message.obj;
         this.sender.log.debug(
-            `Handling new detailed info for message ${msgId}`
+            `Handling new detailed info for message ${answerMsgId}`
         );
-        this.sender.ack(msgId);
+        if (this.sender.state.hasReceived(answerMsgId)) {
+            this.sender.ack(answerMsgId);
+        } else {
+            this.sender.requestResend([answerMsgId]);
+        }
     }
 
     private handleNewSessionCreated(message: TLMessage) {
         this.sender.log.debug("Handling new session created");
+        this.sender.resendBefore(bigInt(message.obj.firstMsgId));
         this.sender.state.salt = message.obj.serverSalt;
         this.sender.dcenter?.updateSalt(message.obj.serverSalt);
         const uniqueId = String(message.obj.uniqueId);
@@ -318,6 +334,10 @@ export class MtpDispatcher {
                 })
             )
         );
+    }
+
+    private handleStateInfo(message: TLMessage) {
+        this.sender.onStateInfo(message.obj.reqMsgId, message.obj.info);
     }
 
     private handleMsgAll(_message: TLMessage) { }

@@ -2,6 +2,7 @@ import type { EntityLike } from "../define";
 import { Api } from "../tl";
 import { InlineResults } from "../tl/custom/inlineResults";
 import type { TelegramClient } from "./TelegramClient";
+import { _parseMessageText, type ParseInterface } from "./messageParse";
 
 export async function inlineQuery(
     client: TelegramClient,
@@ -151,6 +152,65 @@ export async function getBotMenuButton(
             userId: (await client.getInputEntity(
                 user
             )) as unknown as Api.TypeInputUser,
+        })
+    );
+}
+
+export interface SetBotVerificationParams {
+    bot?: EntityLike;
+    enabled?: boolean;
+    description?: string | Api.TypeTextWithEntities;
+    parseMode?: false | string | ParseInterface;
+}
+
+export async function addBotUsername(
+    client: TelegramClient,
+    bot: EntityLike,
+    username: string
+): Promise<boolean> {
+    return client.invoke(new Api.bots.AddUsername({ bot, username }));
+}
+
+export async function removeBotUsername(
+    client: TelegramClient,
+    bot: EntityLike,
+    username: string
+): Promise<boolean> {
+    return client.invoke(new Api.bots.RemoveUsername({ bot, username }));
+}
+
+export async function checkBotUsername(
+    client: TelegramClient,
+    username: string,
+    params: { additional?: boolean } = {}
+): Promise<boolean> {
+    return client.invoke(
+        new Api.bots.CheckUsername({ additional: params.additional, username })
+    );
+}
+
+export async function setBotVerification(
+    client: TelegramClient,
+    peer: EntityLike,
+    params: SetBotVerificationParams = {}
+): Promise<boolean> {
+    let customDescription: Api.TypeTextWithEntities | undefined;
+    if (typeof params.description === "string") {
+        const [text, entities] = await _parseMessageText(
+            client,
+            params.description,
+            params.parseMode as false | string | ParseInterface
+        );
+        customDescription = new Api.TextWithEntities({ text, entities });
+    } else {
+        customDescription = params.description;
+    }
+    return client.invoke(
+        new Api.bots.SetCustomVerification({
+            enabled: params.enabled ?? true,
+            bot: params.bot,
+            peer,
+            customDescription,
         })
     );
 }

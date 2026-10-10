@@ -1,4 +1,4 @@
-import net from "node:net";
+import * as net from "node:net";
 import { Buffer } from "node:buffer";
 
 class NetSocketClosedError extends Error {
@@ -18,6 +18,7 @@ export class PromisedNetSockets {
     private available: number;
     private canRead?: Promise<boolean>;
     private resolveRead: ((value?: any) => void) | undefined;
+    lastDataAt = 0;
     private keepAliveInterval: number;
 
     constructor(keepAliveInterval?: number) {
@@ -179,6 +180,7 @@ export class PromisedNetSockets {
     async receive() {
         if (this.client) {
             this.client.on("data", (chunk: Buffer) => {
+                this.lastDataAt = Date.now();
                 this.chunks.push(chunk);
                 this.available += chunk.length;
                 if (this.resolveRead) {

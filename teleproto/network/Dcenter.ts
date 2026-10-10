@@ -5,8 +5,9 @@ export class Dcenter {
     readonly dcId: number;
     readonly authKey: AuthKey;
     private _salt: bigInt.BigInteger;
-
     mediaTempFailed = false;
+    needsImport = false;
+    importing?: Promise<void>;
 
     constructor(dcId: number, authKey?: AuthKey) {
         this.dcId = dcId;

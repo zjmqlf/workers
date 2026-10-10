@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
+import { sha256 } from "cifrante";
 import bigInt from "big-integer";
 import type { AuthKey } from "../crypto/AuthKey";
-import { generateRandomLong, mod, readBufferFromBigInt, readBigIntFromBuffer } from "../Helpers";
+import { asBuffer, generateRandomLong, mod, readBufferFromBigInt, readBigIntFromBuffer } from "../Helpers";
 import { Api } from "../tl";
 import { toSignedLittleBuffer } from "../Helpers";
 import { GZIPPacked, TLMessage } from "../tl/core";
@@ -10,7 +11,12 @@ import type { BinaryWriter } from "../extensions";
 import { IGE } from "../crypto/IGE";
 import { InvalidBufferError, SecurityError } from "../errors";
 import { ReceivedIdsManager } from "./ReceivedIdsManager";
-import { Buffer } from "node:buffer";
+
+export class DuplicateMessageError extends SecurityError {
+    constructor(readonly msgId: bigInt.BigInteger) {
+        super(`Duplicate message ${msgId}`);
+    }
+}
 
 export class MTProtoState {
     private readonly authKey?: AuthKey;
@@ -35,6 +41,10 @@ export class MTProtoState {
         this.reset();
     }
 
+    hasReceived(msgId: bigInt.BigInteger): boolean {
+        return this.receivedIds.has(msgId);
+    }
+
     get sessionId(): bigInt.BigInteger {
         return this.id;
     }
@@ -48,26 +58,28 @@ export class MTProtoState {
 
     _calcKey(authKey: Buffer, msgKey: Buffer, client: boolean): { key: Buffer; iv: Buffer } {
         const x = client ? 0 : 8;
-        const sha256a = crypto
-            .createHash("sha256")
-            .update(msgKey)
-            .update(authKey.subarray(x, x + 36))
-            .digest();
-        const sha256b = crypto
-            .createHash("sha256")
-            .update(authKey.subarray(x + 40, x + 76))
-            .update(msgKey)
-            .digest();
-        const key = Buffer.concat([
-            sha256a.subarray(0, 8),
-            sha256b.subarray(8, 24),
-            sha256a.subarray(24, 32),
-        ]);
-        const iv = Buffer.concat([
-            sha256b.subarray(0, 8),
-            sha256a.subarray(8, 24),
-            sha256b.subarray(24, 32),
-        ]);
+        const sha256a = asBuffer(
+            sha256.sync
+                .create()
+                .update(msgKey)
+                .update(authKey.subarray(x, x + 36))
+                .digest()
+        );
+        const sha256b = asBuffer(
+            sha256.sync
+                .create()
+                .update(authKey.subarray(x + 40, x + 76))
+                .update(msgKey)
+                .digest()
+        );
+        const key = Buffer.allocUnsafe(32);
+        sha256a.copy(key, 0, 0, 8);
+        sha256b.copy(key, 8, 8, 24);
+        sha256a.copy(key, 24, 24, 32);
+        const iv = Buffer.allocUnsafe(32);
+        sha256b.copy(iv, 0, 0, 8);
+        sha256a.copy(iv, 8, 8, 24);
+        sha256b.copy(iv, 24, 24, 32);
         return { key, iv };
     }
 
@@ -96,12 +108,11 @@ export class MTProtoState {
                 }).getBytes()
             );
         }
-        const s = Buffer.alloc(4);
-        s.writeInt32LE(seqNo, 0);
-        const b = Buffer.alloc(4);
-        b.writeInt32LE(body.length, 0);
-        const m = toSignedLittleBuffer(msgId, 8);
-        buffer.write(Buffer.concat([m, s, b]));
+        const header = Buffer.allocUnsafe(16);
+        toSignedLittleBuffer(msgId, 8).copy(header, 0);
+        header.writeInt32LE(seqNo, 8);
+        header.writeInt32LE(body.length, 12);
+        buffer.write(header);
         buffer.write(body);
         return msgId;
     }
@@ -125,11 +136,13 @@ export class MTProtoState {
         data.copy(plain, 16);
         crypto.randomFillSync(plain, 16 + data.length, padLen);
 
-        const msgKeyLarge = crypto
-            .createHash("sha256")
-            .update(authKey.subarray(88, 120))
-            .update(plain)
-            .digest();
+        const msgKeyLarge = asBuffer(
+            sha256.sync
+                .create()
+                .update(authKey.subarray(88, 120))
+                .update(plain)
+                .digest()
+        );
 
         const msgKey = msgKeyLarge.subarray(8, 24);
 
@@ -162,11 +175,13 @@ export class MTProtoState {
         const { iv, key } = this._calcKey(authKey, msgKey, false);
         body = new IGE(key, iv).decryptIge(body.subarray(24));
 
-        const ourKey = crypto
-            .createHash("sha256")
-            .update(authKey.subarray(96, 128))
-            .update(body)
-            .digest();
+        const ourKey = asBuffer(
+            sha256.sync
+                .create()
+                .update(authKey.subarray(96, 128))
+                .update(body)
+                .digest()
+        );
 
         if (!msgKey.equals(ourKey.subarray(8, 24))) {
             throw new SecurityError(
@@ -181,6 +196,9 @@ export class MTProtoState {
         }
         const remoteMsgId = reader.readLong();
         const registerResult = this.receivedIds.registerMsgId(remoteMsgId);
+        if (registerResult === "duplicate" && this.securityChecks) {
+            throw new DuplicateMessageError(remoteMsgId);
+        }
         if (registerResult !== "success" && this.securityChecks) {
             throw new SecurityError(`Rejected message: ${registerResult}`);
         }

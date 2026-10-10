@@ -1,11 +1,12 @@
-import { createHash } from "node:crypto";
+import { sha1 as hashSha1 } from "cifrante";
 import bigInt from "big-integer";
 import { Api } from "../tl";
 import { AuthKey } from "../crypto/AuthKey";
 import { IGE } from "../crypto/IGE";
 import {
+    asBuffer,
     generateRandomBytes,
-    readBigIntFromBuffer,
+    generateRandomLong,
     toSignedLittleBuffer,
 } from "../Helpers";
 import { Buffer } from "node:buffer";
@@ -13,7 +14,7 @@ import { Buffer } from "node:buffer";
 export const TEMP_KEY_EXPIRES_IN = 24 * 60 * 60;
 
 function sha1(data: Buffer): Buffer {
-    return createHash("sha1").update(data).digest();
+    return asBuffer(hashSha1.sync(data));
 }
 
 function calcKeyV1(authKey: Buffer, msgKey: Buffer): { key: Buffer; iv: Buffer } {
@@ -55,7 +56,7 @@ export function buildBindTempAuthKeyRequest(
     if (!tempKey.keyId) {
         throw new Error("bindTempAuthKey: temporary key is not ready");
     }
-    const nonce = readBigIntFromBuffer(generateRandomBytes(8), true, true);
+    const nonce = generateRandomLong(true);
 
     const inner = new Api.BindAuthKeyInner({
         nonce,

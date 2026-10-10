@@ -487,9 +487,18 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
                 keepAliveInterval: this._keepAliveInterval,
             });
         }
+        const dcenter =
+            this.session.dcId !== dcId ? this._dcenters.get(dcId) : undefined;
+        while (dcenter?.importing) await dcenter.importing;
+        const needAuth =
+            !!dcenter && (dcenter.needsImport || !dcenter.authKey.getKey());
+        let releaseImport: (() => void) | undefined;
+        if (needAuth) {
+            dcenter!.importing = new Promise<void>((resolve) => {
+                releaseImport = resolve;
+            });
+        }
         try {
-            const needAuth =
-                this.session.dcId !== dcId && !sender._authenticated;
             let innerQuery: Api.AnyRequest;
             if (needAuth) {
                 this._log.info(
@@ -507,6 +516,10 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             }
 
             await sender.connect(connection, false);
+            if (useMediaCluster && !needAuth) {
+                sender._authenticated = true;
+                return sender;
+            }
 
             const initConn = new Api.InitConnection({
                 apiId: this._initRequest.apiId,
@@ -523,6 +536,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             );
             sender._authenticated = true;
             sender._needsInitConnection = false;
+            if (needAuth) dcenter!.needsImport = false;
             return sender;
         } catch (err: any) {
             if (err.errorMessage === "DC_ID_INVALID") {
@@ -530,6 +544,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
                 sender.userDisconnected = false;
                 return sender;
             }
+            if (needAuth) dcenter!.needsImport = true;
             const failKey = `${dcId}:${useMediaCluster}`;
             this._dcConnectFailures.set(
                 failKey,
@@ -537,15 +552,24 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             );
             sender.disconnect().catch(() => {});
             throw err;
+        } finally {
+            if (releaseImport) {
+                dcenter!.importing = undefined;
+                releaseImport();
+            }
         }
     }
 
     _makeSender(
         dcId: number,
-        onBreak: (dcId: number) => void,
+        onBreak: (
+            dcId: number,
+            reason?: import("../network/MTProtoSender").ConnectionBreakReason
+        ) => void,
         authKey?: AuthKey,
         autoReconnect: boolean = true,
         tempBinding?: import("../network/MTProtoSender").SenderTempBinding,
+        silenceMs?: number,
     ): MTProtoSender {
         return new MTProtoSender(authKey ?? this.session.getAuthKey(dcId), {
             logger: this._log,
@@ -562,6 +586,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             reconnectRetries: this._reconnectRetries,
             dcenter: this._dcenters.get(dcId),
             tempBinding,
+            silenceMs,
         });
     }
 

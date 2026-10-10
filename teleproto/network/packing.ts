@@ -5,6 +5,14 @@ import type { MTProtoState } from "./MTProtoState";
 import type { RequestState } from "./RequestState";
 import { Buffer } from "node:buffer";
 
+const SOLO_REQUESTS = new Set([
+    "upload.GetFile",
+    "upload.GetCdnFile",
+    "upload.GetWebFile",
+    "upload.SaveFilePart",
+    "upload.SaveBigFilePart",
+]);
+
 export interface PackedBatch {
     batch: RequestState[];
     data: Buffer;
@@ -25,6 +33,11 @@ export async function packRequestBatch(
     ) {
         const request = queued.shift()!;
         if (request.cancelled) continue;
+        const solo = SOLO_REQUESTS.has(request.request.className);
+        if (solo && batch.length) {
+            queued.unshift(request);
+            break;
+        }
         size += request.data.length + TLMessage.SIZE_OVERHEAD;
         if (size <= MessageContainer.MAXIMUM_SIZE) {
             request.msgId = await state.writeDataAsMessage(
@@ -41,6 +54,7 @@ export async function packRequestBatch(
                 }`
             );
             batch.push(request);
+            if (solo) break;
             continue;
         }
         if (batch.length) {
