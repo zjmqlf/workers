@@ -13,6 +13,7 @@ import { buildBindTempAuthKeyRequest } from "./TempAuthKey";
 import { MTProtoPlainSender } from "./MTProtoPlainSender";
 import {
     InvalidBufferError,
+    ProxyRejectedError,
     RPCError,
     SecurityError,
     TypeNotFoundError,
@@ -255,7 +256,10 @@ export class MTProtoSender {
                 return true;
             } catch (err) {
                 lastError = err;
-                if ((this._lifecycle as SenderLifecycle) === "dead") {
+                if (
+                    (this._lifecycle as SenderLifecycle) === "dead" ||
+                    err instanceof ProxyRejectedError
+                ) {
                     break;
                 }
                 if (this._updateCallback && attempt === 0) {
@@ -454,7 +458,6 @@ export class MTProtoSender {
             langCode: this._client._initRequest.langCode,
             langPack: this._client._initRequest.langPack,
             systemLangCode: this._client._initRequest.systemLangCode,
-            proxy: this._client._initRequest.proxy,
             query,
         });
     }
@@ -1219,16 +1222,19 @@ export class MTProtoSender {
             port: previous._port,
             dcId: previous._dcId,
             loggers: previous._log,
-            proxy: previous._proxy,
             socket: this._client.networkSocket,
             keepAliveInterval: previous._keepAliveInterval,
-            testServers: previous._testServers,
         });
         this._connection = connection;
         try {
             await this._connect();
         } catch (err) {
             if (this._lifecycle !== "reconnecting") return;
+            if (err instanceof ProxyRejectedError) {
+                this._log.error(`Reconnect to dc ${this._dcId} stopped: ${err.message}`);
+                this._giveUp(err, "disconnected", true);
+                return;
+            }
             this._log.warn(`Reconnect to dc ${this._dcId} failed: ${err}`);
             this._scheduleReconnect(0);
             return;

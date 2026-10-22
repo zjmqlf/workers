@@ -87,7 +87,7 @@ export class _MessagesIter extends RequestIter {
             offsetId = Math.max(offsetId, minId);
             if (offsetId && maxId) {
                 if (maxId - offsetId <= 1) {
-                    return false;
+                    return true;
                 }
             }
             if (!maxId) {
@@ -97,7 +97,7 @@ export class _MessagesIter extends RequestIter {
             offsetId = Math.max(offsetId, maxId);
             if (offsetId && minId) {
                 if (offsetId - minId <= 1) {
-                    return false;
+                    return true;
                 }
             }
         }

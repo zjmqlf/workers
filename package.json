@@ -97,12 +97,12 @@
     "@types/node": "^26.6.5",
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2",
-    "wrangler": "4.149.0"
+    "wrangler": "4.151.3"
   },
   "dependencies": {
     "big-integer": "^1.6.52",
-    "cifrante": "0.5.1",
-    "mime": "^4.1.0"
+    "cifrante": "0.6.0",
+    "mime": "^4.1.1"
   },
   "browserslist": {
     "production": [

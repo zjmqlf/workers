@@ -1,4 +1,5 @@
 import * as net from "node:net";
+import { ProxyRejectedError } from "../errors/ProxyRejectedError";
 import { Buffer } from "node:buffer";
 
 class NetSocketClosedError extends Error {
@@ -115,9 +116,7 @@ export class PromisedNetSockets {
         this.chunks = [];
         this.headOffset = 0;
         this.available = 0;
-        let connected = false;
         this.client = new net.Socket();
-
         this.canRead = new Promise((resolve) => {
             this.resolveRead = resolve;
         });
@@ -131,17 +130,11 @@ export class PromisedNetSockets {
                         Math.max(0, this.keepAliveInterval)
                     );
                 };
-                if (connected) {
-                    tune(this.client);
+                this.client.connect(port, ip, () => {
+                    tune(this.client!);
                     this.receive();
                     resolve(this);
-                } else {
-                    this.client.connect(port, ip, () => {
-                        tune(this.client!);
-                        this.receive();
-                        resolve(this);
-                    });
-                }
+                });
                 this.client.on("error", reject);
                 this.client.on("close", () => {
                     if (this.client && this.client.destroyed) {

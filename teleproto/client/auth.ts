@@ -17,6 +17,7 @@ export interface EmailVerificationOptions {
 }
 
 export type EmailVerificationResult =
+    | string
     | { type: "code"; code: string }
     | { type: "google"; token: string }
     | { type: "apple"; token: string };
@@ -931,7 +932,10 @@ function toNextCodeDelivery(
 function toEmailVerification(
     verification: EmailVerificationResult
 ): Api.TypeEmailVerification {
-    switch (verification.type) {
+    if (typeof verification === "string") {
+        return new Api.EmailVerificationCode({ code: verification.trim() });
+    }
+    switch (verification?.type) {
         case "code":
             return new Api.EmailVerificationCode({ code: verification.code });
         case "google":
@@ -943,6 +947,9 @@ function toEmailVerification(
                 token: verification.token,
             });
     }
+    throw new Error(
+        'emailVerification must return the code as a string, or { type: "google" | "apple", token }'
+    );
 }
 
 export async function signInWithPassword(

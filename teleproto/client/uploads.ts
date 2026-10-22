@@ -97,7 +97,7 @@ async function getFileBuffer(
     maxBufferSize: number
 ): Promise<CustomBuffer> {
     const options: CustomBufferOptions = {};
-    if (fileSize > maxBufferSize && file instanceof CustomFile) {
+    if (fileSize > maxBufferSize && file instanceof CustomFile && file.path) {
         options.filePath = file.path;
     } else {
         options.buffer = Buffer.from(await fileToBuffer(file));

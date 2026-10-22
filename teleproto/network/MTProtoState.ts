@@ -130,7 +130,8 @@ export class MTProtoState {
             throw new Error("Unset params");
         }
         const padLen = mod(-(16 + data.length + 12), 16) + 12;
-        const plain = Buffer.allocUnsafe(16 + data.length + padLen);
+        const packet = Buffer.allocUnsafe(24 + 16 + data.length + padLen);
+        const plain = packet.subarray(24);
         toSignedLittleBuffer(this.salt, 8).copy(plain, 0);
         toSignedLittleBuffer(this.id, 8).copy(plain, 8);
         data.copy(plain, 16);
@@ -148,12 +149,12 @@ export class MTProtoState {
 
         const { iv, key } = this._calcKey(authKey, msgKey, true);
 
-        const keyId = readBufferFromBigInt(this.authKey.keyId, 8);
-        return Buffer.concat([
-            keyId,
-            msgKey,
-            new IGE(key, iv).encryptIge(plain),
-        ]);
+        readBufferFromBigInt(this.authKey.keyId, 8).copy(packet, 0);
+        msgKey.copy(packet, 8);
+        const ige = new IGE(key, iv);
+        ige.encryptIge(plain, plain);
+        ige.dispose();
+        return packet;
     }
 
     async decryptMessageData(body: Buffer) {
@@ -173,8 +174,10 @@ export class MTProtoState {
         }
         const msgKey = body.subarray(8, 24);
         const { iv, key } = this._calcKey(authKey, msgKey, false);
-        body = new IGE(key, iv).decryptIge(body.subarray(24));
-
+        const encrypted = body.subarray(24);
+        const ige = new IGE(key, iv);
+        body = ige.decryptIge(encrypted, encrypted);
+        ige.dispose();
         const ourKey = asBuffer(
             sha256.sync
                 .create()

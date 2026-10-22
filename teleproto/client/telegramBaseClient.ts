@@ -1,14 +1,12 @@
 import { Connection } from "../network";
 import type { TelegramClient } from "./TelegramClient";
-import {
-    ConnectionTCPFull,
-    ConnectionTCPObfuscated,
-} from "../network/connection";
+import { ConnectionTCPFull } from "../network/connection";
 import { Session, StoreSession } from "../sessions";
 import { Logger, PromisedNetSockets } from "../extensions";
 import type { SocketFactory } from "../extensions/SocketInterface";
 import { Api } from "../tl";
 import type { AuthKey } from "../crypto/AuthKey";
+import { IGE } from "../crypto/IGE";
 import { EntityCache } from "../entityCache";
 import type { EntityCacheOptions } from "../entityCache";
 import type { ParseInterface } from "./messageParse";
@@ -28,6 +26,7 @@ import { Deferred } from "../extensions/Deferred";
 import { UpdateManager } from "./updates/manager";
 import { _clearUpdateQueue, _stopUpdateLoop } from "./updates/dispatch";
 import type { ClientUpdates } from "./updates/composer";
+import { resolveLegacyTransport, type ResolvedTransport, type Transport } from "../network/transport/Transport";
 import { installMessageBehaviour } from "../tl/custom/message";
 
 const SESSION_IDLE_TIMEOUT_MS = 60_000;
@@ -85,6 +84,7 @@ export interface TelegramClientParams {
     requestRetries?: number;
     connectionRetries?: number;
     reconnectRetries?: number;
+    transport?: Transport;
     downloadRetries?: number;
     retryDelay?: number;
     autoReconnect?: boolean;
@@ -247,16 +247,26 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._timeout = clientParams.timeout!;
         this._autoReconnect = clientParams.autoReconnect!;
         this._maxConcurrentDownloads = clientParams.maxConcurrentDownloads || 1;
-        this.networkSocket = clientParams.networkSocket || PromisedNetSockets;
         this._keepAliveInterval = clientParams.keepAliveInterval;
         this._reCaptchaCallback = clientParams.reCaptchaCallback;
         if (!(clientParams.connection instanceof Function)) {
             throw new Error("Connection should be a class not an instance");
         }
-        this._connection = clientParams.connection;
-        if (!explicitConnection && this.networkSocket.isWebSocket) {
-            this._connection = ConnectionTCPObfuscated;
+        let route: ResolvedTransport;
+        if (clientParams.transport) {
+            route = clientParams.transport.resolve(
+                explicitConnection ? clientParams.connection : undefined
+            );
+        } else {
+            route = resolveLegacyTransport({
+                socket: clientParams.networkSocket || PromisedNetSockets,
+                connection: clientParams.connection,
+                explicitConnection,
+                explicitSocket,
+            });
         }
+        this._connection = route.connection;
+        this.networkSocket = route.socket;
         this._initRequest = new Api.InitConnection({
             apiId: this.apiId,
             deviceModel:
