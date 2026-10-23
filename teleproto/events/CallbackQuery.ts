@@ -4,7 +4,7 @@ import { Api } from "../tl";
 import { returnBigInt, toSignedLittleBuffer } from "../Helpers";
 import type { TelegramClient } from "../client/TelegramClient";
 import { _getEntityPair, getInputPeer } from "../Utils";
-import { EditMessageParams, SendMessageParams } from "../client/messages";
+import { EditMessageParams, SendMessageParams } from "../client/methods/messages";
 
 export interface NewCallbackQueryInterface {
     chats: EntityLike[];
@@ -225,17 +225,15 @@ export class CallbackQueryEvent extends EventCommonSender {
     }
 
     async edit(params: EditMessageParams) {
-        if ((this.query.msgId as any) instanceof Api.InputBotInlineMessageID) {
-            return await this._client!.editMessage(this.messageId, params).then(
-                async (res) => {
-                    await this.answer();
-                    return res;
-                }
-            );
+        if (
+            (this.query.msgId as any) instanceof Api.InputBotInlineMessageID ||
+            (this.query.msgId as any) instanceof Api.InputBotInlineMessageID64
+        ) {
+            throw new Error("Editing messages sent via inline mode is not supported yet");
         } else {
             const inputChat = await this.getInputChat();
 
-            return await this._client!.editMessage(inputChat!, params).then(
+            return await this._client!.editMessage(inputChat!, { ...params, message: params.message ?? this.messageId }).then(
                 async (res) => {
                     await this.answer();
                     return res;

@@ -1,6 +1,5 @@
 import type { Connection } from "../connection/Connection";
-import type { SocketFactory } from "../../extensions/SocketInterface";
-import { ConnectionTCPObfuscated } from "../connection/TCPObfuscated";
+import type { SocketFactory } from "./socket/types";
 
 export interface ResolvedTransport {
     connection: typeof Connection;
@@ -20,17 +19,4 @@ export function ownFraming(
         throw new Error(`${transport} uses its own packet framing: remove the connection option`);
     }
     return framing;
-}
-
-export function resolveLegacyTransport(options: {
-    socket: SocketFactory;
-    connection: typeof Connection;
-    explicitConnection: boolean;
-    explicitSocket: boolean;
-}): ResolvedTransport {
-    let { connection, socket } = options;
-    if (!options.explicitConnection && socket.isWebSocket) {
-        connection = ConnectionTCPObfuscated;
-    }
-    return { connection, socket };
 }

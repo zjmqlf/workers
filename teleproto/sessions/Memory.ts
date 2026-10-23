@@ -1,4 +1,4 @@
-import { Session } from "./Abstract";
+import { Session, type StoredUpdateState } from "./Abstract";
 import type { AuthKey } from "../crypto/AuthKey";
 import { Api } from "../tl";
 import bigInt from "big-integer";
@@ -13,7 +13,7 @@ export class MemorySession extends Session {
     protected _port?: number;
     protected _takeoutId: undefined;
     protected _entities: Map<string, any>;
-    protected _updateStates: {};
+    protected _updateState?: StoredUpdateState;
     protected _authKey?: AuthKey;
     protected _dcAuthKeys: Map<number, AuthKey> = new Map();
 
@@ -25,7 +25,6 @@ export class MemorySession extends Session {
         this._port = undefined;
         this._takeoutId = undefined;
         this._entities = new Map();
-        this._updateStates = {};
     }
 
     setDC(dcId: number, serverAddress: string, port: number) {
@@ -89,6 +88,14 @@ export class MemorySession extends Session {
         }
     }
 
+    getUpdateState(): StoredUpdateState | undefined {
+        return this._updateState;
+    }
+
+    setUpdateState(state: StoredUpdateState | undefined) {
+        this._updateState = state;
+    }
+
     close() {}
 
     save() {}
@@ -102,7 +109,7 @@ export class MemorySession extends Session {
         this._port = undefined;
         this._dcAuthKeys.clear();
         this._entities.clear();
-        this._updateStates = {};
+        this._updateState = undefined;
     }
 
     _entityValuesToRow(

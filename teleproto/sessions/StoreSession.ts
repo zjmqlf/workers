@@ -1,4 +1,5 @@
 import { MemorySession } from "./Memory";
+import type { StoredUpdateState } from "./Abstract";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
 import { Buffer } from "node:buffer";
@@ -30,6 +31,9 @@ export class StoreSession extends MemorySession {
             }
             await this._authKey.setKey(authKey);
         }
+
+        const updateState = this.store.get(this.sessionName + "updateState");
+        if (updateState && typeof updateState === "object") this._updateState = updateState;
 
         const dcId = this.store.get(this.sessionName + "dcId");
         if (dcId) {
@@ -85,6 +89,12 @@ export class StoreSession extends MemorySession {
 
     get authKey() {
         return this._authKey;
+    }
+
+    setUpdateState(state: StoredUpdateState | undefined) {
+        super.setUpdateState(state);
+        if (state) this.store.set(this.sessionName + "updateState", state);
+        else this.store.remove(this.sessionName + "updateState");
     }
 
     private _saveDcAuthKeys() {

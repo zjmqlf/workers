@@ -1,4 +1,11 @@
-export { Connection } from "./Connection";
-export { ConnectionTCPFull } from "./TCPFull";
-export { ConnectionTCPAbridged } from "./TCPAbridged";
-export { ConnectionTCPObfuscated } from "./TCPObfuscated";
+export { Connection, PacketCodec } from "./Connection";
+export type { ConnectionInterfaceParams, PacketCodecClass } from "./Connection";
+export { AbridgedPacketCodec, ConnectionTCPAbridged } from "./AbridgedCodec";
+export { FullPacketCodec, ConnectionTCPFull } from "./FullCodec";
+export {
+    IntermediatePacketCodec,
+    PaddedIntermediatePacketCodec,
+    ConnectionTCPIntermediate,
+    ConnectionTCPPaddedIntermediate,
+} from "./IntermediateCodec";
+export { ObfuscatedIO, ObfuscatedConnection, ConnectionTCPObfuscated } from "./Obfuscation";

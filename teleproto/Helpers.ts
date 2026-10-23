@@ -1,9 +1,10 @@
 import bigInt from "big-integer";
 import type { EntityLike } from "./define";
 import type { Api } from "./tl";
-import * as crypto from "node:crypto";
+import crypto from "node:crypto";
 import zlib from "node:zlib";
 import { math, sha1 as hashSha1, sha256 as hashSha256 } from "cifrante";
+import { Buffer } from "node:buffer";
 
 export function asBuffer(bytes: Uint8Array): Buffer {
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);

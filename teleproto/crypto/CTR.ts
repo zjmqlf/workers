@@ -1,6 +1,7 @@
 import type { CtrState } from "cifrante";
 import { aes } from "cifrante";
 import { asBuffer } from "../Helpers";
+import { Buffer } from "node:buffer";
 
 export class CTR {
     private readonly state: CtrState;
