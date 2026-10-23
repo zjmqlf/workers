@@ -4,7 +4,7 @@ import { sleep } from "../../Helpers";
 import { computeCheck as computePasswordSrpCheck } from "../../Password";
 import { UnauthorizedError } from "../../errors";
 import type { TelegramClient } from "../TelegramClient";
-import { Raw } from "../events";
+import { Raw } from "../../events";
 import { Buffer } from "node:buffer";
 
 export interface EmailVerificationOptions {
@@ -641,7 +641,6 @@ export async function signInUserWithQrCode(
         }
     })();
 
-    const Raw = require("../../events/Raw").Raw;
     const rawEvent = new Raw({});
     const onUpdate = (update: Api.TypeUpdate) => {
         if (update instanceof Api.UpdateLoginToken) resolveUpdate();
