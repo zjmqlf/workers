@@ -1,0 +1,35 @@
+import * as twoFA from "./2fa";
+import * as auth from "./auth";
+import * as bots from "./bots";
+import * as buttons from "./buttons";
+import * as chats from "./chats";
+import * as communities from "./communities";
+import * as dialogs from "./dialogs";
+import * as downloads from "./downloads";
+import * as messageParse from "./messageParse";
+import * as message from "./messages";
+import * as telegramBaseClient from "./telegramBaseClient";
+import { TelegramClient } from "./TelegramClient";
+import * as updates from "./updates";
+import * as uploads from "./uploads";
+import * as users from "./users";
+import * as wallet from "./wallet";
+
+export {
+    twoFA,
+    auth,
+    bots,
+    buttons,
+    chats,
+    communities,
+    dialogs,
+    downloads,
+    messageParse,
+    message,
+    telegramBaseClient,
+    TelegramClient,
+    updates,
+    uploads,
+    users,
+    wallet,
+};

@@ -11,6 +11,7 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
+import timers from "node:timers";
 
 const DIFFERENCE_LIMIT_USER = 100;
 const DIFFERENCE_LIMIT_BOT = 100_000;
@@ -41,9 +42,9 @@ interface ChannelTracker {
     pts: PtsWaiter;
     initializing?: Promise<void>;
     difference?: Promise<void>;
-    gapTimer?: NodeJS.Timeout;
-    pollTimer?: NodeJS.Timeout;
-    retryTimer?: NodeJS.Timeout;
+    gapTimer?: ReturnType<typeof setTimeout>;
+    pollTimer?: ReturnType<typeof setTimeout>;
+    retryTimer?: ReturnType<typeof setTimeout>;
     retryDelayS: number;
     inputChannel?: Api.TypeInputChannel;
     lastPolledAt?: number;
@@ -263,7 +264,7 @@ export class ChannelUpdates {
                     clearTimeout(created.gapTimer);
                     created.gapTimer = undefined;
                     if (ms < 0) return;
-                    created.gapTimer = setTimeout(() => {
+                    created.gapTimer = timers.setTimeout(() => {
                         created.gapTimer = undefined;
                         void this.fetchDifference(channelId);
                     }, Math.min(ms, 1));
@@ -419,7 +420,7 @@ export class ChannelUpdates {
             (this.scheduler.state.pausedUntil ?? 0) - Date.now()
         );
         tracker.nextPollAt = Date.now() + delayMs;
-        tracker.retryTimer = setTimeout(() => {
+        tracker.retryTimer = timers.setTimeout(() => {
             tracker.retryTimer = undefined;
             void this.fetchDifference(channelId);
         }, delayMs);
@@ -430,7 +431,7 @@ export class ChannelUpdates {
         clearTimeout(tracker.pollTimer);
         const delayMs = serverTimeoutS && serverTimeoutS > 0 ? serverTimeoutS * 1000 : this.client._channelPollInterval;
         tracker.nextPollAt = Date.now() + delayMs;
-        tracker.pollTimer = setTimeout(() => {
+        tracker.pollTimer = timers.setTimeout(() => {
             tracker.pollTimer = undefined;
             void this.fetchDifference(channelId);
         }, delayMs);

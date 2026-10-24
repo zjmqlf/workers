@@ -1,4 +1,5 @@
 import type { Session } from "../session/Session";
+import timers from "node:timers";
 
 export type SenderSlotState = "idle" | "connecting" | "ready" | "dead";
 
@@ -55,7 +56,7 @@ export class SessionSlot {
     }
 
     private async open(): Promise<Session> {
-        this.clearIdle();
+        // this.clearIdle();
         let session: Session;
         try {
             session = await this.opts.connect(this);
@@ -68,18 +69,18 @@ export class SessionSlot {
             throw new SlotRemovedError(this.dead);
         }
         this.session = session;
-        if (this.active === 0) this.armIdle();
+        // if (this.active === 0) this.armIdle();
         return session;
     }
 
     enter() {
         this.active++;
-        this.clearIdle();
+        // this.clearIdle();
     }
 
     leave() {
         if (this.active > 0) this.active--;
-        if (this.active === 0 && this.session) this.armIdle();
+        // if (this.active === 0 && this.session) this.armIdle();
     }
 
     onDeath(listener: (reason: SenderSlotDeathReason) => void): () => void {
@@ -94,7 +95,7 @@ export class SessionSlot {
     async markDead(reason: SenderSlotDeathReason): Promise<void> {
         if (this.dead) return;
         this.dead = reason;
-        this.clearIdle();
+        // this.clearIdle();
         for (const listener of this.deathListeners) {
             try {
                 listener(reason);
@@ -106,23 +107,23 @@ export class SessionSlot {
         await session?.disconnect().catch(() => { });
     }
 
-    private clearIdle() {
-        clearTimeout(this.idleTimer);
-        this.idleTimer = undefined;
-    }
+    // private clearIdle() {
+    //     clearTimeout(this.idleTimer);
+    //     this.idleTimer = undefined;
+    // }
 
-    private armIdle() {
-        this.clearIdle();
-        if (this.dead || this.opts.idleTimeoutMs <= 0) return;
-        this.idleTimer = setTimeout(() => this.idle(), this.opts.idleTimeoutMs);
-        this.idleTimer.unref?.();
-    }
+    // private armIdle() {
+    //     this.clearIdle();
+    //     if (this.dead || this.opts.idleTimeoutMs <= 0) return;
+    //     this.idleTimer = timers.setTimeout(() => this.idle(), this.opts.idleTimeoutMs);
+    //     this.idleTimer.unref?.();
+    // }
 
     private idle() {
         this.idleTimer = undefined;
         const session = this.session;
         if (this.dead || this.active > 0 || !session) return;
-        if (session.hasPendingWork || session.isReconnecting) return this.armIdle();
+        // if (session.hasPendingWork || session.isReconnecting) return this.armIdle();
         this.session = undefined;
         session.disconnect().catch(() => { });
     }

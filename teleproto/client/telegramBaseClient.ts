@@ -22,13 +22,14 @@ import { DC_PORT, DcAddressBook, isTestDcAddress, type DcAddress } from "../netw
 import { FileTransfers, type TransferBalance } from "./files/FileTransfers";
 import { LAYER } from "../tl/runtime/Registry";
 import { LogLevel } from "../extensions/Logger";
-import { Deferred } from "../extensions/Deferred";
+import Deferred from "../extensions/Deferred";
 import { UpdateManager } from "./updates/UpdateManager";
 import { UpdateDispatcher } from "./updates/UpdateDispatcher";
 import { UpdateLoop } from "./updates/UpdateLoop";
 import type { ClientUpdates } from "./updates/ClientUpdates";
 import type { ResolvedTransport, Transport } from "../network/transport/Transport";
 import { TcpTransport } from "../network/transport/TcpTransport";
+import timers from "node:timers";
 
 const SESSION_IDLE_TIMEOUT_MS = 300_000;
 const SESSION_STARTUP_DELAY_MS = 800;
@@ -90,7 +91,6 @@ export interface TelegramClientParams {
     baseLogger?: Logger;
     maxConcurrentDownloads?: number;
     securityChecks?: boolean;
-    networkSocket?: SocketFactory;
     keepAliveInterval?: number;
     reCaptchaCallback?: (siteKey: string) => Promise<string>;
     downloadPool?: DownloadPoolOptions;
@@ -589,7 +589,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     private _scheduleConfigReload(seconds: number) {
         clearTimeout(this._configTimer);
         if (this._destroyed) return;
-        this._configTimer = setTimeout(() => void this._reloadConfig(), seconds * 1000);
+        this._configTimer = timers.setTimeout(() => void this._reloadConfig(), seconds * 1000);
         this._configTimer.unref?.();
     }
 

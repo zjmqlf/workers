@@ -1,6 +1,5 @@
 import { TelegramBaseClient, TelegramClientParams } from "./TelegramBaseClient";
 import type { DcAddress } from "../network/dc/DcAddressBook";
-
 import type { Connection } from "../network/connection/Connection";
 import * as authMethods from "./methods/auth";
 import * as botMethods from "./methods/bots";

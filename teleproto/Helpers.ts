@@ -4,6 +4,7 @@ import type { Api } from "./tl";
 import crypto from "node:crypto";
 import zlib from "node:zlib";
 import { math, sha1 as hashSha1, sha256 as hashSha256 } from "cifrante";
+import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 export function asBuffer(bytes: Uint8Array): Buffer {
@@ -354,7 +355,7 @@ export function getRandomInt(min: number, max: number): number {
 
 export const sleep = (ms: number, isUnref: boolean = false) =>
     new Promise((resolve) =>
-        isUnref ? setTimeout(resolve, ms).unref() : setTimeout(resolve, ms)
+        isUnref ? timers.setTimeout(resolve, ms).unref() : timers.setTimeout(resolve, ms)
     );
 
 export function bufferXor(a: Buffer, b: Buffer): Buffer {

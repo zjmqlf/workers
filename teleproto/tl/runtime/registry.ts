@@ -1,5 +1,5 @@
 import bigInt from "big-integer";
-import compiledSchema from "../generated/schema";
+import compiledSchema  from "../generated/schema";
 import { coreObjects } from "../core";
 import type { BareReader } from "./fieldCodec";
 import { defineClass, type ClassContext, type Fields, type TlBaseClass, type TlClass } from "./defineClass";
@@ -96,7 +96,7 @@ export class Registry implements ClassContext {
             const candidates = this.byResult.get(expectedType);
             if (candidates && candidates.length > 1) {
                 throw new Error(
-                    `Ambiguous type "${expectedType}" �� add "_" to pick a constructor ` +
+                    `Ambiguous type "${expectedType}" — add "_" to pick a constructor ` +
                     `(one of: ${candidates.map((i) => definitionName(this.schema, i)).join(", ")})`
                 );
             }

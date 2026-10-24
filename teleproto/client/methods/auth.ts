@@ -4,7 +4,7 @@ import { sleep } from "../../Helpers";
 import { computeCheck as computePasswordSrpCheck } from "../../Password";
 import { UnauthorizedError } from "../../errors";
 import type { TelegramClient } from "../TelegramClient";
-import { Raw } from "../../events";
+import { Raw } from "../../events/Raw";
 import { Buffer } from "node:buffer";
 
 export interface EmailVerificationOptions {

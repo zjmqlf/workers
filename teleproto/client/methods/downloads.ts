@@ -13,6 +13,7 @@ import { choosePartSize } from "../files/PartsManager";
 import { OrderedSink, openTarget, type DownloadTarget } from "../files/sinks";
 import { sha256 } from "cifrante";
 import { asBuffer } from "../../Helpers";
+import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 export interface progressCallback {
@@ -143,7 +144,7 @@ export async function downloadFile(
     const forward = () => abort.abort();
     if (signal?.aborted) abort.abort();
     else signal?.addEventListener("abort", forward, { once: true });
-    const timer = requestTimeout && requestTimeout > 0 ? setTimeout(forward, requestTimeout) : undefined;
+    const timer = requestTimeout && requestTimeout > 0 ? timers.setTimeout(forward, requestTimeout) : undefined;
 
     const dc = dcId ?? info.dcId ?? client.session.dcId;
     let release: (() => void) | undefined;

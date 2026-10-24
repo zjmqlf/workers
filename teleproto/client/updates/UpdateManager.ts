@@ -16,6 +16,7 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
+import timers from "node:timers";
 
 export type { ChannelPollingState } from "./ChannelUpdates";
 
@@ -55,16 +56,16 @@ export class UpdateManager implements ChannelUpdatesHost {
     private readonly channels: ChannelUpdates;
     private readonly globalPts: PtsWaiter;
     private readonly qts: PtsWaiter;
-    private readonly gapTimers: { pts?: NodeJS.Timeout; qts?: NodeJS.Timeout } = {};
+    private readonly gapTimers: { pts?: ReturnType<typeof setTimeout>; qts?: ReturnType<typeof setTimeout> } = {};
     private readonly beforeState: BeforeState[] = [];
     private readonly pendingSeq: PendingSeqUpdate[] = [];
     private readonly recentMessageKeys = new Set<string>();
     private readonly recentMessageQueue: string[] = [];
     private initializing?: Promise<void>;
-    private repairTimer?: NodeJS.Timeout;
-    private seqGapTimer?: NodeJS.Timeout;
-    private retryTimer?: NodeJS.Timeout;
-    private saveTimer?: NodeJS.Timeout;
+    private repairTimer?: ReturnType<typeof setTimeout>;
+    private seqGapTimer?: ReturnType<typeof setTimeout>;
+    private retryTimer?: ReturnType<typeof setTimeout>;
+    private saveTimer?: ReturnType<typeof setTimeout>;
     private fetchingDifference = false;
     private retryDelayS = 0;
     private stateCheckAfterMs = 0;
@@ -301,7 +302,7 @@ export class UpdateManager implements ChannelUpdatesHost {
 
     saveState() {
         if (this.saveTimer) return;
-        this.saveTimer = setTimeout(() => this.flushState(), STATE_SAVE_DELAY_MS);
+        this.saveTimer = timers.setTimeout(() => this.flushState(), STATE_SAVE_DELAY_MS);
         this.saveTimer.unref?.();
     }
 
@@ -380,7 +381,7 @@ export class UpdateManager implements ChannelUpdatesHost {
     private armSeqGapTimer(): void {
         clearTimeout(this.seqGapTimer);
         const firstReceivedAt = Math.min(...this.pendingSeq.slice(0, GAP_TIMEOUT_UPDATE_COUNT).map((entry) => entry.receivedAt));
-        this.seqGapTimer = setTimeout(() => {
+        this.seqGapTimer = timers.setTimeout(() => {
             this.seqGapTimer = undefined;
             this.client._log.debug("Seq gap was not filled in time, fetching difference");
             this.requestDifference();
@@ -467,7 +468,7 @@ export class UpdateManager implements ChannelUpdatesHost {
                     }
                     return;
                 }
-                this.gapTimers[kind] = setTimeout(() => {
+                this.gapTimers[kind] = timers.setTimeout(() => {
                     this.gapTimers[kind] = undefined;
                     this.client._log.debug(`${kind} gap was not filled in time, fetching difference`);
                     this.requestDifference();
@@ -477,7 +478,7 @@ export class UpdateManager implements ChannelUpdatesHost {
                 kind === "pts"
                     ? () => {
                           if (this.repairTimer) return;
-                          this.repairTimer = setTimeout(() => {
+                          this.repairTimer = timers.setTimeout(() => {
                               this.repairTimer = undefined;
                               void this.repairSingleGap();
                           }, SINGLE_GAP_REPAIR_MS);
@@ -550,7 +551,7 @@ export class UpdateManager implements ChannelUpdatesHost {
         if (failed && this.running) {
             this.retryDelayS = nextRetryDelaySeconds(this.retryDelayS);
             this.client._log.debug(`Retrying updates.getDifference in ${Math.round(this.retryDelayS)}s`);
-            this.retryTimer = setTimeout(() => {
+            this.retryTimer = timers.setTimeout(() => {
                 this.retryTimer = undefined;
                 void this.fetchDifference();
             }, this.retryDelayS * 1000);
@@ -637,7 +638,7 @@ function markNoDispatch(update: Api.TypeUpdate | Api.TypeUpdates): void {
 
 function withDeadline<T>(promise: Promise<T>, ms: number, what: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-        const timer = setTimeout(() => {
+        const timer = timers.setTimeout(() => {
             promise.catch(() => {});
             reject(new Error(`${what} timed out after ${ms}ms`));
         }, ms);

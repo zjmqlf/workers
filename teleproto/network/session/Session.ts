@@ -4,7 +4,7 @@ import { AuthKey } from "../../crypto/AuthKey";
 import { Api } from "../../tl";
 import { LAYER } from "../../tl/runtime/Registry";
 import type { Logger } from "../../extensions/Logger";
-import { Deferred } from "../../extensions/Deferred";
+import Deferred from "../../extensions/Deferred";
 import { ProxyRejectedError, RPCError, TypeNotFoundError } from "../../errors";
 import type { TelegramClient } from "../../client/TelegramClient";
 import type { Connection } from "../connection/Connection";
@@ -22,6 +22,7 @@ import { RequestQueue } from "./RequestQueue";
 import { SessionLink, type LinkClose, type LinkHost, type OutgoingPacket } from "./SessionLink";
 import { ConnectThrottle } from "./ConnectThrottle";
 import { UpdateConnectionState } from "./UpdateConnectionState";
+import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 const DEFAULT_CONNECT_TIMEOUT_S = 10;
@@ -332,7 +333,7 @@ export class Session implements LinkHost, RouterHost {
             await Promise.race([
                 dial,
                 new Promise<never>((_, reject) => {
-                    timer = setTimeout(
+                    timer = timers.setTimeout(
                         () => reject(new Error(`Connection to ${connection} timed out after ${seconds}s`)),
                         seconds * 1000
                     );

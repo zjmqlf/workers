@@ -1,0 +1,146 @@
+import { MemorySession } from "./Memory";
+import { AuthKey } from "../crypto/AuthKey";
+import bigInt from "big-integer";
+import { Buffer } from "node:buffer";
+
+export class StoreSession extends MemorySession {
+    private readonly sessionName: string;
+    private store: Map<string, any>;
+
+    constructor(sessionName: string, divider = ":") {
+        super();
+        if (sessionName === "session") {
+            throw new Error(
+                "Session name can't be 'session'. Please use a different name."
+            );
+        }
+        this.store = new Map();
+        if (divider == undefined) {
+            divider = ":";
+        }
+        this.sessionName = sessionName + divider;
+    }
+
+    async load() {
+        let authKey = this.store.get(this.sessionName + "authKey");
+        if (authKey && typeof authKey === "object") {
+            this._authKey = new AuthKey();
+            if ("data" in authKey) {
+                authKey = Buffer.from(authKey.data);
+            }
+            await this._authKey.setKey(authKey);
+        }
+
+        const dcId = this.store.get(this.sessionName + "dcId");
+        if (dcId) {
+            this._dcId = dcId;
+        }
+
+        const port = this.store.get(this.sessionName + "port");
+        if (port) {
+            this._port = port;
+        }
+        const serverAddress = this.store.get(
+            this.sessionName + "serverAddress"
+        );
+        if (serverAddress) {
+            this._serverAddress = serverAddress;
+        }
+        const dcKeys = this.store.get(this.sessionName + "dcAuthKeys");
+        if (dcKeys && typeof dcKeys === "object") {
+            for (const [k, v] of Object.entries(dcKeys)) {
+                const id = Number(k);
+                if (!Number.isFinite(id) || !v || typeof v !== "object") continue;
+                let buf: Buffer | undefined;
+                if (Buffer.isBuffer(v)) buf = v as Buffer;
+                else if ("data" in (v as any)) buf = Buffer.from((v as any).data);
+                if (!buf) continue;
+                const key = new AuthKey();
+                await key.setKey(buf);
+                this._dcAuthKeys.set(id, key);
+            }
+        }
+    }
+
+    setAuthKey(authKey?: AuthKey, dcId?: number) {
+        super.setAuthKey(authKey, dcId);
+        if (dcId !== undefined && dcId !== this._dcId) {
+            this._saveDcAuthKeys();
+        }
+    }
+
+    setDC(dcId: number, serverAddress: string, port: number) {
+        super.setDC(dcId, serverAddress, port);
+        this.store.set(this.sessionName + "dcId", dcId);
+        this.store.set(this.sessionName + "port", port);
+        this.store.set(this.sessionName + "serverAddress", serverAddress);
+        this.store.set(this.sessionName + "authKey", this._authKey?.getKey());
+        this._saveDcAuthKeys();
+    }
+
+    set authKey(value: AuthKey | undefined) {
+        this._authKey = value;
+        this.store.set(this.sessionName + "authKey", value?.getKey());
+    }
+
+    get authKey() {
+        return this._authKey;
+    }
+
+    private _saveDcAuthKeys() {
+        const snapshot: Record<string, Buffer | undefined> = {};
+        for (const [id, k] of this._dcAuthKeys) {
+            const raw = k.getKey();
+            if (raw) snapshot[String(id)] = raw;
+        }
+        this.store.set(this.sessionName + "dcAuthKeys", snapshot);
+    }
+
+    delete() {
+        super.delete();
+    }
+
+    processEntities(tlo: any) {
+        const rows = this._entitiesToRows(tlo);
+        if (!rows) {
+            return;
+        }
+        for (const row of rows) {
+            this.store.set(this.sessionName + row[0], row);
+        }
+    }
+
+    getEntityRowsById(
+        id: string | bigInt.BigInteger,
+        exact: boolean = true
+    ): any {
+        const row = this.store.get(this.sessionName + id.toString());
+        if (row || exact) return row;
+        return this.store.get(this.sessionName + "-" + id)
+            ?? this.store.get(this.sessionName + "-100" + id);
+    }
+
+    getEntityRowsByPhone(phone: string) {
+        return this.findEntityRow((row) => row[3] === phone);
+    }
+
+    getEntityRowsByUsername(username: string) {
+        return this.findEntityRow((row) => row[2] === username.toLowerCase());
+    }
+
+    getEntityRowsByName(name: string) {
+        return this.findEntityRow((row) => row[4] === name);
+    }
+
+    private findEntityRow(matches: (row: string[]) => boolean): string[] | undefined {
+        let result: string[] | undefined;
+        this.store.each((key, row) => {
+            if (Array.isArray(row) && row.length >= 5 &&
+                key === this.sessionName + row[0] && matches(row)) {
+                result = row;
+                return false;
+            }
+        });
+        return result;
+    }
+}

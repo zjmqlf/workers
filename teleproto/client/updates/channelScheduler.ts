@@ -1,3 +1,5 @@
+import timers from "node:timers";
+
 interface Job {
     channelId: string;
     run: () => Promise<unknown>;
@@ -82,7 +84,7 @@ export class ChannelScheduler {
         if (index < 0) return;
         const delay = Math.max(this.nextStartAt, this.pausedUntil) - Date.now();
         if (delay > 0) {
-            this.timer = setTimeout(() => {
+            this.timer = timers.setTimeout(() => {
                 this.timer = undefined;
                 this.pump();
             }, Math.min(delay, 2147483647));

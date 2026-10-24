@@ -1,4 +1,4 @@
-import { gzipSync, unzipSync } from "zlib";
+import { gzipSync, unzipSync } from "node:zlib";
 import { Writer } from "../binary/Writer";
 import type { Reader } from "../binary/Reader";
 import { Buffer } from "node:buffer";

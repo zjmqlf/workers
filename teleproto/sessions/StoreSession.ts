@@ -94,7 +94,7 @@ export class StoreSession extends MemorySession {
     setUpdateState(state: StoredUpdateState | undefined) {
         super.setUpdateState(state);
         if (state) this.store.set(this.sessionName + "updateState", state);
-        else this.store.remove(this.sessionName + "updateState");
+        else this.store.delete(this.sessionName + "updateState");
     }
 
     private _saveDcAuthKeys() {
@@ -144,7 +144,7 @@ export class StoreSession extends MemorySession {
 
     private findEntityRow(matches: (row: string[]) => boolean): string[] | undefined {
         let result: string[] | undefined;
-        this.store.each((key, row) => {
+        this.store.forEach((row, key) => {
             if (Array.isArray(row) && row.length >= 5 &&
                 key === this.sessionName + row[0] && matches(row)) {
                 result = row;
