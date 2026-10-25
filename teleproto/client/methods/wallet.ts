@@ -76,10 +76,12 @@ export class WalletCursorIter<T> extends RequestIter {
     }
 }
 
+/** @hidden */
 export async function getWallet(client: TelegramClient): Promise<Api.TypeWalletState> {
     return client.invoke(new Api.wallet.GetState());
 }
 
+/** @hidden */
 export async function getWalletAddresses(
     client: TelegramClient,
     users: EntityLike | EntityLike[],
@@ -95,6 +97,7 @@ export async function getWalletAddresses(
     return result.addresses;
 }
 
+/** @hidden */
 export function iterWalletTransactions(
     client: TelegramClient,
     params: IterWalletTransactionsParams = {}
@@ -122,6 +125,7 @@ export function iterWalletTransactions(
     );
 }
 
+/** @hidden */
 export async function getWalletTransactions(
     client: TelegramClient,
     params: IterWalletTransactionsParams = {}
@@ -132,6 +136,7 @@ export async function getWalletTransactions(
     return list;
 }
 
+/** @hidden */
 export async function getWalletTransactionsById(
     client: TelegramClient,
     ids: string[]
@@ -140,6 +145,7 @@ export async function getWalletTransactionsById(
     return result.transactions;
 }
 
+/** @hidden */
 export async function getWalletTransactionsByHash(
     client: TelegramClient,
     hashes: string[]
@@ -150,6 +156,7 @@ export async function getWalletTransactionsByHash(
     return result.transactions;
 }
 
+/** @hidden */
 export function iterWalletNfts(
     client: TelegramClient,
     params: IterWalletNftsParams = {}
@@ -166,6 +173,7 @@ export function iterWalletNfts(
     );
 }
 
+/** @hidden */
 export async function getWalletNfts(
     client: TelegramClient,
     params: IterWalletNftsParams = {}
@@ -173,6 +181,7 @@ export async function getWalletNfts(
     return (await iterWalletNfts(client, params).collect()) as TotalList<Api.wallet.NftItem>;
 }
 
+/** @hidden */
 export async function sendWalletTransfer(
     client: TelegramClient,
     user: EntityLike,
@@ -189,6 +198,7 @@ export async function sendWalletTransfer(
     return client._getResponseMessage(request, result, entity) as Api.Message | undefined;
 }
 
+/** @hidden */
 export async function getTonConnectSessions(
     client: TelegramClient
 ): Promise<Api.TonConnectSession[]> {
@@ -196,6 +206,7 @@ export async function getTonConnectSessions(
     return result.sessions;
 }
 
+/** @hidden */
 export async function closeTonConnectSession(
     client: TelegramClient,
     sessionId: BigInteger,
@@ -206,6 +217,7 @@ export async function closeTonConnectSession(
     );
 }
 
+/** @hidden */
 export async function getCurrencyRates(client: TelegramClient): Promise<Map<string, number>> {
     const result = await client.invoke(new Api.payments.GetCurrencyRates());
     return new Map(result.rates.map((rate) => [rate.currency, rate.rate]));

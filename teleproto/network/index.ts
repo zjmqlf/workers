@@ -28,6 +28,16 @@ export {
 export {
     Transport,
     TcpTransport,
+    SocksTransport,
+    HttpProxyTransport,
+    MTProxyTransport,
+    WebSocketTransport,
+    WebProxyTransport,
+} from "./transport";
+export type {
+    SocksTransportOptions,
+    HttpProxyTransportOptions,
+    MTProxyTransportOptions,
 } from "./transport";
 export { NetSocket } from "./transport/socket/NetSocket";
 export { WebSocketSocket } from "./transport/socket/WebSocketSocket";

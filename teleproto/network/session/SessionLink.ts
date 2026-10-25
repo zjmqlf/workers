@@ -1,6 +1,7 @@
 import type { Connection } from "../connection";
 import type { RequestState } from "../mtproto/RequestState";
 import { InvalidBufferError } from "../../errors";
+import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 const TICK_MS = 1_000;
@@ -72,8 +73,8 @@ export class SessionLink {
     }
 
     start() {
-        this.timer = setInterval(() => this.host.tick(this, Date.now()), TICK_MS);
-        this.timer.unref?.();
+        this.timer = timers.setInterval(() => this.host.tick(this, Date.now()), TICK_MS);
+        this.timer?.unref?.();
         void this.readLoop();
         void this.writeLoop();
     }

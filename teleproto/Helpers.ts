@@ -11,6 +11,13 @@ export function asBuffer(bytes: Uint8Array): Buffer {
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
+/**
+ * converts a buffer to big int
+ * @param buffer
+ * @param little
+ * @param signed
+ * @returns {bigInt.BigInteger}
+ */
 export function readBigIntFromBuffer(
     buffer: Buffer,
     little = true,
@@ -34,6 +41,7 @@ export function readBigIntFromBuffer(
     let count8b = buffer.length/8 | 0;
     let bytesLeft = buffer.length - count8b*8;
 
+    // TODO use 0n after setting build target >= ES2020
     const bi64 = BigInt(64);
     let resBigInt = BigInt(0);
     let i = count8b;
@@ -47,6 +55,7 @@ export function readBigIntFromBuffer(
 
     const resBitLength = 8*buffer.length;
 
+    // bytesLeft<8
     if(bytesLeft) {
         if(buffer.length<8){
             let buf8b = Buffer.allocUnsafe(8);
@@ -56,10 +65,11 @@ export function readBigIntFromBuffer(
             buffer.copy(buf8b, writeIdx, 0, bytesLeft);
             buffer = buf8b;
         }
+        //read 64 bits and discard excess bits
         let bi = little ?
               buffer.readBigUInt64LE(0)
             : buffer.readBigUint64BE(buffer.length-8);
-        bi = BigInt.asUintN(8*bytesLeft, bi);
+        bi = BigInt.asUintN(8*bytesLeft, bi); // discard higher bits - garbage
         resBigInt = bi + (resBigInt << BigInt(8*bytesLeft));
     }
 
@@ -88,6 +98,10 @@ export function groupBy(list: any[], keyGetter: Function) {
     return map;
 }
 
+/**
+ * Outputs the object in a better way by hiding all the private methods/attributes.
+ * @param object - the class to use
+ */
 export function betterConsoleLog(object: { [key: string]: any }) {
     const toPrint: { [key: string]: any } = {};
     for (const key in object) {
@@ -100,12 +114,39 @@ export function betterConsoleLog(object: { [key: string]: any }) {
     return toPrint;
 }
 
+/**
+ * Helper to find if a given object is an array (or similar)
+ */
 export const isArrayLike = <T>(x: any): x is Array<T> =>
     x &&
     typeof x.length === "number" &&
     typeof x !== "function" &&
     typeof x !== "string";
 
+/*
+export function addSurrogate(text: string) {
+    let temp = "";
+    for (const letter of text) {
+        const t = letter.charCodeAt(0);
+        if (0x1000 < t && t < 0x10FFFF) {
+            const b = Buffer.from(letter, "utf16le");
+            const r = String.fromCharCode(b.readUInt16LE(0)) + String.fromCharCode(b.readUInt16LE(2));
+            temp += r;
+        } else {
+            text += letter;
+        }
+    }
+    return temp;
+}
+
+ */
+
+/**
+ * Special case signed little ints
+ * @param big
+ * @param number
+ * @returns {Buffer}
+ */
 function toNativeBigInt(
     value: bigInt.BigInteger | string | number | bigint
 ): bigint {
@@ -157,6 +198,14 @@ export function toSignedLittleBuffer(
     return buffer;
 }
 
+/**
+ * converts a big int to a buffer
+ * @param bigIntVar {BigInteger}
+ * @param bytesNumber
+ * @param little
+ * @param signed
+ * @returns {Buffer}
+ */
 export function readBufferFromBigInt(
     bigIntVar: bigInt.BigInteger,
     bytesNumber: number,
@@ -178,18 +227,39 @@ export function readBufferFromBigInt(
     return little ? buffer : buffer.reverse();
 }
 
+/**
+ * Generates a random long integer (8 bytes), which is optionally signed
+ * @returns {BigInteger}
+ */
 export function generateRandomLong(signed = true) {
     return readBigIntFromBuffer(generateRandomBytes(8), true, signed);
 }
 
+/**
+ * Generates a random unsigned long integer (8 bytes)
+ * @returns {BigInteger}
+ */
 export function generateRandomBigInt() {
     return generateRandomLong(false);
 }
 
+
+/**
+ * .... really javascript
+ * @param n {number}
+ * @param m {number}
+ * @returns {number}
+ */
 export function mod(n: number, m: number) {
     return ((n % m) + m) % m;
 }
 
+/**
+ * returns a positive bigInt
+ * @param n {bigInt.BigInteger}
+ * @param m {bigInt.BigInteger}
+ * @returns {bigInt.BigInteger}
+ */
 export function bigIntMod(
     n: bigInt.BigInteger,
     m: bigInt.BigInteger
@@ -197,10 +267,42 @@ export function bigIntMod(
     return n.remainder(m).add(m).remainder(m);
 }
 
+/**
+ * Generates a random bytes array
+ * @param count
+ * @returns {Buffer}
+ */
 export function generateRandomBytes(count: number): Buffer {
     return crypto.randomBytes(count);
 }
 
+/**
+ * Calculate the key based on Telegram guidelines, specifying whether it's the client or not
+ * @param sharedKey
+ * @param msgKey
+ * @param client
+ * @returns {{iv: Buffer, key: Buffer}}
+ */
+
+/*CONTEST
+this is mtproto 1 (mostly used for secret chats)
+async function calcKey(sharedKey, msgKey, client) {
+    const x = client === true ? 0 : 8
+    const [sha1a, sha1b, sha1c, sha1d] = await Promise.all([
+        sha1(Buffer.concat([msgKey, sharedKey.slice(x, x + 32)])),
+        sha1(Buffer.concat([sharedKey.slice(x + 32, x + 48), msgKey, sharedKey.slice(x + 48, x + 64)])),
+        sha1(Buffer.concat([sharedKey.slice(x + 64, x + 96), msgKey])),
+        sha1(Buffer.concat([msgKey, sharedKey.slice(x + 96, x + 128)]))
+    ])
+    const key = Buffer.concat([sha1a.slice(0, 8), sha1b.slice(8, 20), sha1c.slice(4, 16)])
+    const iv = Buffer.concat([sha1a.slice(8, 20), sha1b.slice(0, 8), sha1c.slice(16, 20), sha1d.slice(0, 8)])
+    return {
+        key,
+        iv
+    }
+}
+
+ */
 export function stripText(text: string, entities: Api.TypeMessageEntity[]) {
     if (!entities || !entities.length) {
         return text.trim();
@@ -240,6 +342,12 @@ export function stripText(text: string, entities: Api.TypeMessageEntity[]) {
     return text;
 }
 
+/**
+ * Generates the key data corresponding to the given nonces
+ * @param serverNonceBigInt
+ * @param newNonceBigInt
+ * @returns {{key: Buffer, iv: Buffer}}
+ */
 export async function generateKeyDataFromNonce(
     serverNonceBigInt: bigInt.BigInteger,
     newNonceBigInt: bigInt.BigInteger
@@ -265,22 +373,40 @@ export async function generateKeyDataFromNonce(
 
 export function convertToLittle(buf: Buffer): Buffer {
     const correct = Buffer.alloc(buf.length * 4);
+
     for (let i = 0; i < buf.length; i++) {
         correct.writeUInt32BE(buf[i], i * 4);
     }
     return correct;
 }
 
+/**
+ * Calculates the SHA1 digest for the given data
+ * @param data
+ * @returns {Promise}
+ */
 export function sha1(data: Buffer): Promise<Buffer> {
     // @ts-ignore
     return asBuffer(hashSha1.sync(data));
 }
 
+/**
+ * Calculates the SHA256 digest for the given data
+ * @param data
+ * @returns {Promise}
+ */
 export function sha256(data: Buffer): Promise<Buffer> {
     // @ts-ignore
     return asBuffer(hashSha256.sync(data));
 }
 
+/**
+ * Fast mod pow for RSA calculation. a^b % n
+ * @param a
+ * @param b
+ * @param n
+ * @returns {bigInt.BigInteger}
+ */
 export function modExp(
     a: bigInt.BigInteger,
     b: bigInt.BigInteger,
@@ -300,6 +426,12 @@ export function modExp(
     );
 }
 
+/**
+ * Gets the arbitrary-length byte array corresponding to the given integer
+ * @param integer {number,BigInteger}
+ * @param signed {boolean}
+ * @returns {Buffer}
+ */
 export function getByteArray(
     integer: bigInt.BigInteger | number,
     signed = false
@@ -329,6 +461,10 @@ export function returnBigInt(
     return bigInt(num);
 }
 
+/**
+ * Helper function to return the smaller big int in an array
+ * @param arrayOfBigInts
+ */
 export function getMinBigInt(
     arrayOfBigInts: (bigInt.BigInteger | string)[]
 ): bigInt.BigInteger {
@@ -347,16 +483,33 @@ export function getMinBigInt(
     return smallest;
 }
 
+/**
+ * returns a random int from min (inclusive) and max (inclusive)
+ * @param min
+ * @param max
+ * @returns {number}
+ */
 export function getRandomInt(min: number, max: number): number {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Sleeps a specified amount of time
+ * @param ms time in milliseconds
+ * @param isUnref make a timer unref'ed
+ * @returns {Promise}
+ */
 export const sleep = (ms: number, isUnref: boolean = false) =>
     new Promise((resolve) =>
         isUnref ? timers.setTimeout(resolve, ms).unref() : timers.setTimeout(resolve, ms)
     );
+
+/**
+ * Helper to export two buffers of same length
+ * @returns {Buffer}
+ */
 
 export function bufferXor(a: Buffer, b: Buffer): Buffer {
     const res = [];
@@ -366,6 +519,7 @@ export function bufferXor(a: Buffer, b: Buffer): Buffer {
     return Buffer.from(res);
 }
 
+// Taken from https://stackoverflow.com/questions/18638900/javascript-crc32/18639999#18639999
 function makeCRCTable() {
     let c;
     const crcTable = [];
@@ -461,5 +615,6 @@ export function _entityType(entity: EntityLike) {
     } else if (name.includes("Self")) {
         return _EntityType.USER;
     }
+    // 'Empty' in name or not found, we don't care, not a valid entity.
     throw new Error(`${entity} does not have any entity type`);
 }

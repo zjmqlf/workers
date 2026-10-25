@@ -6,12 +6,17 @@ import * as utils from "../../Utils";
 import { Api } from "../../tl";
 import { _fileToMedia } from "./uploads";
 
+/** Parameters for {@link updateProfile}. Only the fields you set are changed. */
 export interface UpdateProfileParams {
+    /** New first name. */
     firstName?: string;
+    /** New last name. Pass an empty string to remove it. */
     lastName?: string;
+    /** New bio ("about"). Pass an empty string to remove it. */
     about?: string;
 }
 
+/** @hidden */
 export async function updateProfile(
     client: TelegramClient,
     params: UpdateProfileParams
@@ -23,6 +28,7 @@ export async function updateProfile(
     });
 }
 
+/** @hidden */
 export async function updateUsername(
     client: TelegramClient,
     username: string
@@ -30,6 +36,7 @@ export async function updateUsername(
     return client.api.account.updateUsername({ username: username });
 }
 
+/** @hidden */
 export async function updateStatus(
     client: TelegramClient,
     online: boolean = true
@@ -51,15 +58,23 @@ async function _toInputFile(
     return fileHandle;
 }
 
+/** Parameters for {@link uploadProfilePhoto}. */
 export interface UploadProfilePhotoParams {
+    /** The photo to upload (path, Buffer, File, or an uploaded {@link Api.TypeInputFile}). */
     file?: FileLike;
+    /** An animated profile video to upload instead of a photo. */
     video?: FileLike;
+    /** Timestamp (in seconds) of the video frame to use as the static preview. */
     videoStartTs?: number;
+    /** Sticker/custom-emoji markup to generate an animated photo instead of uploading one. */
     videoEmojiMarkup?: Api.TypeVideoSize;
+    /** Set as the fallback photo, shown to users prevented from seeing the main one by privacy settings. */
     fallback?: boolean;
+    /** Bot owners: change the photo of an owned bot instead. */
     bot?: EntityLike;
 }
 
+/** @hidden */
 export async function uploadProfilePhoto(
     client: TelegramClient,
     params: UploadProfilePhotoParams
@@ -84,6 +99,7 @@ export async function uploadProfilePhoto(
     );
 }
 
+/** @hidden */
 export async function updateProfilePhoto(
     client: TelegramClient,
     photo: Api.TypeInputPhoto | Api.TypePhoto,
@@ -102,6 +118,7 @@ export async function updateProfilePhoto(
     );
 }
 
+/** @hidden */
 export async function deleteProfilePhotos(
     client: TelegramClient,
     photos: (Api.TypeInputPhoto | Api.TypePhoto)[]
@@ -113,12 +130,17 @@ export async function deleteProfilePhotos(
     );
 }
 
+/** Parameters for {@link getUserPhotos}. */
 export interface GetUserPhotosParams {
+    /** Number of photos to skip. */
     offset?: number;
+    /** Only return photos with IDs lower than this one. */
     maxId?: BigInteger;
+    /** Maximum number of photos to return (server caps at 100 per request). */
     limit?: number;
 }
 
+/** @hidden */
 export async function getUserPhotos(
     client: TelegramClient,
     entity: EntityLike,
@@ -142,12 +164,20 @@ export async function getUserPhotos(
     return photos;
 }
 
+// region sessions, privacy & settings
+
+/** @hidden */
 export async function getAuthorizations(
     client: TelegramClient
 ): Promise<Api.account.Authorizations> {
     return client.api.account.getAuthorizations({});
 }
 
+/**
+ * Terminates a session from {@link getAuthorizations}. Pass no hash (or zero)
+ * to terminate ALL other sessions.
+ * @hidden
+ */
 export async function resetAuthorization(
     client: TelegramClient,
     hash?: BigInteger
@@ -158,6 +188,7 @@ export async function resetAuthorization(
     return client.api.account.resetAuthorization({ hash: hash });
 }
 
+/** @hidden */
 export async function getPrivacy(
     client: TelegramClient,
     key: Api.TypeInputPrivacyKey
@@ -165,6 +196,7 @@ export async function getPrivacy(
     return client.invoke(new Api.account.GetPrivacy({ key: key }));
 }
 
+/** @hidden */
 export async function setPrivacy(
     client: TelegramClient,
     key: Api.TypeInputPrivacyKey,
@@ -173,6 +205,7 @@ export async function setPrivacy(
     return client.invoke(new Api.account.SetPrivacy({ key: key, rules: rules }));
 }
 
+/** @hidden */
 export async function getNotifySettings(
     client: TelegramClient,
     entity: EntityLike | Api.TypeInputNotifyPeer
@@ -184,16 +217,25 @@ export async function getNotifySettings(
     );
 }
 
+/** New notification settings for {@link updateNotifySettings}. Only the fields you set are changed. */
 export interface UpdateNotifySettingsParams {
+    /** Whether to show message previews in notifications. */
     showPreviews?: boolean;
+    /** Whether to deliver notifications without sound. */
     silent?: boolean;
+    /** Mute the peer until this Unix time. Use a far-future value (e.g. `2147483647`) to mute forever, `0` to unmute. */
     muteUntil?: number;
+    /** Notification sound. */
     sound?: Api.TypeNotificationSound;
+    /** Mute stories from this peer. */
     storiesMuted?: boolean;
+    /** Hide the sender name on story notifications. */
     storiesHideSender?: boolean;
+    /** Notification sound for stories. */
     storiesSound?: Api.TypeNotificationSound;
 }
 
+/** @hidden */
 export async function updateNotifySettings(
     client: TelegramClient,
     entity: EntityLike | Api.TypeInputNotifyPeer,
@@ -215,11 +257,13 @@ export async function updateNotifySettings(
     );
 }
 
+/** @hidden */
 export async function getAccountTTL(client: TelegramClient): Promise<number> {
     const result = await client.api.account.getAccountTTL({});
     return result.days;
 }
 
+/** @hidden */
 export async function setAccountTTL(
     client: TelegramClient,
     days: number
@@ -231,12 +275,14 @@ export async function setAccountTTL(
     );
 }
 
+/** @hidden */
 export async function getGlobalPrivacySettings(
     client: TelegramClient
 ): Promise<Api.TypeGlobalPrivacySettings> {
     return client.api.account.getGlobalPrivacySettings({});
 }
 
+/** @hidden */
 export async function setGlobalPrivacySettings(
     client: TelegramClient,
     settings: Api.TypeGlobalPrivacySettings
@@ -245,3 +291,5 @@ export async function setGlobalPrivacySettings(
         new Api.account.SetGlobalPrivacySettings({ settings: settings })
     );
 }
+
+// endregion

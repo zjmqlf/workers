@@ -1,0 +1,132 @@
+import type { TelegramClient } from "../../client/TelegramClient";
+import { Api } from "../api";
+import type { Entity } from "../../define";
+import { getDisplayName, getInputChannel, getInputPeer, getPeerId } from "../../Utils";
+import { Draft } from "./draft";
+import { returnBigInt } from "../../Helpers";
+import bigInt from "big-integer";
+import type { SendMessageParams } from "../../client/methods/messages";
+import type { DeleteHistoryParams } from "../../client/methods/chats";
+
+export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
+    _client: TelegramClient;
+    dialog: D;
+    pinned: boolean;
+    folderId?: number;
+    archived: boolean;
+    message?: Api.Message;
+    date?: number;
+    entity?: Entity;
+    inputEntity: Api.TypeInputPeer;
+    id?: bigInt.BigInteger;
+    name?: string;
+    title?: string;
+    unreadCount: number;
+    unreadMentionsCount: number;
+    draft: Draft;
+    isUser: boolean;
+    isGroup: boolean;
+    isChannel: boolean;
+    isCommunity: boolean;
+
+    constructor(
+        client: TelegramClient,
+        dialog: D,
+        entities: Map<string, Entity>,
+        message?: Api.Message
+    ) {
+        this._client = client;
+        this.dialog = dialog;
+        this.pinned = !!dialog.pinned;
+        this.folderId = dialog instanceof Api.Dialog ? dialog.folderId : undefined;
+        this.archived = this.folderId != undefined;
+        this.message = message;
+        this.date = this.message?.date;
+
+        const peer = dialog instanceof Api.DialogCommunity
+            ? new Api.PeerChannel({ channelId: dialog.communityId })
+            : dialog.peer;
+        this.entity = entities.get(getPeerId(peer));
+        this.inputEntity = getInputPeer(this.entity);
+        if (this.entity) {
+            this.id = returnBigInt(getPeerId(this.entity));
+            this.name = this.title = getDisplayName(this.entity);
+        }
+
+        this.unreadCount = dialog instanceof Api.Dialog ? dialog.unreadCount : 0;
+        this.unreadMentionsCount = dialog instanceof Api.Dialog ? dialog.unreadMentionsCount : 0;
+        if (!this.entity) {
+            throw new Error("Entity not found for dialog");
+        }
+        this.draft = new Draft(client, this.entity, dialog instanceof Api.Dialog ? dialog.draft : undefined);
+
+        this.isUser = this.entity instanceof Api.User;
+        this.isGroup = !!(
+            this.entity instanceof Api.Chat ||
+            this.entity instanceof Api.ChatForbidden ||
+            (this.entity instanceof Api.Channel && this.entity.megagroup)
+        );
+        this.isChannel = this.entity instanceof Api.Channel;
+        this.isCommunity = dialog instanceof Api.DialogCommunity;
+    }
+
+    get inputDialog(): Api.TypeInputDialogPeer {
+        return this.isCommunity
+            ? new Api.InputDialogPeerCommunity({ community: getInputChannel(this.inputEntity) })
+            : new Api.InputDialogPeer({ peer: this.inputEntity });
+    }
+
+    async setCollapsed(collapsed: boolean) {
+        if (!this.isCommunity) throw new Error("The dialog is not a community");
+        const result = await this._client.setCommunityCollapsed(this.inputEntity, collapsed);
+        if (this.entity instanceof Api.Community) {
+            this.entity.collapsedInDialogs = collapsed || undefined;
+        }
+        return result;
+    }
+
+    async send(params: string | SendMessageParams) {
+        return this._client.sendMessage(
+            this.inputEntity,
+            typeof params === "string" ? { message: params } : params
+        );
+    }
+
+    async markAsRead(params?: { clearMentions?: boolean }) {
+        return this._client.markAsRead(this.inputEntity, undefined, params);
+    }
+
+    async archive() {
+        this.archived = true;
+        this.folderId = 1;
+        return this._client.editPeerFolders(this.inputEntity, 1);
+    }
+
+    async unarchive() {
+        this.archived = false;
+        this.folderId = 0;
+        return this._client.editPeerFolders(this.inputEntity, 0);
+    }
+
+    async pin(pinned: boolean = true) {
+        const result = await this._client.invoke(
+            new Api.messages.ToggleDialogPin({
+                peer: this.inputDialog as unknown as Api.TypeEntityLike,
+                pinned: pinned || undefined,
+            })
+        );
+        this.pinned = pinned;
+        return result;
+    }
+
+    async unpin() {
+        return this.pin(false);
+    }
+
+    async delete(params?: DeleteHistoryParams) {
+        if (this.isChannel || this.isCommunity) {
+            return this._client.leaveChannel(this.inputEntity);
+        }
+        return this._client.deleteHistory(this.inputEntity, params);
+    }
+}

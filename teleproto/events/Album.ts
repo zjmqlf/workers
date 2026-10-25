@@ -4,8 +4,25 @@ import { Api } from "../tl";
 import type { TelegramClient } from "../client/TelegramClient";
 import timers from "node:timers";
 
-const _ALBUM_DELAY = 500;
+const _ALBUM_DELAY = 500; // 0.5 sec
 
+/**
+ * Occurs whenever an album (multiple grouped messages with media) arrive.
+ * @example
+ * ```ts
+ * // Albums are basically a list of messages. so event is a list
+ *   async function listenForAlbums(event: AlbumEvent) {
+ *       const messages = event.messages;
+ *       for (const message of messages){
+ *           console.log("Caption is",message.text);
+ *           console.log("Message id is",message.id);
+ *           console.log("Chat id is",message.chatId);
+ *       }
+ *   }
+ * // adds an event handler for new messages
+ * client.addEventHandler(listenForAlbums, new Album({}));
+ * ```
+ */
 export class Album extends EventBuilder {
     func?: { (event: Album): boolean };
 
@@ -44,6 +61,7 @@ export class Album extends EventBuilder {
                 }
                 const messages: Api.Message[] = [];
                 for (const update of updates) {
+                    // there is probably an easier way
                     if (
                         "message" in update &&
                         update.message instanceof Api.Message
@@ -79,6 +97,7 @@ export class AlbumEvent extends EventCommon {
         super._setClient(client);
         for (let i = 0; i < this.messages.length; i++) {
             try {
+                // todo make sure this never fails
                 this.messages[i]._finishInit(
                     client,
                     this.originalUpdates[i]._entities || new Map(),

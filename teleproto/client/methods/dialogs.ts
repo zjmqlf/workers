@@ -9,7 +9,18 @@ import bigInt from "big-integer";
 
 const _MAX_CHUNK_SIZE = 100;
 
+/**
+ Get the key to get messages from a dialog.
+
+ We cannot just use the message ID because channels share message IDs,
+ and the peer ID is required to distinguish between them. But it is not
+ necessary in small group chats and private chats.
+ * @param {Api.TypePeer} [peer] the dialog peer
+ * @param {number} [messageId] the message id
+ * @return {[number,number]} the channel id and message id
+ */
 function _dialogMessageKey(peer: Api.TypePeer, messageId: number): string {
+    // can't use arrays as keys for map :( need to convert to string.
     return (
         "" +
         [
@@ -29,6 +40,13 @@ export interface DialogsIterInterface {
     includeCommunities?: boolean;
 }
 
+/**
+ * Async iterator over the user's dialogs (conversations).
+ *
+ * Fetches dialogs in chunks, supports date/ID offsets, folder filtering,
+ * and can skip pinned or migrated chats. Used internally by `iterDialogs` / `getDialogs`.
+ * @internal
+ */
 export class _DialogsIter<IncludeCommunities extends boolean = false> extends RequestIter {
     private request?: Api.messages.GetDialogs;
     private seen?: Set<any>;
@@ -56,6 +74,7 @@ export class _DialogsIter<IncludeCommunities extends boolean = false> extends Re
             folderId: folder,
         });
         if (this.limit <= 0) {
+            // Special case, get a single dialog and determine count
             const dialogs = await this.client.invoke(this.request);
             if ("count" in dialogs) {
                 this.total = dialogs.count;
@@ -107,6 +126,7 @@ export class _DialogsIter<IncludeCommunities extends boolean = false> extends Re
                 let message = m as unknown as Api.Message;
                 try {
                     if (message && "_finishInit" in message) {
+                        // todo make sure this never fails
                         message._finishInit(this.client, entities, undefined);
                     }
                 } catch (e) {
@@ -145,6 +165,11 @@ export class _DialogsIter<IncludeCommunities extends boolean = false> extends Re
                 if (!this.seen.has(peerId)) {
                     this.seen.add(peerId);
                     if (!entities.has(peerId)) {
+                        /*
+                         > In which case can a UserEmpty appear in the list of banned members?
+                         > In a very rare cases. This is possible but isn't an expected behavior.
+                         Real world example: https://t.me/TelethonChat/271471
+                         */
                         continue;
                     }
                     const cd = new Dialog(this.client, d, entities, message);
@@ -188,18 +213,35 @@ export class _DialogsIter<IncludeCommunities extends boolean = false> extends Re
     }
 }
 
+/** interface for iterating and getting dialogs. */
 export interface IterDialogsParams<IncludeCommunities extends boolean = false> {
+    /** Include community rows; defaults to false to preserve conversation-only results. */
     includeCommunities?: IncludeCommunities;
+    /**  How many dialogs to be retrieved as maximum. Can be set to undefined to retrieve all dialogs.<br/>
+     * Note that this may take whole minutes if you have hundreds of dialogs, as Telegram will tell the library to slow down through a FloodWaitError.*/
     limit?: number;
+    /** The offset date of last message of dialog to be used. */
     offsetDate?: DateLike;
+    /** The message ID to be used as offset. */
     offsetId?: number;
+    /** offset Peer to be used (defaults to Empty = no offset) */
     offsetPeer?: EntityLike;
+    /** Whether pinned dialogs should be ignored or not. When set to true, these won't be yielded at all. */
     ignorePinned?: boolean;
+    /**  Whether Chat that have migratedTo a Supergroup should be included or not.<br/>
+     * By default all the chats in your dialogs are returned, but setting this to True will ignore (i.e. skip) them in the same way official applications do.*/
     ignoreMigrated?: boolean;
+    /** The folder from which the dialogs should be retrieved.<br/>
+     * If left unspecified, all dialogs (including those from folders) will be returned.<br/>
+     * If set to 0, all dialogs that don't belong to any folder will be returned.<br/>
+     * If set to a folder number like 1, only those from said folder will be returned.<br/>
+     * By default Telegram assigns the folder ID 1 to archived chats, so you should use that if you need to fetch the archived dialogs.<br/> */
     folder?: number;
+    /**  Alias for folder. If unspecified, all will be returned, false implies `folder:0` and True implies `folder:1`.*/
     archived?: boolean;
 }
 
+/** @hidden */
 export function iterDialogs<IncludeCommunities extends boolean = false>(
     client: TelegramClient,
     {
@@ -234,6 +276,7 @@ export function iterDialogs<IncludeCommunities extends boolean = false>(
     );
 }
 
+/** @hidden */
 export async function getDialogs<IncludeCommunities extends boolean = false>(
     client: TelegramClient,
     params: IterDialogsParams<IncludeCommunities>

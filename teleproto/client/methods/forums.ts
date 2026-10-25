@@ -5,14 +5,21 @@ import { generateRandomBigInt } from "../../Helpers";
 import { Api } from "../../tl";
 import { getInputChannel } from "../../Utils";
 
+/** Parameters for {@link createForumTopic}. */
 export interface CreateForumTopicParams {
+    /** The topic title. */
     title: string;
+    /** RGB color of the fallback topic icon. */
     iconColor?: number;
+    /** ID of a custom emoji to use as the topic icon. */
     iconEmojiId?: BigInteger;
+    /** Create the topic without a name (direct-messages channels). */
     titleMissing?: boolean;
+    /** Send the topic-creation message as a specific peer. */
     sendAs?: EntityLike;
 }
 
+/** @hidden */
 export async function createForumTopic(
     client: TelegramClient,
     entity: EntityLike,
@@ -34,13 +41,19 @@ export async function createForumTopic(
     );
 }
 
+/** Parameters for {@link editForumTopic}. Only the fields you set are changed. */
 export interface EditForumTopicParams {
+    /** New topic title. */
     title?: string;
+    /** ID of a custom emoji to use as the new topic icon. Pass `0` as BigInteger to remove it. */
     iconEmojiId?: BigInteger;
+    /** Close or reopen the topic. */
     closed?: boolean;
+    /** Hide or unhide the topic (only for the "General" topic). */
     hidden?: boolean;
 }
 
+/** @hidden */
 export async function editForumTopic(
     client: TelegramClient,
     entity: EntityLike,
@@ -60,6 +73,7 @@ export async function editForumTopic(
     );
 }
 
+/** @hidden */
 export async function updatePinnedForumTopic(
     client: TelegramClient,
     entity: EntityLike,
@@ -76,6 +90,7 @@ export async function updatePinnedForumTopic(
     );
 }
 
+/** @hidden */
 export async function reorderPinnedForumTopics(
     client: TelegramClient,
     entity: EntityLike,
@@ -92,14 +107,21 @@ export async function reorderPinnedForumTopics(
     );
 }
 
+/** Parameters for {@link getForumTopics}. */
 export interface GetForumTopicsParams {
+    /** Search query for topic titles. */
     search?: string;
+    /** Offset date for pagination. */
     offsetDate?: number;
+    /** Offset message ID for pagination. */
     offsetId?: number;
+    /** Offset topic ID for pagination. */
     offsetTopic?: number;
+    /** Maximum number of topics to return. */
     limit?: number;
 }
 
+/** @hidden */
 export async function getForumTopics(
     client: TelegramClient,
     entity: EntityLike,
@@ -118,6 +140,7 @@ export async function getForumTopics(
     );
 }
 
+/** @hidden */
 export async function getForumTopicsByID(
     client: TelegramClient,
     entity: EntityLike,
@@ -132,6 +155,7 @@ export async function getForumTopicsByID(
     );
 }
 
+/** @hidden */
 export async function toggleForum(
     client: TelegramClient,
     entity: EntityLike,
@@ -146,6 +170,7 @@ export async function toggleForum(
     });
 }
 
+/** @hidden */
 export async function toggleViewForumAsMessages(
     client: TelegramClient,
     entity: EntityLike,

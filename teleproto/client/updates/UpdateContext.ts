@@ -4,6 +4,7 @@ import { EventCommon } from "../../events/common";
 import { getPeer } from "../../Utils";
 import bigInt from "big-integer";
 
+/** Chat access for raw updates; entity fetching is deferred until `getChat()`. */
 export class UpdateContext extends EventCommon {
     private pendingChat?: Promise<Entity | undefined>;
 
@@ -13,10 +14,12 @@ export class UpdateContext extends EventCommon {
         this._setClient(client);
     }
 
+    /** Attached users and chats keyed by marked peer ID; reading never makes an RPC. */
     get peers(): ReadonlyMap<string, Entity> {
         return this._entities;
     }
 
+    /** Returns the attached chat or fetches it, sharing concurrent calls within this update. */
     async getChat(): Promise<Entity | undefined> {
         if (!this.pendingChat) {
             this.pendingChat = super.getChat();
@@ -30,4 +33,5 @@ export class UpdateContext extends EventCommon {
     }
 }
 
+/** The original event with a non-enumerable chat context. */
 export type WithUpdateContext<T> = T & { readonly context: UpdateContext };

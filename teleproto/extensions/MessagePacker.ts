@@ -22,6 +22,7 @@ export class MessagePacker {
         this._state = state;
         this._queue = [];
         this._pendingStates = [];
+
         this._ready = new Promise((resolve) => {
             this.setReady = resolve;
         });
@@ -37,8 +38,10 @@ export class MessagePacker {
     }
 
     append(state?: RequestState, setReady = true, atStart = false) {
+        // We need to check if there is already a `USE_INVOKE_AFTER_WITH` request
         if (state && USE_INVOKE_AFTER_WITH.has(state.request.className)) {
             if (atStart) {
+                // Assign `after` for the previously first `USE_INVOKE_AFTER_WITH` request
                 for (let i = 0; i < this._queue.length; i++) {
                     if (
                         USE_INVOKE_AFTER_WITH.has(
@@ -50,6 +53,7 @@ export class MessagePacker {
                     }
                 }
             } else {
+                // Assign after for the previous `USE_INVOKE_AFTER_WITH` request
                 for (let i = this._queue.length - 1; i >= 0; i--) {
                     if (
                         USE_INVOKE_AFTER_WITH.has(
@@ -62,18 +66,22 @@ export class MessagePacker {
                 }
             }
         }
+
         if (atStart) {
             this._queue.unshift(state);
         } else {
             this._queue.push(state);
         }
+
         if (setReady && this.setReady) {
             this.setReady(true);
         }
+
+        // 1658238041=MsgsAck, we don't care about MsgsAck here because they never resolve anyway.
         if (state && state.request.CONSTRUCTOR_ID !== 1658238041) {
             this._pendingStates.push(state);
             state
-                .promise!
+                .promise! // Using finally causes triggering `unhandledrejection` event
                 .catch((err) => {})
                 .finally(() => {
                     this._pendingStates = this._pendingStates.filter(

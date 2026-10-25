@@ -74,7 +74,7 @@ class FileHashChecker {
 
     async verify(absOffset: number, data: Buffer): Promise<void> {
         if (this._unsupported || !data.length) return;
-        if (absOffset % HASH_BLOCK !== 0) return;
+        if (absOffset % HASH_BLOCK !== 0) return; // parts are block-aligned
         for (let o = 0; o < data.length; o += HASH_BLOCK) {
             const abs = absOffset + o;
             let expected = this._hashes.get(abs);
@@ -82,7 +82,7 @@ class FileHashChecker {
                 await this._fetch(abs);
                 expected = this._hashes.get(abs);
             }
-            if (!expected) return;
+            if (!expected) return; // unsupported location or past EOF
             const block = data.subarray(o, Math.min(o + HASH_BLOCK, data.length));
             const actual = asBuffer(sha256.sync(block));
             if (!actual.equals(expected)) {
@@ -121,6 +121,7 @@ class FileHashChecker {
     }
 }
 
+/** @hidden */
 export async function downloadFile(
     client: TelegramClient,
     inputLocation: Api.TypeInputFileLocation,
@@ -230,6 +231,7 @@ export interface DownloadMediaInterface extends DownloadCancelParams {
     progressCallback?: ProgressCallback;
 }
 
+/** @hidden */
 export async function downloadMedia(
     client: TelegramClient,
     messageOrMedia: Api.Message | Api.TypeMessageMedia,
@@ -312,6 +314,7 @@ export async function downloadMedia(
     }
 }
 
+/** @hidden */
 export async function _downloadDocument(
     client: TelegramClient,
     doc: Api.MessageMediaDocument | Api.TypeDocument,
@@ -369,6 +372,7 @@ export async function _downloadDocument(
     );
 }
 
+/** @hidden */
 export async function _downloadContact(
     _client: TelegramClient,
     media: Api.MessageMediaContact,
@@ -392,6 +396,7 @@ export async function _downloadContact(
 
 const WEB_FILE_PART = 128 * 1024;
 
+/** @hidden */
 export async function _downloadWebDocument(
     client: TelegramClient,
     media: Api.WebDocument | Api.WebDocumentNoProxy,
@@ -445,6 +450,7 @@ function pickFileSize(sizes: Api.TypePhotoSize[], sizeType: string) {
     return undefined;
 }
 
+/** @hidden */
 function getThumb(
     thumbs: (Api.TypePhotoSize | Api.TypeVideoSize)[],
     thumb?: number | string | Api.TypePhotoSize | Api.VideoSize
@@ -495,6 +501,7 @@ function getThumb(
     }
 }
 
+/** @hidden */
 export async function _downloadCachedPhotoSize(
     size: Api.PhotoCachedSize | Api.PhotoStrippedSize,
     outputFile?: OutFile
@@ -532,6 +539,7 @@ function getProperFilename(
     return file;
 }
 
+/** @hidden */
 export async function _downloadPhoto(
     client: TelegramClient,
     photo: Api.MessageMediaPhoto | Api.Photo,
@@ -592,6 +600,7 @@ export async function _downloadPhoto(
     );
 }
 
+/** @hidden */
 export async function downloadProfilePhoto(
     client: TelegramClient,
     entity: EntityLike,
@@ -635,13 +644,23 @@ export async function downloadProfilePhoto(
     });
 }
 
+/** Parameters for {@link TelegramClient.iterDownload}. */
 export interface IterDownloadParams extends DownloadCancelParams {
+    /** Byte offset to start downloading from. Must be divisible by 4096 unless `precise` handles it (it does by default). */
     offset?: bigInt.BigInteger | number;
+    /** Stop after this many bytes (approximate — rounded up to whole chunks). */
     limit?: number;
+    /** Size of each downloaded chunk in bytes. Must be divisible by 4096; server caps at 1 MB. Defaults to 512 KB. */
     requestSize?: number;
+    /** The DC to download from. Auto-corrected on FILE_MIGRATE. */
     dcId?: number;
 }
 
+/**
+ * Iterates over a file's contents chunk by chunk — streaming download
+ * without buffering the whole file in memory.
+ * @hidden
+ */
 export async function* iterDownload(
     client: TelegramClient,
     file:

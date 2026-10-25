@@ -303,7 +303,7 @@ export class UpdateManager implements ChannelUpdatesHost {
     saveState() {
         if (this.saveTimer) return;
         this.saveTimer = timers.setTimeout(() => this.flushState(), STATE_SAVE_DELAY_MS);
-        this.saveTimer.unref?.();
+        this.saveTimer?.unref?.();
     }
 
     private flushState() {

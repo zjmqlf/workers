@@ -34,6 +34,15 @@ interface ChatActionInterface {
     autoCancel: boolean;
 }
 
+/**
+ * Sends a chat action (e.g. "typing…") that repeats at a fixed interval until stopped.
+ *
+ * Supported action strings: `"typing"`, `"contact"`, `"game"`, `"location"`,
+ * `"record-audio"` / `"record-voice"`, `"record-round"`, `"record-video"`,
+ * `"audio"` / `"voice"` / `"song"`, `"round"`, `"video"`, `"photo"`,
+ * `"document"` / `"file"`, `"cancel"`.
+ * @internal
+ */
 class _ChatAction {
     static _str_mapping = {
         typing: new Api.SendMessageTypingAction(),
@@ -42,19 +51,19 @@ class _ChatAction {
         location: new Api.SendMessageGeoLocationAction(),
 
         "record-audio": new Api.SendMessageRecordAudioAction(),
-        "record-voice": new Api.SendMessageRecordAudioAction(),
+        "record-voice": new Api.SendMessageRecordAudioAction(), //alias
         "record-round": new Api.SendMessageRecordRoundAction(),
         "record-video": new Api.SendMessageRecordVideoAction(),
 
         audio: new Api.SendMessageUploadAudioAction({ progress: 1 }),
-        voice: new Api.SendMessageUploadAudioAction({ progress: 1 }),
-        song: new Api.SendMessageUploadAudioAction({ progress: 1 }),
+        voice: new Api.SendMessageUploadAudioAction({ progress: 1 }), // alias
+        song: new Api.SendMessageUploadAudioAction({ progress: 1 }), // alias
         round: new Api.SendMessageUploadRoundAction({ progress: 1 }),
         video: new Api.SendMessageUploadVideoAction({ progress: 1 }),
 
         photo: new Api.SendMessageUploadPhotoAction({ progress: 1 }),
         document: new Api.SendMessageUploadDocumentAction({ progress: 1 }),
-        file: new Api.SendMessageUploadDocumentAction({ progress: 1 }),
+        file: new Api.SendMessageUploadDocumentAction({ progress: 1 }), // alias
 
         cancel: new Api.SendMessageCancelAction(),
     };
@@ -165,6 +174,7 @@ export class _ParticipantsIter extends RequestIter {
         entity = await this.client.getInputEntity(entity);
         const ty = helpers._entityType(entity);
         if (search && (filter || ty != helpers._EntityType.CHANNEL)) {
+            // We need to 'search' ourselves unless we have a PeerChannel
             search = search.toLowerCase();
             this.filterEntity = (entity: Entity) => {
                 return (
@@ -180,12 +190,14 @@ export class _ParticipantsIter extends RequestIter {
         } else {
             this.filterEntity = (entity: Entity) => true;
         }
+        // Only used for channels, but we should always set the attribute
         this.request = undefined;
         if (ty == helpers._EntityType.CHANNEL) {
             if (showTotal) {
                 const channel = await this.client.api.channels.getFullChannel(
                     { channel: utils.getInputChannel(entity) }
                 );
+                
                 if (channel.fullChat instanceof Api.ChannelFull) {
                     this.total = channel.fullChat.participantsCount;
                 }
@@ -296,34 +308,61 @@ export class _ParticipantsIter extends RequestIter {
     }
 }
 
+/** Event filter for {@link TelegramClient.iterAdminLog}/{@link TelegramClient.getAdminLog}. Set only the event types you want. */
 export interface AdminLogFilterParams {
+    /** Join events, including joins via invite links. */
     join?: boolean;
+    /** Leave events. */
     leave?: boolean;
+    /** Invite events. */
     invite?: boolean;
+    /** Ban events. */
     ban?: boolean;
+    /** Unban events. */
     unban?: boolean;
+    /** Kick events. */
     kick?: boolean;
+    /** Unkick events. */
     unkick?: boolean;
+    /** Admin promotion events. */
     promote?: boolean;
+    /** Admin demotion events. */
     demote?: boolean;
+    /** Info changes (title, about, photo…). */
     info?: boolean;
+    /** Settings changes. */
     settings?: boolean;
+    /** Message pin events. */
     pinned?: boolean;
+    /** Message edit events. */
     edit?: boolean;
+    /** Message delete events. */
     delete?: boolean;
+    /** Group call events. */
     groupCall?: boolean;
+    /** Invite link create/edit/revoke/delete events. */
     invites?: boolean;
+    /** Message send events. */
     send?: boolean;
+    /** Forum topic events. */
     forums?: boolean;
+    /** Channel subscription extension events. */
     subExtend?: boolean;
+    /** Admin custom-rank change events. */
     editRank?: boolean;
 }
 
+/** Parameters for {@link TelegramClient.iterAdminLog}/{@link TelegramClient.getAdminLog}. */
 export interface AdminLogParams extends AdminLogFilterParams {
+    /** How many events to retrieve. Defaults to all. */
     limit?: number;
+    /** Search query to filter events. */
     search?: string;
+    /** Only show events from these admins. */
     admins?: EntitiesLike;
+    /** Minimum event ID. */
     minId?: BigInteger;
+    /** Maximum event ID. */
     maxId?: BigInteger;
 }
 
@@ -335,6 +374,7 @@ export class _AdminLogIter extends RequestIter {
         const { entity, search, admins, minId, maxId, limit, ...filterArgs } =
             params;
         let eventsFilter = undefined;
+
         if (Object.values(filterArgs).find((element) => element === true)) {
             eventsFilter = new Api.ChannelAdminLogEventsFilter({
                 ...filterArgs,
@@ -410,14 +450,23 @@ export class _AdminLogIter extends RequestIter {
     }
 }
 
+/**
+ * Used in iterParticipant and getParticipant. all params are optional.
+ */
 export interface IterParticipantsParams {
+    /** how many members to retrieve. defaults to Number.MAX_SAFE_INTEGER (everyone) */
     limit?: number;
+    /** how many members to skip. defaults to 0 */
     offset?: number;
+    /** a query string to filter participants based on their display names and usernames. defaults to "" (everyone) */
     search?: string;
+    /** optional filter to be used. E.g only admins filter or only banned members filter. PS : some filters need more permissions. */
     filter?: Api.TypeChannelParticipantsFilter;
+    /** whether to call an extra request (GetFullChannel) to show the total of users in the group/channel. if set to false total will be 0 */
     showTotal?: boolean;
 }
 
+/** @hidden */
 export function iterParticipants(
     client: TelegramClient,
     entity: EntityLike,
@@ -437,6 +486,7 @@ export function iterParticipants(
     );
 }
 
+/** @hidden */
 export async function getParticipants(
     client: TelegramClient,
     entity: EntityLike,
@@ -446,6 +496,7 @@ export async function getParticipants(
     return (await it.collect()) as TotalList<UserWithParticipant>;
 }
 
+/** @hidden */
 export async function kickParticipant(
     client: TelegramClient,
     entity: EntityLike,
@@ -494,30 +545,57 @@ export async function kickParticipant(
     return client._getResponseMessage(request, resp, entity);
 }
 
+// region admin rights
+
+/** Restrictions to apply with {@link TelegramClient.editBanned}. Every unset right stays allowed. */
 export interface EditBannedParams {
+    /** Until when the restrictions apply. Defaults to forever. */
     untilDate?: number | Date;
+    /** Disallow viewing messages (a full ban — kicks the participant). */
     viewMessages?: boolean;
+    /** Disallow sending messages of any kind. */
     sendMessages?: boolean;
+    /** Disallow sending any media. */
     sendMedia?: boolean;
+    /** Disallow sending stickers. */
     sendStickers?: boolean;
+    /** Disallow sending GIFs. */
     sendGifs?: boolean;
+    /** Disallow sending games. */
     sendGames?: boolean;
+    /** Disallow using inline bots. */
     sendInline?: boolean;
+    /** Disallow embedding link previews. */
     embedLinks?: boolean;
+    /** Disallow sending polls. */
     sendPolls?: boolean;
+    /** Disallow sending photos. */
     sendPhotos?: boolean;
+    /** Disallow sending videos. */
     sendVideos?: boolean;
+    /** Disallow sending round videos. */
     sendRoundvideos?: boolean;
+    /** Disallow sending audio files. */
     sendAudios?: boolean;
+    /** Disallow sending voice messages. */
     sendVoices?: boolean;
+    /** Disallow sending documents. */
     sendDocs?: boolean;
+    /** Disallow sending plain text messages. */
     sendPlain?: boolean;
+    /** Disallow sending reactions. */
     sendReactions?: boolean;
+    /** Disallow changing the chat info. */
     changeInfo?: boolean;
+    /** Disallow inviting users. */
     inviteUsers?: boolean;
+    /** Disallow pinning messages. */
     pinMessages?: boolean;
+    /** Disallow managing forum topics. */
     manageTopics?: boolean;
+    /** Disallow changing own rank. */
     editRank?: boolean;
+    /** Disallow managing linked peers. */
     manageLinkedPeers?: boolean;
 }
 
@@ -537,6 +615,7 @@ function _toBannedRights(
     });
 }
 
+/** @hidden */
 export async function editBanned(
     client: TelegramClient,
     entity: EntityLike,
@@ -554,28 +633,49 @@ export async function editBanned(
     );
 }
 
+/** Admin rights to grant with {@link TelegramClient.editAdmin}. Every unset right stays revoked. */
 export interface EditAdminParams {
+    /** Allow changing the chat info. */
     changeInfo?: boolean;
+    /** Allow posting messages (channels only). */
     postMessages?: boolean;
+    /** Allow editing messages (channels only). */
     editMessages?: boolean;
+    /** Allow deleting messages of other users. */
     deleteMessages?: boolean;
+    /** Allow banning users. */
     banUsers?: boolean;
+    /** Allow inviting users. */
     inviteUsers?: boolean;
+    /** Allow pinning messages. */
     pinMessages?: boolean;
+    /** Allow adding other admins. */
     addAdmins?: boolean;
+    /** Send messages anonymously, as the group itself (supergroups only). */
     anonymous?: boolean;
+    /** Allow managing group calls. */
     manageCall?: boolean;
+    /** Set for admins with no other rights, to display them in the admin list. */
     other?: boolean;
+    /** Allow managing forum topics. */
     manageTopics?: boolean;
+    /** Allow posting stories. */
     postStories?: boolean;
+    /** Allow editing stories. */
     editStories?: boolean;
+    /** Allow deleting stories. */
     deleteStories?: boolean;
+    /** Allow managing direct-messages channels. */
     manageDirectMessages?: boolean;
+    /** Allow changing admin ranks. */
     manageRanks?: boolean;
+    /** Allow managing linked peers. */
     manageLinkedPeers?: boolean;
+    /** Custom admin rank (badge shown instead of "admin"). */
     rank?: string;
 }
 
+/** @hidden */
 export async function editAdmin(
     client: TelegramClient,
     entity: EntityLike,
@@ -618,6 +718,7 @@ export async function editAdmin(
     );
 }
 
+/** @hidden */
 export async function editChatDefaultBannedRights(
     client: TelegramClient,
     entity: EntityLike,
@@ -632,6 +733,7 @@ export async function editChatDefaultBannedRights(
     );
 }
 
+/** @hidden */
 export async function getParticipant(
     client: TelegramClient,
     entity: EntityLike,
@@ -650,6 +752,11 @@ export async function getParticipant(
     });
 }
 
+// endregion
+
+// region chat info
+
+/** @hidden */
 export async function editTitle(
     client: TelegramClient,
     entity: EntityLike,
@@ -667,6 +774,7 @@ export async function editTitle(
     return client.api.channels.editTitle({ channel: utils.getInputChannel(peer), title: title });
 }
 
+/** @hidden */
 export async function editPhoto(
     client: TelegramClient,
     entity: EntityLike,
@@ -705,6 +813,7 @@ export async function editPhoto(
     );
 }
 
+/** @hidden */
 export async function editChatAbout(
     client: TelegramClient,
     entity: EntityLike,
@@ -714,6 +823,7 @@ export async function editChatAbout(
     return client.api.messages.editChatAbout({ peer: peer, about: about });
 }
 
+/** @hidden */
 export async function toggleSlowMode(
     client: TelegramClient,
     entity: EntityLike,
@@ -726,17 +836,31 @@ export async function toggleSlowMode(
     });
 }
 
+// endregion
+
+// region chat lifecycle
+
+/** Parameters for {@link TelegramClient.createChannel}. */
 export interface CreateChannelParams {
+    /** The channel title. */
     title: string;
+    /** The channel description. */
     about?: string;
+    /** Create a supergroup instead of a broadcast channel. */
     megagroup?: boolean;
+    /** Create a forum (requires `megagroup`). */
     forum?: boolean;
+    /** Whether the group will be used to import messages from a foreign chat service. */
     forImport?: boolean;
+    /** Geolocation of the supergroup (for geo chats). Requires `address`. */
     geoPoint?: Api.TypeInputGeoPoint;
+    /** Physical address of the geo chat. */
     address?: string;
+    /** Time-to-live of all messages that will be sent in the channel, in seconds. */
     ttlPeriod?: number;
 }
 
+/** @hidden */
 export async function createChannel(
     client: TelegramClient,
     params: CreateChannelParams
@@ -764,12 +888,17 @@ export async function createChannel(
     throw new Error("Could not find the created channel in the response");
 }
 
+/** Parameters for {@link TelegramClient.createChat} (small group chats). */
 export interface CreateChatParams {
+    /** The chat title. */
     title: string;
+    /** The users to invite into the chat. */
     users: EntitiesLike;
+    /** Time-to-live of all messages that will be sent in the chat, in seconds. */
     ttlPeriod?: number;
 }
 
+/** @hidden */
 export async function createChat(
     client: TelegramClient,
     params: CreateChatParams
@@ -799,6 +928,7 @@ export async function createChat(
     throw new Error("Could not find the created chat in the response");
 }
 
+/** @hidden */
 export async function joinChannel(
     client: TelegramClient,
     entity: EntityLike
@@ -807,25 +937,34 @@ export async function joinChannel(
     return client.api.channels.joinChannel({ channel: utils.getInputChannel(channel) });
 }
 
+/** @hidden */
 export async function importChatInvite(client: TelegramClient, link: string) {
     return client.api.messages.importChatInvite({
         hash: _parseInviteHash(link),
     });
 }
 
+/** @hidden */
 export async function leaveChannel(client: TelegramClient, entity: EntityLike) {
     const channel = await client.getInputEntity(entity);
     return client.api.channels.leaveChannel({ channel: utils.getInputChannel(channel) });
 }
 
+/** Parameters for {@link TelegramClient.deleteHistory}. */
 export interface DeleteHistoryParams {
+    /** Delete only messages with IDs up to and including this one. Defaults to all. */
     maxId?: number;
+    /** Delete the history for the other side as well (private chats and small groups: `revoke`; channels and supergroups: `forEveryone`). */
     revoke?: boolean;
+    /** Only clear the history for the current user, without leaving the chat (private chats and small groups only). */
     justClear?: boolean;
+    /** Only delete messages sent after this date (private chats and small groups only). */
     minDate?: number;
+    /** Only delete messages sent before this date (private chats and small groups only). */
     maxDate?: number;
 }
 
+/** @hidden */
 export async function deleteHistory(
     client: TelegramClient,
     entity: EntityLike,
@@ -849,6 +988,7 @@ export async function deleteHistory(
     });
 }
 
+/** @hidden */
 export async function editPeerFolders(
     client: TelegramClient,
     entity: EntityLike | EntityLike[],
@@ -869,8 +1009,12 @@ export async function editPeerFolders(
     );
 }
 
+// endregion
+
+/** Chat action names accepted by {@link TelegramClient.setTyping}. */
 export type ChatActionType = keyof typeof _ChatAction._str_mapping;
 
+/** @hidden */
 export async function setTyping(
     client: TelegramClient,
     entity: EntityLike,
@@ -896,6 +1040,7 @@ export async function setTyping(
     );
 }
 
+/** @hidden */
 export function iterAdminLog(
     client: TelegramClient,
     entity: EntityLike,
@@ -907,6 +1052,7 @@ export function iterAdminLog(
     });
 }
 
+/** @hidden */
 export async function getAdminLog(
     client: TelegramClient,
     entity: EntityLike,

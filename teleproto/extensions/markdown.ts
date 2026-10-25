@@ -18,6 +18,7 @@ export const DEFAULT_DELIMITERS: {
 };
 
 export class MarkdownParser {
+    // TODO maybe there is a better way :shrug:
     static parse(message: string): [string, Api.TypeMessageEntity[]] {
         let i = 0;
         const keys: { [key: string]: boolean } = {};
@@ -36,6 +37,7 @@ export class MarkdownParser {
                     foundDelim = key;
                 }
             }
+
             if (foundIndex === -1 || foundDelim == undefined) {
                 break;
             }
@@ -67,6 +69,7 @@ export class MarkdownParser {
             return text;
         }
         let insertAt: [number, string][] = [];
+
         const tempDelimiters: Map<string, string> = new Map();
         Object.keys(delimiters).forEach((key) => {
             tempDelimiters.set(delimiters[key].className, key);

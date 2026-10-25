@@ -83,6 +83,7 @@ export class ChatGetter {
                     }
                 }
             } catch (e) {
+                // do nothing
             }
         }
         return this._inputChat;

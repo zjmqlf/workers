@@ -1,3 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) sanyok12345. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.txt in the project root for details.
+ *--------------------------------------------------------------------------------------------*/
+
+/**
+ * Uint32Array -> ArrayBuffer (little-endian OS)
+ * Writes each uint32 in big-endian byte order for stable, platform-independent representation.
+ */
 export function i2abLow(buf: Uint32Array): ArrayBufferLike {
     const out = new Uint8Array(buf.length * 4);
     let o = 0;
@@ -14,10 +23,18 @@ export function i2abLow(buf: Uint32Array): ArrayBufferLike {
     return out.buffer;
 }
 
+/**
+ * Uint32Array -> ArrayBuffer (big-endian OS)
+ * Direct buffer view is already in the desired memory layout.
+ */
 export function i2abBig(buf: Uint32Array): ArrayBufferLike {
     return buf.buffer;
 }
 
+/**
+ * ArrayBuffer -> Uint32Array (little-endian OS)
+ * Reads big-endian bytes into uint32 values.
+ */
 export function ab2iLow(ab: ArrayBufferLike | Uint8Array): Uint32Array {
     const src = ab instanceof Uint8Array ? ab : new Uint8Array(ab);
     const len = src.length;
@@ -37,6 +54,9 @@ export function ab2iLow(ab: ArrayBufferLike | Uint8Array): Uint32Array {
     return out;
 }
 
+/**
+ * ArrayBuffer -> Uint32Array (big-endian OS)
+ */
 export function ab2iBig(ab: ArrayBufferLike | Uint8Array): Uint32Array {
     return ab instanceof Uint8Array
         ? new Uint32Array(
@@ -47,6 +67,7 @@ export function ab2iBig(ab: ArrayBufferLike | Uint8Array): Uint32Array {
         : new Uint32Array(ab);
 }
 
+/** Runtime endianness check (true if big-endian). */
 export const isBigEndian =
     new Uint8Array(new Uint32Array([0x01020304]).buffer)[0] === 0x01;
 

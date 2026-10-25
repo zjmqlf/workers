@@ -27,6 +27,7 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
     isUser: boolean;
     isGroup: boolean;
     isChannel: boolean;
+    /** Whether this row represents a community instead of a conversation. */
     isCommunity: boolean;
 
     constructor(
@@ -49,7 +50,7 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
         this.entity = entities.get(getPeerId(peer));
         this.inputEntity = getInputPeer(this.entity);
         if (this.entity) {
-            this.id = returnBigInt(getPeerId(this.entity));
+            this.id = returnBigInt(getPeerId(this.entity)); // ^ May be InputPeerSelf();
             this.name = this.title = getDisplayName(this.entity);
         }
 
@@ -70,12 +71,14 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
         this.isCommunity = dialog instanceof Api.DialogCommunity;
     }
 
+    /** Input dialog reference, including the distinct community constructor. */
     get inputDialog(): Api.TypeInputDialogPeer {
         return this.isCommunity
             ? new Api.InputDialogPeerCommunity({ community: getInputChannel(this.inputEntity) })
             : new Api.InputDialogPeer({ peer: this.inputEntity });
     }
 
+    /** Groups or expands a community row; unavailable for ordinary dialogs. */
     async setCollapsed(collapsed: boolean) {
         if (!this.isCommunity) throw new Error("The dialog is not a community");
         const result = await this._client.setCommunityCollapsed(this.inputEntity, collapsed);
@@ -85,6 +88,7 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
         return result;
     }
 
+    /** Sends a message to this dialog. A bare string is used as the message text. */
     async send(params: string | SendMessageParams) {
         return this._client.sendMessage(
             this.inputEntity,
@@ -92,22 +96,26 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
         );
     }
 
+    /** Marks all messages in this dialog as read (clearing mentions too when asked). */
     async markAsRead(params?: { clearMentions?: boolean }) {
         return this._client.markAsRead(this.inputEntity, undefined, params);
     }
 
+    /** Moves this dialog to the archive folder. */
     async archive() {
         this.archived = true;
         this.folderId = 1;
         return this._client.editPeerFolders(this.inputEntity, 1);
     }
 
+    /** Moves this dialog back to the main chat list. */
     async unarchive() {
         this.archived = false;
         this.folderId = 0;
         return this._client.editPeerFolders(this.inputEntity, 0);
     }
 
+    /** Pins or unpins this dialog in the chat list (`messages.toggleDialogPin`). */
     async pin(pinned: boolean = true) {
         const result = await this._client.invoke(
             new Api.messages.ToggleDialogPin({
@@ -119,10 +127,15 @@ export class Dialog<D extends Api.Dialog | Api.DialogCommunity = Api.Dialog> {
         return result;
     }
 
+    /** Unpins this dialog in the chat list. */
     async unpin() {
         return this.pin(false);
     }
 
+    /**
+     * Deletes this dialog: leaves channels/supergroups, or deletes the
+     * message history of private chats and small groups (see {@link DeleteHistoryParams}).
+     */
     async delete(params?: DeleteHistoryParams) {
         if (this.isChannel || this.isCommunity) {
             return this._client.leaveChannel(this.inputEntity);
