@@ -4,7 +4,7 @@ import { Api } from "../tl";
 import { returnBigInt, toSignedLittleBuffer } from "../Helpers";
 import type { TelegramClient } from "../client/TelegramClient";
 import { _getEntityPair, getInputPeer } from "../Utils";
-import { EditMessageParams, SendMessageParams } from "../client/messages";
+import { EditMessageParams, SendMessageParams } from "../client/methods/messages";
 
 export interface NewCallbackQueryInterface {
     chats: EntityLike[];
@@ -20,6 +20,21 @@ export const NewCallbackQueryDefaults: NewCallbackQueryInterface = {
     blacklistUsers: [],
 };
 
+/**
+ * Occurs whenever you sign in as a bot and a user
+ * clicks one of the inline buttons on your messages.
+ * Note that the `chats` parameter will **not** work with normal
+ * IDs or peers if the clicked inline button comes from a "via bot"
+ * message. The `chats` parameter also supports checking against the
+ * `chat_instance` which should be used for inline callbacks.
+ *
+ * @example
+ * ```ts
+ * async function printQuery(event: NewCallbackQueryEvent) {
+ *     // TODO
+ * }
+ * ```
+ */
 export class CallbackQuery extends EventBuilder {
     match?: RegExp;
 
@@ -98,7 +113,15 @@ export interface AnswerCallbackQueryParams {
 }
 
 export class CallbackQueryEvent extends EventCommonSender {
+    /**
+     * The original {@link Api.UpdateBotCallbackQuery} or {@link Api.UpdateInlineBotCallbackQuery} object.
+     */
     query: Api.UpdateBotCallbackQuery | Api.UpdateInlineBotCallbackQuery;
+
+    /**
+     * The regex match object returned from successfully matching the
+     * query `data` with the provided pattern in your event handler.
+     */
     patternMatch: RegExpMatchArray | undefined;
 
     private _message: Api.Message | undefined;
@@ -225,17 +248,15 @@ export class CallbackQueryEvent extends EventCommonSender {
     }
 
     async edit(params: EditMessageParams) {
-        if ((this.query.msgId as any) instanceof Api.InputBotInlineMessageID) {
-            return await this._client!.editMessage(this.messageId, params).then(
-                async (res) => {
-                    await this.answer();
-                    return res;
-                }
-            );
+        if (
+            (this.query.msgId as any) instanceof Api.InputBotInlineMessageID ||
+            (this.query.msgId as any) instanceof Api.InputBotInlineMessageID64
+        ) {
+            throw new Error("Editing messages sent via inline mode is not supported yet");
         } else {
             const inputChat = await this.getInputChat();
 
-            return await this._client!.editMessage(inputChat!, params).then(
+            return await this._client!.editMessage(inputChat!, { ...params, message: params.message ?? this.messageId }).then(
                 async (res) => {
                     await this.answer();
                     return res;

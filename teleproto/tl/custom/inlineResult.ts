@@ -88,7 +88,6 @@ export class InlineResult {
                 replyToMsgId: getMessageId(replyTo)!,
             });
         }
-
         const request = new Api.messages.SendInlineBotResult({
             peer: entity,
             queryId: this._queryId,
@@ -100,19 +99,4 @@ export class InlineResult {
         });
         return await this._client.invoke(request);
     }
-
-    /*
-    async downloadMedia(file: FileLike,
-                        thumb?: number | Api.TypePhotoSize, processCallback?: ProgressCallback): Promise<string | Buffer> {
-        if (this.document || this.photo) {
-            return this._client.downloadMedia(
-                // I don't like this
-                this.document || this.photo,
-                file,
-                thumb,
-                processCallback
-            )
-        }
-        throw new Error("Inline result has no document or photo");
-    }*/
 }

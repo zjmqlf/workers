@@ -6,42 +6,32 @@ import { RequestIter } from "../../requestIter";
 import { TotalList } from "../../Helpers";
 import type { UpdateNotifySettingsParams } from "./account";
 
-/** Options for creating a community around an initial chat or bot. */
 export interface CreateCommunityParams {
     title: string;
     peer: EntityLike;
     about?: string;
-    /** Hides the initial peer inside the community. */
     hidden?: boolean;
 }
 
-/** Makes a linked peer visible, hidden or removes its link. */
 export type CommunityPeerLinkAction = "visible" | "hidden" | "deleted";
 
-/** A linked peer with its resolved entity when supplied by Telegram. */
 export type CommunityPeer = Api.CommunityPeer & { entity?: Entity };
 
-/** A pending link request with its peer and requesting user. */
 export type CommunityPeerLinkRequest = Api.CommunityPeerRequest & {
     entity?: Entity;
     requestedByUser?: Api.User;
 };
 
-/** Pagination options; limit zero fetches only the total count. */
 export interface IterCommunityPeerLinkRequestsParams {
-    /** Opaque cursor returned by communities.getPeerLinkRequests. */
     offset?: string;
     limit?: number;
-    /** Minimum interval between page requests, in seconds. */
     waitTime?: number;
 }
 
-/** Full community details together with related users and chats. */
 export type FullCommunity = Api.messages.ChatFull & {
     fullChat: Api.CommunityFull;
 };
 
-/** Creates a community and returns its entity. */
 export async function createCommunity(
     client: TelegramClient,
     params: CreateCommunityParams
@@ -61,7 +51,6 @@ export async function createCommunity(
     throw new Error("Telegram did not return the created community");
 }
 
-/** Fetches full community details and linked peers. */
 export async function getCommunity(
     client: TelegramClient,
     community: EntityLike
@@ -75,7 +64,6 @@ export async function getCommunity(
     return result as FullCommunity;
 }
 
-/** Lists joined communities, retaining forbidden entries. */
 export async function getJoinedCommunities(
     client: TelegramClient
 ): Promise<TotalList<Api.Community | Api.CommunityForbidden>> {
@@ -92,7 +80,6 @@ export async function getJoinedCommunities(
     return communities;
 }
 
-/** Lists linked peers with visibility and history access metadata. */
 export async function getCommunityPeers(
     client: TelegramClient,
     community: EntityLike
@@ -106,7 +93,6 @@ export async function getCommunityPeers(
     }));
 }
 
-/** Adds, changes visibility of, or removes a peer link. */
 export async function setCommunityPeerLink(
     client: TelegramClient,
     community: EntityLike,
@@ -125,7 +111,6 @@ export async function setCommunityPeerLink(
     }));
 }
 
-/** Groups or expands the community in the dialog list. */
 export async function setCommunityCollapsed(
     client: TelegramClient,
     community: EntityLike,
@@ -137,7 +122,6 @@ export async function setCommunityCollapsed(
     }));
 }
 
-/** Iterates pending peer links using Telegram’s opaque pagination cursor. */
 export class CommunityPeerLinkRequestsIter extends RequestIter {
     private request?: Api.communities.GetPeerLinkRequests;
     private readonly offsets = new Set<string>();
@@ -188,7 +172,6 @@ export class CommunityPeerLinkRequestsIter extends RequestIter {
     }
 }
 
-/** Iterates pending links with requester and peer metadata. */
 export function iterCommunityPeerLinkRequests(
     client: TelegramClient,
     community: EntityLike,
@@ -199,7 +182,6 @@ export function iterCommunityPeerLinkRequests(
     }, { community, offset: params.offset ?? "" });
 }
 
-/** Collects pending peer links and their total count. */
 export async function getCommunityPeerLinkRequests(
     client: TelegramClient,
     community: EntityLike,
@@ -208,7 +190,6 @@ export async function getCommunityPeerLinkRequests(
     return (await iterCommunityPeerLinkRequests(client, community, params).collect()) as TotalList<CommunityPeerLinkRequest>;
 }
 
-/** Approves a peer link request, or rejects it when approved is false. */
 export async function setCommunityPeerLinkRequestApproval(
     client: TelegramClient,
     community: EntityLike,
@@ -222,7 +203,6 @@ export async function setCommunityPeerLinkRequestApproval(
     }));
 }
 
-/** Approves or rejects all pending peer link requests. */
 export async function setAllCommunityPeerLinkRequestsApproval(
     client: TelegramClient,
     community: EntityLike,
@@ -234,7 +214,6 @@ export async function setAllCommunityPeerLinkRequestsApproval(
     }));
 }
 
-/** Bans a participant across the community, or unbans when banned is false. */
 export async function setCommunityParticipantBanned(
     client: TelegramClient,
     community: EntityLike,
@@ -248,7 +227,6 @@ export async function setCommunityParticipantBanned(
     }));
 }
 
-/** Returns the community chats a participant owns or has joined. */
 export async function getCommunityParticipantJoinedChats(
     client: TelegramClient,
     community: EntityLike,
@@ -260,7 +238,6 @@ export async function getCommunityParticipantJoinedChats(
     }));
 }
 
-/** Pins or unpins the community's grouped dialog. */
 export async function pinCommunity(
     client: TelegramClient,
     community: EntityLike,
@@ -274,14 +251,12 @@ export async function pinCommunity(
     }));
 }
 
-/** Fetches notification settings using the community notification scope. */
 export async function getCommunityNotifySettings(client: TelegramClient, community: EntityLike) {
     return client.getNotifySettings(new Api.InputNotifyCommunity({
         community: getInputChannel(await client.getInputEntity(community)),
     }));
 }
 
-/** Updates notification settings for the community notification scope. */
 export async function updateCommunityNotifySettings(
     client: TelegramClient,
     community: EntityLike,

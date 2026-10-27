@@ -17,7 +17,6 @@ function asRequestClass(value: unknown): RequestClass | undefined {
         : undefined;
 }
 
-/** Builds cached method helpers and a typed raw-object entry point. */
 export function createApiProxy(api: Record<string, unknown>, invoke: Invoker): unknown {
     const lookup = (name: string): RequestClass | undefined => {
         const parts = name.split(".");

@@ -45,30 +45,15 @@ PUBLIC_KEYS.forEach(({ fingerprint, ...keyInfo }) => {
     _serverKeys.set(fingerprint.toString(), keyInfo);
 });
 
-/**
- * Encrypts the given data known the fingerprint to be used
- * in the way Telegram requires us to do so (sha1(data) + data + padding)
-
- * @param fingerprint the fingerprint of the RSA key.
- * @param data the data to be encrypted.
- * @returns {Buffer|*|undefined} the cipher text, or undefined if no key matching this fingerprint is found.
- */
 export async function encrypt(fingerprint: bigInt.BigInteger, data: Buffer): Promise<Buffer | undefined> {
     const key = _serverKeys.get(fingerprint.toString());
     if (!key) {
         return undefined;
     }
-
-    // len(sha1.digest) is always 20, so we're left with 255 - 20 - x padding
     const rand = generateRandomBytes(235 - data.length);
-
     const toEncrypt = Buffer.concat([await sha1(data), data, rand]);
-
-    // rsa module rsa.encrypt adds 11 bits for padding which we don't want
-    // rsa module uses rsa.transform.bytes2int(to_encrypt), easier way:
     const payload = readBigIntFromBuffer(toEncrypt, false);
     const encrypted = modExp(payload, bigInt(key.e), key.n);
-    // rsa module uses transform.int2bytes(encrypted, keylength), easier:
     return readBufferFromBigInt(encrypted, 256, false);
 }
 

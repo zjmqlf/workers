@@ -5,50 +5,14 @@ import { EventBuilder, EventCommonSender, _intoIdSet } from "./common";
 import bigInt from "big-integer";
 
 export interface InlineQueryInterface {
-    /**
-     * Filter by users. Only inline queries from these users will be handled.
-     */
     users?: EntityLike[];
-    /**
-     * Whether to treat the users as a blacklist.
-     */
     blacklistUsers?: boolean;
-    /**
-     * Pattern to match against the query text.
-     * Can be a string (will be compiled to regex) or RegExp.
-     */
     pattern?: string | RegExp;
-    /**
-     * Custom filter function.
-     */
     func?: CallableFunction;
 }
 
 type InlineQueryUpdate = Api.UpdateBotInlineQuery | Api.UpdateBotInlineSend;
 
-/**
- * Occurs when a user sends an inline query to your bot (e.g., @bot query).
- *
- * @remarks
- * This event only works for bot accounts.
- *
- * @example
- * ```ts
- * client.addEventHandler(async (event: InlineQueryEvent) => {
- *     console.log(`Query: ${event.text}`);
- *
- *     // Respond with results
- *     await event.answer([
- *         event.builder.article("Title", { text: "Content", description: "Description" })
- *     ]);
- * }, new InlineQuery({}));
- *
- * // With pattern matching
- * client.addEventHandler(async (event: InlineQueryEvent) => {
- *     console.log(`Matched: ${event.patternMatch?.[1]}`);
- * }, new InlineQuery({ pattern: /search (.+)/ }));
- * ```
- */
 export class InlineQuery extends EventBuilder {
     private _users?: string[];
     private _blacklistUsers: boolean;
@@ -84,7 +48,6 @@ export class InlineQuery extends EventBuilder {
     }
 
     filter(event: InlineQueryEvent): InlineQueryEvent | undefined {
-        // Filter by users
         if (this._users !== undefined) {
             const userIdStr = event.userId?.toString();
             if (!userIdStr) return undefined;
@@ -94,7 +57,6 @@ export class InlineQuery extends EventBuilder {
             }
         }
 
-        // Apply pattern matching
         if (this._pattern && event.text) {
             const match = event.text.match(this._pattern);
             if (!match) {
@@ -111,9 +73,6 @@ export class InlineQuery extends EventBuilder {
     }
 }
 
-/**
- * Helper class for building inline query results.
- */
 export class InlineBuilder {
     private _resultId: number = 0;
 
@@ -121,9 +80,6 @@ export class InlineBuilder {
         return String(this._resultId++);
     }
 
-    /**
-     * Creates an article result.
-     */
     article(
         title: string,
         params: {
@@ -158,9 +114,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a photo result from an existing photo.
-     */
     photo(
         photo: Api.TypeInputPhoto,
         params: {
@@ -184,9 +137,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a document result.
-     */
     document(
         document: Api.TypeInputDocument,
         params: {
@@ -215,9 +165,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a game result.
-     */
     game(
         shortName: string,
         params: {
@@ -236,9 +183,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a geo location result.
-     */
     geo(
         geoPoint: Api.TypeInputGeoPoint,
         params: {
@@ -268,9 +212,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a venue result.
-     */
     venue(
         geoPoint: Api.TypeInputGeoPoint,
         title: string,
@@ -303,9 +244,6 @@ export class InlineBuilder {
         });
     }
 
-    /**
-     * Creates a contact result.
-     */
     contact(
         phoneNumber: string,
         firstName: string,
@@ -335,9 +273,6 @@ export class InlineBuilder {
     }
 }
 
-/**
- * Represents an inline query event.
- */
 export class InlineQueryEvent extends EventCommonSender {
     _eventName = "InlineQuery";
 
@@ -369,7 +304,6 @@ export class InlineQueryEvent extends EventCommonSender {
             this._geo = update.geo;
             this._peerType = update.peerType;
         } else {
-            // UpdateBotInlineSend
             this._userId = update.userId;
             this._text = update.query;
             this._offset = "";
@@ -379,86 +313,50 @@ export class InlineQueryEvent extends EventCommonSender {
         }
     }
 
-    /**
-     * The unique query ID.
-     */
     get id(): bigInt.BigInteger | undefined {
         return this._queryId;
     }
 
-    /**
-     * The query text sent by the user.
-     */
     get text(): string {
         return this._text;
     }
 
-    /**
-     * Alias for text.
-     */
     get query(): string {
         return this._text;
     }
 
-    /**
-     * The offset for pagination.
-     */
     get offset(): string {
         return this._offset;
     }
 
-    /**
-     * The user ID who sent the query.
-     */
     get userId(): bigInt.BigInteger {
         return this._userId;
     }
 
-    /**
-     * The geographic location of the user (if shared).
-     */
     get geo(): Api.TypeGeoPoint | undefined {
         return this._geo;
     }
 
-    /**
-     * The type of peer from which the query was sent.
-     */
     get peerType(): Api.TypeInlineQueryPeerType | undefined {
         return this._peerType;
     }
 
-    /**
-     * Whether this is a "chosen result" event (UpdateBotInlineSend).
-     */
     get isChosen(): boolean {
         return this._isChosen;
     }
 
-    /**
-     * The chosen result ID (only for UpdateBotInlineSend).
-     */
     get resultId(): string | undefined {
         return this._resultId;
     }
 
-    /**
-     * The message ID of the sent inline message (only for UpdateBotInlineSend).
-     */
     get msgId(): Api.TypeInputBotInlineMessageID | undefined {
         return this._msgId;
     }
 
-    /**
-     * The regex pattern match result (if pattern was set in InlineQuery).
-     */
     get patternMatch(): RegExpMatchArray | undefined {
         return this._patternMatch;
     }
 
-    /**
-     * A helper to build inline results.
-     */
     get builder(): InlineBuilder {
         if (!this._builder) {
             this._builder = new InlineBuilder();
@@ -466,19 +364,10 @@ export class InlineQueryEvent extends EventCommonSender {
         return this._builder;
     }
 
-    /**
-     * Whether this query has already been answered.
-     */
     get answered(): boolean {
         return this._answered;
     }
 
-    /**
-     * Answer the inline query with results.
-     *
-     * @param results - Array of inline results (max 50)
-     * @param params - Additional parameters
-     */
     async answer(
         results: Api.TypeInputBotInlineResult[] = [],
         params: {
@@ -538,9 +427,6 @@ export class InlineQueryEvent extends EventCommonSender {
         }
     }
 
-    /**
-     * Get the user who sent the query.
-     */
     async getUser(): Promise<Api.User | undefined> {
         if (!this._client) return undefined;
         try {

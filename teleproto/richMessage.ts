@@ -1,41 +1,14 @@
-/**
- * Helpers for Telegram rich messages (Layer 228): building
- * {@link Api.TypeInputRichMessage} inputs for sending, and rendering received
- * {@link Api.RichMessage} block trees to plain text, Markdown or HTML.
- *
- * Sending — the server parses HTML/Markdown for you:
- * ```ts
- * import { Rich } from "teleproto";
- * await client.sendMessage(chat, {
- *     richMessage: Rich.markdown("# Title\n\nHello **world**"),
- * });
- * ```
- *
- * Reading:
- * ```ts
- * if (message.richMessage) console.log(Rich.toMarkdown(message.richMessage));
- * ```
- */
 import { Api } from "./tl/api";
 import { unionId } from "./Helpers";
 
-/**
- * Media referenced from HTML/Markdown content by id: map of id → uploaded
- * photo or document. Reference them from the content by that id
- * (e.g. `<img src="cover">` with `files: { cover: inputPhoto }`).
- */
 export type RichFileMap = Record<
     string,
     Api.TypeInputPhoto | Api.TypeInputDocument
 >;
 
-/** Common options for the rich input factories. */
 export interface RichInputOptions {
-    /** Right-to-left layout. */
     rtl?: boolean;
-    /** Disable automatic linking of URLs, emails and phone numbers. */
     noAutolink?: boolean;
-    /** Media referenced from the content by id, see {@link RichFileMap}. */
     files?: RichFileMap;
 }
 
@@ -66,7 +39,6 @@ function _toRichFiles(
     return result.length ? result : undefined;
 }
 
-/** Builds a rich message from HTML. The server parses it into blocks. */
 export function html(
     content: string,
     options: RichInputOptions = {}
@@ -79,7 +51,6 @@ export function html(
     });
 }
 
-/** Builds a rich message from Markdown. The server parses it into blocks. */
 export function markdown(
     content: string,
     options: RichInputOptions = {}
@@ -92,21 +63,14 @@ export function markdown(
     });
 }
 
-/** Options for {@link blocks} — the raw PageBlock input variant. */
 export interface RichBlocksOptions {
-    /** Right-to-left layout. */
     rtl?: boolean;
-    /** Disable automatic linking of URLs, emails and phone numbers. */
     noAutolink?: boolean;
-    /** Photos referenced by `photoId` from within the blocks. */
     photos?: Api.TypeInputPhoto[];
-    /** Documents referenced by `documentId` from within the blocks. */
     documents?: Api.TypeInputDocument[];
-    /** Users referenced by `userId` from within the blocks. */
     users?: Api.TypeInputUser[];
 }
 
-/** Builds a rich message from a raw PageBlock tree. */
 export function blocks(
     pageBlocks: Api.TypePageBlock[],
     options: RichBlocksOptions = {}
@@ -185,7 +149,6 @@ function _renderButton(
     return inner;
 }
 
-/** Renders a {@link Api.TypeRichText} tree to plain text, Markdown or HTML. */
 export function renderRichText(
     text: Api.TypeRichText | undefined,
     mode: RenderMode = "text"
@@ -608,7 +571,6 @@ function _renderBlock(block: Api.TypePageBlock, mode: RenderMode): string {
     return "";
 }
 
-/** @hidden */
 export function renderBlocks(
     pageBlocks: Api.TypePageBlock[],
     mode: RenderMode
@@ -628,17 +590,14 @@ function _blocksOf(source: RichSource): Api.TypePageBlock[] {
     return Array.isArray(source) ? source : source.blocks;
 }
 
-/** Renders a rich message to plain text. */
 export function toPlainText(source: RichSource): string {
     return renderBlocks(_blocksOf(source), "text");
 }
 
-/** Renders a rich message to Markdown. */
 export function toMarkdown(source: RichSource): string {
     return renderBlocks(_blocksOf(source), "md");
 }
 
-/** Renders a rich message to HTML. Media are emitted as tags with `data-photo-id`/`data-document-id` attributes pointing into `richMessage.photos`/`documents`. */
 export function toHtml(source: RichSource): string {
     return renderBlocks(_blocksOf(source), "html");
 }

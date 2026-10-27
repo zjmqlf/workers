@@ -5,11 +5,6 @@ import { Buffer } from "node:buffer";
 
 const DEFAULT_KEEP_ALIVE_INTERVAL = 30_000;
 
-export interface Tunnel {
-    socket: net.Socket;
-    head?: Buffer;
-}
-
 export class NetSocket implements SocketInterface {
     private socket?: net.Socket;
     private stream = new ByteStream();
@@ -24,16 +19,10 @@ export class NetSocket implements SocketInterface {
         return this.stream.lastDataAt;
     }
 
-    protected async openTunnel(_port: number, _ip: string): Promise<Tunnel | undefined> {
-        return undefined;
-    }
-
     async connect(port: number, ip: string) {
         const stream = (this.stream = new ByteStream());
-        const tunnel = await this.openTunnel(port, ip);
-        const socket = tunnel?.socket ?? new net.Socket();
+        const socket = new net.Socket();
         this.socket = socket;
-        if (tunnel?.head?.length) stream.push(tunnel.head);
         socket.on("data", (chunk: Buffer) => stream.push(chunk));
         socket.on("close", () => stream.end());
         await new Promise<void>((resolve, reject) => {
@@ -49,8 +38,7 @@ export class NetSocket implements SocketInterface {
                 socket.setKeepAlive(this.keepAliveInterval > 0, Math.max(0, this.keepAliveInterval));
                 resolve();
             };
-            if (tunnel) ready();
-            else socket.connect(port, ip, ready);
+            socket.connect(port, ip, ready);
         });
     }
 

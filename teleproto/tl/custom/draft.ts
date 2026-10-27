@@ -55,6 +55,4 @@ export class Draft {
         }
         return this._inputEntity;
     }
-
-    // TODO later
 }

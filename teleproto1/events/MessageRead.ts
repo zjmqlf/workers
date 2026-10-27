@@ -5,9 +5,22 @@ import { EventBuilder, EventCommon, _intoIdSet } from "./common";
 import bigInt from "big-integer";
 
 export interface MessageReadInterface {
+    /**
+     * Filter by chats where messages were read.
+     */
     chats?: EntityLike[];
+    /**
+     * Whether to treat the chats as a blacklist.
+     */
     blacklistChats?: boolean;
+    /**
+     * If True, only events when YOU read messages will be handled.
+     * If False (default), only events when OTHERS read your messages.
+     */
     inbox?: boolean;
+    /**
+     * Custom filter function.
+     */
     func?: CallableFunction;
 }
 
@@ -19,6 +32,25 @@ type ReadUpdateType =
     | Api.UpdateReadMessagesContents
     | Api.UpdateChannelReadMessagesContents;
 
+/**
+ * Occurs whenever messages are marked as read.
+ *
+ * @example
+ * ```ts
+ * // When others read your messages
+ * client.addEventHandler((event: MessageReadEvent) => {
+ *     console.log(`Messages up to ${event.maxId} were read`);
+ *     if (event.outbox) {
+ *         console.log("Someone read my message!");
+ *     }
+ * }, new MessageRead({}));
+ *
+ * // When you read messages
+ * client.addEventHandler((event: MessageReadEvent) => {
+ *     console.log("I read messages");
+ * }, new MessageRead({ inbox: true }));
+ * ```
+ */
 export class MessageRead extends EventBuilder {
     private _inbox?: boolean;
 
@@ -50,12 +82,14 @@ export class MessageRead extends EventBuilder {
     }
 
     filter(event: MessageReadEvent): MessageReadEvent | undefined {
+        // Filter by inbox/outbox preference
         if (this._inbox !== undefined) {
             if (this._inbox !== event.inbox) {
                 return undefined;
             }
         }
 
+        // Apply chat filter
         if (this.chats !== undefined && event.chatId) {
             const chatIdStr = event.chatId.toString();
             const inside = this.chats.includes(chatIdStr);
@@ -72,6 +106,9 @@ export class MessageRead extends EventBuilder {
     }
 }
 
+/**
+ * Represents a message read event.
+ */
 export class MessageReadEvent extends EventCommon {
     _eventName = "MessageRead";
 
@@ -124,30 +161,54 @@ export class MessageReadEvent extends EventCommon {
         this._messageIds = messageIds;
     }
 
+    /**
+     * Up to which message ID has been read.
+     * Every message with ID <= maxId has been read.
+     */
     get maxId(): number {
         return this._maxId;
     }
 
+    /**
+     * True if someone else read YOUR messages (outbox read).
+     */
     get outbox(): boolean {
         return this._outbox;
     }
 
+    /**
+     * True if YOU read someone else's messages (inbox read).
+     */
     get inbox(): boolean {
         return !this._outbox;
     }
 
+    /**
+     * True if this is a content read (e.g., voice message played).
+     */
     get contents(): boolean {
         return this._contents;
     }
 
+    /**
+     * The IDs of messages whose contents were read.
+     * Only set when `contents` is True.
+     */
     get messageIds(): number[] {
         return this._messageIds;
     }
 
+    /**
+     * Whether any message IDs are available.
+     */
     get isRead(): boolean {
         return this._maxId > 0 || this._messageIds.length > 0;
     }
 
+    /**
+     * Gets messages that were read (if message IDs are available).
+     * Only works for content reads.
+     */
     async getMessages(): Promise<Api.Message[] | undefined> {
         if (!this._client || this._messageIds.length === 0) {
             return undefined;

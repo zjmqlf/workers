@@ -1,6 +1,7 @@
 import type { CtrState } from "cifrante";
 import { aes } from "cifrante";
 import { asBuffer } from "../Helpers";
+import { Buffer } from "node:buffer";
 
 export class CTR {
     private readonly state: CtrState;
@@ -10,10 +11,21 @@ export class CTR {
             throw new Error("Key and iv need to be a buffer");
         }
 
-        this.state = aes.ctr(key).create({ iv });
+        const cipher = aes.ctr(key);
+        this.state = cipher.create({ iv });
+        cipher.dispose();
     }
 
     encrypt(data: Uint8Array): Buffer {
         return asBuffer(this.state.update(data));
+    }
+
+    encryptInPlace(data: Buffer): Buffer {
+        this.state.update(data, data);
+        return data;
+    }
+
+    dispose(): void {
+        this.state.dispose();
     }
 }

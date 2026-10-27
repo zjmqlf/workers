@@ -37,6 +37,7 @@ export class RequestIter implements AsyncIterable<any> {
     }
 
     async _init(kwargs: any): Promise<boolean | void> {
+        // for overload
     }
 
     [Symbol.asyncIterator](): AsyncIterator<any, any, undefined> {
@@ -68,6 +69,7 @@ export class RequestIter implements AsyncIterable<any> {
                     this.buffer = [];
                     const nextChunk = await this._loadNextChunk();
                     if (nextChunk === false) {
+                        // we exit;
                         return {
                             value: undefined,
                             done: true,
@@ -77,6 +79,7 @@ export class RequestIter implements AsyncIterable<any> {
                         this.left = Math.min(this.left, this.buffer.length);
                     }
                 }
+
                 if (!this.buffer || !this.buffer.length) {
                     return {
                         value: undefined,

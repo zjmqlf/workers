@@ -13,16 +13,8 @@ import * as errors from "../../errors";
 import * as utils from "../../Utils";
 import type { TelegramClient } from "../TelegramClient";
 import bigInt from "big-integer";
-
 export { invoke } from "../rpc/invoke";
 
-/**
- * Returns the current user as an {@link Api.User}, or as an {@link Api.InputPeerUser}
- * if `inputPeer` is `true` (useful when only the input peer is needed without a full API call).
- *
- * The result is cached after the first call.
- * @hidden
- */
 export async function getMe<
     T extends boolean,
     R = T extends true ? Api.InputPeerUser : Api.User
@@ -47,7 +39,6 @@ export async function getMe<
         : (me as unknown as R);
 }
 
-/** @hidden */
 export async function isBot(client: TelegramClient) {
     if (client._bot === undefined) {
         const me = await client.getMe();
@@ -58,7 +49,6 @@ export async function isBot(client: TelegramClient) {
     return client._bot;
 }
 
-/** @hidden */
 export async function isUserAuthorized(client: TelegramClient) {
     try {
         await client.api.updates.getState();
@@ -67,17 +57,6 @@ export async function isUserAuthorized(client: TelegramClient) {
         return false;
     }
 }
-
-/**
- * Resolves one or more entity-like values into their full {@link Entity} objects
- * by calling the appropriate Telegram API methods (`users.GetUsers`, `messages.GetChats`,
- * `channels.GetChannels`).
- *
- * @param client - The Telegram client instance.
- * @param entity - A single entity or array of entities to resolve (usernames, IDs, peers, etc.).
- * @returns A single entity if a single value was given, or an array of entities.
- * @hidden
- */
 export async function getEntity(
     client: TelegramClient,
     entity: EntityLike | EntityLike[]
@@ -89,7 +68,6 @@ export async function getEntity(
     } else {
         entityArray.push(entity);
     }
-
     const inputs = [];
     for (const x of entityArray) {
         if (typeof x === "string") {
@@ -116,7 +94,6 @@ export async function getEntity(
     let users = lists.get(_EntityType.USER)!;
     let chats = lists.get(_EntityType.CHAT)!;
     let channels = lists.get(_EntityType.CHANNEL)!;
-
     if (users.length) {
         users = await client.api.users.getUsers({
             id: users,
@@ -130,19 +107,15 @@ export async function getEntity(
         channels = await _getChannelsWithCommunityFallback(client, channels);
     }
     const idEntity = new Map<string, any>();
-
     for (const user of users) {
         idEntity.set(peerUtils(user), user);
     }
-
     for (const channel of channels) {
         idEntity.set(peerUtils(channel), channel);
     }
-
     for (const chat of chats) {
         idEntity.set(peerUtils(chat), chat);
     }
-
     const result = [];
     for (const x of inputs) {
         if (typeof x === "string") {
@@ -191,31 +164,14 @@ async function _getChannelsWithCommunityFallback(
     return resolved;
 }
 
-/**
- * Resolves an entity-like value into an {@link Api.TypeInputPeer}, using (in order):
- * 1. Direct InputPeer conversion
- * 2. In-memory entity cache
- * 3. Known strings ("me", "this", "self")
- * 4. Session (disk) cache
- * 5. Network lookup (username resolution, `users.GetUsers`, `channels.GetChannels`)
- *
- * @param client - The Telegram client instance.
- * @param peer - The entity to resolve (username, phone, ID, Peer object, etc.).
- * @returns The corresponding InputPeer.
- * @throws {Error} If the entity cannot be resolved by any means.
- * @hidden
- */
 export async function getInputEntity(
     client: TelegramClient,
     peer: EntityLike
 ): Promise<Api.TypeInputPeer> {
-    // Short-circuit if the input parameter directly maps to an InputPeer
-
     try {
         return utils.getInputPeer(peer);
         // eslint-disable-next-line no-empty
     } catch (e) {}
-    // Next in priority is having a peer (or its ID) cached in-memory
     try {
         if (typeof peer == "string") {
             const valid = parseID(peer);
@@ -236,7 +192,6 @@ export async function getInputEntity(
                 return res;
             }
         }
-        // unionId("Peer") == crc32(b'Peer')
         if (
             typeof peer == "object" &&
             !bigInt.isInstance(peer) &&
@@ -249,29 +204,20 @@ export async function getInputEntity(
         }
         // eslint-disable-next-line no-empty
     } catch (e) {}
-    // Then come known strings that take precedence
     if (typeof peer == "string") {
         if (["me", "this", "self"].includes(peer)) {
             return new Api.InputPeerSelf();
         }
     }
-
-    // No InputPeer, cached peer, or known string. Fetch from disk cache
     try {
         if (peer != undefined) {
             return await client.session.getInputEntity(peer);
         }
         // eslint-disable-next-line no-empty
     } catch (e) {}
-    // Only network left to try
     if (typeof peer === "string") {
         return utils.getInputPeer(await _getEntityFromString(client, peer));
     }
-
-    // If we're a bot and the user has messaged us privately users.getUsers
-    // will work with accessHash = 0. Similar for channels.getChannels.
-    // If we're not a bot but the user is in our contacts, it seems to work
-    // regardless. These are the only two special-cased requests.
     if (typeof peer === "number") {
         peer = returnBigInt(peer);
     }
@@ -286,13 +232,6 @@ export async function getInputEntity(
             ],
         });
         if (users.length && !(users[0] instanceof Api.UserEmpty)) {
-            // If the user passed a valid ID they expect to work for
-            // channels but would be valid for users, we get UserEmpty.
-            // Avoid returning the invalid empty input peer for that.
-            //
-            // We *could* try to guess if it's a channel first, and if
-            // it's not, work as a chat and try to validate it through
-            // another request, but that becomes too much work.
             return utils.getInputPeer(users[0]);
         }
     } else if (peer instanceof Api.PeerChat) {
@@ -326,7 +265,6 @@ export async function getInputEntity(
     );
 }
 
-/** @hidden */
 export async function _getEntityFromString(
     client: TelegramClient,
     string: string
@@ -403,7 +341,6 @@ export async function _getEntityFromString(
     throw new Error(`Cannot find any entity corresponding to "${string}"`);
 }
 
-/** @hidden */
 export async function getPeerId(
     client: TelegramClient,
     peer: EntityLike,
@@ -433,7 +370,6 @@ export async function getPeerId(
     return utils.getPeerId(peer, addMark);
 }
 
-/** @hidden */
 export async function _getPeer(client: TelegramClient, peer: EntityLike) {
     if (!peer) {
         return undefined;
@@ -448,7 +384,6 @@ export async function _getPeer(client: TelegramClient, peer: EntityLike) {
     });
 }
 
-/** @hidden */
 export async function _getInputDialog(client: TelegramClient, dialog: any) {
     if (dialog?.inputDialog) return _getInputDialog(client, dialog.inputDialog);
     if (dialog instanceof Api.InputDialogPeerCommunity) {
@@ -483,7 +418,6 @@ export async function _getInputDialog(client: TelegramClient, dialog: any) {
     });
 }
 
-/** @hidden */
 export async function _getInputNotify(client: TelegramClient, notify: any) {
     if (notify instanceof Api.Community || notify instanceof Api.CommunityForbidden) {
         return new Api.InputNotifyCommunity({
@@ -514,20 +448,15 @@ export async function _getInputNotify(client: TelegramClient, notify: any) {
     });
 }
 
-/** @hidden */
 export function _selfId(client: TelegramClient) {
     return client._selfInputPeer ? client._selfInputPeer.userId : undefined;
 }
 
-/** Parameters for {@link TelegramClient.getCommonChats}. */
 export interface GetCommonChatsParams {
-    /** Maximum chat ID to return (for pagination). */
     maxId?: bigInt.BigInteger;
-    /** Maximum number of chats to return. */
     limit?: number;
 }
 
-/** @hidden */
 export async function getCommonChats(
     client: TelegramClient,
     entity: EntityLike,

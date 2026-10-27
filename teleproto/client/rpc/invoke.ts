@@ -10,22 +10,6 @@ import type { SessionLease } from "../../network/dc/SessionPool";
 import { RpcCallControl } from "./RpcCallControl";
 import { _resaveUploadedParts } from "../methods/uploads";
 
-/**
- * Invokes a raw Telegram API request and returns the result.
- *
- * Handles automatic retry on transient errors (server errors, flood waits below
- * {@link TelegramClientParams.floodSleepThreshold}, DC migration, reCAPTCHA),
- * and caches any entities found in the response.
- *
- * @param client - The Telegram client instance.
- * @param request - The MTProto request to invoke.
- * @param dcId - Optional DC to send the request to (uses a borrowed sender).
- * @param otherSender - Optional explicit sender to use instead of the default.
- * @returns The response corresponding to the request type.
- * @throws {FloodWaitError} If the flood wait exceeds `floodSleepThreshold`.
- * @throws {Error} If the request fails after all retries.
- * @hidden
- */
 interface InvokeAttempt {
     client: TelegramClient;
     request: Api.AnyRequest;

@@ -124,7 +124,7 @@ export class SessionPool {
                 pfs
                     ? {
                         permAuthKey: dc.authKey,
-                        dcParam: -(dcId + (this.client._testServers ? 10000 : 0)),
+                        dcParam: -dcId,
                         expiresIn: tempKeyLifetime(),
                         onFailed: (error: unknown) => {
                             dc.pfsFailed = true;

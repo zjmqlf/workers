@@ -5,18 +5,8 @@ import { EventBuilder, EventCommonSender, _intoIdSet } from "./common";
 import bigInt from "big-integer";
 
 export interface UserUpdateInterface {
-    /**
-     * Filter by users. Only updates from these users will be handled.
-     */
     chats?: EntityLike[];
-    /**
-     * Whether to treat the chats as a blacklist instead of whitelist.
-     */
     blacklistChats?: boolean;
-    /**
-     * A callable function that should accept the event as input
-     * and return a value indicating whether the event should be dispatched.
-     */
     func?: CallableFunction;
 }
 
@@ -27,21 +17,6 @@ type TypingUpdate =
 
 type UserUpdateType = Api.UpdateUserStatus | TypingUpdate;
 
-/**
- * Occurs whenever a user goes online, starts typing, etc.
- *
- * @example
- * ```ts
- * client.addEventHandler((event: UserUpdateEvent) => {
- *     if (event.online) {
- *         console.log(`${event.userId} is now online!`);
- *     }
- *     if (event.typing) {
- *         console.log(`${event.userId} is typing...`);
- *     }
- * }, new UserUpdate({}));
- * ```
- */
 export class UserUpdate extends EventBuilder {
     constructor(params: UserUpdateInterface = {}) {
         super({
@@ -87,9 +62,6 @@ export class UserUpdate extends EventBuilder {
     }
 }
 
-/**
- * Represents a user update event (status change or typing action).
- */
 export class UserUpdateEvent extends EventCommonSender {
     _eventName = "UserUpdate";
 
@@ -115,7 +87,6 @@ export class UserUpdateEvent extends EventCommonSender {
                 : bigInt.zero;
             chatPeer = new Api.PeerChat({ chatId: update.chatId });
         } else {
-            // UpdateChannelUserTyping
             userId = update.fromId instanceof Api.PeerUser
                 ? update.fromId.userId
                 : bigInt.zero;
@@ -139,49 +110,28 @@ export class UserUpdateEvent extends EventCommonSender {
         }
     }
 
-    /**
-     * The ID of the user whose status/action changed.
-     */
     get userId(): bigInt.BigInteger {
         return this._userId;
     }
 
-    /**
-     * The raw status object (if this is a status update).
-     */
     get status(): Api.TypeUserStatus | undefined {
         return this._status;
     }
 
-    /**
-     * The raw action object (if this is a typing/action update).
-     */
     get action(): Api.TypeSendMessageAction | undefined {
         return this._action;
     }
 
-
-    // ==================== Status Properties ====================
-
-    /**
-     * Whether the user is currently online.
-     */
     get online(): boolean | undefined {
         if (!this._status) return undefined;
         return this._status instanceof Api.UserStatusOnline;
     }
 
-    /**
-     * Whether the user went offline.
-     */
     get offline(): boolean | undefined {
         if (!this._status) return undefined;
         return this._status instanceof Api.UserStatusOffline;
     }
 
-    /**
-     * When the user's online status expires (if online).
-     */
     get until(): Date | undefined {
         if (this._status instanceof Api.UserStatusOnline) {
             return new Date(this._status.expires * 1000);
@@ -189,9 +139,6 @@ export class UserUpdateEvent extends EventCommonSender {
         return undefined;
     }
 
-    /**
-     * When the user was last seen (if offline).
-     */
     get lastSeen(): Date | undefined {
         if (this._status instanceof Api.UserStatusOffline) {
             return new Date(this._status.wasOnline * 1000);
@@ -199,51 +146,31 @@ export class UserUpdateEvent extends EventCommonSender {
         return undefined;
     }
 
-    /**
-     * Whether the user was seen recently.
-     */
     get recently(): boolean | undefined {
         if (!this._status) return undefined;
         return this._status instanceof Api.UserStatusRecently;
     }
 
-    /**
-     * Whether the user was seen within the last week.
-     */
     get withinWeeks(): boolean | undefined {
         if (!this._status) return undefined;
         return this._status instanceof Api.UserStatusLastWeek;
     }
 
-    /**
-     * Whether the user was seen within the last month.
-     */
     get withinMonths(): boolean | undefined {
         if (!this._status) return undefined;
         return this._status instanceof Api.UserStatusLastMonth;
     }
 
-    // ==================== Action Properties ====================
-
-    /**
-     * Whether the user is typing a message.
-     */
     get typing(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageTypingAction;
     }
 
-    /**
-     * Whether the user cancelled the action.
-     */
     get cancel(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageCancelAction;
     }
 
-    /**
-     * Whether the user is recording something (audio, video, or round).
-     */
     get recording(): boolean | undefined {
         if (!this._action) return undefined;
         return (
@@ -253,9 +180,6 @@ export class UserUpdateEvent extends EventCommonSender {
         );
     }
 
-    /**
-     * Whether the user is uploading something.
-     */
     get uploading(): boolean | undefined {
         if (!this._action) return undefined;
         return (
@@ -267,9 +191,6 @@ export class UserUpdateEvent extends EventCommonSender {
         );
     }
 
-    /**
-     * Whether the user is recording or sending audio.
-     */
     get audio(): boolean | undefined {
         if (!this._action) return undefined;
         return (
@@ -278,9 +199,6 @@ export class UserUpdateEvent extends EventCommonSender {
         );
     }
 
-    /**
-     * Whether the user is recording or sending video.
-     */
     get video(): boolean | undefined {
         if (!this._action) return undefined;
         return (
@@ -289,9 +207,6 @@ export class UserUpdateEvent extends EventCommonSender {
         );
     }
 
-    /**
-     * Whether the user is recording or sending a round video.
-     */
     get round(): boolean | undefined {
         if (!this._action) return undefined;
         return (
@@ -300,57 +215,36 @@ export class UserUpdateEvent extends EventCommonSender {
         );
     }
 
-    /**
-     * Whether the user is uploading a photo.
-     */
     get photo(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageUploadPhotoAction;
     }
 
-    /**
-     * Whether the user is uploading a document.
-     */
     get document(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageUploadDocumentAction;
     }
 
-    /**
-     * Whether the user is sending a geo location.
-     */
     get geo(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageGeoLocationAction;
     }
 
-    /**
-     * Whether the user is choosing a contact to share.
-     */
     get contact(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageChooseContactAction;
     }
 
-    /**
-     * Whether the user is playing a game.
-     */
     get playing(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageGamePlayAction;
     }
 
-    /**
-     * Whether the user is choosing a sticker.
-     */
     get sticker(): boolean | undefined {
         if (!this._action) return undefined;
         return this._action instanceof Api.SendMessageChooseStickerAction;
     }
 
-    /**
-     * Upload progress (0-100) if uploading, otherwise undefined.
-     */
     get uploadProgress(): number | undefined {
         if (
             this._action instanceof Api.SendMessageUploadVideoAction ||
@@ -364,9 +258,6 @@ export class UserUpdateEvent extends EventCommonSender {
         return undefined;
     }
 
-    /**
-     * Fetches the User entity for this event.
-     */
     async getUser(): Promise<Api.User | undefined> {
         if (!this._client) return undefined;
         try {
@@ -382,9 +273,6 @@ export class UserUpdateEvent extends EventCommonSender {
         return undefined;
     }
 
-    /**
-     * Gets the InputUser for this event.
-     */
     async getInputUser(): Promise<Api.InputUser | Api.InputPeerUser | undefined> {
         if (!this._client) return undefined;
         try {

@@ -1,5 +1,5 @@
 import type { Session } from "../session/Session";
-//import timers from "node:timers";
+import timers from "node:timers";
 
 export type SenderSlotState = "idle" | "connecting" | "ready" | "dead";
 

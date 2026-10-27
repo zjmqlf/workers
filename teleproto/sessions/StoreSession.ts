@@ -4,19 +4,6 @@ import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
 import { Buffer } from "node:buffer";
 
-/**
- * Persistent session that stores auth keys and entity data on disk using `node-localstorage`.
- *
- * Accepts an absolute path or a directory relative to the working directory.
- * Reuses an existing legacy directory when the absolute target is absent.
- * Suitable for long-running server applications where session data must survive restarts.
- *
- * @example
- * ```ts
- * const session = new StoreSession("my_session");
- * const client = new TelegramClient(session, apiId, apiHash, {});
- * ```
- */
 export class StoreSession extends MemorySession {
     private readonly sessionName: string;
     private store: Map<string, any>;
@@ -63,13 +50,6 @@ export class StoreSession extends MemorySession {
         if (serverAddress) {
             this._serverAddress = serverAddress;
         }
-        const testServers = this.store.get(this.sessionName + "testServers");
-        if (testServers != null) {
-            super.testServers = !!testServers;
-        }
-
-        // Reload cached per-DC (non-main) auth keys so we don't have to do a
-        // fresh DH handshake every process start.
         const dcKeys = this.store.get(this.sessionName + "dcAuthKeys");
         if (dcKeys && typeof dcKeys === "object") {
             for (const [k, v] of Object.entries(dcKeys)) {
@@ -102,15 +82,6 @@ export class StoreSession extends MemorySession {
         this._saveDcAuthKeys();
     }
 
-    set testServers(value: boolean) {
-        super.testServers = value;
-        this.store.set(this.sessionName + "testServers", value);
-    }
-
-    get testServers() {
-        return super.testServers;
-    }
-
     set authKey(value: AuthKey | undefined) {
         this._authKey = value;
         this.store.set(this.sessionName + "authKey", value?.getKey());
@@ -136,7 +107,6 @@ export class StoreSession extends MemorySession {
     }
 
     delete() {
-        this.store.clear();
         super.delete();
     }
 

@@ -4,8 +4,6 @@ import { InlineResults } from "../../tl/custom/inlineResults";
 import type { TelegramClient } from "../TelegramClient";
 import { _parseMessageText, type ParseInterface } from "./messageParse";
 
-// BotMethods
-/** @hidden */
 export async function inlineQuery(
     client: TelegramClient,
     bot: EntityLike,
@@ -31,25 +29,17 @@ export async function inlineQuery(
     return new InlineResults(client, result, entity ? peer : undefined);
 }
 
-/** One bot command for {@link TelegramClient.setBotCommands}. */
 export interface BotCommandEntry {
-    /** The command itself, without the leading `/` (1-32 chars: a-z, 0-9, _). */
     command: string;
-    /** Description shown in the command menu (1-256 chars). */
     description: string;
-    /** L228: hide the command from the menu while still accepting it. */
     ephemeral?: boolean;
 }
 
-/** Scope/language selector for the bot command methods. */
 export interface BotCommandScopeParams {
-    /** Where the commands apply. Defaults to {@link Api.BotCommandScopeDefault}. */
     scope?: Api.TypeBotCommandScope;
-    /** Two-letter language code the commands apply to. Defaults to all languages. */
     langCode?: string;
 }
 
-/** @hidden */
 export async function setBotCommands(
     client: TelegramClient,
     commands: BotCommandEntry[],
@@ -71,7 +61,6 @@ export async function setBotCommands(
     );
 }
 
-/** @hidden */
 export async function getBotCommands(
     client: TelegramClient,
     params: BotCommandScopeParams = {}
@@ -84,7 +73,6 @@ export async function getBotCommands(
     );
 }
 
-/** @hidden */
 export async function resetBotCommands(
     client: TelegramClient,
     params: BotCommandScopeParams = {}
@@ -97,21 +85,14 @@ export async function resetBotCommands(
     );
 }
 
-/** Parameters for {@link TelegramClient.setBotInfo}. Only the fields you set are changed. */
 export interface SetBotInfoParams {
-    /** Bot owners: the owned bot to edit. Bots editing themselves can omit this. */
     bot?: EntityLike;
-    /** Two-letter language code the info applies to. Defaults to all languages. */
     langCode?: string;
-    /** New bot name. */
     name?: string;
-    /** New short description ("about", shown on the profile page). */
     about?: string;
-    /** New full description (shown on the empty chat screen). */
     description?: string;
 }
 
-/** @hidden */
 export async function setBotInfo(
     client: TelegramClient,
     params: SetBotInfoParams
@@ -131,7 +112,6 @@ export async function setBotInfo(
     );
 }
 
-/** @hidden */
 export async function getBotInfo(
     client: TelegramClient,
     params: { bot?: EntityLike; langCode?: string } = {}
@@ -148,7 +128,6 @@ export async function getBotInfo(
     );
 }
 
-/** @hidden */
 export async function setBotMenuButton(
     client: TelegramClient,
     user: EntityLike,
@@ -164,7 +143,6 @@ export async function setBotMenuButton(
     );
 }
 
-/** @hidden */
 export async function getBotMenuButton(
     client: TelegramClient,
     user: EntityLike
@@ -185,7 +163,6 @@ export interface SetBotVerificationParams {
     parseMode?: false | string | ParseInterface;
 }
 
-/** @hidden */
 export async function addBotUsername(
     client: TelegramClient,
     bot: EntityLike,
@@ -194,7 +171,6 @@ export async function addBotUsername(
     return client.invoke(new Api.bots.AddUsername({ bot, username }));
 }
 
-/** @hidden */
 export async function removeBotUsername(
     client: TelegramClient,
     bot: EntityLike,
@@ -203,7 +179,6 @@ export async function removeBotUsername(
     return client.invoke(new Api.bots.RemoveUsername({ bot, username }));
 }
 
-/** @hidden */
 export async function checkBotUsername(
     client: TelegramClient,
     username: string,
@@ -214,7 +189,6 @@ export async function checkBotUsername(
     );
 }
 
-/** @hidden */
 export async function setBotVerification(
     client: TelegramClient,
     peer: EntityLike,

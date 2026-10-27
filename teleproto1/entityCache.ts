@@ -5,10 +5,24 @@ import bigInt from "big-integer";
 import type { EntityLike } from "./define";
 
 export interface CachePolicy {
+    /**
+     * Maximum number of cached peers, counted separately for users and
+     * chats/channels. `0` or omitted - unlimited.
+     */
     max?: number;
+    /**
+     * Peer lifetime in milliseconds since it was cached; an expired peer is
+     * re-resolved on next access. `0` or omitted - never expires.
+     */
     ttl?: number;
 }
 
+/**
+ * Entity cache configuration:
+ * omitted / `true` - default limits ({@link ENTITY_CACHE_DEFAULTS});
+ * `false` - cache disabled, peers are resolved from the session store;
+ * `{ max, ttl }` - custom policy, `{ max: 0 }` for an unbounded cache.
+ */
 export type EntityCacheOptions = boolean | CachePolicy;
 
 export const ENTITY_CACHE_DEFAULTS = {

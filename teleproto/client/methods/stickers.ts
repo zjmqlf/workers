@@ -4,7 +4,6 @@ import bigInt from "big-integer";
 import * as utils from "../../Utils";
 import { Api } from "../../tl";
 
-/** A sticker set reference: its short name (from the t.me/addstickers link) or a raw {@link Api.TypeInputStickerSet}. */
 export type InputStickerSetLike = string | Api.TypeInputStickerSet;
 
 function _toInputStickerSet(set: InputStickerSetLike): Api.TypeInputStickerSet {
@@ -14,7 +13,6 @@ function _toInputStickerSet(set: InputStickerSetLike): Api.TypeInputStickerSet {
     return set;
 }
 
-/** @hidden */
 export async function getStickerSet(
     client: TelegramClient,
     set: InputStickerSetLike
@@ -27,14 +25,12 @@ export async function getStickerSet(
     );
 }
 
-/** @hidden */
 export async function getAllStickers(
     client: TelegramClient
 ): Promise<Api.messages.TypeAllStickers> {
     return client.api.messages.getAllStickers({ hash: bigInt.zero });
 }
 
-/** @hidden */
 export async function installStickerSet(
     client: TelegramClient,
     set: InputStickerSetLike,
@@ -48,7 +44,6 @@ export async function installStickerSet(
     );
 }
 
-/** @hidden */
 export async function uninstallStickerSet(
     client: TelegramClient,
     set: InputStickerSetLike
@@ -60,7 +55,6 @@ export async function uninstallStickerSet(
     );
 }
 
-/** @hidden */
 export async function getRecentStickers(
     client: TelegramClient,
     params: { attached?: boolean } = {}
@@ -71,7 +65,6 @@ export async function getRecentStickers(
     });
 }
 
-/** @hidden */
 export async function saveRecentSticker(
     client: TelegramClient,
     document: Api.TypeInputDocument | Api.Document,
@@ -86,7 +79,6 @@ export async function saveRecentSticker(
     );
 }
 
-/** @hidden */
 export async function clearRecentStickers(
     client: TelegramClient,
     params: { attached?: boolean } = {}
@@ -96,14 +88,12 @@ export async function clearRecentStickers(
     });
 }
 
-/** @hidden */
 export async function getFavedStickers(
     client: TelegramClient
 ): Promise<Api.messages.TypeFavedStickers> {
     return client.api.messages.getFavedStickers({ hash: bigInt.zero });
 }
 
-/** @hidden */
 export async function faveSticker(
     client: TelegramClient,
     document: Api.TypeInputDocument | Api.Document,
@@ -117,7 +107,6 @@ export async function faveSticker(
     );
 }
 
-/** @hidden */
 export async function getCustomEmojiDocuments(
     client: TelegramClient,
     documentIds: BigInteger[]

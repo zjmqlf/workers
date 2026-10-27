@@ -199,11 +199,13 @@ function render(text: string, start: number, end: number, nodes: EntityNode[]): 
 }
 
 export class MarkdownV2Parser {
+    /** Parses Telegram MarkdownV2 into text and UTF-16 entity ranges. */
     static parse(message: string): [string, Api.TypeMessageEntity[]] {
         const [text, entities] = HTMLParser.parse(toHtml(message));
         return [text, entities.filter((entity) => entity.length > 0)];
     }
 
+    /** Serializes entities as MarkdownV2 with context-specific escaping. */
     static unparse(text: string, entities: Api.TypeMessageEntity[] | undefined): string {
         const roots: EntityNode[] = [];
         const stack: EntityNode[] = [];

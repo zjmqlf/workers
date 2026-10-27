@@ -3,10 +3,25 @@ import type { TelegramClient } from "../client/TelegramClient";
 import { Api } from "../tl";
 
 export interface RawInterface {
+    /**
+     * The types that the {@link Api.TypeUpdate} instance must be.
+     * Equivalent to ``if (update instanceof type) return update``.
+     */
     types?: Function[];
     func?: CallableFunction;
 }
 
+/**
+ * The RAW updates that telegram sends. these are {@link Api.TypeUpdate} objects.
+ * The are useful to handle custom events that you need like user typing or games.
+ * @example
+ * ```ts
+ * client.addEventHandler((update) => {
+ *   console.log("Received new Update");
+ *   console.log(update);
+ * });
+ * ```
+ */
 export class Raw extends EventBuilder {
     private readonly types?: Function[];
 

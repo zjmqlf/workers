@@ -8,7 +8,6 @@ export interface ConnectionInterfaceParams {
     dcId: number;
     loggers: Logger;
     socket: SocketFactory;
-    testServers?: boolean;
     keepAliveInterval?: number;
 }
 
@@ -29,7 +28,6 @@ export class Connection {
     readonly ip: string;
     readonly port: number;
     readonly dcId: number;
-    readonly testServers: boolean;
     readonly log: Logger;
     socket: SocketInterface;
     protected codec?: PacketCodec;
@@ -40,7 +38,6 @@ export class Connection {
         this.ip = params.ip;
         this.port = params.port;
         this.dcId = params.dcId;
-        this.testServers = !!params.testServers;
         this.log = params.loggers;
         this.socket = this.rawSocket = new params.socket(params.keepAliveInterval);
     }
@@ -58,7 +55,7 @@ export class Connection {
         this.codec = new this.codecClass();
         this.socket = this.rawSocket;
         try {
-            await this.socket.connect(this.port, this.ip, this.testServers);
+            await this.socket.connect(this.port, this.ip);
             await this.handshake();
         } catch (error) {
             await this.socket.close().catch(() => { });

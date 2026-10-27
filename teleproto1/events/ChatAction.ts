@@ -5,8 +5,17 @@ import { EventBuilder, EventCommon, _intoIdSet } from "./common";
 import bigInt from "big-integer";
 
 export interface ChatActionInterface {
+    /**
+     * Filter by chats.
+     */
     chats?: EntityLike[];
+    /**
+     * Whether to treat the chats as a blacklist.
+     */
     blacklistChats?: boolean;
+    /**
+     * Custom filter function.
+     */
     func?: CallableFunction;
 }
 
@@ -20,6 +29,28 @@ type ChatActionUpdate =
     | Api.UpdateNewMessage
     | Api.UpdateNewChannelMessage;
 
+/**
+ * Occurs on chat actions: user joined/left/kicked, title/photo changed,
+ * messages pinned, chat created, etc.
+ *
+ * @example
+ * ```ts
+ * client.addEventHandler((event: ChatActionEvent) => {
+ *     if (event.userJoined) {
+ *         console.log(`User ${event.userId} joined!`);
+ *     }
+ *     if (event.userLeft) {
+ *         console.log(`User ${event.userId} left`);
+ *     }
+ *     if (event.newTitle) {
+ *         console.log(`New title: ${event.newTitle}`);
+ *     }
+ *     if (event.newPin) {
+ *         console.log(`Message pinned: ${event.pinnedMessageIds}`);
+ *     }
+ * }, new ChatAction({}));
+ * ```
+ */
 export class ChatAction extends EventBuilder {
     constructor(params: ChatActionInterface = {}) {
         super({
@@ -30,6 +61,7 @@ export class ChatAction extends EventBuilder {
     }
 
     build(update: Api.TypeUpdate): ChatActionEvent | undefined {
+        // Direct participant updates
         if (
             update instanceof Api.UpdateChatParticipantAdd ||
             update instanceof Api.UpdateChatParticipantDelete ||
@@ -39,6 +71,7 @@ export class ChatAction extends EventBuilder {
             return new ChatActionEvent(update);
         }
 
+        // Pinned messages
         if (
             update instanceof Api.UpdatePinnedMessages ||
             update instanceof Api.UpdatePinnedChannelMessages
@@ -46,12 +79,14 @@ export class ChatAction extends EventBuilder {
             return new ChatActionEvent(update);
         }
 
+        // Service messages with actions
         if (
             update instanceof Api.UpdateNewMessage ||
             update instanceof Api.UpdateNewChannelMessage
         ) {
             const msg = update.message;
             if (msg instanceof Api.MessageService && msg.action) {
+                // Check if it's a chat action we care about
                 if (
                     msg.action instanceof Api.MessageActionChatCreate ||
                     msg.action instanceof Api.MessageActionChannelCreate ||
@@ -90,6 +125,7 @@ export class ChatActionEvent extends EventCommon {
     constructor(update: ChatActionUpdate, actionMessage?: Api.MessageService) {
         let chatPeer: Api.TypePeer | undefined;
 
+        // Determine chat peer based on update type
         if (update instanceof Api.UpdateChatParticipantAdd) {
             chatPeer = new Api.PeerChat({ chatId: update.chatId });
         } else if (update instanceof Api.UpdateChatParticipantDelete) {
@@ -119,6 +155,7 @@ export class ChatActionEvent extends EventCommon {
     }
 
     private _parseUpdate(update: ChatActionUpdate, actionMessage?: Api.MessageService) {
+        // Handle participant updates
         if (update instanceof Api.UpdateChatParticipantAdd) {
             this._userIds = [update.userId];
             this._addedBy = update.inviterId;
@@ -140,6 +177,7 @@ export class ChatActionEvent extends EventCommon {
             }
         }
 
+        // Handle pinned messages
         if (update instanceof Api.UpdatePinnedMessages) {
             this._pinnedIds = update.messages;
             this._pinned = update.pinned ?? true;
@@ -148,6 +186,7 @@ export class ChatActionEvent extends EventCommon {
             this._pinned = update.pinned ?? true;
         }
 
+        // Handle service message actions
         if (actionMessage?.action) {
             const action = actionMessage.action;
 
@@ -192,10 +231,18 @@ export class ChatActionEvent extends EventCommon {
         }
     }
 
+    /**
+     * The service message that triggered this event (if any).
+     */
     get actionMessage(): Api.MessageService | undefined {
         return this._actionMessage;
     }
 
+    // ==================== User Actions ====================
+
+    /**
+     * True if a user joined the chat.
+     */
     get userJoined(): boolean {
         const action = this._actionMessage?.action;
         return (
@@ -210,6 +257,9 @@ export class ChatActionEvent extends EventCommon {
         );
     }
 
+    /**
+     * True if a user was added by someone else.
+     */
     get userAdded(): boolean {
         return (
             this._actionMessage?.action instanceof Api.MessageActionChatAddUser ||
@@ -217,6 +267,9 @@ export class ChatActionEvent extends EventCommon {
         );
     }
 
+    /**
+     * True if a user left the chat.
+     */
     get userLeft(): boolean {
         const action = this._actionMessage?.action;
         if (action instanceof Api.MessageActionChatDeleteUser) {
@@ -237,6 +290,9 @@ export class ChatActionEvent extends EventCommon {
         return false;
     }
 
+    /**
+     * True if a user was kicked/banned.
+     */
     get userKicked(): boolean {
         const action = this._actionMessage?.action;
         if (action instanceof Api.MessageActionChatDeleteUser) {
@@ -257,30 +313,53 @@ export class ChatActionEvent extends EventCommon {
         return this.originalUpdate instanceof Api.UpdateChatParticipantDelete;
     }
 
+    /**
+     * The user IDs affected by this action.
+     */
     get userIds(): bigInt.BigInteger[] {
         return this._userIds;
     }
 
+    /**
+     * The first user ID (convenience getter).
+     */
     get userId(): bigInt.BigInteger | undefined {
         return this._userIds.length > 0 ? this._userIds[0] : undefined;
     }
 
+    /**
+     * The user ID who added someone (if applicable).
+     */
     get addedBy(): bigInt.BigInteger | undefined {
         return this._addedBy;
     }
 
+    /**
+     * The user ID who kicked someone (if applicable).
+     */
     get kickedBy(): bigInt.BigInteger | undefined {
         return this._kickedBy;
     }
 
+    // ==================== Chat Changes ====================
+
+    /**
+     * True if this is a new chat/channel creation.
+     */
     get created(): boolean {
         return this._created;
     }
 
+    /**
+     * The new chat title (if changed).
+     */
     get newTitle(): string | undefined {
         return this._newTitle;
     }
 
+    /**
+     * True if the chat photo was changed.
+     */
     get newPhoto(): boolean {
         return (
             this._newPhoto !== undefined ||
@@ -288,30 +367,55 @@ export class ChatActionEvent extends EventCommon {
         );
     }
 
+    /**
+     * True if the chat photo was deleted.
+     */
     get photoDeleted(): boolean {
         return this._actionMessage?.action instanceof Api.MessageActionChatDeletePhoto;
     }
 
+    /**
+     * The new photo object (if available).
+     */
     get photo(): Api.TypePhoto | undefined {
         return this._newPhoto;
     }
 
+    // ==================== Pin Actions ====================
+
+    /**
+     * True if a message was pinned.
+     */
     get newPin(): boolean {
         return this._pinned && this._pinnedIds.length > 0;
     }
 
+    /**
+     * True if a message was unpinned.
+     */
     get unpin(): boolean {
         return !this._pinned && this._pinnedIds.length > 0;
     }
 
+    /**
+     * The IDs of pinned/unpinned messages.
+     */
     get pinnedMessageIds(): number[] {
         return this._pinnedIds;
     }
 
+    /**
+     * The first pinned message ID.
+     */
     get pinnedMessageId(): number | undefined {
         return this._pinnedIds.length > 0 ? this._pinnedIds[0] : undefined;
     }
 
+    // ==================== Methods ====================
+
+    /**
+     * Get the pinned message(s).
+     */
     async getPinnedMessages(): Promise<Api.Message[] | undefined> {
         if (!this._client || this._pinnedIds.length === 0 || !this.chatId) {
             return undefined;
@@ -325,11 +429,17 @@ export class ChatActionEvent extends EventCommon {
         }
     }
 
+    /**
+     * Get the first pinned message.
+     */
     async getPinnedMessage(): Promise<Api.Message | undefined> {
         const messages = await this.getPinnedMessages();
         return messages && messages.length > 0 ? messages[0] : undefined;
     }
 
+    /**
+     * Get the user(s) affected by this action.
+     */
     async getUsers(): Promise<Api.User[] | undefined> {
         if (!this._client || this._userIds.length === 0) {
             return undefined;
@@ -350,11 +460,17 @@ export class ChatActionEvent extends EventCommon {
         }
     }
 
+    /**
+     * Get the first affected user.
+     */
     async getUser(): Promise<Api.User | undefined> {
         const users = await this.getUsers();
         return users && users.length > 0 ? users[0] : undefined;
     }
 
+    /**
+     * Respond to the action in the same chat.
+     */
     async respond(params: {
         message?: string;
         parseMode?: any;

@@ -9,7 +9,7 @@ import * as downloads from "./methods/downloads";
 import * as messageParse from "./methods/messageParse";
 import * as message from "./methods/messages";
 import * as telegramBaseClient from "./TelegramBaseClient";
-import * as tgClient from "./TelegramClient";
+import * as TelegramClient from "./TelegramClient";
 import * as updates from "./updates";
 import * as uploads from "./methods/uploads";
 import * as users from "./methods/users";
@@ -27,7 +27,7 @@ export {
     messageParse,
     message,
     telegramBaseClient,
-    tgClient,
+    TelegramClient,
     updates,
     uploads,
     users,

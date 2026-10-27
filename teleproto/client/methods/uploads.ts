@@ -1,5 +1,4 @@
 import { Api } from "../../tl";
-
 import type { TelegramClient } from "../TelegramClient";
 import { generateRandomLong, unionId } from "../../Helpers";
 import { getInputMedia, getMessageId } from "../../Utils";
@@ -17,23 +16,14 @@ import { choosePartSize, MAX_PART_SIZE } from "../files/PartsManager";
 import { Buffer } from "node:buffer";
 
 interface OnProgress {
-    // Float between 0 and 1.
     (progress: number): void;
 
     isCanceled?: boolean;
 }
 
-/**
- * interface for uploading files.
- */
 export interface UploadFileParams {
-    /** A {@link CustomFile}, or any File / Blob that has a `name`.
-     */
     file: NamedBlob | CustomFile;
-    /** Parts to keep in flight. Defaults to a parallel value when omitted;
-     * anything above 16 is unstable. */
     workers?: number;
-    /** a progress callback for the upload. */
     onProgress?: OnProgress;
     maxBufferSize?: number;
 }
@@ -54,20 +44,10 @@ function isNamedBlob(value: unknown): value is NamedBlob {
     );
 }
 
-/**
- * A custom file class compatible with File-like upload shape.<br/>
- * You should use this whenever you want to upload a file.
- */
 export class CustomFile {
-    /** The name of the file to be uploaded. This is what will be shown in telegram */
     name: string;
-    /** The size of the file. this should be the exact size to not lose any information */
     size: number;
-    /** The full path on the system to where the file is. this will be used to read the file from.<br/>
-     * Can be left empty to use a buffer instead
-     */
     path: string;
-    /** in case of the no path a buffer can instead be passed instead to upload. */
     buffer?: Buffer;
 
     constructor(name: string, size: number, path: string, buffer?: Buffer) {
@@ -104,7 +84,6 @@ async function openUploadSource(file: NamedBlob | CustomFile, size: number, maxB
     };
 }
 
-/** @hidden */
 export async function uploadFile(
     client: TelegramClient,
     fileParams: UploadFileParams
@@ -164,7 +143,6 @@ export async function uploadFile(
     }
 }
 
-/** @hidden */
 export async function _resaveUploadedParts(client: TelegramClient, request: unknown, part: number | "all"): Promise<boolean> {
     const files = findUploads(request);
     if (!files.length) return false;
@@ -191,113 +169,46 @@ export async function _resaveUploadedParts(client: TelegramClient, request: unkn
     return true;
 }
 
-/**
- * Interface for sending files to a chat.
- */
 export interface SendFileInterface {
-    /** a file like object.
-     *   - can be a localpath. the file name will be used.
-     *   - can be a Buffer with a ".name" attribute to use as the file name.
-     *   - can be an external direct URL. Telegram will download the file and send it.
-     *   - can be an existing media from another message.
-     *   - can be a handle to a file that was received by using {@link TelegramClient.uploadFile}
-     *   - can be a list when using an album
-     *   - can be {@link Api.TypeInputMedia} instance. For example if you want to send a dice you would use {@link Api.InputMediaDice}
-     */
     file: FileLike | FileLike[];
-    /** Optional caption for the sent media message. can be a list for albums*/
     caption?: string | string[];
-    /** If left to false and the file is a path that ends with the extension of an image file or a video file, it will be sent as such. Otherwise always as a document. */
     forceDocument?: boolean;
-    /** The size of the file to be uploaded if it needs to be uploaded, which will be determined automatically if not specified. */
     fileSize?: number;
-    /** Whether the existing draft should be cleared or not. */
     clearDraft?: boolean;
-    /** progress callback that will be called each time a new chunk is downloaded. */
     progressCallback?: OnProgress;
-    /** Same as `replyTo` from {@link TelegramClient.sendMessage}. Also accepts a raw {@link Api.TypeInputReplyTo} for full control (stories, monoforums, todo items). */
     replyTo?: MessageIDLike | Api.TypeInputReplyTo;
-    /** Quoted part of the message being replied to. Requires `replyTo`. */
     quoteText?: string;
-    /** Formatting entities of the quote. Offsets are relative to `quoteText`. */
     quoteEntities?: Api.TypeMessageEntity[];
-    /** Offset of the quote within the original message (UTF-16 code units). */
     quoteOffset?: number;
-    /** Chat where the quoted message was sent, for quoting messages from other chats. */
     replyToPeerId?: EntityLike;
-    /** Optional attributes that override the inferred ones, like {@link Api.DocumentAttributeFilename} and so on.*/
     attributes?: Api.TypeDocumentAttribute[] | Api.TypeDocumentAttribute[][];
-    /** Optional JPEG thumbnail (for documents). Telegram will ignore this parameter unless you pass a .jpg file!<br/>
-     * The file must also be small in dimensions and in disk size. Successful thumbnails were files below 20kB and 320x320px.<br/>
-     *  Width/height and dimensions/size ratios may be important.
-     *  For Telegram to accept a thumbnail, you must provide the dimensions of the underlying media through `attributes:` with DocumentAttributesVideo.
-     */
     thumb?: FileLike;
-    /** If true the audio will be sent as a voice note. */
     voiceNote?: boolean;
-    /** If true the video will be sent as a video note, also known as a round video message.*/
     videoNote?: boolean;
-    /** Whether the sent video supports streaming or not.<br/>
-     *  Note that Telegram only recognizes as streamable some formats like MP4, and others like AVI or MKV will not work.<br/>
-     *  You should convert these to MP4 before sending if you want them to be streamable. Unsupported formats will result in VideoContentTypeError. */
     supportsStreaming?: boolean;
-    /** See the {@link parseMode} property for allowed values. Markdown parsing will be used by default. */
     parseMode?: any;
-    /** A list of message formatting entities. When provided, the parseMode is ignored. */
     formattingEntities?: Api.TypeMessageEntity[];
-    /** Whether the message should notify people in a broadcast channel or not. Defaults to false, which means it will notify them. Set it to True to alter this behaviour. */
     silent?: boolean;
-    /**
-     * If set, the file won't send immediately, and instead it will be scheduled to be automatically sent at a later time.
-     */
     scheduleDate?: number;
-    /**
-     * The matrix (list of lists), row list or button to be shown after sending the message.<br/>
-     * This parameter will only work if you have signed in as a bot. You can also pass your own ReplyMarkup here.
-     */
     buttons?: MarkupLike;
-    /** How many workers to use to upload the file. anything above 16 is unstable. */
     workers?: number;
     noforwards?: boolean;
-    /** Similar to ``replyTo``, but replies in the linked group of a broadcast channel instead (effectively leaving a "comment to" the specified message).
-
-     This parameter takes precedence over ``replyTo``.
-     If there is no linked chat, `SG_ID_INVALID` is thrown.
-     */
     commentTo?: number | Api.Message;
-    /**
-     * Used for threads to reply to a specific thread
-     */
     topMsgId?: number | Api.Message;
-    /** Send the file as a specific entity (channel/user). */
     sendAs?: EntityLike;
-    /** Message effect ID (animation/visual effect). */
     effect?: BigInteger;
-    /** If true, media will be shown below the text instead of above. */
     invertMedia?: boolean;
-    /** Send this message as a background message. */
     background?: boolean;
-    /** Whether the order of the user's sticker sets should be updated when a sticker is sent. */
     updateStickersetsOrder?: boolean;
-    /** Bots only: if set, allows sending up to 1000 messages per second past the flood limits, at a Stars cost. */
     allowPaidFloodskip?: boolean;
-    /** Stars to pay for sending a paid message, when the recipient charges for messages. */
     allowPaidStars?: BigInteger;
-    /** Repeat period (in seconds) for recurring scheduled messages. Requires `scheduleDate`. */
     scheduleRepeatPeriod?: number;
-    /** Add the message to a quick-reply shortcut instead of sending it. A shortcut name, shortcut ID, or a raw {@link Api.TypeInputQuickReplyShortcut}. */
     quickReplyShortcut?: string | number | Api.TypeInputQuickReplyShortcut;
-    /** Suggested-post metadata for direct-messages channels. */
     suggestedPost?: Api.TypeSuggestedPost;
-    /** Mark the media as spoiler (blurred until tapped). */
     spoiler?: boolean;
-    /** Self-destruct timer for the media, in seconds. */
     ttlSeconds?: number;
-    /** If true, the uploaded video has no sound (sent as a silent video). */
     nosoundVideo?: boolean;
-    /** Custom cover photo for the video. */
     videoCover?: Api.TypeInputPhoto;
-    /** Start playback timestamp of the video, in seconds. */
     videoTimestamp?: number;
 }
 
@@ -321,7 +232,6 @@ interface FileToMediaInterface {
     videoTimestamp?: number;
 }
 
-/** @hidden */
 export function _toQuickReplyShortcut(
     shortcut: string | number | Api.TypeInputQuickReplyShortcut | undefined
 ): Api.TypeInputQuickReplyShortcut | undefined {
@@ -337,7 +247,6 @@ export function _toQuickReplyShortcut(
     return shortcut;
 }
 
-/** @hidden */
 export async function _toReplyObject(
     client: TelegramClient,
     replyTo: MessageIDLike | Api.TypeInputReplyTo | undefined,
@@ -375,7 +284,6 @@ export async function _toReplyObject(
     });
 }
 
-/** @hidden */
 export async function _fileToMedia(
     client: TelegramClient,
     {
@@ -530,7 +438,6 @@ export async function _fileToMedia(
         if (!thumb) {
             uploadedThumb = undefined;
         } else {
-            // todo refactor
             if (typeof thumb == "string") {
                 uploadedThumb = new CustomFile(
                     path.basename(thumb),
@@ -583,7 +490,6 @@ export async function _fileToMedia(
     };
 }
 
-/** @hidden */
 export async function _sendAlbum(
     client: TelegramClient,
     entity: EntityLike,
@@ -756,7 +662,6 @@ export async function _sendAlbum(
     return client._getResponseMessage(randomIds, result, entity) as Api.Message;
 }
 
-/** @hidden */
 export async function sendFile(
     client: TelegramClient,
     entity: EntityLike,

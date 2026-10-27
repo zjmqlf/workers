@@ -1,20 +1,35 @@
-import { Session } from "./Abstract";
+import { Session, type StoredUpdateState } from "./Abstract";
 import type { AuthKey } from "../crypto/AuthKey";
 import { Api } from "../tl";
 import bigInt from "big-integer";
+
 import { getDisplayName, getInputPeer, getPeerId } from "../Utils";
 import { isArrayLike, returnBigInt, unionId } from "../Helpers";
 import * as utils from "../Utils";
 import type { EntityLike } from "../define";
 
+/**
+ * In-memory session storage that keeps all auth and entity data in RAM.
+ *
+ * All data is lost when the process exits. Use {@link StringSession} to export
+ * the session to a portable string, or {@link StoreSession} for persistent on-disk storage.
+ *
+ * Entities are keyed by their peer ID to prevent duplicate accumulation.
+ */
 export class MemorySession extends Session {
     protected _serverAddress?: string;
     protected _dcId: number;
     protected _port?: number;
     protected _takeoutId: undefined;
     protected _entities: Map<string, any>;
-    protected _updateStates: {};
+    protected _updateState?: StoredUpdateState;
     protected _authKey?: AuthKey;
+    /**
+     * Auth keys for non-main DCs (file/media). Keyed by DC id. Sharing one
+     * key per (account, DC) is what Telegram expects — fresh DH for every
+     * connection eventually trips the server's per-account auth-key limit
+     * and downloads start getting dropped.
+     */
     protected _dcAuthKeys: Map<number, AuthKey> = new Map();
 
     constructor() {
@@ -24,8 +39,8 @@ export class MemorySession extends Session {
         this._dcId = 0;
         this._port = undefined;
         this._takeoutId = undefined;
+
         this._entities = new Map();
-        this._updateStates = {};
     }
 
     setDC(dcId: number, serverAddress: string, port: number) {
@@ -89,6 +104,14 @@ export class MemorySession extends Session {
         }
     }
 
+    getUpdateState(): StoredUpdateState | undefined {
+        return this._updateState;
+    }
+
+    setUpdateState(state: StoredUpdateState | undefined) {
+        this._updateState = state;
+    }
+
     close() {}
 
     save() {}
@@ -102,7 +125,7 @@ export class MemorySession extends Session {
         this._port = undefined;
         this._dcAuthKeys.clear();
         this._entities.clear();
-        this._updateStates = {};
+        this._updateState = undefined;
     }
 
     _entityValuesToRow(
@@ -112,6 +135,9 @@ export class MemorySession extends Session {
         phone: string,
         name: string
     ) {
+        // While this is a simple implementation it might be overrode by,
+        // other classes so they don't need to implement the plural form
+        // of the method. Don't remove.
         return [id, hash, username, phone, name];
     }
 
@@ -151,6 +177,7 @@ export class MemorySession extends Session {
     _entitiesToRows(tlo: any) {
         let entities: any = [];
         if (!(tlo.classType === "constructor") && isArrayLike(tlo)) {
+            // This may be a list of users already for instance
             entities = tlo;
         } else {
             if (typeof tlo === "object") {
@@ -171,7 +198,7 @@ export class MemorySession extends Session {
                 }
             }
         }
-        const rows = [];
+        const rows = []; // Rows to add (id, hash, username, phone, name)
         for (const e of entities) {
             const row = this._entityToRow(e);
             if (row) {
@@ -190,6 +217,7 @@ export class MemorySession extends Session {
 
     getEntityRowsByPhone(phone: string) {
         for (const e of this._entities.values()) {
+            // id, hash, username, phone, name
             if (e[3] === phone) {
                 return [e[0], e[1]];
             }
@@ -198,6 +226,7 @@ export class MemorySession extends Session {
 
     getEntityRowsByUsername(username: string) {
         for (const e of this._entities.values()) {
+            // id, hash, username, phone, name
             if (e[2] === username) {
                 return [e[0], e[1]];
             }
@@ -206,6 +235,7 @@ export class MemorySession extends Session {
 
     getEntityRowsByName(name: string) {
         for (const e of this._entities.values()) {
+            // id, hash, username, phone, name
             if (e[4] === name) {
                 return [e[0], e[1]];
             }
@@ -225,6 +255,7 @@ export class MemorySession extends Session {
                 ),
             ];
             for (const e of this._entities.values()) {
+                // id, hash, username, phone, name
                 if (ids.includes(e[0])) {
                     return [e[0], e[1]];
                 }
@@ -247,6 +278,7 @@ export class MemorySession extends Session {
                 // @ts-ignore
                 return key;
             }
+            // Try to early return if this key can be casted as input peer
             try {
                 return utils.getInputPeer(key);
             } catch {
@@ -254,6 +286,7 @@ export class MemorySession extends Session {
                 exact = true;
             }
         } else {
+            // Not a TLObject or can't be cast into InputPeer
             if (typeof key === "object") {
                 key = utils.getPeerId(key);
                 exact = true;
@@ -290,11 +323,12 @@ export class MemorySession extends Session {
             }
         }
         if (result) {
-            let entityId = result[0];
+            let entityId = result[0]; // unpack resulting tuple
             const entityHash = bigInt(result[1]);
             const resolved = utils.resolveId(returnBigInt(entityId));
             entityId = resolved[0];
             const kind = resolved[1];
+            // removes the mark and returns type of entity
             if (kind === Api.PeerUser) {
                 return new Api.InputPeerUser({
                     userId: entityId,

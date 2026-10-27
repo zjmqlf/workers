@@ -60,14 +60,6 @@ export class AuthKey {
         return this._key;
     }
 
-    // TODO : This doesn't really fit here, it's only used in authentication
-
-    /**
-     * Calculates the new nonce hash based on the current class fields' values
-     * @param newNonce
-     * @param number
-     * @returns {bigInt.BigInteger}
-     */
     async calcNewNonceHash(
         newNonce: bigInt.BigInteger,
         number: number
@@ -80,8 +72,6 @@ export class AuthKey {
                 nonce,
                 Buffer.concat([n, readBufferFromBigInt(this.auxHash, 8, true)]),
             ]);
-
-            // Calculates the message key from the given data
             const shaData = (await sha1(data)).slice(4, 20);
             return readBigIntFromBuffer(shaData, true, true);
         }

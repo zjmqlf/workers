@@ -3,12 +3,9 @@ import { LegacySocketTransport } from "../compat/LegacySocketTransport";
 import type { SocketFactory as LegacySocketFactory } from "../compat/extensions/SocketInterface";
 import { isLegacyProxyConnection } from "../compat/network/connection/TCPMTProxy";
 import type { TelegramClient } from "./TelegramClient";
-import { version } from "../Version";
 import { Session, StoreSession } from "../sessions";
 import { Logger } from "../extensions";
 import { Api } from "../tl";
-
-import os from "node:os";
 import { AuthKey } from "../crypto/AuthKey";
 import { addServerKey } from "../crypto/RSA";
 import { IGE } from "../crypto/IGE";
@@ -32,9 +29,6 @@ import { UpdateLoop } from "./updates/UpdateLoop";
 import type { ClientUpdates } from "./updates/ClientUpdates";
 import type { ResolvedTransport, Transport } from "../network/transport/Transport";
 import { TcpTransport } from "../network/transport/TcpTransport";
-import { SocksTransport } from "../network/transport/SocksTransport";
-import { MTProxyTransport } from "../network/transport/MTProxyTransport";
-import { WebProxyTransport, type WebProxyOptions } from "../network/transport/WebProxyTransport";
 import timers from "node:timers";
 
 const SESSION_IDLE_TIMEOUT_MS = 300_000;
@@ -44,55 +38,14 @@ type LifecycleEvent = "connecting" | "connect" | "disconnect" | "reconnecting" |
 type LifecycleHandler = () => void | Promise<void>;
 
 const PROD_DEFAULT_DC_ID = 2;
-const TEST_DEFAULT_DC_ID = 2;
 
 export {
     PROD_DC_IPV4,
     PROD_DC_IPV6,
-    TEST_DC_IPV4,
-    TEST_DC_IPV6,
     WEBSOCKET_DC_HOSTS,
     webSocketDcAddress,
 } from "../network/dc/DcAddressBook";
 
-/** @deprecated Use the `transport` client option. */
-export type WebProxyType = WebProxyOptions & { WEB: true };
-
-/** @deprecated Use the `transport` client option. */
-export type ProxyInterface =
-    | { MTProxy: true; ip: string; port: number; secret: string; timeout?: number }
-    | {
-          socksType: 4 | 5;
-          ip: string;
-          port: number;
-          username?: string;
-          password?: string;
-          timeout?: number;
-      }
-    | WebProxyType;
-
-function proxyTransport(proxy: ProxyInterface): Transport {
-    if ("WEB" in proxy) {
-        const { WEB: _, ...options } = proxy;
-        return new WebProxyTransport(options);
-    }
-    if ("MTProxy" in proxy) {
-        return new MTProxyTransport({ host: proxy.ip, port: proxy.port, secret: proxy.secret });
-    }
-    return new SocksTransport({
-        host: proxy.ip,
-        port: proxy.port,
-        version: proxy.socksType,
-        username: proxy.username,
-        password: proxy.password,
-        timeout: proxy.timeout,
-    });
-}
-
-/**
- * Interface for creating a new client.
- * All of these have a default value and you should only change those if you know what you are doing.
- */
 function jsonValue(value: Api.TypeJSONValue): unknown {
     if (value instanceof Api.JsonObject) return Object.fromEntries(value.value.map((entry) => [entry.key, jsonValue(entry.value)]));
     if (value instanceof Api.JsonArray) return value.value.map(jsonValue);
@@ -115,147 +68,40 @@ export interface DownloadPoolOptions {
 }
 
 export interface TelegramClientParams {
-    /** MTProto packet framing. Defaults to {@link ConnectionTCPObfuscated}. */
     connection?: typeof Connection;
-    /**
-     * Whether to connect to the servers through IPv6 or not. By default this is false.
-     */
     useIPV6?: boolean;
-    /**
-     * Whether to connect to Telegram's test environment instead of production.
-     *
-     * When `true`:
-     * - The client starts from test DC2 (`149.154.167.40`). DC routing follows the same
-     *   path as production: `help.GetConfig` is the runtime source of truth, with the
-     *   built-in test seed table (DC1/DC2/DC3) used as a fallback.
-     * - You must use a test phone number of the form `99966<dc><4 digits>`; the login
-     *   code is the DC digit repeated 5 times (e.g. `22222` for DC2).
-     * - Test sessions are not interchangeable with production sessions.
-     *
-     * Defaults to `false`.
-     */
-    testServers?: boolean;
-    /**
-     * The timeout in seconds for establishing a TCP connection to a DC.
-     * An address that exceeds it is closed, the attempt fails fast and the
-     * next attempt rotates to an alternative address of that DC.
-     */
     timeout?: number;
-    /**
-     * How many times a request should be retried.<br/>
-     * Request are retried when Telegram is having internal issues (due to INTERNAL error or RPC_CALL_FAIL error),<br/>
-     * when there is a errors.FloodWaitError less than floodSleepThreshold, or when there's a migrate error.<br/>
-     * defaults to 5.
-     */
     requestRetries?: number;
-    /**
-     * How many times the connection should retry, either on the initial connection or when Telegram disconnects us.<br/>
-     * May be set to a negative or undefined value for infinite retries, but this is not recommended, since the program can get stuck in an infinite loop.<br/>
-     * defaults to 5
-     */
     connectionRetries?: number;
-    /**
-     * How many times to reconnect before giving up. This happens after the initial connection is finished<br/>
-     * defaults to infinity
-     */
     reconnectRetries?: number;
-    /**
-     * How the client reaches Telegram: `TcpTransport` (default), `SocksTransport`, `HttpProxyTransport`,
-     * `MTProxyTransport`, `WebSocketTransport` or `WebProxyTransport`.
-     */
     transport?: Transport;
-    /** @deprecated Use `transport`: `MTProxyTransport`, `SocksTransport` or `WebProxyTransport`. */
-    proxy?: ProxyInterface;
-    /** @deprecated Use `transport`: `TcpTransport`, `WebSocketTransport`, `SocksTransport`, or your own `Transport`. */
     networkSocket?: LegacySocketFactory;
-    /**
-     * How many times we should retry borrowing a sender from another DC when it fails. defaults to 5
-     */
     downloadRetries?: number;
-    /** The delay in milliseconds to sleep between automatic reconnections. defaults to 1000*/
     retryDelay?: number;
-    /**Whether reconnection should be retried connection_retries times automatically if Telegram disconnects us or not. defaults to true */
     autoReconnect?: boolean;
-    /** Deliver updates one at a time, awaiting all handlers. Defaults to false. Slow handlers accumulate queued updates; destroy clears pending work. */
     sequentialUpdates?: boolean;
-    /** The threshold below which the library should automatically sleep on flood wait and slow mode wait errors (inclusive).<br/>
-     *  For instance, if a FloodWaitError for 17s occurs and floodSleepThreshold is 20s, the library will sleep automatically.<br/>
-     *  If the error was for 21s, it would raise FloodWaitError instead. defaults to 60 sec.*/
     floodSleepThreshold?: number;
-    /**
-     * Device model to be sent when creating the initial connection. Defaults to os.type().toString().
-     */
     deviceModel?: string;
-    /**
-     * System version to be sent when creating the initial connection. defaults to os.release().toString() -.
-     */
     systemVersion?: string;
-    /**
-     * App version to be sent when creating the initial connection. Defaults to 1.0.
-     */
     appVersion?: string;
-    /**
-     * Language code to be sent when creating the initial connection. Defaults to 'en'.
-     */
     langCode?: string;
-    /**
-     * Language pack of the app. `langCode` is sent only together with it. Defaults to empty.
-     */
     langPack?: string;
-    /**
-     * Use temporary auth keys (perfect forward secrecy) for file transfers. Defaults to false;
-     * also turned on when Telegram asks for it with `tmp_sessions` in the config.
-     */
     pfs?: boolean;
-    /**
-     * System lang code to be sent when creating the initial connection. Defaults to 'en'.
-     */
     systemLangCode?: string;
-    /**
-     * Instance of Logger to use. <br />
-     * If a `Logger` is given, it'll be used directly. If nothing is given, the default logger will be used. <br />
-     * To create your own Logger make sure you extends teleproto logger {@link Logger} and override `log` method.
-     */
     baseLogger?: Logger;
-    /**
-     * Limits how many downloads happen at the same time.
-     */
     maxConcurrentDownloads?: number;
-    /**
-     * Whether to check for tampering in messages or not.
-     */
     securityChecks?: boolean;
-    /**
-     * TCP keep-alive probe interval in milliseconds. Defaults to 30000.
-     * Set to 0 to disable keep-alive probes.
-     */
     keepAliveInterval?: number;
-    /**
-     * Callback for handling reCAPTCHA verification.
-     * It should return the token obtained after solving the CAPTCHA.
-     */
     reCaptchaCallback?: (siteKey: string) => Promise<string>;
     downloadPool?: DownloadPoolOptions;
-    /** Channel polling fallback in milliseconds when Telegram omits timeout. Defaults to 1000. */
     channelPollInterval?: number;
-    /** Minimum spacing in milliseconds between scheduled channel RPCs. Defaults to 250; not a Telegram rate guarantee. */
     channelPollRequestInterval?: number;
-    /** Maximum concurrent scheduled channel RPCs. Defaults to 2. More watched channels increase polling latency. */
     channelPollConcurrency?: number;
-    /**
-     * Bounds the in-memory entity cache (the hot working set of resolved
-     * peers; the session remains the storage tier).
-     *
-     * omitted / `true` - default limit (4096 peers per user/chat segment);
-     * `false` - disabled, peers are resolved straight from the session store;
-     * `{ max?, ttl? }` - explicit policy, `ttl` in milliseconds, `{ max: 0 }` for an unbounded cache.
-     */
     entityCache?: EntityCacheOptions;
 }
 
 const clientParamsDefault = {
     useIPV6: false,
-    testServers: false,
     timeout: 10,
     requestRetries: 5,
     connectionRetries: Infinity,
@@ -277,127 +123,64 @@ const clientParamsDefault = {
 };
 
 export abstract class TelegramBaseClient<S extends Session = Session> {
-    /** The current teleproto version. */
-    __version__ = version;
-    /** @hidden */
     _config?: Api.Config;
     private _tzOffset: number;
     private readonly _pfs: boolean;
     private _configTimer?: ReturnType<typeof setTimeout>;
-    /** @hidden */
     _appConfig?: { [key: string]: unknown };
     private _appConfigTask?: Promise<{ [key: string]: unknown }>;
     private _cdnKeysTask?: Promise<void>;
-    /** @hidden */
     public _log: Logger;
-
-    /** @hidden */
     public _floodSleepThreshold: number;
     public session: S;
     public apiHash: string;
     public apiId: number;
-
-    /** @hidden */
     public _requestRetries: number;
-    /** @hidden */
     public _downloadRetries: number;
-    /** @hidden */
     public _connectionRetries: number;
-    /** @hidden */
     public _reconnectRetries: number;
-    /** @hidden */
     public _retryDelay: number;
-    /** @hidden */
     public _timeout: number;
-    /** @hidden */
     public _autoReconnect: boolean;
-    /** @hidden */
     public _transport: ResolvedTransport;
-    /** @deprecated The socket factory passed as `networkSocket`; use `transport`. */
     public networkSocket?: LegacySocketFactory;
-    /** @hidden */
     public _initRequest: Api.InitConnection;
-    /** @hidden */
     public _sender?: MTProtoSender;
-    /** @hidden */
     public _floodWaitedRequests: any;
-    /** @hidden */
     public _bot?: boolean;
-    /** @hidden */
     public _premium?: boolean;
-    /** @hidden */
     public _useIPV6: boolean;
-    /** @hidden */
-    public _testServers: boolean;
-    /** @hidden */
     public _selfInputPeer?: Api.InputPeerUser;
-    /** @hidden */
     public _errorHandler?: (error: Error) => Promise<void>;
-    /** @hidden */
     public _eventBuilders: [EventBuilder, CallableFunction][];
-    /** @hidden */
     public _entityCache: EntityCache;
-    /** @hidden */
     public _channelPollInterval: number;
-    /** @hidden */
     public _channelPollRequestInterval: number;
-    /** @hidden */
     public _channelPollConcurrency: number;
-    /** @hidden */
     public readonly _sequentialUpdates: boolean;
     public _lastRequest?: number;
-    /**
-     * Epoch ms of the last message decrypted on ANY session. Distinguishes a
-     * genuinely dead main connection from a ping that merely timed out because
-     * the single JS thread was busy decrypting media — if data is still
-     * arriving, the stack is alive and a ping hiccup must not force a reconnect.
-     * @hidden
-     */
     public _lastReceivedAt = 0;
-    /** @hidden */
     public _parseMode?: ParseInterface;
-    /** @hidden */
     public _reCaptchaCallback?: (siteKey: string) => Promise<string>;
-    /** @hidden */
     public _ALBUMS = new Map<
         string,
         [ReturnType<typeof setTimeout>, Api.TypeUpdate[]]
     >();
-    /** All MTProto sessions, keyed by ShiftedDcId. @hidden */
     public _network!: SessionPool;
-    /** @hidden */
     public _addresses!: DcAddressBook;
-    /** File-part scheduler shared by downloads and uploads. @hidden */
     public _files!: FileTransfers;
-    /**
-     * Shared per-DC state (auth key + server salt).
-     * Every sender of one DC reads/writes here so fresh sessions start with a
-     * valid salt and share one auth key.
-     * @hidden
-     */
     public readonly _dcenters = new DcStateRegistry();
-    /** @hidden */
     _destroyed: boolean;
     protected _updates?: ClientUpdates;
     private readonly _lifecycleHandlers = new Map<LifecycleEvent, Set<LifecycleHandler>>();
     private _connectionEvent: LifecycleEvent = "disconnect";
     private _destroyTask?: Promise<void>;
-    /**
-     * Retained for contract compatibility; concurrency of file transfers is
-     * governed by the download pool (MediaScheduler), not this number.
-     * @hidden
-     */
     _maxConcurrentDownloads: number;
-    /** @hidden */
     _securityChecks: boolean;
-    /** @hidden */
     public _keepAliveInterval?: number;
     _connectedDeferred: Deferred<void>;
-    /** Centralised pts/qts/seq tracker and gap recovery driver. */
     public updateManager!: UpdateManager;
-    /** @hidden */
     _updateDispatcher!: UpdateDispatcher;
-    /** @hidden */
     _updateLoop!: UpdateLoop;
 
     constructor(
@@ -415,7 +198,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         } else {
             this._log = new Logger();
         }
-        this._log.info(`Running teleproto version ${version} (crypto: ${IGE.backend()})`);
+        this._log.info("Running teleproto");
         if (session && typeof session == "string") {
             session = new StoreSession(session) as unknown as S;
         }
@@ -429,7 +212,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this.apiId = apiId;
         this.apiHash = apiHash;
         this._useIPV6 = clientParams.useIPV6!;
-        this._testServers = clientParams.testServers!;
         this._requestRetries = clientParams.requestRetries!;
         this._sequentialUpdates = !!clientParams.sequentialUpdates;
         this._downloadRetries = clientParams.downloadRetries!;
@@ -456,9 +238,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         if (clientParams.connection && !(clientParams.connection instanceof Function)) {
             throw new Error("Connection should be a class not an instance");
         }
-        if (clientParams.proxy && clientParams.transport) {
-            throw new Error("Pass either transport or proxy, not both");
-        }
         let connection = clientParams.connection;
         if (isLegacyProxyConnection(connection)) {
             this._log.warn("connection: proxy connection classes are deprecated: the proxy picks its own framing, remove the connection option");
@@ -468,33 +247,29 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         if (clientParams.networkSocket) {
             if (clientParams.transport) throw new Error("transport replaces networkSocket: pass only transport");
             this._log.warn(
-                "networkSocket is deprecated: use the transport option (TcpTransport, WebSocketTransport, SocksTransport, HttpProxyTransport, MTProxyTransport) or your own Transport"
+                "networkSocket is deprecated: use the transport option (TcpTransport) or your own Transport"
             );
             this.networkSocket = clientParams.networkSocket;
-            transport = new LegacySocketTransport(clientParams.networkSocket, clientParams.proxy);
+            transport = new LegacySocketTransport(clientParams.networkSocket);
         } else {
             transport =
                 clientParams.transport ??
-                (clientParams.proxy ? proxyTransport(clientParams.proxy) : new TcpTransport());
+                new TcpTransport();
         }
         const route = transport.resolve(connection);
         this._transport = route;
-        const initProxy = route.clientProxy
-            ? new Api.InputClientProxy(route.clientProxy)
-            : undefined;
         this._initRequest = new Api.InitConnection({
             apiId: this.apiId,
             deviceModel:
-                clientParams.deviceModel || os.type().toString() || "Unknown",
+                clientParams.deviceModel || "Unknown",
             systemVersion:
-                clientParams.systemVersion || os.release().toString() || "1.0",
+                clientParams.systemVersion || "1.0",
             appVersion: clientParams.appVersion || "1.0",
             langCode: clientParams.langCode || clientParamsDefault.langCode,
             langPack: clientParams.langPack || "",
             systemLangCode:
                 clientParams.systemLangCode ||
                 clientParamsDefault.systemLangCode,
-            proxy: initProxy,
         });
         this._pfs = !!clientParams.pfs;
         const tzOffset = -new Date().getTimezoneOffset() * 60;
@@ -509,17 +284,12 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._config = undefined;
         this._destroyed = false;
         this._connectedDeferred = new Deferred();
-
         this._parseMode = MarkdownParser;
-
         this.updateManager = new UpdateManager(this as unknown as TelegramClient);
         this._updateDispatcher = new UpdateDispatcher(this as unknown as TelegramClient);
         this._updateLoop = new UpdateLoop(this as unknown as TelegramClient);
-
         this._addresses = new DcAddressBook({
-            testServers: this._testServers,
             webSocket: !!route.webSocket,
-            proxied: !!route.proxied,
             ipv6: () => this._useIPV6,
         });
         this._network = new SessionPool(this, {
@@ -533,11 +303,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._files = new FileTransfers(this, clientParams.downloadPool);
     }
 
-    /**
-     * The in-memory entity cache. Exposes `size`, `has`, `delete` and
-     * `clear` so stale peers can be invalidated without touching internals.
-     * See {@link TelegramClientParams.entityCache} for bounding it.
-     */
     get entityCache(): EntityCache {
         return this._entityCache;
     }
@@ -554,20 +319,17 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._maxConcurrentDownloads = value;
     }
 
-    // region connecting
     async _initSession() {
         await this.session.load();
-        this.session.testServers = this._testServers;
         if (!this.session.serverAddress) {
-            const dcId = this._testServers ? TEST_DEFAULT_DC_ID : PROD_DEFAULT_DC_ID;
+            const dcId = PROD_DEFAULT_DC_ID;
             const seed = this._addresses.seed(dcId, this._useIPV6)!;
             this.session.setDC(dcId, seed.ipAddress, seed.port);
             return;
         }
         const sessionEnv = isTestDcAddress(this.session.serverAddress);
-        if (sessionEnv !== undefined && sessionEnv !== this._testServers) {
+        if (sessionEnv !== undefined) {
             this._log.warn(
-                `testServers mismatch: client constructed with testServers=${this._testServers}, ` +
                     `but the session's saved address (${this.session.serverAddress}) looks like ` +
                     `${sessionEnv ? "test" : "production"}. Sessions are not portable between ` +
                     `environments — use a separate session for each.`
@@ -585,32 +347,26 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._sender && this._sender.isConnected();
     }
 
-    /** Runs when the main sender starts connecting, including reconnections. */
     onConnecting(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("connecting", handler);
     }
 
-    /** Runs when the main transport connects; account sign-in may still be required. */
     onConnect(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("connect", handler);
     }
 
-    /** Runs when the main transport disconnects, manually or during recovery. */
     onDisconnect(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("disconnect", handler);
     }
 
-    /** Runs once when an automatic reconnect cycle starts. */
     onReconnecting(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("reconnecting", handler);
     }
 
-    /** Runs after automatic reconnection, the client probe and a catch-up attempt; does not await application handlers. */
     onReconnect(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("reconnect", handler);
     }
 
-    /** Runs once after client resources and subscriptions have been released. */
     onDestroy(handler: LifecycleHandler): () => void {
         return this._subscribeLifecycle("destroy", handler);
     }
@@ -624,7 +380,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return () => { handlers!.delete(handler); };
     }
 
-    /** @hidden */
     _handleConnectionLifecycle(event: "connecting" | "connect" | "disconnect" | "reconnecting"): void {
         if (this._destroyed && event !== "disconnect") return;
         if (event === this._connectionEvent) return;
@@ -657,7 +412,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._teardownUpdateState();
     }
 
-    /** @hidden */
     _teardownUpdateState() {
         for (const [timer] of this._ALBUMS.values()) {
             clearTimeout(timer);
@@ -680,10 +434,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         await this._sender?.disconnect();
     }
 
-    /**
-     * Disconnects all senders and removes all handlers
-     * Disconnect is safer as it will not remove your event handlers
-     */
     destroy(): Promise<void> {
         if (this._destroyTask) return this._destroyTask;
         this._destroyed = true;
@@ -700,7 +450,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._destroyTask;
     }
 
-    /** @hidden */
     async _authKeyCallback(authKey: AuthKey | undefined, dcId: number) {
         if (this._addresses.isCdn(dcId)) return;
         if (authKey && dcId !== this.session.dcId) this._dcenters.get(dcId).authorized = false;
@@ -708,7 +457,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         await this.session.save();
     }
 
-    /** @hidden */
     _createConnection(address: DcAddress, dcId = address.id): Connection {
         return new this._transport.connection({
             ip: address.ipAddress,
@@ -717,11 +465,9 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             loggers: this._log,
             socket: this._transport.socket,
             keepAliveInterval: this._keepAliveInterval,
-            testServers: this._testServers,
         });
     }
 
-    /** @hidden */
     _ensureCdnKeys(): Promise<void> {
         this._cdnKeysTask ??= this.invoke(new Api.help.GetCdnConfig())
             .then(async (config) => {
@@ -734,7 +480,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._cdnKeysTask;
     }
 
-    /** @hidden */
     async _connectSender(sender: MTProtoSender, dcId: number, connection?: Connection, mediaCluster = false) {
         try {
             if (!connection && this._addresses.isCdn(dcId)) {
@@ -762,7 +507,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         }
     }
 
-    /** @hidden */
     async _validateAuthKey(dcId: number, permAuthKey: AuthKey, template: Connection): Promise<boolean | undefined> {
         let failure: unknown;
         const sender = new MTProtoSender(new AuthKey(), {
@@ -776,7 +520,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             securityChecks: this._securityChecks,
             tempBinding: {
                 permAuthKey,
-                dcParam: this._testServers ? dcId + 10000 : dcId,
+                dcParam: dcId,
                 expiresIn: 3600,
                 onFailed: (error) => {
                     failure = error;
@@ -794,7 +538,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         }
     }
 
-    /** @hidden */
     _getAppConfig(): Promise<{ [key: string]: unknown }> {
         this._appConfigTask ??= this.invoke(new Api.help.GetAppConfig({ hash: 0 }))
             .then((result) => {
@@ -809,12 +552,10 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._appConfigTask;
     }
 
-    /** @hidden */
     _usePfs(): boolean {
         return this._pfs || (this._config?.tmpSessions ?? 0) > 1;
     }
 
-    /** @hidden */
     _buildInitConnection(query: Api.AnyRequest): Api.InitConnection {
         const init = this._initRequest;
         const sendLang = !!init.langPack && !init.langCode.startsWith("X");
@@ -826,7 +567,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             systemLangCode: init.systemLangCode,
             langPack: sendLang ? init.langPack : "",
             langCode: sendLang ? init.langCode || "en" : "",
-            proxy: init.proxy,
             params: new Api.JsonObject({
                 value: [
                     new Api.JsonObjectValue({
@@ -839,7 +579,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         });
     }
 
-    /** @hidden */
     _setConfig(config: Api.Config) {
         this._config = config;
         this._addresses.setOptions(config.dcOptions);
@@ -854,7 +593,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._configTimer?.unref?.();
     }
 
-    /** @hidden */
     async _reloadConfig() {
         if (this._destroyed) return;
         try {
@@ -865,7 +603,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         }
     }
 
-    /** @hidden */
     _makeSender(
         dcId: number,
         onBreak: (dcId: number, reason?: ConnectionBreakReason) => void,
@@ -893,7 +630,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         });
     }
 
-    /** @hidden */
     getSender(dcId: number): Promise<MTProtoSender> {
         return dcId
             ? this._network.getSession(dcId).ensureConnected()
@@ -906,7 +642,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
             : Promise.resolve({ sender: this._sender!, release: () => {} });
     }
 
-    // endregion
     async getDC(dcId: number, download: boolean): Promise<DcAddress> {
         throw new Error("Cannot be called from here!");
     }
@@ -923,15 +658,6 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         return this._log;
     }
 
-    /**
-     * Custom error handler for the client
-     * @example
-     * ```ts
-     * client.onError = async (error)=>{
-     *         console.log("error is",error)
-     *     }
-     * ```
-     */
     set onError(handler: (error: Error) => Promise<void>) {
         this._errorHandler = async (error: Error) => {
             try {

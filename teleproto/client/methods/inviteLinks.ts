@@ -7,11 +7,6 @@ import { Api } from "../../tl";
 const _MAX_INVITES_CHUNK_SIZE = 100;
 const _MAX_IMPORTERS_CHUNK_SIZE = 100;
 
-/**
- * Extracts the hash from an invite link (`t.me/+hash`, `t.me/joinchat/hash`)
- * or returns the input unchanged if it is already a bare hash.
- * @hidden
- */
 export function _parseInviteHash(link: string): string {
     const trimmed = link.trim();
     const match = trimmed.match(
@@ -20,19 +15,12 @@ export function _parseInviteHash(link: string): string {
     return match ? match[1] : trimmed;
 }
 
-/** Parameters for {@link exportChatInvite}. */
 export interface ExportChatInviteParams {
-    /** Human-readable title of the link (visible to admins only). */
     title?: string;
-    /** Point in time when the link will expire. */
     expireDate?: number | Date;
-    /** Maximum number of users that can join through this link. */
     usageLimit?: number;
-    /** Whether joining via this link requires admin approval. */
     requestNeeded?: boolean;
-    /** Legacy behavior: revoke the previous permanent link and create a new one. */
     legacyRevokePermanent?: boolean;
-    /** Telegram Star subscription pricing for the link (paid channel subscriptions). */
     subscriptionPricing?: Api.TypeStarsSubscriptionPricing;
 }
 
@@ -42,7 +30,6 @@ function _toDate(value: number | Date | undefined): number | undefined {
         : value;
 }
 
-/** @hidden */
 export async function exportChatInvite(
     client: TelegramClient,
     entity: EntityLike,
@@ -62,21 +49,14 @@ export async function exportChatInvite(
     );
 }
 
-/** Parameters for {@link editExportedChatInvite}. */
 export interface EditExportedChatInviteParams {
-    /** Revoke the link, preventing further joins. */
     revoked?: boolean;
-    /** New expiration date. */
     expireDate?: number | Date;
-    /** New usage limit. */
     usageLimit?: number;
-    /** Whether joining via this link should require admin approval. */
     requestNeeded?: boolean;
-    /** New link title. */
     title?: string;
 }
 
-/** @hidden */
 export async function editExportedChatInvite(
     client: TelegramClient,
     entity: EntityLike,
@@ -97,7 +77,6 @@ export async function editExportedChatInvite(
     );
 }
 
-/** @hidden */
 export async function getExportedChatInvite(
     client: TelegramClient,
     entity: EntityLike,
@@ -110,7 +89,6 @@ export async function getExportedChatInvite(
     });
 }
 
-/** @hidden */
 export async function deleteExportedChatInvite(
     client: TelegramClient,
     entity: EntityLike,
@@ -123,7 +101,6 @@ export async function deleteExportedChatInvite(
     });
 }
 
-/** @hidden */
 export async function deleteRevokedExportedChatInvites(
     client: TelegramClient,
     entity: EntityLike,
@@ -141,7 +118,6 @@ export async function deleteRevokedExportedChatInvites(
     );
 }
 
-/** @hidden */
 export async function getAdminsWithInvites(
     client: TelegramClient,
     entity: EntityLike
@@ -150,13 +126,9 @@ export async function getAdminsWithInvites(
     return client.api.messages.getAdminsWithInvites({ peer: peer });
 }
 
-/** Parameters for {@link iterExportedChatInvites}/{@link getExportedChatInvites}. */
 export interface ExportedChatInvitesParams {
-    /** How many links to retrieve. Defaults to all. */
     limit?: number;
-    /** Only fetch revoked links. */
     revoked?: boolean;
-    /** Only fetch links created by this admin. Defaults to yourself. */
     admin?: EntityLike;
 }
 
@@ -209,7 +181,6 @@ export class _ExportedChatInvitesIter extends RequestIter {
     }
 }
 
-/** @hidden */
 export function iterExportedChatInvites(
     client: TelegramClient,
     entity: EntityLike,
@@ -223,7 +194,6 @@ export function iterExportedChatInvites(
     );
 }
 
-/** @hidden */
 export async function getExportedChatInvites(
     client: TelegramClient,
     entity: EntityLike,
@@ -236,22 +206,11 @@ export async function getExportedChatInvites(
     ).collect()) as TotalList<Api.TypeExportedChatInvite>;
 }
 
-/**
- * Parameters for {@link TelegramClient.iterChatInviteImporters}/{@link TelegramClient.getChatInviteImporters}.
- *
- * The server requires either `link` or `requested: true`; asking for a whole
- * chat without narrowing it down fails with `INVITE_HASH_EXPIRED`.
- */
 export interface ChatInviteImportersParams {
-    /** How many importers to retrieve. Defaults to all. */
     limit?: number;
-    /** Only fetch users that joined via this specific link. Required unless `requested` is set. */
     link?: string;
-    /** Fetch pending join requests instead of joined users. Required unless `link` is set. */
     requested?: boolean;
-    /** Only fetch users whose channel subscription has expired. */
     subscriptionExpired?: boolean;
-    /** Search for a user by name. */
     search?: string;
 }
 
@@ -304,7 +263,6 @@ export class _ChatInviteImportersIter extends RequestIter {
     }
 }
 
-/** @hidden */
 export function iterChatInviteImporters(
     client: TelegramClient,
     entity: EntityLike,
@@ -318,7 +276,6 @@ export function iterChatInviteImporters(
     );
 }
 
-/** @hidden */
 export async function getChatInviteImporters(
     client: TelegramClient,
     entity: EntityLike,
@@ -331,7 +288,6 @@ export async function getChatInviteImporters(
     ).collect()) as TotalList<Api.ChatInviteImporter>;
 }
 
-/** @hidden */
 export async function hideChatJoinRequest(
     client: TelegramClient,
     entity: EntityLike,
@@ -349,7 +305,6 @@ export async function hideChatJoinRequest(
     );
 }
 
-/** @hidden */
 export async function hideAllChatJoinRequests(
     client: TelegramClient,
     entity: EntityLike,
@@ -365,7 +320,6 @@ export async function hideAllChatJoinRequests(
     );
 }
 
-/** @hidden */
 export async function checkChatInvite(
     client: TelegramClient,
     link: string

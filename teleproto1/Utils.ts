@@ -1,6 +1,6 @@
 import bigInt from "big-integer";
 import mime from "mime";
-import type { CustomFile } from "./client/uploads";
+import type { CustomFile } from "./client/methods/uploads";
 import type { Entity, EntityLike, MessageIDLike } from "./define";
 import type { EntityCache } from "./entityCache";
 import { returnBigInt, unionId } from "./Helpers";
@@ -37,6 +37,7 @@ export function getFileInfo(
     } else if (location instanceof Api.MessageMediaPhoto) {
         location = location.photo;
     }
+
     if (location instanceof Api.Document) {
         return {
             dcId: location.dcId,
@@ -114,6 +115,10 @@ export function getPhotoInfo(
     _raiseCastFail(fileLocation, "InputFileLocation");
 }
 
+/**
+ * Turns the given iterable into chunks of the specified size,
+ * which is 100 by default since that's what Telegram uses the most.
+ */
 export function* chunks<T>(arr: T[], size = 100): Generator<T[]> {
     for (let i = 0; i < arr.length; i += size) {
         yield arr.slice(i, i + size);
@@ -133,7 +138,9 @@ const JPEG_HEADER = Buffer.from(
     "hex"
 );
 const JPEG_FOOTER = Buffer.from("ffd9", "hex");
+
 const TG_JOIN_RE = new RegExp("tg:\\/\\/(join)\\?invite=", "i");
+
 const VALID_USERNAME_RE = new RegExp(
     "^([a-z]((?!__)[\\w\\d]){2,30}[a-z\\d]|gif|vid|" +
         "pic|bing|wiki|imdb|bold|vote|like|coub)$",
@@ -148,12 +155,30 @@ function _raiseCastFail(entity: any, target: string): never {
     throw new Error(`Cannot cast ${toWrite} to any kind of ${target}`);
 }
 
+/**
+ Gets the input peer for the given "entity" (user, chat or channel).
+
+ A ``TypeError`` is raised if the given entity isn't a supported type
+ or if ``check_hash is True`` but the entity's ``accessHash is None``
+ *or* the entity contains ``min`` information. In this case, the hash
+ cannot be used for general purposes, and thus is not returned to avoid
+ any issues which can derive from invalid access hashes.
+
+ Note that ``checkHash`` **is ignored** if an input peer is already
+ passed since in that case we assume the user knows what they're doing.
+ This is key to getting entities by explicitly passing ``hash = 0``.
+
+ * @param entity
+ * @param allowSelf
+ * @param checkHash
+ */
 export function getInputPeer(
     entity: any,
     allowSelf = true,
     checkHash = true
 ): Api.TypeInputPeer {
     if (entity.SUBCLASS_OF_ID === undefined) {
+        // e.g. custom.Dialog (can't cyclic import).
         if (allowSelf && "inputEntity" in entity) {
             return entity.inputEntity;
         } else if ("entity" in entity) {
@@ -163,8 +188,10 @@ export function getInputPeer(
         }
     }
     if (entity.SUBCLASS_OF_ID === unionId("InputPeer")) {
+
         return entity;
     }
+
     if (entity instanceof Api.User) {
         if (entity.self && allowSelf) {
             return new Api.InputPeerSelf();
@@ -203,11 +230,14 @@ export function getInputPeer(
         entity instanceof Api.ChannelForbidden ||
         entity instanceof Api.CommunityForbidden
     ) {
+        // "channelForbidden are never min", and since their hash is
+        // also not optional, we assume that this truly is the case.
         return new Api.InputPeerChannel({
             channelId: entity.id,
             accessHash: entity.accessHash || bigInt(0),
         });
     }
+
     if (entity instanceof Api.InputUser) {
         return new Api.InputPeerUser({
             userId: entity.userId,
@@ -226,9 +256,11 @@ export function getInputPeer(
     if (entity instanceof Api.UserFull) {
         return getInputPeer(entity.id);
     }
+
     if (entity instanceof Api.ChatFull) {
         return new Api.InputPeerChat({ chatId: entity.id });
     }
+
     if (entity instanceof Api.PeerChat) {
         return new Api.InputPeerChat({
             chatId: entity.chatId,
@@ -285,6 +317,18 @@ export function getInnerText(text: string, entities: Api.TypeMessageEntity[]) {
     return result;
 }
 
+/**
+ Similar to :meth:`get_input_peer`, but for :tl:`InputChannel`'s alone.
+
+ .. important::
+
+ This method does not validate for invalid general-purpose access
+ hashes, unlike `get_input_peer`. Consider using instead:
+ ``get_input_channel(get_input_peer(channel))``.
+
+ * @param entity
+ * @returns {InputChannel|*}
+ */
 export function getInputChannel(entity: EntityLike): Api.TypeInputChannel {
     if (
         typeof entity === "string" ||
@@ -312,6 +356,7 @@ export function getInputChannel(entity: EntityLike): Api.TypeInputChannel {
             accessHash: entity.accessHash || bigInt.zero,
         });
     }
+
     if (entity instanceof Api.InputPeerChannel) {
         return new Api.InputChannel({
             channelId: entity.channelId,
@@ -328,6 +373,17 @@ export function getInputChannel(entity: EntityLike): Api.TypeInputChannel {
     _raiseCastFail(entity, "InputChannel");
 }
 
+/**
+ Similar to :meth:`getInputPeer`, but for :tl:`InputUser`'s alone.
+
+ .. important::
+
+ This method does not validate for invalid general-purpose access
+ hashes, unlike `get_input_peer`. Consider using instead:
+ ``get_input_channel(get_input_peer(channel))``.
+
+ * @param entity
+ */
 export function getInputUser(entity: EntityLike): Api.TypeInputUser {
     if (
         typeof entity === "string" ||
@@ -337,12 +393,15 @@ export function getInputUser(entity: EntityLike): Api.TypeInputUser {
     ) {
         _raiseCastFail(entity, "InputUser");
     }
+
     if (entity.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(entity, "InputUser");
     }
     if (entity.SUBCLASS_OF_ID === unionId("InputUser")) {
+
         return entity as unknown as Api.TypeInputUser;
     }
+
     if (entity instanceof Api.User) {
         if (entity.self) {
             return new Api.InputUserSelf();
@@ -365,6 +424,7 @@ export function getInputUser(entity: EntityLike): Api.TypeInputUser {
     if (entity instanceof Api.UserFull) {
         return getInputUser(entity);
     }
+
     if (entity instanceof Api.InputPeerUser) {
         return new Api.InputUser({
             userId: entity.userId,
@@ -381,6 +441,37 @@ export function getInputUser(entity: EntityLike): Api.TypeInputUser {
     _raiseCastFail(entity, "InputUser");
 }
 
+/**
+ Similar to :meth:`get_input_peer`, but for dialogs
+ * @param dialog
+ */
+
+/*CONTEST
+function getInputDialog(dialog) {
+    try {
+        if (dialog.SUBCLASS_OF_ID === unionId("InputDialogPeer")) {
+            return dialog
+        }
+        if (dialog.SUBCLASS_OF_ID === unionId("InputPeer")) {
+            return new Api.InputDialogPeer({ peer: dialog })
+        }
+    } catch (e) {
+        _raiseCastFail(dialog, 'InputDialogPeer')
+    }
+
+    try {
+        return new Api.InputDialogPeer(getInputPeer(dialog))
+        // eslint-disable-next-line no-empty
+    } catch (e) {
+
+    }
+    _raiseCastFail(dialog, 'InputDialogPeer')
+}
+*/
+/**
+ *  Similar to :meth:`get_input_peer`, but for input messages.
+ */
+
 export function getInputMessage(message: any): Api.InputMessageID {
     if (typeof message === "number") {
         return new Api.InputMessageID({ id: message });
@@ -389,20 +480,28 @@ export function getInputMessage(message: any): Api.InputMessageID {
         _raiseCastFail(message, "InputMessage");
     }
     if (message.SUBCLASS_OF_ID === unionId("InputMessage")) {
+
         return message;
     } else if (message.SUBCLASS_OF_ID === unionId("Message")) {
+
         return new Api.InputMessageID({ id: message.id });
     }
     _raiseCastFail(message, "InputMessage");
 }
+
+/**
+ *  Similar to :meth:`get_input_peer`, but for input messages.
+ */
 
 export function getInputChatPhoto(photo: any): Api.TypeInputChatPhoto {
     if (photo === undefined || photo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(photo, "InputChatPhoto");
     }
     if (photo.SUBCLASS_OF_ID === unionId("InputChatPhoto")) {
+
         return photo;
     } else if (photo.SUBCLASS_OF_ID === unionId("InputFile")) {
+
         return new Api.InputChatUploadedPhoto({
             file: photo,
         });
@@ -418,7 +517,15 @@ export function getInputChatPhoto(photo: any): Api.TypeInputChatPhoto {
     _raiseCastFail(photo, "InputChatPhoto");
 }
 
+/**
+ * Adds the JPG header and footer to a stripped image.
+ * Ported from https://github.com/telegramdesktop/tdesktop/blob/bec39d89e19670eb436dc794a8f20b657cb87c71/Telegram/SourceFiles/ui/image/image.cpp#L225
+
+ * @param stripped{Buffer}
+ * @returns {Buffer}
+ */
 export function strippedPhotoToJpg(stripped: Buffer): Buffer {
+    // Note: Changes here should update _stripped_real_length
     if (stripped.length < 3 || stripped[0] !== 1) {
         return stripped;
     }
@@ -428,13 +535,71 @@ export function strippedPhotoToJpg(stripped: Buffer): Buffer {
     return Buffer.concat([header, stripped.slice(3), JPEG_FOOTER]);
 }
 
+/*CONTEST
+function getInputLocation(location) {
+    try {
+        if (!location.SUBCLASS_OF_ID) {
+            throw new Error()
+        }
+        if (location.SUBCLASS_OF_ID === unionId("InputFileLocation")) {
+            return {
+                dcId: null,
+                inputLocation: location
+            }
+        }
+    } catch (e) {
+        _raiseCastFail(location, 'InputFileLocation')
+    }
+    if (location instanceof Api.Message) {
+        location = location.media
+    }
+
+    if (location instanceof Api.MessageMediaDocument) {
+        location = location.document
+    } else if (location instanceof Api.MessageMediaPhoto) {
+        location = location.photo
+    }
+
+    if (location instanceof Api.Document) {
+        return {
+            dcId: location.dcId,
+            inputLocation: new Api.InputDocumentFileLocation({
+                id: location.id,
+                accessHash: location.accessHash,
+                fileReference: location.fileReference,
+                thumbSize: '', // Presumably to download one of its thumbnails
+            }),
+        }
+    } else if (location instanceof Api.Photo) {
+        return {
+            dcId: location.dcId,
+            inputLocation: new Api.InputPhotoFileLocation({
+                id: location.id,
+                accessHash: location.accessHash,
+                fileReference: location.fileReference,
+                thumbSize: location.sizes[location.sizes.length - 1].type,
+            }),
+        }
+    }
+
+    if (location instanceof Api.FileLocationToBeDeprecated) {
+        throw new Error('Unavailable location cannot be used as input')
+    }
+    _raiseCastFail(location, 'InputFileLocation')
+}
+*/
+/**
+ *  Similar to :meth:`get_input_peer`, but for photos
+ */
 export function getInputPhoto(photo: any): Api.TypeInputPhoto {
     if (photo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(photo, "InputPhoto");
     }
+
     if (photo.SUBCLASS_OF_ID === unionId("InputPhoto")) {
         return photo;
     }
+
     if (photo instanceof Api.Message) {
         photo = photo.media;
     }
@@ -485,15 +650,21 @@ export function getInputPhoto(photo: any): Api.TypeInputPhoto {
     _raiseCastFail(photo, "InputPhoto");
 }
 
+/**
+ *  Similar to :meth:`get_input_peer`, but for documents
+ */
+
 export function getInputDocument(
     document: any
 ): Api.InputDocument | Api.InputDocumentEmpty {
     if (document.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(document, "InputDocument");
     }
+
     if (document.SUBCLASS_OF_ID === unionId("InputDocument")) {
         return document;
     }
+
     if (document instanceof Api.Document) {
         return new Api.InputDocument({
             id: document.id,
@@ -523,6 +694,9 @@ interface GetAttributesParams {
     thumb?: any;
 }
 
+/**
+ *  Returns `True` if the file has an audio mime type.
+ */
 export function isAudio(file: any): boolean {
     const ext = _getExtension(file);
     if (!ext) {
@@ -534,6 +708,9 @@ export function isAudio(file: any): boolean {
     }
 }
 
+/**
+ *  Returns `True` if the file has an image mime type.
+ */
 export function isImage(file: any): boolean {
     const ext = _getExtension(file).toLowerCase();
     return (
@@ -542,6 +719,8 @@ export function isImage(file: any): boolean {
 }
 
 export function getExtension(media: any): string {
+    // Photos are always compressed as .jpg by Telegram
+
     try {
         getInputPhoto(media);
         return ".jpg";
@@ -552,6 +731,7 @@ export function getExtension(media: any): string {
     ) {
         return ".jpg";
     }
+
     if (media instanceof Api.MessageMediaDocument) {
         media = media.document;
     }
@@ -561,6 +741,7 @@ export function getExtension(media: any): string {
         media instanceof Api.WebDocumentNoProxy
     ) {
         if (media.mimeType === "application/octet-stream") {
+            // Octet stream are just bytes, which have no default extension
             return "";
         } else {
             return mime.getExtension(media.mimeType) || "";
@@ -569,6 +750,10 @@ export function getExtension(media: any): string {
     return "";
 }
 
+/**
+ * Gets the extension for the given file, which can be either a
+ * str or an ``open()``'ed file (which has a ``.name`` attribute).
+ */
 function _getExtension(file: any): string {
     if (typeof file === "string") {
         return "." + file.split(".").pop();
@@ -580,6 +765,7 @@ function _getExtension(file: any): string {
 }
 
 function _getMetadata(file: any): Map<string, string> {
+    //TODO Return nothing for now until we find a better way
     return new Map<string, string>();
 }
 
@@ -598,6 +784,10 @@ function isVideo(file: any): boolean {
     }
 }
 
+/**
+ Get a list of attributes for the given file and
+ the mime type as a tuple ([attribute], mime_type).
+ */
 export function getAttributes(
     file: File | CustomFile | TypeInputFile | string,
     {
@@ -661,6 +851,7 @@ export function getAttributes(
                 supportsStreaming: supportsStreaming,
             });
         }
+
         attrObj.set(Api.DocumentAttributeVideo, doc);
     }
     if (videoNote) {
@@ -676,6 +867,10 @@ export function getAttributes(
             );
         }
     }
+    /* Now override the attributes if any. As we have a dict of
+    {cls: instance}, we can override any class with the list
+     of attributes provided by the user easily.
+    */
     if (attributes) {
         for (const a of attributes) {
             attrObj.set(a.constructor, a);
@@ -688,13 +883,18 @@ export function getAttributes(
     };
 }
 
+/**
+ *  Similar to :meth:`get_input_peer`, but for geo points
+ */
 export function getInputGeo(geo: any): Api.TypeInputGeoPoint {
     if (geo === undefined || geo.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(geo, "InputGeoPoint");
     }
     if (geo.SUBCLASS_OF_ID === unionId("InputGeoPoint")) {
+
         return geo;
     }
+
     if (geo instanceof Api.GeoPoint) {
         return new Api.InputGeoPoint({ lat: geo.lat, long: geo.long });
     }
@@ -724,6 +924,21 @@ export interface GetInputMediaInterface {
     nosoundVideo?: boolean;
 }
 
+/**
+ *
+ Similar to :meth:`get_input_peer`, but for media.
+
+ If the media is :tl:`InputFile` and ``is_photo`` is known to be `True`,
+ it will be treated as an :tl:`InputMediaUploadedPhoto`. Else, the rest
+ of parameters will indicate how to treat it.
+ * @param media
+ * @param isPhoto - whether it's a photo or not
+ * @param attributes
+ * @param forceDocument
+ * @param voiceNote
+ * @param videoNote
+ * @param supportsStreaming
+ */
 export function getInputMedia(
     media: any,
     {
@@ -743,10 +958,13 @@ export function getInputMedia(
     if (media.SUBCLASS_OF_ID === undefined) {
         _raiseCastFail(media, "InputMedia");
     }
+
     if (media.SUBCLASS_OF_ID === unionId("InputMedia")) {
+
         return media;
     } else {
         if (media.SUBCLASS_OF_ID === unionId("InputPhoto")) {
+
             return new Api.InputMediaPhoto({
                 id: media,
                 spoiler: spoiler,
@@ -754,6 +972,7 @@ export function getInputMedia(
             });
         } else {
             if (media.SUBCLASS_OF_ID === unionId("InputDocument")) {
+
                 return new Api.InputMediaDocument({
                     id: media,
                     spoiler: spoiler,
@@ -764,6 +983,7 @@ export function getInputMedia(
             }
         }
     }
+
     if (media instanceof Api.MessageMediaPhoto) {
         return new Api.InputMediaPhoto({
             id: getInputPhoto(media.photo),
@@ -883,6 +1103,7 @@ export function getInputMedia(
                     "Cannot cast unanswered quiz to any kind of InputMedia."
                 );
             }
+
             correctAnswers = [];
             for (const r of media.results.results) {
                 if (r.correct) {
@@ -945,11 +1166,19 @@ export function getInputMedia(
     _raiseCastFail(media, "InputMedia");
 }
 
+/**
+ * Gets the appropriated part size when uploading or downloading files,
+ * given an initial file size.
+ * @param fileSize
+ * @returns {Number}
+ */
 export function getAppropriatedPartSize(fileSize: bigInt.BigInteger) {
     if (fileSize.lesser(104857600)) {
+        // 100MB
         return 128;
     }
     if (fileSize.lesser(786432000)) {
+        // 750MB
         return 256;
     }
     return 512;
@@ -980,6 +1209,7 @@ export function getPeer(peer: EntityLike | any) {
             throw new Error();
         }
         if (peer.SUBCLASS_OF_ID === unionId("Peer")) {
+
             return peer;
         } else if (
             peer instanceof Api.contacts.ResolvedPeer ||
@@ -1007,6 +1237,7 @@ export function getPeer(peer: EntityLike | any) {
             peer.SUBCLASS_OF_ID === unionId("ChatParticipant") ||
             peer.SUBCLASS_OF_ID === unionId("ChannelParticipant")
         ) {
+            // ChatParticipant, ChannelParticipant
             if ("userId" in peer) {
                 return new Api.PeerUser({ userId: peer.userId });
             }
@@ -1023,16 +1254,35 @@ export function getPeer(peer: EntityLike | any) {
     _raiseCastFail(peer, "peer");
 }
 
+/**
+ Convert the given peer into its marked ID by default.
+
+ This "mark" comes from the "bot api" format, and with it the peer type
+ can be identified back. User ID is left unmodified, chat ID is negated,
+ and channel ID is prefixed with -100:
+
+ * ``userId``
+ * ``-chatId``
+ * ``-100channel_id``
+
+ The original ID and the peer type class can be returned with
+ a call to :meth:`resolve_id(marked_id)`.
+ * @param peer
+ * @param addMark
+ */
 export function getPeerId(peer: EntityLike, addMark = true): string {
     if (typeof peer == "string" && parseID(peer)) {
         peer = returnBigInt(peer);
     }
+    // First we assert it's a Peer TLObject, or early return for integers
     if (bigInt.isInstance(peer)) {
         return addMark ? peer.toString() : resolveId(peer)[0].toString();
     }
+    // Tell the user to use their client to resolve InputPeerSelf if we got one
     if (peer instanceof Api.InputPeerSelf) {
         _raiseCastFail(peer, "int (you might want to use client.get_peer_id)");
     }
+
     try {
         peer = getPeer(peer);
     } catch (e) {
@@ -1041,20 +1291,19 @@ export function getPeerId(peer: EntityLike, addMark = true): string {
     if (peer instanceof Api.PeerUser) {
         return peer.userId.toString();
     } else if (peer instanceof Api.PeerChat) {
-        peer.chatId = resolveId(returnBigInt(peer.chatId))[0];
-        return addMark
-            ? peer.chatId.negate().toString()
-            : peer.chatId.toString();
+        const chatId = resolveId(returnBigInt(peer.chatId))[0];
+        return addMark ? chatId.negate().toString() : chatId.toString();
     } else if (typeof peer == "object" && "channelId" in peer) {
-        peer.channelId = resolveId(returnBigInt(peer.channelId))[0];
-        if (!addMark) {
-            return peer.channelId.toString();
-        }
-        return "-100" + peer.channelId.toString();
+        const channelId = resolveId(returnBigInt(peer.channelId))[0];
+        return addMark ? "-100" + channelId.toString() : channelId.toString();
     }
     _raiseCastFail(peer, "int");
 }
 
+/**
+ * Given a marked ID, returns the original ID and its :tl:`Peer` type.
+ * @param markedId
+ */
 export function resolveId(
     markedId: bigInt.BigInteger
 ): [
@@ -1064,12 +1313,46 @@ export function resolveId(
     if (markedId.greaterOrEquals(bigInt.zero)) {
         return [markedId, Api.PeerUser];
     }
+
+    // There have been report of chat IDs being 10000xyz, which means their
+    // marked version is -10000xyz, which in turn looks like a channel but
+    // it becomes 00xyz (= xyz). Hence, we must assert that there are only
+    // two zeroes.
     const m = markedId.toString().match(/-100([^0]\d*)/);
     if (m) {
         return [bigInt(m[1]), Api.PeerChannel];
     }
     return [markedId.negate(), Api.PeerChat];
 }
+
+/**
+ * returns an entity pair
+ * @param entityId
+ * @param entities
+ * @param cache
+ * @param getInputPeer
+ * @returns {{inputEntity: *, entity: *}}
+ * @private
+ */
+
+/*CONTEST
+
+export function  _getEntityPair(entityId, entities, cache, getInputPeer = getInputPeer) {
+    const entity = entities.get(entityId)
+    let inputEntity = cache[entityId]
+    if (inputEntity === undefined) {
+        try {
+            inputEntity = getInputPeer(inputEntity)
+        } catch (e) {
+            inputEntity = null
+        }
+    }
+    return {
+        entity,
+        inputEntity
+    }
+}
+*/
 
 export function getMessageId(
     message: number | Api.TypeMessage | MessageIDLike | undefined
@@ -1079,12 +1362,17 @@ export function getMessageId(
     } else if (typeof message === "number") {
         return message;
     } else if (message.SUBCLASS_OF_ID === unionId("Message") || "id" in message) {
+
         return (message as { id: number }).id;
     } else {
         throw new Error(`Invalid message type: ${message.constructor.name}`);
     }
 }
 
+/**
+ * Parses the given phone, or returns `undefined` if it's invalid.
+ * @param phone
+ */
 export function parsePhone(phone: string) {
     phone = phone.toString().replace(/[()\s-]/gm, "");
     if (phone.startsWith("+") && phone.split("+").length - 1 == 1) {
@@ -1092,12 +1380,25 @@ export function parsePhone(phone: string) {
     }
 }
 
+/**
+ * Parses a string ID into a big int
+ * @param id
+ */
 export function parseID(id: string) {
     const isValid = /^(-?[0-9][0-9]*)$/.test(id);
 
     return isValid ? bigInt(id) : undefined;
 }
 
+/**
+ * Parses a Telegram invite link and extracts the hash.
+ * Supports formats like:
+ * - https://t.me/joinchat/HASH
+ * - https://t.me/+HASH
+ * - tg://join?invite=HASH
+ * @param link The invite link
+ * @returns The invite hash, or undefined if not a valid invite link
+ */
 export function resolveInviteLink(link: string): string | undefined {
     if (!link) {
         return undefined;
@@ -1119,6 +1420,17 @@ export function resolveInviteLink(link: string): string | undefined {
 
     return undefined;
 }
+
+/**
+ Parses the given username or channel access hash, given
+ a string, username or URL. Returns a tuple consisting of
+ both the stripped, lowercase username and whether it is
+ a joinchat/ hash (in which case is not lowercase'd).
+
+ Returns ``(undefined, false)`` if the ``username`` or link is not valid.
+
+ * @param username {string}
+ */
 
 export function parseUsername(
     username: string
@@ -1158,6 +1470,11 @@ export function rtrim(s: string, mask: string) {
     return s;
 }
 
+/**
+ * Gets the display name for the given :tl:`User`,
+ :tl:`Chat` or :tl:`Channel`. Returns an empty string otherwise
+ * @param entity
+ */
 export function getDisplayName(entity: EntityLike) {
     if (entity instanceof Api.User) {
         if (entity.lastName && entity.firstName) {
@@ -1180,6 +1497,9 @@ export function getDisplayName(entity: EntityLike) {
     return "";
 }
 
+/**
+ * Returns `True` if the file is a GIF.
+ */
 export function isGif(file: any): boolean {
     const ext = _getExtension(file).toLowerCase();
     if (ext === ".gif") {
@@ -1189,6 +1509,12 @@ export function isGif(file: any): boolean {
     return (metadata.get("mimeType") || "") === "image/gif";
 }
 
+/**
+ * Encodes the given array of 5-bit values into a waveform bytestring.
+ * Used for voice message waveforms.
+ * @param waveform Array of numbers (0-31, 5 bits each)
+ * @returns Buffer with encoded waveform
+ */
 export function encodeWaveform(waveform: number[]): Buffer {
     const bitCount = waveform.length * 5;
     const byteCount = Math.floor((bitCount + 7) / 8);
@@ -1209,6 +1535,12 @@ export function encodeWaveform(waveform: number[]): Buffer {
     return result;
 }
 
+/**
+ * Decodes a waveform bytestring into an array of 5-bit values.
+ * @param waveform Buffer with encoded waveform
+ * @param valueCount Number of values to decode (default: calculated from buffer size)
+ * @returns Array of numbers (0-31)
+ */
 export function decodeWaveform(
     waveform: Buffer,
     valueCount?: number
@@ -1237,6 +1569,14 @@ export function decodeWaveform(
     return result;
 }
 
+/**
+ * Splits a message text while preserving formatting entities.
+ * Useful for sending messages that exceed Telegram's character limit.
+ * @param text The text to split
+ * @param entities The formatting entities
+ * @param limit Maximum length per chunk (default: 4096)
+ * @returns Array of [text, entities] tuples
+ */
 export function splitText(
     text: string,
     entities: Api.TypeMessageEntity[] = [],
@@ -1300,6 +1640,10 @@ export function splitText(
     return result;
 }
 
+/**
+ * Similar to getInputPeer, but for InputDialogPeer.
+ * @param dialog The dialog to convert
+ */
 export function getInputDialog(dialog: any): Api.TypeInputDialogPeer {
     if (dialog.inputDialog) return dialog.inputDialog;
     if (dialog.SUBCLASS_OF_ID === undefined) {
@@ -1324,6 +1668,7 @@ export function getInputDialog(dialog: any): Api.TypeInputDialogPeer {
     }
 }
 
+// Bot File ID constants
 const FILE_REFERENCE_FLAG = 0x01000000;
 const WEB_LOCATION_FLAG = 0x02000000;
 
@@ -1385,6 +1730,11 @@ function _rleEncodeFileId(data: Buffer): Buffer {
     return Buffer.from(result);
 }
 
+/**
+ * Decodes a bot API file_id into the corresponding InputDocument/InputPhoto.
+ * @param fileId The bot API file_id string
+ * @returns InputDocument, InputPhoto, or undefined if decoding fails
+ */
 export function resolveBotFileId(
     fileId: string
 ): Api.InputDocument | Api.InputPhoto | undefined {
@@ -1408,7 +1758,7 @@ export function resolveBotFileId(
         const fileType = decoded.readUInt32LE(offset);
         offset += 4;
 
-        offset += 4;
+        offset += 4; // dcId (not used)
 
         const hasFileReference = (fileType & FILE_REFERENCE_FLAG) !== 0;
         const hasWebLocation = (fileType & WEB_LOCATION_FLAG) !== 0;
@@ -1455,6 +1805,11 @@ export function resolveBotFileId(
     }
 }
 
+/**
+ * Encodes a document or photo into a bot API file_id.
+ * @param media The media object (Document, Photo, etc.)
+ * @returns The encoded file_id string, or undefined if encoding fails
+ */
 export function packBotFileId(
     media: Api.Document | Api.Photo | Api.TypeInputDocument | Api.TypeInputPhoto
 ): string | undefined {
@@ -1542,3 +1897,26 @@ export function packBotFileId(
         return undefined;
     }
 }
+
+/**
+ * check if a given item is an array like or not
+ * @param item
+ * @returns {boolean}
+ */
+
+/*CONTEST
+Duplicate ?
+export function  isListLike(item) {
+    return (
+        Array.isArray(item) ||
+        (!!item &&
+            typeof item === 'object' &&
+            typeof (item.length) === 'number' &&
+            (item.length === 0 ||
+                (item.length > 0 &&
+                    (item.length - 1) in item)
+            )
+        )
+    )
+}
+*/

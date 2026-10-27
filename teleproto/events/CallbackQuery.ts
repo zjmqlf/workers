@@ -20,21 +20,6 @@ export const NewCallbackQueryDefaults: NewCallbackQueryInterface = {
     blacklistUsers: [],
 };
 
-/**
- * Occurs whenever you sign in as a bot and a user
- * clicks one of the inline buttons on your messages.
- * Note that the `chats` parameter will **not** work with normal
- * IDs or peers if the clicked inline button comes from a "via bot"
- * message. The `chats` parameter also supports checking against the
- * `chat_instance` which should be used for inline callbacks.
- *
- * @example
- * ```ts
- * async function printQuery(event: NewCallbackQueryEvent) {
- *     // TODO
- * }
- * ```
- */
 export class CallbackQuery extends EventBuilder {
     match?: RegExp;
 
@@ -113,15 +98,7 @@ export interface AnswerCallbackQueryParams {
 }
 
 export class CallbackQueryEvent extends EventCommonSender {
-    /**
-     * The original {@link Api.UpdateBotCallbackQuery} or {@link Api.UpdateInlineBotCallbackQuery} object.
-     */
     query: Api.UpdateBotCallbackQuery | Api.UpdateInlineBotCallbackQuery;
-
-    /**
-     * The regex match object returned from successfully matching the
-     * query `data` with the provided pattern in your event handler.
-     */
     patternMatch: RegExpMatchArray | undefined;
 
     private _message: Api.Message | undefined;

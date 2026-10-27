@@ -18,7 +18,6 @@ const FORBIDDEN_FIRST_INTS = new Set([
 export interface ObfuscationParams {
     protocolTag: Buffer;
     dcId: number;
-    testServers: boolean;
     secret?: Buffer;
     fakeTls?: boolean;
 }
@@ -45,7 +44,7 @@ export class ObfuscatedIO implements PacketReader {
     static async create(socket: SocketInterface, params: ObfuscationParams): Promise<ObfuscatedIO> {
         const header = pickHeader(!!params.fakeTls);
         params.protocolTag.copy(header, 56);
-        const dcId = params.testServers ? Math.sign(params.dcId) * (Math.abs(params.dcId) + 10000) : params.dcId;
+        const dcId = params.dcId;
         if (dcId !== 0) header.writeInt16LE(dcId, 60);
         const reversed = Buffer.from(header).reverse();
         const key = async (source: Buffer) =>
@@ -82,7 +81,7 @@ export class ObfuscatedConnection extends Connection {
     protected obfuscationParams(): ObfuscationParams {
         const protocolTag = this.codecClass.obfuscateTag;
         if (!protocolTag) throw new Error(`${this.codecClass.name} cannot be obfuscated`);
-        return { protocolTag, dcId: this.dcId, testServers: this.testServers, secret: this.secret, fakeTls: this.fakeTls };
+        return { protocolTag, dcId: this.dcId, secret: this.secret, fakeTls: this.fakeTls };
     }
 
     protected async handshake() {

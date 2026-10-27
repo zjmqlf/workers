@@ -9,5 +9,3 @@ export {
     ConnectionTCPPaddedIntermediate,
 } from "./IntermediateCodec";
 export { ObfuscatedIO, ObfuscatedConnection, ConnectionTCPObfuscated } from "./Obfuscation";
-export { ConnectionWebProxy } from "../../compat/network/connection/WebProxy";
-export type { WebProxyOptions, WebProxyWebSocket } from "../../compat/network/connection/WebProxy";

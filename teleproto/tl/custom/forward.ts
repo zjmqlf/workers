@@ -19,9 +19,7 @@ export class Forward extends SenderGetter {
         entities: Map<string, Entity>
     ) {
         super();
-        // contains info for the original header sent by telegram.
         this.originalFwd = original;
-
         let senderId = undefined;
         let sender = undefined;
         let inputSender = undefined;

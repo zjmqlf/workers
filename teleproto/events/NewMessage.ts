@@ -11,62 +11,13 @@ import bigInt from "big-integer";
 
 export interface NewMessageInterface extends DefaultEventInterface {
     func?: { (event: NewMessageEvent): boolean };
-    /**
-     * If set to `true`, only **incoming** messages will be handled.
-     Mutually exclusive with ``outgoing`` (can only set one of either).
-     */
     incoming?: boolean;
-    /**
-     * If set to `true`, only **outgoing** messages will be handled.
-     * Mutually exclusive with ``incoming`` (can only set one of either).
-     */
     outgoing?: boolean;
-    /**
-     * Unlike `chats`, this parameter filters the *senders* of the
-     * message. That is, only messages *sent by these users* will be
-     * handled. Use `chats` if you want private messages with this/these
-     * users. `from_users` lets you filter by messages sent by *one or
-     * more* users across the desired chats (doesn't need a list).
-     */
     fromUsers?: EntityLike[];
-    /**
-     * Whether forwarded messages should be handled or not. By default,
-     * both forwarded and normal messages are included. If it's `True`
-     * **only** forwards will be handled. If it's `False` only messages
-     * that are *not* forwards will be handled.
-     */
     forwards?: boolean;
-    /**
-     *  If set, only messages matching this pattern will be handled.
-     */
     pattern?: RegExp;
 }
 
-/**
- * Occurs whenever a new text message or a message with media arrives.
- * @example
- * ```ts
- * async function eventPrint(event: NewMessageEvent) {
- * const message = event.message;
- *
- *   // Checks if it's a private message (from user or bot)
- *   if (event.isPrivate){
- *       // prints sender id
- *       console.log(message.senderId);
- *       // read message
- *       if (message.text == "hello"){
- *           const sender = await message.getSender();
- *           console.log("sender is",sender);
- *           await client.sendMessage(sender,{
- *               message:`hi your id is ${message.senderId}`
- *           });
- *       }
- *   }
- * }
- * // adds an event handler for new messages
- * client.addEventHandler(eventPrint, new NewMessage({}));
- * ```
- */
 export class NewMessage extends EventBuilder {
     func?: { (event: NewMessageEvent): boolean };
     incoming?: boolean;
@@ -74,8 +25,6 @@ export class NewMessage extends EventBuilder {
     fromUsers?: EntityLike[];
     forwards?: boolean;
     pattern?: RegExp;
-
-    /** @hidden */
     private readonly _noCheck: boolean;
 
     constructor(newMessageParams: NewMessageInterface = {}) {
@@ -220,7 +169,6 @@ export class NewMessage extends EventBuilder {
     }
 
     addAttributes(update: any) {
-        //update.patternMatch =
     }
 }
 
@@ -263,16 +211,10 @@ export class NewMessageEvent extends EventCommon {
         }
     }
 
-    /**
-     * The regex match object from the pattern filter (if any).
-     */
     get patternMatch(): RegExpMatchArray | undefined {
         return this.message.patternMatch;
     }
 
-    /**
-     * Replies to the message (with a reply header).
-     */
     async reply(params: {
         message?: string;
         parseMode?: any;
@@ -293,9 +235,6 @@ export class NewMessageEvent extends EventCommon {
         });
     }
 
-    /**
-     * Responds to the message in the same chat (without reply header).
-     */
     async respond(params: {
         message?: string;
         parseMode?: any;
@@ -315,9 +254,6 @@ export class NewMessageEvent extends EventCommon {
         });
     }
 
-    /**
-     * Deletes the message.
-     */
     async delete(params: { revoke?: boolean } = {}): Promise<Api.messages.AffectedMessages[] | undefined> {
         if (!this._client) return undefined;
         return this._client.deleteMessages(
@@ -327,9 +263,6 @@ export class NewMessageEvent extends EventCommon {
         );
     }
 
-    /**
-     * Forwards the message to another chat.
-     */
     async forward(chat: EntityLike): Promise<Api.Message[] | undefined> {
         if (!this._client) return undefined;
         return this._client.forwardMessages(chat, {
@@ -338,9 +271,6 @@ export class NewMessageEvent extends EventCommon {
         });
     }
 
-    /**
-     * Edits the message (only own messages can be edited).
-     */
     async edit(params: {
         message?: string;
         parseMode?: any;
@@ -357,25 +287,16 @@ export class NewMessageEvent extends EventCommon {
         });
     }
 
-    /**
-     * Marks the message as read.
-     */
     async markRead(): Promise<boolean | undefined> {
         if (!this._client) return undefined;
         return this._client.markAsRead(this.message.peerId!, this.message.id);
     }
 
-    /**
-     * Pins the message.
-     */
     async pin(params?: { notify?: boolean; pmOneside?: boolean }): Promise<Api.Message | undefined> {
         if (!this._client) return undefined;
         return this._client.pinMessage(this.message.peerId!, this.message.id, params);
     }
 
-    /**
-     * Unpins the message.
-     */
     async unpin(): Promise<void> {
         if (!this._client) return undefined;
         await this._client.unpinMessage(this.message.peerId!, this.message.id);

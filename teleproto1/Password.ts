@@ -14,6 +14,63 @@ import { Buffer } from "node:buffer";
 
 const SIZE_FOR_HASH = 256;
 
+/**
+ *
+ *
+ * @param prime{BigInteger}
+ * @param g{BigInteger}
+ */
+
+/*
+We don't support changing passwords yet
+function checkPrimeAndGoodCheck(prime, g) {
+    console.error('Unsupported function `checkPrimeAndGoodCheck` call. Arguments:', prime, g)
+
+    const goodPrimeBitsCount = 2048
+    if (prime < 0 || prime.bitLength() !== goodPrimeBitsCount) {
+        throw new Error(`bad prime count ${prime.bitLength()},expected ${goodPrimeBitsCount}`)
+    }
+    // TODO this is kinda slow
+    if (Factorizator.factorize(prime)[0] !== 1) {
+        throw new Error('give "prime" is not prime')
+    }
+    if (g.eq(bigInt(2))) {
+        if ((prime.remainder(bigInt(8))).neq(bigInt(7))) {
+            throw new Error(`bad g ${g}, mod8 ${prime % 8}`)
+        }
+    } else if (g.eq(bigInt(3))) {
+        if ((prime.remainder(bigInt(3))).neq(bigInt(2))) {
+            throw new Error(`bad g ${g}, mod3 ${prime % 3}`)
+        }
+        // eslint-disable-next-line no-empty
+    } else if (g.eq(bigInt(4))) {
+
+    } else if (g.eq(bigInt(5))) {
+        if (!([ bigInt(1), bigInt(4) ].includes(prime.remainder(bigInt(5))))) {
+            throw new Error(`bad g ${g}, mod8 ${prime % 5}`)
+        }
+    } else if (g.eq(bigInt(6))) {
+        if (!([ bigInt(19), bigInt(23) ].includes(prime.remainder(bigInt(24))))) {
+            throw new Error(`bad g ${g}, mod8 ${prime % 24}`)
+        }
+    } else if (g.eq(bigInt(7))) {
+        if (!([ bigInt(3), bigInt(5), bigInt(6) ].includes(prime.remainder(bigInt(7))))) {
+            throw new Error(`bad g ${g}, mod8 ${prime % 7}`)
+        }
+    } else {
+        throw new Error(`bad g ${g}`)
+    }
+    const primeSub1Div2 = (prime.subtract(bigInt(1))).divide(bigInt(2))
+    if (Factorizator.factorize(primeSub1Div2)[0] !== 1) {
+        throw new Error('(prime - 1) // 2 is not prime')
+    }
+}
+*/
+/**
+ *
+ * @param primeBytes{Buffer}
+ * @param g{number}
+ */
 function checkPrimeAndGood(primeBytes: Buffer, g: number) {
     const goodPrime = Buffer.from([
         0xc7, 0x1c, 0xae, 0xb9, 0xc6, 0xb1, 0xc9, 0x04, 0x8e, 0x6c, 0x52, 0x2f,
@@ -41,31 +98,56 @@ function checkPrimeAndGood(primeBytes: Buffer, g: number) {
     ]);
     if (goodPrime.equals(primeBytes)) {
         if ([3, 4, 5, 7].includes(g)) {
-            return;
+            return; // It's good
         }
     }
     throw new Error("Changing passwords unsupported");
+    //checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
 }
 
+/**
+ *
+ * @param number{BigInteger}
+ * @param p{BigInteger}
+ * @returns {boolean}
+ */
 function isGoodLarge(number: bigInt.BigInteger, p: bigInt.BigInteger) {
     return number.greater(bigInt(0)) && p.subtract(number).greater(bigInt(0));
 }
 
+/**
+ *
+ * @param number {Buffer}
+ * @returns {Buffer}
+ */
 function numBytesForHash(number: Buffer) {
     return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
 }
 
+/**
+ *
+ * @param g {bigInt}
+ * @returns {Buffer}
+ */
 function bigNumForHash(g: bigInt.BigInteger) {
     return readBufferFromBigInt(g, SIZE_FOR_HASH, false);
 }
 
+/**
+ *
+ * @param modexp {BigInteger}
+ * @param prime {BigInteger}
+ * @returns {Boolean}
+ */
 function isGoodModExpFirst(
     modexp: bigInt.BigInteger,
     prime: bigInt.BigInteger
 ) {
     const diff = prime.subtract(modexp);
+
     const minDiffBitsCount = 2048 - 64;
     const maxModExpSize = 256;
+
     return !(
         diff.lesser(bigInt(0)) ||
         diff.bitLength().toJSNumber() < minDiffBitsCount ||
@@ -76,6 +158,7 @@ function isGoodModExpFirst(
 
 function xor(a: Buffer, b: Buffer) {
     const length = Math.min(a.length, b.length);
+
     for (let i = 0; i < length; i++) {
         a[i] = a[i] ^ b[i];
     }
@@ -83,12 +166,26 @@ function xor(a: Buffer, b: Buffer) {
     return a;
 }
 
+/**
+ *
+ * @param password{Buffer}
+ * @param salt{Buffer}
+ * @param iterations{number}
+ * @returns {*}
+ */
+
 async function pbkdf2sha512(password: Buffer, salt: Buffer, iterations: number) {
     return asBuffer(
         await kdf.pbkdf2(password, salt, { hash: "sha512", iterations, length: 64 })
     );
 }
 
+/**
+ *
+ * @param algo {constructors.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow}
+ * @param password
+ * @returns {Buffer|*}
+ */
 async function computeHash(
     algo: Api.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string
@@ -101,6 +198,11 @@ async function computeHash(
     return sha256(Buffer.concat([algo.salt2, hash3, algo.salt2]));
 }
 
+/**
+ *
+ * @param algo {constructors.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow}
+ * @param password
+ */
 async function computeDigest(
     algo: Api.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow,
     password: string
@@ -110,6 +212,7 @@ async function computeDigest(
     } catch (e: any) {
         throw new Error("bad p/g in password");
     }
+
     const value = modExp(
         bigInt(algo.g),
         readBigIntFromBuffer(await computeHash(algo, password), false),
@@ -118,6 +221,11 @@ async function computeDigest(
     return bigNumForHash(value);
 }
 
+/**
+ *
+ * @param request {constructors.account.Password}
+ * @param password {string}
+ */
 async function computeCheck(request: Api.account.Password, password: string) {
     const algo = request.currentAlgo;
     if (
@@ -183,6 +291,7 @@ async function computeCheck(request: Api.account.Password, password: string) {
     if (!isGoodModExpFirst(gB, p)) {
         throw new Error("bad gB");
     }
+
     const ux = u.multiply(x);
     const aUx = a.add(ux);
     const S = modExp(gB, aUx, p);

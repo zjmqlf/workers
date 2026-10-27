@@ -1,8 +1,22 @@
 import { MemorySession } from "./Memory";
+import type { StoredUpdateState } from "./Abstract";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
 import { Buffer } from "node:buffer";
 
+/**
+ * Persistent session that stores auth keys and entity data on disk using `node-localstorage`.
+ *
+ * Accepts an absolute path or a directory relative to the working directory.
+ * Reuses an existing legacy directory when the absolute target is absent.
+ * Suitable for long-running server applications where session data must survive restarts.
+ *
+ * @example
+ * ```ts
+ * const session = new StoreSession("my_session");
+ * const client = new TelegramClient(session, apiId, apiHash, {});
+ * ```
+ */
 export class StoreSession extends MemorySession {
     private readonly sessionName: string;
     private store: Map<string, any>;
@@ -31,6 +45,9 @@ export class StoreSession extends MemorySession {
             await this._authKey.setKey(authKey);
         }
 
+        const updateState = this.store.get(this.sessionName + "updateState");
+        if (updateState && typeof updateState === "object") this._updateState = updateState;
+
         const dcId = this.store.get(this.sessionName + "dcId");
         if (dcId) {
             this._dcId = dcId;
@@ -46,6 +63,13 @@ export class StoreSession extends MemorySession {
         if (serverAddress) {
             this._serverAddress = serverAddress;
         }
+        const testServers = this.store.get(this.sessionName + "testServers");
+        if (testServers != null) {
+            super.testServers = !!testServers;
+        }
+
+        // Reload cached per-DC (non-main) auth keys so we don't have to do a
+        // fresh DH handshake every process start.
         const dcKeys = this.store.get(this.sessionName + "dcAuthKeys");
         if (dcKeys && typeof dcKeys === "object") {
             for (const [k, v] of Object.entries(dcKeys)) {
@@ -78,6 +102,15 @@ export class StoreSession extends MemorySession {
         this._saveDcAuthKeys();
     }
 
+    set testServers(value: boolean) {
+        super.testServers = value;
+        this.store.set(this.sessionName + "testServers", value);
+    }
+
+    get testServers() {
+        return super.testServers;
+    }
+
     set authKey(value: AuthKey | undefined) {
         this._authKey = value;
         this.store.set(this.sessionName + "authKey", value?.getKey());
@@ -85,6 +118,12 @@ export class StoreSession extends MemorySession {
 
     get authKey() {
         return this._authKey;
+    }
+
+    setUpdateState(state: StoredUpdateState | undefined) {
+        super.setUpdateState(state);
+        if (state) this.store.set(this.sessionName + "updateState", state);
+        else this.store.delete(this.sessionName + "updateState");
     }
 
     private _saveDcAuthKeys() {
@@ -97,6 +136,7 @@ export class StoreSession extends MemorySession {
     }
 
     delete() {
+        this.store.clear();
         super.delete();
     }
 
@@ -134,7 +174,7 @@ export class StoreSession extends MemorySession {
 
     private findEntityRow(matches: (row: string[]) => boolean): string[] | undefined {
         let result: string[] | undefined;
-        this.store.each((key, row) => {
+        this.store.forEach((row, key) => {
             if (Array.isArray(row) && row.length >= 5 &&
                 key === this.sessionName + row[0] && matches(row)) {
                 result = row;

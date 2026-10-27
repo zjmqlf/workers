@@ -15,11 +15,17 @@ import timers from "node:timers";
 
 const DIFFERENCE_LIMIT_USER = 100;
 const DIFFERENCE_LIMIT_BOT = 100_000;
+const PEER_DIALOGS_BATCH = 100;
+const PEER_DIALOGS_KEY = "peerDialogs";
+const JOINED_POLL_MS = 60_000;
+const PROBE_MAX_PAGES = 50;
+const FLOOD_WAIT = /^FLOOD_(?:PREMIUM_)?WAIT(?:_|$)/;
 
 export interface ChannelPollingState {
     pendingRequests: number;
     activeRequests: number;
     pausedUntil?: number;
+    requestInterval?: number;
     channels: {
         channelId: string;
         lastPolledAt?: number;
@@ -50,6 +56,18 @@ interface ChannelTracker {
     lastPolledAt?: number;
     lastDelayMs?: number;
     nextPollAt?: number;
+    joined?: boolean;
+    lastMessageId?: number;
+}
+
+interface StartPts {
+    pts?: number;
+    joined: boolean;
+}
+
+interface PtsRequest {
+    input: Api.InputChannel;
+    waiters: ((result: StartPts) => void)[];
 }
 
 export class ChannelUpdates {
@@ -58,6 +76,8 @@ export class ChannelUpdates {
     private readonly watched = new Map<string, number>();
     private readonly scheduler: ChannelScheduler;
     private readonly requests = new WeakSet<object>();
+    private readonly ptsRequests = new Map<string, PtsRequest>();
+    private ptsBatch?: Promise<void>;
 
     constructor(private readonly host: ChannelUpdatesHost) {
         this.scheduler = new ChannelScheduler(host.client._channelPollRequestInterval, host.client._channelPollConcurrency);
@@ -116,7 +136,7 @@ export class ChannelUpdates {
             if (stored === undefined) {
                 tracker.pts.init(update.pts);
                 this.host.saveState();
-                this.host.dispatch(update, payload);
+                this.deliver(tracker, update, payload);
                 return;
             }
             tracker.pts.init(stored);
@@ -127,7 +147,7 @@ export class ChannelUpdates {
             { tag: "update", update },
             (applied) => {
                 this.host.saveState();
-                this.host.dispatch(applied, payload);
+                this.deliver(tracker, applied, payload);
             },
             () => {}
         );
@@ -179,9 +199,10 @@ export class ChannelUpdates {
         if (!tracker.initializing && (watching === 0 || !tracker.pts.inited())) {
             const task = (async () => {
                 if (!tracker.pts.inited()) {
-                    const pts = await this.readPts(channelId, inputChannel);
+                    const pts = await this.readPts(channelId, tracker, inputChannel);
                     if (!this.host.isCurrent(generation) || !this.watched.has(channelId) || this.trackers.get(channelId) !== tracker) return;
                     if (!tracker.pts.inited()) tracker.pts.init(pts);
+                    this.host.saveState();
                 }
                 await this.fetchDifference(channelId);
             })();
@@ -275,8 +296,15 @@ export class ChannelUpdates {
         return created;
     }
 
-    private invoke<R extends Api.AnyRequest>(channelId: string, create: () => R): Promise<R["__response"]> {
+    private invoke<R extends Api.AnyRequest>(channelId: string, create: () => R, poll = true): Promise<R["__response"]> {
         const generation = this.host.generation;
+        return this.schedule(channelId, create, poll, generation).catch((error) => {
+            if (!FLOOD_WAIT.test((error as { errorMessage?: string })?.errorMessage ?? "") || !this.host.isCurrent(generation)) throw error;
+            return this.invoke(channelId, create, poll);
+        });
+    }
+
+    private schedule<R extends Api.AnyRequest>(channelId: string, create: () => R, poll: boolean, generation: number): Promise<R["__response"]> {
         const queuedAt = Date.now();
         return this.scheduler.schedule(channelId, async () => {
             if (!this.host.isCurrent(generation)) throw new ChannelPollCancelledError();
@@ -284,7 +312,7 @@ export class ChannelUpdates {
             const request = create();
             this.requests.add(request);
             const tracker = this.trackers.get(channelId);
-            if (tracker && request instanceof Api.updates.GetChannelDifference) {
+            if (poll && tracker && request instanceof Api.updates.GetChannelDifference) {
                 tracker.pts.setRequesting(true);
                 tracker.lastPolledAt = Date.now();
                 tracker.lastDelayMs = tracker.lastPolledAt - queuedAt;
@@ -295,7 +323,7 @@ export class ChannelUpdates {
                 if (this.host.isCurrent(generation)) {
                     this.client.updates._suspendAuthorization(error);
                     const flood = error as { errorMessage?: string; seconds?: number };
-                    if (/^FLOOD_(?:PREMIUM_)?WAIT(?:_|$)/.test(flood.errorMessage ?? "")) this.handleFloodWait(request, flood.seconds ?? 0);
+                    if (FLOOD_WAIT.test(flood.errorMessage ?? "")) this.handleFloodWait(request, flood.seconds ?? 0);
                 }
                 throw error;
             } finally {
@@ -304,13 +332,103 @@ export class ChannelUpdates {
         });
     }
 
-    private async readPts(channelId: string, inputChannel: Api.TypeInputChannel): Promise<number> {
+    private async readPts(channelId: string, tracker: ChannelTracker, inputChannel: Api.TypeInputChannel): Promise<number> {
         const stored = this.stored.get(channelId);
         if (stored) return stored;
-        const full = await this.invoke(channelId, () => new Api.channels.GetFullChannel({ channel: inputChannel }));
-        this.client._entityCache.add(full);
-        if (!(full.fullChat instanceof Api.ChannelFull)) throw new Error("Cannot read the channel pts to start watching it");
-        return full.fullChat.pts;
+        if (!this.client._bot && inputChannel instanceof Api.InputChannel) {
+            const start = await this.peerDialogPts(channelId, inputChannel);
+            tracker.joined = start.joined;
+            if (start.pts) return start.pts;
+        }
+        return this.probePts(channelId, inputChannel);
+    }
+
+    private peerDialogPts(channelId: string, input: Api.InputChannel): Promise<StartPts> {
+        return new Promise((resolve) => {
+            const pending = this.ptsRequests.get(channelId);
+            if (pending) pending.waiters.push(resolve);
+            else this.ptsRequests.set(channelId, { input, waiters: [resolve] });
+            this.ptsBatch ??= this.loadPeerDialogs().finally(() => {
+                this.ptsBatch = undefined;
+            });
+        });
+    }
+
+    private async loadPeerDialogs(): Promise<void> {
+        while (this.ptsRequests.size) {
+            let batch: [string, PtsRequest][] = [];
+            const found = new Map<string, number>();
+            try {
+                const result = await this.invoke(
+                    PEER_DIALOGS_KEY,
+                    () => {
+                        if (!batch.length) {
+                            batch = [...this.ptsRequests].slice(0, PEER_DIALOGS_BATCH);
+                            for (const [channelId] of batch) this.ptsRequests.delete(channelId);
+                        }
+                        return new Api.messages.GetPeerDialogs({
+                            peers: batch.map(([, request]) => new Api.InputPeerChannel({
+                                channelId: request.input.channelId,
+                                accessHash: request.input.accessHash,
+                            })),
+                        });
+                    },
+                    false
+                );
+                this.client._entityCache.add(result);
+                await this.host.saveEntities(result);
+                for (const dialog of result.dialogs) {
+                    if (dialog instanceof Api.Dialog && dialog.peer instanceof Api.PeerChannel && dialog.pts) {
+                        found.set(dialog.peer.channelId.toString(), dialog.pts);
+                    }
+                }
+            } catch (error) {
+                if (!batch.length) {
+                    batch = [...this.ptsRequests];
+                    this.ptsRequests.clear();
+                }
+                this.client._log.debug(`messages.getPeerDialogs failed, probing ${batch.length} channels: ${error}`);
+            }
+            for (const [channelId, request] of batch) {
+                const pts = found.get(channelId);
+                for (const waiter of request.waiters) waiter({ pts, joined: pts !== undefined });
+            }
+        }
+    }
+
+    private async probePts(channelId: string, inputChannel: Api.TypeInputChannel): Promise<number> {
+        let pts = 1;
+        let limit = 1;
+        for (let page = 0; page < PROBE_MAX_PAGES; page++) {
+            const diff = await this.invoke(
+                channelId,
+                () =>
+                    new Api.updates.GetChannelDifference({
+                        channel: inputChannel,
+                        filter: new Api.ChannelMessagesFilterEmpty(),
+                        pts,
+                        limit,
+                        force: true,
+                    }),
+                false
+            );
+            this.client._entityCache.add(diff);
+            if (diff instanceof Api.updates.ChannelDifferenceTooLong) {
+                return diff.dialog instanceof Api.Dialog && diff.dialog.pts ? diff.dialog.pts : pts;
+            }
+            pts = Math.max(diff.pts, pts);
+            if (diff instanceof Api.updates.ChannelDifferenceEmpty || diff.final) return pts;
+            limit = this.client._bot ? DIFFERENCE_LIMIT_BOT : DIFFERENCE_LIMIT_USER;
+        }
+        return pts;
+    }
+
+    private deliver(tracker: ChannelTracker, update: Api.TypeUpdate, payload: DispatchPayload) {
+        const message = (update as { message?: { id?: number } }).message;
+        if (message?.id !== undefined && (update instanceof Api.UpdateNewChannelMessage || update instanceof Api.UpdateNewMessage)) {
+            tracker.lastMessageId = Math.max(tracker.lastMessageId ?? 0, message.id);
+        }
+        this.host.dispatch(update, payload);
     }
 
     private fetchDifference(channelId: string): Promise<void> {
@@ -336,6 +454,7 @@ export class ChannelUpdates {
         clearTimeout(tracker.retryTimer);
         tracker.pollTimer = tracker.retryTimer = tracker.nextPollAt = undefined;
         let failed = false;
+        let reset = false;
         let serverTimeoutS: number | undefined;
         try {
             const inputChannel = await this.resolve(channelId, tracker);
@@ -376,14 +495,32 @@ export class ChannelUpdates {
                 this.drop(channelId);
                 return;
             }
+            if (message === "PERSISTENT_TIMESTAMP_INVALID") reset = true;
             failed = true;
             this.client._log.warn(`updates.getChannelDifference for ${channelId} failed: ${error}`);
         } finally {
             if (current()) tracker.pts.setRequesting(false);
         }
         if (!current()) return;
+        if (reset) await this.resetPts(channelId, tracker, current);
+        if (!current()) return;
         if (failed) this.scheduleRetry(channelId, tracker);
         else this.schedulePoll(channelId, tracker, serverTimeoutS);
+    }
+
+    private async resetPts(channelId: string, tracker: ChannelTracker, current: () => boolean) {
+        this.stored.delete(channelId);
+        const inputChannel = tracker.inputChannel;
+        if (!inputChannel) return;
+        try {
+            const pts = await this.probePts(channelId, inputChannel);
+            if (!current()) return;
+            this.client._log.info(`Channel ${channelId} pts was reset to ${pts}`);
+            tracker.pts.init(pts, true);
+            this.host.saveState();
+        } catch (error) {
+            if (current()) this.client._log.warn(`Cannot reset pts of channel ${channelId}: ${error}`);
+        }
     }
 
     private async applyDifference(
@@ -401,7 +538,7 @@ export class ChannelUpdates {
         if (diff instanceof Api.updates.ChannelDifference) {
             const entities = collectEntities(diff.users, diff.chats);
             for (const message of diff.newMessages.filter(isMessage).sort((a, b) => a.id - b.id)) {
-                this.host.dispatch(new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
+                this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
             }
             for (const update of diff.otherUpdates) this.host.dispatch(update, { others: diff.otherUpdates, entities });
             tracker.pts.init(diff.pts > requestPts ? diff.pts : requestPts + 1, true);
@@ -409,7 +546,16 @@ export class ChannelUpdates {
         }
         const dialogPts = diff.dialog instanceof Api.Dialog ? diff.dialog.pts : undefined;
         const next = dialogPts !== undefined && dialogPts > requestPts ? dialogPts : requestPts + 1;
-        this.client._log.warn(`Channel ${channelId} difference is too long, skipping to pts ${next}`);
+        const seen = tracker.lastMessageId;
+        const recent = seen === undefined ? [] : diff.messages
+            .filter(isMessage)
+            .filter((message) => message.id > seen)
+            .sort((a, b) => a.id - b.id);
+        this.client._log.warn(`Channel ${channelId} difference is too long, delivering ${recent.length} recent messages and skipping to pts ${next}`);
+        const entities = collectEntities(diff.users, diff.chats);
+        for (const message of recent) {
+            this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
+        }
         tracker.pts.init(next, true);
     }
 
@@ -429,7 +575,8 @@ export class ChannelUpdates {
     private schedulePoll(channelId: string, tracker: ChannelTracker, serverTimeoutS?: number) {
         if (!this.watched.has(channelId)) return;
         clearTimeout(tracker.pollTimer);
-        const delayMs = serverTimeoutS && serverTimeoutS > 0 ? serverTimeoutS * 1000 : this.client._channelPollInterval;
+        const baseMs = serverTimeoutS && serverTimeoutS > 0 ? serverTimeoutS * 1000 : this.client._channelPollInterval;
+        const delayMs = tracker.joined ? Math.max(baseMs, JOINED_POLL_MS) : baseMs;
         tracker.nextPollAt = Date.now() + delayMs;
         tracker.pollTimer = timers.setTimeout(() => {
             tracker.pollTimer = undefined;

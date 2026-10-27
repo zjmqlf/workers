@@ -18,18 +18,6 @@ export const PROD_DC_IPV6: { readonly [id: number]: string } = {
     5: "2001:0b28:f23f:f005:0000:0000:0000:000a",
 };
 
-export const TEST_DC_IPV4: { readonly [id: number]: string } = {
-    1: "149.154.175.10",
-    2: "149.154.167.40",
-    3: "149.154.175.117",
-};
-
-export const TEST_DC_IPV6: { readonly [id: number]: string } = {
-    1: "2001:0b28:f23d:f001:0000:0000:0000:000e",
-    2: "2001:067c:04e8:f002:0000:0000:0000:000e",
-    3: "2001:0b28:f23d:f003:0000:0000:0000:000e",
-};
-
 export const WEBSOCKET_DC_HOSTS: { readonly [id: number]: string } = {
     1: "pluto",
     2: "venus",
@@ -44,7 +32,6 @@ export function webSocketDcAddress(dcId: number, mediaCluster = false): string |
 }
 
 export function isTestDcAddress(address: string): boolean | undefined {
-    if (Object.values(TEST_DC_IPV4).includes(address) || Object.values(TEST_DC_IPV6).includes(address)) return true;
     if (Object.values(PROD_DC_IPV4).includes(address) || Object.values(PROD_DC_IPV6).includes(address)) return false;
     return undefined;
 }
@@ -57,9 +44,7 @@ export interface DcAddress {
 }
 
 export interface DcAddressBookOptions {
-    testServers: boolean;
     webSocket: boolean;
-    proxied: boolean;
     ipv6: () => boolean;
 }
 
@@ -82,7 +67,7 @@ export class DcAddressBook {
             const host = webSocketDcAddress(dcId);
             return host ? { id: dcId, ipAddress: host, port: DC_PORT } : undefined;
         }
-        const table = this.env.testServers ? (ipv6 ? TEST_DC_IPV6 : TEST_DC_IPV4) : ipv6 ? PROD_DC_IPV6 : PROD_DC_IPV4;
+        const table = ipv6 ? PROD_DC_IPV6 : PROD_DC_IPV4;
         const ipAddress = table[dcId];
         return ipAddress ? { id: dcId, ipAddress, port: DC_PORT } : undefined;
     }
@@ -98,7 +83,6 @@ export class DcAddressBook {
             .filter((option) => media || !option.mediaOnly)
             .sort((a, b) => Number(!!a.ipv6 !== ipv6) - Number(!!b.ipv6 !== ipv6));
         if (media && candidates.some((option) => option.mediaOnly)) candidates = candidates.filter((option) => option.mediaOnly);
-        if (this.env.proxied && candidates.some((option) => option.static)) candidates = candidates.filter((option) => option.static);
         if (!candidates.length) return undefined;
         const chosen = candidates[this.failureCount(dcId, media) % candidates.length];
         return { id: chosen.id, ipAddress: chosen.ipAddress, port: chosen.port || DC_PORT, mediaOnly: !!chosen.mediaOnly };

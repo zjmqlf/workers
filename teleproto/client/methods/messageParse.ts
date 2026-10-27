@@ -14,7 +14,6 @@ export interface ParseInterface {
 export { DEFAULT_DELIMITERS } from "../../extensions/markdown";
 export type { messageEntities } from "../../extensions/markdown";
 
-/** @hidden */
 export async function _replaceWithMention(
     client: TelegramClient,
     entities: Api.TypeMessageEntity[],
@@ -33,7 +32,6 @@ export async function _replaceWithMention(
     }
 }
 
-/** @hidden */
 export async function _parseMessageText(
     client: TelegramClient,
     message: string,
@@ -74,7 +72,6 @@ export async function _parseMessageText(
     return [rawMessage, msgEntities];
 }
 
-/** @hidden */
 export function _getResponseMessage(
     client: TelegramClient,
     request: any,
@@ -82,7 +79,6 @@ export function _getResponseMessage(
     inputChat: any
 ) {
     let updates = [];
-
     let entities = new Map();
     if (result instanceof Api.UpdateShort) {
         updates = [result.update];

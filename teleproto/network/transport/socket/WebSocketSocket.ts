@@ -28,7 +28,7 @@ export class WebSocketSocket implements SocketInterface {
         return this.stream.lastDataAt;
     }
 
-    async connect(port: number, ip: string, testServers = false) {
+    async connect(port: number, ip: string) {
         const impl = (this.constructor as typeof WebSocketSocket).webSocketImpl ?? WebSocketSocket.webSocketImpl ?? (globalThis as { WebSocket?: WebSocketCtor }).WebSocket;
         if (!impl) {
             throw new Error(
@@ -37,7 +37,7 @@ export class WebSocketSocket implements SocketInterface {
             );
         }
         const stream = (this.stream = new ByteStream());
-        const url = `${port === 443 ? "wss" : "ws"}://${ip}:${port}/apiws${testServers ? "_test" : ""}`;
+        const url = `${port === 443 ? "wss" : "ws"}://${ip}:${port}/apiws`;
         const socket = new impl(url, "binary");
         socket.binaryType = "arraybuffer";
         this.socket = socket;
