@@ -1,10 +1,7 @@
 import bigInt from "big-integer";
 import type { EntityLike } from "./define";
 import type { Api } from "./tl";
-import crypto from "node:crypto";
-import zlib from "node:zlib";
-import { math, sha1 as hashSha1, sha256 as hashSha256 } from "cifrante";
-import timers from "node:timers";
+import { compression, crypto, timers } from "./platform";
 import { Buffer } from "node:buffer";
 
 export function asBuffer(bytes: Uint8Array): Buffer {
@@ -272,13 +269,11 @@ export function convertToLittle(buf: Buffer): Buffer {
 }
 
 export function sha1(data: Buffer): Promise<Buffer> {
-    // @ts-ignore
-    return asBuffer(hashSha1.sync(data));
+    return crypto.hash("sha1", data) as unknown as Promise<Buffer>;
 }
 
 export function sha256(data: Buffer): Promise<Buffer> {
-    // @ts-ignore
-    return asBuffer(hashSha256.sync(data));
+    return crypto.hash("sha256", data) as unknown as Promise<Buffer>;
 }
 
 export function modExp(
@@ -289,15 +284,7 @@ export function modExp(
     if (b.lesserOrEquals(bigInt.zero)) {
         return bigInt.one;
     }
-    return bigInt(
-        math
-            .modPow(
-                BigInt(a.toString()),
-                BigInt(b.toString()),
-                BigInt(n.toString())
-            )
-            .toString()
-    );
+    return bigInt(crypto.modPow(BigInt(a.toString()), BigInt(b.toString()), BigInt(n.toString())).toString());
 }
 
 export function getByteArray(
@@ -353,10 +340,7 @@ export function getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export const sleep = (ms: number, isUnref: boolean = false) =>
-    new Promise((resolve) =>
-        isUnref ? timers.setTimeout(resolve, ms).unref() : timers.setTimeout(resolve, ms)
-    );
+export const sleep = (ms: number, isUnref: boolean = false): Promise<unknown> => timers.sleep(ms, { ref: !isUnref });
 
 export function bufferXor(a: Buffer, b: Buffer): Buffer {
     const res = [];
@@ -366,42 +350,8 @@ export function bufferXor(a: Buffer, b: Buffer): Buffer {
     return Buffer.from(res);
 }
 
-function makeCRCTable() {
-    let c;
-    const crcTable = [];
-    for (let n = 0; n < 256; n++) {
-        c = n;
-        for (let k = 0; k < 8; k++) {
-            c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-        }
-        crcTable[n] = c;
-    }
-    return crcTable;
-}
-
-let crcTable: number[] | undefined = undefined;
-
-const nativeCrc32 = (
-    zlib as { crc32?: (data: Buffer | string, value?: number) => number }
-).crc32;
-
 export function crc32(buf: Buffer | string, previous = 0) {
-    if (nativeCrc32) {
-        return nativeCrc32(buf, previous) >>> 0;
-    }
-    if (!crcTable) {
-        crcTable = makeCRCTable();
-    }
-    if (!Buffer.isBuffer(buf)) {
-        buf = Buffer.from(buf);
-    }
-    let crc = previous ^ -1;
-
-    for (let index = 0; index < buf.length; index++) {
-        const byte = buf[index];
-        crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-    }
-    return (crc ^ -1) >>> 0;
+    return compression.crc32(buf, previous);
 }
 
 const unionIdCache = new Map<string, number>();

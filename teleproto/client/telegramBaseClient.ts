@@ -8,7 +8,6 @@ import { Logger } from "../extensions";
 import { Api } from "../tl";
 import { AuthKey } from "../crypto/AuthKey";
 import { addServerKey } from "../crypto/RSA";
-import { IGE } from "../crypto/IGE";
 import { EntityCache } from "../entityCache";
 import type { EntityCacheOptions } from "../entityCache";
 import type { ParseInterface } from "./methods/messageParse";

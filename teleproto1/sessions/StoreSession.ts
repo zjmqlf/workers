@@ -1,7 +1,9 @@
 import { MemorySession } from "./Memory";
 import type { StoredUpdateState } from "./Abstract";
+import store, { StoreBase } from "store2";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
+import { fs, storage } from "../platform";
 import { Buffer } from "node:buffer";
 
 /**
@@ -19,7 +21,7 @@ import { Buffer } from "node:buffer";
  */
 export class StoreSession extends MemorySession {
     private readonly sessionName: string;
-    private store: Map<string, any>;
+    private store: StoreBase;
 
     constructor(sessionName: string, divider = ":") {
         super();
@@ -28,7 +30,14 @@ export class StoreSession extends MemorySession {
                 "Session name can't be 'session'. Please use a different name."
             );
         }
-        this.store = new Map();
+        const directory = fs.resolve(sessionName);
+        const legacyDirectory = fs.resolve("./" + sessionName);
+        this.store = store.area(
+            sessionName,
+            storage.open(fs.isAbsolute(sessionName) && !fs.exists(directory) && fs.exists(legacyDirectory)
+                ? legacyDirectory
+                : directory)
+        );
         if (divider == undefined) {
             divider = ":";
         }
@@ -123,7 +132,7 @@ export class StoreSession extends MemorySession {
     setUpdateState(state: StoredUpdateState | undefined) {
         super.setUpdateState(state);
         if (state) this.store.set(this.sessionName + "updateState", state);
-        else this.store.delete(this.sessionName + "updateState");
+        else this.store.remove(this.sessionName + "updateState");
     }
 
     private _saveDcAuthKeys() {
@@ -174,7 +183,7 @@ export class StoreSession extends MemorySession {
 
     private findEntityRow(matches: (row: string[]) => boolean): string[] | undefined {
         let result: string[] | undefined;
-        this.store.forEach((row, key) => {
+        this.store.each((key, row) => {
             if (Array.isArray(row) && row.length >= 5 &&
                 key === this.sessionName + row[0] && matches(row)) {
                 result = row;

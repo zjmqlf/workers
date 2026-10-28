@@ -1,14 +1,9 @@
-import { setMaxListeners } from "node:events";
-import { isIP } from "node:net";
-import { setTimeout as delay } from "node:timers/promises";
-import { hmac } from "cifrante";
 import type { Connection } from "../connection/Connection";
 import type { SocketInterface, SocketFactory } from "./socket/types";
 import { ByteQueue } from "./socket/ByteStream";
-import { asBuffer } from "../../Helpers";
+import { crypto, events, net, timers } from "../../platform";
 import { mtproxyConnection, parseProxySecret } from "./MTProxyTransport";
 import { Transport, ownFraming, type ResolvedTransport } from "./Transport";
-import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 const WINDOW = 4 * 1024 * 1024;
@@ -58,7 +53,7 @@ function configure(options: WebProxyOptions) {
         throw new Error("WEB proxy requires a hostname and optional canonical base path");
     }
     const host = new URL(`https://${hostInput}`).hostname;
-    if (isIP(host) || host.length > 253 || !host.includes(".") ||
+    if (net.isIP(host) || host.length > 253 || !host.includes(".") ||
         !host.split(".").every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) {
         throw new Error("WEB proxy requires a DNS hostname");
     }
@@ -83,7 +78,7 @@ function configure(options: WebProxyOptions) {
     }
     if (maxStreams > 256) throw new Error("WEB proxy maxStreams cannot exceed 256");
     const context = path ? `tdesktop-web-proxy-bridge-v2\n${host}\n${path}` : `tdesktop-web-proxy-bridge-v1\n${host}`;
-    const capability = asBuffer(hmac.sha256.sync(secret, context)).toString("base64url");
+    const capability = crypto.hmac("sha256", secret, context).toString("base64url");
     return {
         host, base: `https://${host}/${path ? path + "/" : ""}`, secret: secret.toString("hex"), capability,
         connectTimeoutMs, requestTimeoutMs, maxStreams, webSocket: options.webSocket
@@ -158,7 +153,7 @@ class RelayTransport {
     private wsTimer?: ReturnType<typeof setTimeout>;
 
     constructor(readonly config: Configuration) {
-        setMaxListeners(config.maxStreams * 3 + 16, this.controller.signal);
+        events.setMaxListeners(config.maxStreams * 3 + 16, this.controller.signal);
     }
 
     async open(stream: RelaySocket): Promise<void> {
@@ -358,7 +353,7 @@ class RelayTransport {
                     if (!this.isLanes() || !lane.id || response.body.length || this.streams.has(lane.id)) throw new Error("Invalid WEB proxy lane closure");
                     this.finishLane(lane); return;
                 }
-                if (response.status === 204) await delay(10, undefined, { signal: lane.controller.signal });
+                if (response.status === 204) await timers.sleep(10, { signal: lane.controller.signal });
             }
         })().catch(error => { if (!lane.closed) this.fail(error instanceof Error ? error : closedError()); });
     }
@@ -546,7 +541,7 @@ class RelayTransport {
                 clearTimeout(timer); this.controller.signal.removeEventListener("abort", abort); signal?.removeEventListener("abort", abort);
             }
             if (Date.now() + wait >= deadline) throw new Error("WEB proxy HTTP retry deadline exceeded");
-            await delay(wait, undefined, { signal: this.controller.signal });
+            await timers.sleep(wait, { signal: this.controller.signal });
         }
         throw closedError();
     }

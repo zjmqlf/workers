@@ -1,6 +1,6 @@
-import { gzipSync, unzipSync } from "node:zlib";
 import { Writer } from "../binary/Writer";
 import type { Reader } from "../binary/Reader";
+import { compression } from "../../platform";
 import { Buffer } from "node:buffer";
 
 const MIN_COMPRESS_SIZE = 128;
@@ -27,11 +27,11 @@ export class GZIPPacked {
     }
 
     static gzip(input: Buffer): Buffer {
-        return gzipSync(input);
+        return compression.gzip(input);
     }
 
     static ungzip(input: Buffer): Buffer {
-        return unzipSync(input);
+        return compression.gunzip(input);
     }
 
     toBytes(): Buffer {

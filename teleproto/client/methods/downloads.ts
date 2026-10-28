@@ -3,16 +3,13 @@ import type { TelegramClient } from "../TelegramClient";
 import { strippedPhotoToJpg } from "../../Utils";
 import { EntityLike, OutFile, ProgressCallback } from "../../define";
 import * as utils from "../../Utils";
-import * as fs from "node:fs";
-import path from "node:path";
 import bigInt from "big-integer";
 import { MediaAbortError } from "../../errors";
 import { FileDownloader } from "../files/FileDownloader";
 import { transferKindFor } from "../files/FileTransfers";
 import { choosePartSize } from "../files/PartsManager";
 import { OrderedSink, openTarget, type DownloadTarget } from "../files/sinks";
-import { sha256 } from "cifrante";
-import { asBuffer } from "../../Helpers";
+import { crypto, fs } from "../../platform";
 import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
@@ -84,7 +81,7 @@ class FileHashChecker {
             }
             if (!expected) return;
             const block = data.subarray(o, Math.min(o + HASH_BLOCK, data.length));
-            const actual = asBuffer(sha256.sync(block));
+            const actual = crypto.hash("sha256", block);
             if (!actual.equals(expected)) {
                 throw new Error(
                     `File hash mismatch at offset ${abs} — corrupted part`
@@ -525,9 +522,9 @@ function getProperFilename(
         return file;
     }
 
-    if (fs.existsSync(file) && fs.lstatSync(file).isDirectory()) {
+    if (fs.isDirectory(file)) {
         let fullName = fileType + date + extension;
-        return path.join(file, fullName);
+        return fs.join(file, fullName);
     }
     return file;
 }

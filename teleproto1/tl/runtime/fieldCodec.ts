@@ -182,32 +182,32 @@ function interpretFieldsReader(context: CodecContext, fields: FieldDef[]): Field
 }
 
 export function compileFieldsReader(context: CodecContext, fields: FieldDef[]): FieldsReader {
-    const lines = fields.map((field, index) => {
-        const target = `target[${JSON.stringify(field.name)}]`;
-        if (!field.isFlag) return `${target} = ${fieldReadExpression(field, index)};`;
-        const set = `(target[${JSON.stringify(fields[field.flagField].name)}] & ${1 << field.flagBit}) !== 0`;
-        return field.type === "true"
-            ? `${target} = ${set};`
-            : `${target} = ${set} ? ${fieldReadExpression(field, index)} : null;`;
-    });
-    try {
-        return new Function("readField", "context", "fields", `return function read(reader, target) {\n${lines.join("\n")}\n};`)(
-            readField,
-            context,
-            fields
-        ) as FieldsReader;
-    } catch {
+    // const lines = fields.map((field, index) => {
+    //     const target = `target[${JSON.stringify(field.name)}]`;
+    //     if (!field.isFlag) return `${target} = ${fieldReadExpression(field, index)};`;
+    //     const set = `(target[${JSON.stringify(fields[field.flagField].name)}] & ${1 << field.flagBit}) !== 0`;
+    //     return field.type === "true"
+    //         ? `${target} = ${set};`
+    //         : `${target} = ${set} ? ${fieldReadExpression(field, index)} : null;`;
+    // });
+    // try {
+    //     return new Function("readField", "context", "fields", `return function read(reader, target) {\n${lines.join("\n")}\n};`)(
+    //         readField,
+    //         context,
+    //         fields
+    //     ) as FieldsReader;
+    // } catch {
         return interpretFieldsReader(context, fields);
-    }
+    // }
 }
 
 export function compileFieldsCopier(fields: FieldDef[]): FieldsCopier {
-    const lines = fields.map((field) => `target[${JSON.stringify(field.name)}] = source[${JSON.stringify(field.name)}];`);
-    try {
-        return new Function("target", "source", lines.join("\n")) as FieldsCopier;
-    } catch {
+    // const lines = fields.map((field) => `target[${JSON.stringify(field.name)}] = source[${JSON.stringify(field.name)}];`);
+    // try {
+    //     return new Function("target", "source", lines.join("\n")) as FieldsCopier;
+    // } catch {
         return (target, source) => {
             for (const field of fields) target[field.name] = source[field.name];
         };
-    }
+    // }
 }

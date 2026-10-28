@@ -1,4 +1,4 @@
-import * as net from "node:net";
+import { net } from "../../../platform";
 import { ByteStream, SocketClosedError } from "./ByteStream";
 import type { SocketInterface } from "./types";
 import { Buffer } from "node:buffer";
@@ -21,7 +21,7 @@ export class NetSocket implements SocketInterface {
 
     async connect(port: number, ip: string) {
         const stream = (this.stream = new ByteStream());
-        const socket = new net.Socket();
+        const socket = net.createSocket();
         this.socket = socket;
         socket.on("data", (chunk: Buffer) => stream.push(chunk));
         socket.on("close", () => stream.end());

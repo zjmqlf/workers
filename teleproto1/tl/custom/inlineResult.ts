@@ -2,6 +2,7 @@ import type { TelegramClient } from "../../client/TelegramClient";
 import type { EntityLike, MessageIDLike } from "../../define";
 import { Api } from "../api";
 import { getMessageId } from "../../Utils";
+// import { Buffer } from "node:buffer";
 
 export class InlineResult {
     private _ARTICLE = "article";

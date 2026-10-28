@@ -1,6 +1,5 @@
 import { Api } from "./tl";
 import {
-    asBuffer,
     bigIntMod,
     generateRandomBytes,
     modExp,
@@ -9,7 +8,7 @@ import {
     sha256,
 } from "./Helpers";
 import bigInt from "big-integer";
-import { kdf } from "cifrante";
+import { crypto } from "./platform";
 import { Buffer } from "node:buffer";
 
 const SIZE_FOR_HASH = 256;
@@ -84,9 +83,7 @@ function xor(a: Buffer, b: Buffer) {
 }
 
 async function pbkdf2sha512(password: Buffer, salt: Buffer, iterations: number) {
-    return asBuffer(
-        await kdf.pbkdf2(password, salt, { hash: "sha512", iterations, length: 64 })
-    );
+    return crypto.pbkdf2(password, salt, iterations, 64, "sha512");
 }
 
 async function computeHash(

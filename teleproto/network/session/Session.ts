@@ -1,5 +1,5 @@
 import bigInt from "big-integer";
-import { setTimeout as sleep } from "node:timers/promises";
+import { timers } from "../../platform";
 import { AuthKey } from "../../crypto/AuthKey";
 import { Api } from "../../tl";
 import { LAYER } from "../../tl/runtime/Registry";
@@ -22,7 +22,6 @@ import { RequestQueue } from "./RequestQueue";
 import { SessionLink, type LinkClose, type LinkHost, type OutgoingPacket } from "./SessionLink";
 import { ConnectThrottle } from "./ConnectThrottle";
 import { UpdateConnectionState } from "./UpdateConnectionState";
-import timers from "node:timers";
 import { Buffer } from "node:buffer";
 
 const DEFAULT_CONNECT_TIMEOUT_S = 10;
@@ -479,7 +478,7 @@ export class Session implements LinkHost, RouterHost {
     private async wait(ms: number, signal: AbortSignal): Promise<boolean> {
         if (ms <= 0) return !signal.aborted;
         try {
-            await sleep(ms, undefined, { signal });
+            await timers.sleep(ms, { signal });
             return true;
         } catch {
             return false;
