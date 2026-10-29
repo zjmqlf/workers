@@ -1,10 +1,45 @@
 import { MemorySession } from "./Memory";
 import type { StoredUpdateState } from "./Abstract";
-import store, { StoreBase } from "store2";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
 import { fs, storage } from "../platform";
-import { Buffer } from "node:buffer";
+
+class JsonStore {
+    constructor(private readonly area: Storage) {}
+
+    get(key: string): any {
+        const value = this.area.getItem(key);
+        if (value === null) return null;
+        try {
+            return JSON.parse(value);
+        } catch {
+            return value;
+        }
+    }
+
+    set(key: string, value: unknown): void {
+        this.area.setItem(key, value === undefined || typeof value === "function" ? String(value) : JSON.stringify(value));
+    }
+
+    remove(key: string): void {
+        this.area.removeItem(key);
+    }
+
+    clear(): void {
+        this.area.clear();
+    }
+
+    each(visit: (key: string, value: any) => boolean | void): void {
+        for (let i = 0, count = this.area.length; i < count; i++) {
+            const key = this.area.key(i);
+            if (key !== null && visit(key, this.get(key)) === false) return;
+            if (count > this.area.length) {
+                count--;
+                i--;
+            }
+        }
+    }
+}
 
 /**
  * Persistent session that stores auth keys and entity data on disk using `node-localstorage`.
@@ -21,7 +56,7 @@ import { Buffer } from "node:buffer";
  */
 export class StoreSession extends MemorySession {
     private readonly sessionName: string;
-    private store: StoreBase;
+    private store: JsonStore;
 
     constructor(sessionName: string, divider = ":") {
         super();
@@ -32,8 +67,7 @@ export class StoreSession extends MemorySession {
         }
         const directory = fs.resolve(sessionName);
         const legacyDirectory = fs.resolve("./" + sessionName);
-        this.store = store.area(
-            sessionName,
+        this.store = new JsonStore(
             storage.open(fs.isAbsolute(sessionName) && !fs.exists(directory) && fs.exists(legacyDirectory)
                 ? legacyDirectory
                 : directory)
