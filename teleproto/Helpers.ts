@@ -1,8 +1,7 @@
 import bigInt from "big-integer";
 import type { EntityLike } from "./define";
 import type { Api } from "./tl";
-import { compression, crypto, timers } from "./platform";
-import { Buffer } from "node:buffer";
+import { Buffer, compression, crypto, timers } from "./platform";
 
 export function asBuffer(bytes: Uint8Array): Buffer {
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -36,7 +35,7 @@ export function readBigIntFromBuffer(
     let i = count8b;
     while(i>0){
         let bi = little ? buffer.readBigUInt64LE(buffer.length - (count8b-i+1)*8 )
-                        : buffer.readBigUint64BE((count8b-i)*8);
+                        : buffer.readBigUInt64BE((count8b-i)*8);
         resBigInt = bi + (resBigInt << bi64);
 
         --i;
@@ -55,7 +54,7 @@ export function readBigIntFromBuffer(
         }
         let bi = little ?
               buffer.readBigUInt64LE(0)
-            : buffer.readBigUint64BE(buffer.length-8);
+            : buffer.readBigUInt64BE(buffer.length-8);
         bi = BigInt.asUintN(8*bytesLeft, bi);
         resBigInt = bi + (resBigInt << BigInt(8*bytesLeft));
     }

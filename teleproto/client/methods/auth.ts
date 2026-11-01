@@ -1,11 +1,11 @@
 import { Api } from "../../tl";
+import { Raw } from "../../events/Raw";
 import * as utils from "../../Utils";
 import { sleep } from "../../Helpers";
 import { computeCheck as computePasswordSrpCheck } from "../../Password";
 import { UnauthorizedError } from "../../errors";
 import type { TelegramClient } from "../TelegramClient";
-import { Raw } from "../../events/Raw";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 export interface EmailVerificationOptions {
     googleSigninAllowed?: boolean;

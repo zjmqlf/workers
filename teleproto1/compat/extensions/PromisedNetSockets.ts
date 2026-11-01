@@ -1,7 +1,7 @@
 import type { ProxyInterface } from "../../client/TelegramBaseClient";
 import { NetSocket } from "../../network/transport/socket/NetSocket";
 import { openSocksTunnel } from "../../network/transport/SocksTransport";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 const ALL = 0x7fffffff;
 

@@ -2,7 +2,7 @@ import { MemorySession } from "./Memory";
 import type { StoredUpdateState } from "./Abstract";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../platform";
 
 export class StoreSession extends MemorySession {
     private readonly sessionName: string;

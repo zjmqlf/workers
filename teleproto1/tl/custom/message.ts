@@ -18,7 +18,7 @@ import * as rich from "../../richMessage";
 import { returnBigInt } from "../../Helpers";
 import { BigInteger } from "big-integer";
 import { MessageButton } from "./messageButton";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 interface MessageBaseInterface {
     id: any;
@@ -157,6 +157,11 @@ export interface ButtonClickParam {
      `PASSWORD_HASH_INVALID` is raised.
      */
     password?: string;
+}
+
+export interface CustomMessage {
+    /** @hidden */
+    getBytes(): Buffer;
 }
 
 /**
@@ -358,10 +363,6 @@ export class CustomMessage extends SenderGetter {
     _sender?: any;
     /** @hidden */
     _entities?: Map<string, Entity>;
-    /** @hidden */
-
-    /* @ts-ignore */
-    getBytes(): Buffer;
 
     originalArgs: any;
 

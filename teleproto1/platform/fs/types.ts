@@ -1,4 +1,4 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from "../buffer";
 
 export interface FileHandle {
     read(buffer: Uint8Array, offset: number, length: number, position: number): Promise<{ bytesRead: number }>;

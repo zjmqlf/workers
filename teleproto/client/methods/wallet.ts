@@ -4,7 +4,7 @@ import { Api } from "../../tl";
 import { RequestIter } from "../../requestIter";
 import { TotalList, generateRandomLong } from "../../Helpers";
 import type { TelegramClient } from "../TelegramClient";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 const PAGE_LIMIT = 100;
 

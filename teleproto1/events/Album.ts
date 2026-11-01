@@ -2,7 +2,7 @@ import { DefaultEventInterface, EventBuilder, EventCommon } from "./common";
 import { Entity, EntityLike } from "../define";
 import { Api } from "../tl";
 import type { TelegramClient } from "../client/TelegramClient";
-import timers from "node:timers";
+import { timers } from "../platform";
 
 const _ALBUM_DELAY = 500; // 0.5 sec
 

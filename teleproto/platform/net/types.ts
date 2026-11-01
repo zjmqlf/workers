@@ -1,4 +1,4 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from "../buffer";
 
 export interface TcpSocket {
     readonly destroyed: boolean;
@@ -33,17 +33,8 @@ export interface HttpConnectResponse<Socket extends TcpSocket> {
     head: Buffer;
 }
 
-export interface SocksConnectOptions {
-    host: string;
-    port: number;
-    version: 4 | 5;
-    username?: string;
-    password?: string;
-    timeoutMs: number;
-    destination: { host: string; port: number };
-}
-
 export interface Network<Socket extends TcpSocket> {
+    readonly tcp: boolean;
     createSocket(): Socket;
     isIP(host: string): number;
     httpConnect(options: HttpConnectOptions): Promise<HttpConnectResponse<Socket>>;

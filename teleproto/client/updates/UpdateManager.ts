@@ -16,7 +16,7 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
-import timers from "node:timers";
+import { timers } from "../../platform";
 
 export type { ChannelPollingState } from "./ChannelUpdates";
 

@@ -3,7 +3,7 @@
  */
 
 import { Api } from "../tl";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../platform";
 
 /**
  * Occurs when a read operation was cancelled.

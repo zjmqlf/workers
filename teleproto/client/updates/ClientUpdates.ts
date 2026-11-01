@@ -10,7 +10,7 @@ import { events } from "../../platform";
 import type { UpdateState, ChannelPollingState } from "./UpdateManager";
 import { UpdateConnectionState } from "../../network";
 import { UpdateContext, type WithUpdateContext } from "./UpdateContext";
-import timers from "node:timers";
+import { timers } from "../../platform";
 
 export type NextFn = () => Promise<void>;
 

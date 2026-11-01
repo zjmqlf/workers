@@ -9,9 +9,7 @@ import { FileDownloader } from "../files/FileDownloader";
 import { transferKindFor } from "../files/FileTransfers";
 import { choosePartSize } from "../files/PartsManager";
 import { OrderedSink, openTarget, type DownloadTarget } from "../files/sinks";
-import { crypto, fs } from "../../platform";
-import timers from "node:timers";
-import { Buffer } from "node:buffer";
+import { Buffer, crypto, fs, timers } from "../../platform";
 
 export interface progressCallback {
     (

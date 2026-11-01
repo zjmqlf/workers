@@ -11,7 +11,7 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
-import timers from "node:timers";
+import { timers } from "../../platform";
 
 const DIFFERENCE_LIMIT_USER = 100;
 const DIFFERENCE_LIMIT_BOT = 100_000;

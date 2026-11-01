@@ -28,7 +28,7 @@ import {
     _toReplyObject,
     SendFileInterface,
 } from "./uploads";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 const _MAX_CHUNK_SIZE = 100;
 

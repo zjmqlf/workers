@@ -1,10 +1,9 @@
 import type { Connection } from "../connection/Connection";
 import type { SocketInterface, SocketFactory } from "./socket/types";
 import { ByteQueue } from "./socket/ByteStream";
-import { crypto, events, net, timers } from "../../platform";
+import { Buffer, crypto, events, net, timers } from "../../platform";
 import { mtproxyConnection, parseProxySecret } from "./MTProxyTransport";
 import { Transport, ownFraming, type ResolvedTransport } from "./Transport";
-import { Buffer } from "node:buffer";
 
 const WINDOW = 4 * 1024 * 1024;
 const MAX_BATCH = 2 * 1024 * 1024;
@@ -43,6 +42,10 @@ export interface WebProxyOptions {
     webSocket?: new (url: string, protocols: string | string[]) => WebProxyWebSocket;
 }
 
+function base64url(data: Buffer): string {
+    return data.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 function configure(options: WebProxyOptions) {
     const input = options.server.trim().replace(/^https:\/\//i, "");
     const slash = input.indexOf("/");
@@ -62,7 +65,7 @@ function configure(options: WebProxyOptions) {
     if (/^(?:[a-fA-F0-9]{2})+$/.test(encoded)) secret = Buffer.from(encoded, "hex");
     else if (/^[A-Za-z0-9+/_-]+={0,2}$/.test(encoded)) {
         secret = Buffer.from(encoded, "base64");
-        if (secret.toString("base64url") !== encoded.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")) {
+        if (base64url(secret) !== encoded.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")) {
             throw new Error("Invalid WEB proxy secret encoding");
         }
     } else throw new Error("Invalid WEB proxy secret encoding");
@@ -78,7 +81,7 @@ function configure(options: WebProxyOptions) {
     }
     if (maxStreams > 256) throw new Error("WEB proxy maxStreams cannot exceed 256");
     const context = path ? `tdesktop-web-proxy-bridge-v2\n${host}\n${path}` : `tdesktop-web-proxy-bridge-v1\n${host}`;
-    const capability = crypto.hmac("sha256", secret, context).toString("base64url");
+    const capability = base64url(crypto.hmac("sha256", secret, context));
     return {
         host, base: `https://${host}/${path ? path + "/" : ""}`, secret: secret.toString("hex"), capability,
         connectTimeoutMs, requestTimeoutMs, maxStreams, webSocket: options.webSocket
@@ -110,7 +113,7 @@ function parseFrames(data: Buffer): { type: number; id: number; payload: Buffer 
 }
 
 function token(value: string | null): string {
-    if (!value || !/^[A-Za-z0-9_-]{43}$/.test(value) || Buffer.from(value, "base64url").toString("base64url") !== value) {
+    if (!value || !/^[A-Za-z0-9_-]{43}$/.test(value) || base64url(Buffer.from(value, "base64")) !== value) {
         throw new Error("Invalid WEB proxy token");
     }
     return value;
@@ -253,7 +256,7 @@ class RelayTransport {
     wake(): void {
         if (this.pumpQueued || this.closed) return;
         this.pumpQueued = true;
-        timers.setImmediate(() => {
+        timers.immediate(() => {
             this.pumpQueued = false;
             if (this.closed) return;
             try {

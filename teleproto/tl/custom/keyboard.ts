@@ -4,7 +4,7 @@ import { returnBigInt } from "../../Helpers";
 import { getInputUser } from "../../Utils";
 import { Api } from "../api";
 import { Button } from "./button";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 export type ButtonColor = "primary" | "danger" | "success";
 

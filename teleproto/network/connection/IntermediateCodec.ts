@@ -1,9 +1,8 @@
 import { generateRandomBytes } from "../../Helpers";
-import { crypto } from "../../platform";
+import { Buffer, crypto } from "../../platform";
 import { Connection, PacketCodec } from "./Connection";
 import { InvalidBufferError } from "../../errors";
 import type { PacketReader } from "../transport/socket/types";
-import { Buffer } from "node:buffer";
 
 const TRANSPORT_ERRORS = new Set([-404, -429, -444]);
 const MAX_PACKET_LENGTH = (1 << 24) + 1024;

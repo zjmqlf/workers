@@ -3,6 +3,7 @@ import { LegacySocketTransport } from "../compat/LegacySocketTransport";
 import type { SocketFactory as LegacySocketFactory } from "../compat/extensions/SocketInterface";
 import { isLegacyProxyConnection } from "../compat/network/connection/TCPMTProxy";
 import type { TelegramClient } from "./TelegramClient";
+import { net, timers } from "../platform";
 import { Session, StoreSession } from "../sessions";
 import { Logger } from "../extensions";
 import { Api } from "../tl";
@@ -28,7 +29,6 @@ import { UpdateLoop } from "./updates/UpdateLoop";
 import type { ClientUpdates } from "./updates/ClientUpdates";
 import type { ResolvedTransport, Transport } from "../network/transport/Transport";
 import { TcpTransport } from "../network/transport/TcpTransport";
-import timers from "node:timers";
 
 const SESSION_IDLE_TIMEOUT_MS = 300_000;
 const SESSION_STARTUP_DELAY_MS = 800;

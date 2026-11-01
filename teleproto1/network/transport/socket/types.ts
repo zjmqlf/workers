@@ -1,4 +1,4 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../../platform";
 
 export interface PacketReader {
     read(n: number): Promise<Buffer>;

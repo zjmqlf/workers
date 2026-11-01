@@ -1,5 +1,5 @@
 import { Api } from "../tl";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../platform";
 
 export class ReadCancelledError extends Error {
     constructor() {

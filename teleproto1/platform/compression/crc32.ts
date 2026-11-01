@@ -1,4 +1,4 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from "../buffer";
 
 let table: Uint32Array | undefined;
 

@@ -3,6 +3,7 @@ import { ConnectionTCPObfuscated } from "../connection/Obfuscation";
 import { NetSocket } from "./socket/NetSocket";
 import { ProxyRejectedError } from "../../errors/ProxyRejectedError";
 import { Transport, type ResolvedTransport } from "./Transport";
+import { net } from "../../platform";
 
 export interface SocksTransportOptions {
     host: string;

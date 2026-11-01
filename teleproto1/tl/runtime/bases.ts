@@ -1,8 +1,8 @@
 import type { TlBaseClass } from "./defineClass";
-import { CustomMessage } from "../custom/message";
+import * as message from "../custom/message";
 
 const customMessage = (): TlBaseClass =>
-    CustomMessage as unknown as TlBaseClass;
+    message.CustomMessage as unknown as TlBaseClass;
 
 export const tlBases: Record<string, () => TlBaseClass> = {
     Message: customMessage,

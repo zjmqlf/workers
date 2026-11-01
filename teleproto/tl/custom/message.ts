@@ -18,7 +18,7 @@ import * as rich from "../../richMessage";
 import { returnBigInt } from "../../Helpers";
 import { BigInteger } from "big-integer";
 import { MessageButton } from "./messageButton";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 interface MessageBaseInterface {
     id: any;
@@ -64,6 +64,10 @@ export interface ButtonClickParam {
     sharePhone?: boolean | string | Api.InputMediaContact;
     shareGeo?: [number, number] | Api.InputMediaGeoPoint;
     password?: string;
+}
+
+export interface CustomMessage {
+    getBytes(): Buffer;
 }
 
 export class CustomMessage extends SenderGetter {
@@ -117,8 +121,6 @@ export class CustomMessage extends SenderGetter {
     _forward?: Forward;
     _sender?: any;
     _entities?: Map<string, Entity>;
-    /* @ts-ignore */
-    getBytes(): Buffer;
     originalArgs: any;
     patternMatch?: RegExpMatchArray;
 

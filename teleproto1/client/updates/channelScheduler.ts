@@ -1,4 +1,4 @@
-import timers from "node:timers";
+import { timers } from "../../platform";
 
 const MAX_GAP_FACTOR = 8;
 const GAP_RECOVERY = 0.9;

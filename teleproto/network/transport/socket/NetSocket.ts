@@ -1,7 +1,6 @@
-import { net } from "../../../platform";
+import { Buffer, net } from "../../../platform";
 import { ByteStream, SocketClosedError } from "./ByteStream";
 import type { SocketInterface } from "./types";
-import { Buffer } from "node:buffer";
 
 const DEFAULT_KEEP_ALIVE_INTERVAL = 30_000;
 

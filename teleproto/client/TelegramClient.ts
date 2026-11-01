@@ -1,4 +1,5 @@
 import { TelegramBaseClient, TelegramClientParams } from "./TelegramBaseClient";
+import * as events from "../events";
 import type { DcAddress } from "../network/dc/DcAddressBook";
 import type { Connection } from "../network/connection/Connection";
 import * as authMethods from "./methods/auth";
@@ -48,7 +49,7 @@ import { Album, AlbumEvent } from "../events/Album";
 import { CallbackQuery, CallbackQueryEvent } from "../events/CallbackQuery";
 import { EditedMessage, EditedMessageEvent } from "../events/EditedMessage";
 import { DeletedMessage, DeletedMessageEvent } from "../events/DeletedMessage";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../platform";
 
 export class TelegramClient<
     S extends Session = Session

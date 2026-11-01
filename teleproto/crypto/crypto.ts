@@ -1,5 +1,4 @@
-import { crypto } from "../platform";
-import { Buffer } from "node:buffer";
+import { Buffer, crypto } from "../platform";
 
 export class CTR {
     private cipher: any;

@@ -6,7 +6,7 @@ import {
     readBufferFromBigInt,
     toSignedLittleBuffer,
 } from "../../Helpers";
-import { crypto } from "../../platform";
+import { Buffer, crypto } from "../../platform";
 import { Api } from "../../tl";
 import { GZIPPacked, TLMessage } from "../../tl/core";
 import { Reader } from "../../tl/binary/Reader";
@@ -15,7 +15,6 @@ import type { Logger } from "../../extensions/Logger";
 import { IGE } from "../../crypto/IGE";
 import { InvalidBufferError, SecurityError } from "../../errors";
 import { ReceivedIdsManager } from "./ReceivedIds";
-import { Buffer } from "node:buffer";
 
 export class DuplicateMessageError extends SecurityError {
     constructor(readonly msgId: bigInt.BigInteger) {

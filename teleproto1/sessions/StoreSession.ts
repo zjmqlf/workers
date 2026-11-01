@@ -2,7 +2,7 @@ import { MemorySession } from "./Memory";
 import type { StoredUpdateState } from "./Abstract";
 import { AuthKey } from "../crypto/AuthKey";
 import bigInt from "big-integer";
-import { fs, storage } from "../platform";
+import { Buffer, fs, storage } from "../platform";
 
 class JsonStore {
     constructor(private readonly area: Storage) {}
@@ -23,10 +23,6 @@ class JsonStore {
 
     remove(key: string): void {
         this.area.removeItem(key);
-    }
-
-    clear(): void {
-        this.area.clear();
     }
 
     each(visit: (key: string, value: any) => boolean | void): void {
@@ -179,7 +175,11 @@ export class StoreSession extends MemorySession {
     }
 
     delete() {
-        this.store.clear();
+        const keys: string[] = [];
+        this.store.each((key) => {
+            if (key.startsWith(this.sessionName)) keys.push(key);
+        });
+        for (const key of keys) this.store.remove(key);
         super.delete();
     }
 

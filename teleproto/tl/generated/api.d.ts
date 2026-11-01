@@ -4,7 +4,7 @@ import { BigInteger } from 'big-integer';
 import {EntityLike,MessageIDLike} from "../../define";
 import { CustomMessage } from "../custom/message";
 import type * as RpcErrors from "../../errors";
-import { Buffer } from "node:buffer";
+import { Buffer } from "../../platform";
 
 export namespace Api {
   type AnyLiteral = Record<string, any> | void;

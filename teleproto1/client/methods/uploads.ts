@@ -2,7 +2,7 @@ import { Api } from "../../tl";
 
 import type { TelegramClient } from "../TelegramClient";
 import { generateRandomLong, unionId } from "../../Helpers";
-import { crypto, fs } from "../../platform";
+import { Buffer, crypto, fs } from "../../platform";
 import { getInputMedia, getMessageId } from "../../Utils";
 import { EntityLike, FileLike, MarkupLike, MessageIDLike } from "../../define";
 import * as utils from "../../Utils";
@@ -12,7 +12,6 @@ import { MediaAbortError } from "../../errors";
 import { FileUploader } from "../files/FileUploader";
 import { findUploads, rememberUpload, type UploadSource } from "../files/uploadRegistry";
 import { choosePartSize, MAX_PART_SIZE } from "../files/PartsManager";
-import { Buffer } from "node:buffer";
 
 interface OnProgress {
     // Float between 0 and 1.

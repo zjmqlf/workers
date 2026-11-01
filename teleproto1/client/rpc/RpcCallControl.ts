@@ -1,5 +1,5 @@
 import type { Api } from "../../tl";
-import timers from "node:timers";
+import { timers } from "../../platform";
 
 export class RpcCallControl {
     private readonly controller = new AbortController();
