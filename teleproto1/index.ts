@@ -13,6 +13,16 @@ export type {
 } from "./client/methods/communities";
 export { Button } from "./tl/custom/button";
 export {
+    RichContent,
+    type RichContentOptions,
+    type RichContentLike,
+    type RichCaptionOptions,
+    type RichListItem,
+    type RichListOptions,
+    type RichTableCell,
+    type RichTableOptions,
+} from "./tl/custom/RichContent";
+export {
     InlineKeyboard,
     ReplyKeyboard,
     Keyboard,
@@ -29,6 +39,9 @@ export {
     WebProxyTransport,
 } from "./network/transport";
 export type {
+    TransportAddress,
+    TransportStream,
+    WebSocketLike,
     SocksTransportOptions,
     HttpProxyTransportOptions,
     MTProxyTransportOptions,

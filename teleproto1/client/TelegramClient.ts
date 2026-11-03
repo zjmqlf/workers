@@ -107,7 +107,7 @@ export class TelegramClient<
      * By using this method you are **agreeing to Telegram's Terms of Service** https://core.telegram.org/api/terms.<br/>
      * this method also calls {@link getMe} to tell telegram that we want to receive updates.<br/>
      * @param authParams - see UserAuthParams and BotAuthParams
-     * @return nothing
+     * @returns nothing
      * @example
      * ```ts
      * // this example assumes you've installed and imported the input package. npm i input.
@@ -148,7 +148,7 @@ export class TelegramClient<
      *     console.log("I am connected to telegram servers but not logged in with any account/bot");
      * }
      * ```
-     * @return boolean (true of authorized else false)
+     * @returns boolean (true of authorized else false)
      * @category Authorization
      */
     checkAuthorization() {
@@ -278,7 +278,7 @@ export class TelegramClient<
      * @param phoneNumber - the phone number to send the code to
      * @param forceSMS - whether to send it as an SMS or a normal in app message
      * @param reCaptchaCallback - callback to handle reCAPTCHA verification
-     * @return the phone code hash and whether it was sent via app
+     * @returns the phone code hash and whether it was sent via app
      * @category Authorization
      */
     sendCode(
@@ -412,7 +412,7 @@ export class TelegramClient<
      * ```
      * @param apiCredentials - credentials to be used.
      * @param authParams - user auth params.
-     * @return instance User of the logged in bot.
+     * @returns instance User of the logged in bot.
      * @category Authorization
      */
     signInBot(
@@ -457,41 +457,10 @@ export class TelegramClient<
     }
 
     /**
-     * Changes the 2FA settings of the logged in user.
-     Note that this method may be *incredibly* slow depending on the
-     prime numbers that must be used during the process to make sure
-     that everything is safe.
-
-     Has no effect if both current and new password are omitted.
-
-     * @param client: The telegram client instance
-     * @param isCheckPassword: Must be ``true`` if you want to check the current password
-     * @param currentPassword: The current password, to authorize changing to ``new_password``.
-     Must be set if changing existing 2FA settings.
-     Must **not** be set if 2FA is currently disabled.
-     Passing this by itself will remove 2FA (if correct).
-     * @param newPassword: The password to set as 2FA.
-     If 2FA was already enabled, ``currentPassword`` **must** be set.
-     Leaving this blank or `undefined` will remove the password.
-     * @param hint: Hint to be displayed by Telegram when it asks for 2FA.
-     Must be set when changing or creating a new password.
-     Has no effect if ``newPassword`` is not set.
-     * @param email: Recovery and verification email. If present, you must also
-     set `emailCodeCallback`, else it raises an Error.
-     * @param emailCodeCallback: If an email is provided, a callback that returns the code sent
-     to it must also be set. This callback may be asynchronous.
-     It should return a string with the code. The length of the
-     code will be passed to the callback as an input parameter.
-     * @param onEmailCodeError: Called when an error happens while sending an email.
-
-     If the callback returns an invalid code, it will raise an rpc error with the message
-     ``CODE_INVALID``
-
-     * @returns Promise<void>
-     * @throws this method can throw:
-     "PASSWORD_HASH_INVALID" if you entered a wrong password (or set it to undefined).
-     "EMAIL_INVALID" if the entered email is wrong
-     "EMAIL_HASH_EXPIRED" if the user took too long to verify their email
+     * Changes the 2FA settings of the logged in user. May be slow: SRP math over large primes.
+     * Throws if both `currentPassword` and `newPassword` are missing.
+     * @param params - see {@link twoFA.TwoFaParams | TwoFaParams}
+     * @throws `PASSWORD_HASH_INVALID` on a wrong password, `EMAIL_INVALID` on a bad email, `EMAIL_HASH_EXPIRED` if the email was not confirmed in time.
      * @category Authorization
      */
     async updateTwoFaSettings({
@@ -528,7 +497,7 @@ export class TelegramClient<
      * Otherwise, the “empty peer” will be used, which some bots may not handle correctly.
      * @param offset - String offset of the results to be returned. can be empty
      * @param geoPoint - The geo point location information to send to the bot for localised results. Available under some bots.
-     * @return a list of InlineResults
+     * @returns a list of InlineResults
      * @example
      * ```ts
      * // Makes the query to @pic
@@ -600,8 +569,8 @@ export class TelegramClient<
      * Low-level method to download files from their input location.
      * downloadMedia should generally be used over this.
      * @param inputLocation - The file location from which the file will be downloaded. See getInputLocation source for a complete list of supported types.
-     * @param fileParams - {@link DownloadFileParams}
-     * @return a Buffer downloaded from the inputFile.
+     * @param fileParams - {@link downloadMethods.DownloadFileParams | DownloadFileParams}
+     * @returns a Buffer downloaded from the inputFile.
      * @example
      * ```ts
      * const photo = message.photo;
@@ -633,8 +602,8 @@ export class TelegramClient<
      * Downloads the profile photo from the given user,chat or channel.<br/>
      * This method will return an empty buffer in case of no profile photo.
      * @param entity - where to download the photo from.
-     * @param downloadProfilePhotoParams - {@link DownloadProfilePhotoParams}
-     * @return buffer containing the profile photo. can be empty in case of no profile photo.
+     * @param downloadProfilePhotoParams - {@link downloadMethods.DownloadProfilePhotoParams | DownloadProfilePhotoParams}
+     * @returns buffer containing the profile photo. can be empty in case of no profile photo.
      * @example
      * ```ts
      * // Download your own profile photo
@@ -670,9 +639,10 @@ export class TelegramClient<
      * Downloads the given media from a message or a media object.<br/>
      * this will return an empty Buffer in case of wrong or empty media.
      * @param messageOrMedia - instance of a message or a media.
-     * @param downloadParams {@link DownloadMediaInterface}
-     * @return a buffer containing the downloaded data if outputFile is undefined else nothing.
-     * @example ```ts
+     * @param downloadParams - {@link DownloadMediaInterface}
+     * @returns a buffer containing the downloaded data if outputFile is undefined else nothing.
+     * @example
+     * ```ts
      * const buffer = await client.downloadMedia(message, {})
      * // to save it to a file later on using fs.
      * import { promises as fs } from 'fs';
@@ -708,7 +678,7 @@ export class TelegramClient<
 
     //region message parse
     /**
-     * This property is the default parse mode used when sending messages. Defaults to {@link MarkdownParser}.<br/>
+     * This property is the default parse mode used when sending messages. Defaults to Markdown.<br/>
      * It will always be either undefined or an object with parse and unparse methods.<br/>
      * When setting a different value it should be one of:<br/>
      *<br/>
@@ -793,8 +763,8 @@ export class TelegramClient<
      * It may be undefined to perform a global search, or to get messages by their ID from no particular chat<br/>
      * **Note** that some of the offsets will not work if this is the case.<br/>
      * **Note** that if you want to perform a global search, you must set a non-empty search string, a filter. or fromUser.
-     * @param iterParams - {@link IterMessagesParams}
-     * @yield Instances of custom {@link Message}
+     * @param iterParams - {@link messageMethods.IterMessagesParams | IterMessagesParams}
+     * @yield Instances of custom {@link Api.Message | Message}
      * @example
      * ```ts
      * // From most-recent to oldest
@@ -841,8 +811,8 @@ export class TelegramClient<
      * Same as iterMessages() but returns a TotalList instead.<br/>
      * if the `limit` is not set, it will be 1 by default unless both `minId` **and** `maxId` are set. in which case the entire  range will be returned.<br/>
      * @param entity - The entity from whom to retrieve the message history. see {@link TelegramClient.iterMessages}.<br/>
-     * @param getMessagesParams - see {@link IterMessagesParams}.
-     * @return {@link TotalList} of messages.
+     * @param getMessagesParams - see {@link messageMethods.IterMessagesParams | IterMessagesParams}.
+     * @returns {@link helpers.TotalList | TotalList} of messages.
      * @example
      * ```ts
      * // The totalList has a .total attribute which will show the complete number of messages even if none are fetched.
@@ -875,15 +845,15 @@ export class TelegramClient<
     /**
      * Sends a message to the specified user, chat or channel.<br/>
      * The default parse mode is the same as the official applications (a custom flavour of markdown). **bold**, `code` or __italic__ are available.<br/>
-     * In addition you can send [links](https://example.com) and [mentions](@username) (or using IDs like in the Bot API: [mention](tg://user?id=123456789)) and pre blocks with three backticks.<br/>
+     * In addition you can send links as `[links](https://example.com)` and mentions as `[mentions](@username)` (or using IDs like in the Bot API: `[mention](tg://user?id=123456789)`) and pre blocks with three backticks.<br/>
      * <br/>
      * Sending a /start command with a parameter (like ?start=data) is also done through this method. Simply send '/start data' to the bot.<br/>
      * <br/>
      * See also Message.respond() and Message.reply().
      *
      * @param entity - Who to sent the message to.
-     * @param sendMessageParams - see {@link SendMessageParams}
-     * @return
+     * @param sendMessageParams - see {@link messageMethods.SendMessageParams | SendMessageParams}
+     * @returns
      * The sent custom Message.
      * @example
      * ```ts
@@ -928,10 +898,10 @@ export class TelegramClient<
      * (the "forwarded from" text), you should use `sendMessage` with
      * the original message instead. This will send a copy of it.
      *<br/>
-     * See also {@link Message.forwardTo}`.
+     * See also {@link Api.Message.forwardTo | Message.forwardTo}.
      * @param entity - To which entity the message(s) will be forwarded.
-     * @param forwardMessagesParams - see {@link ForwardMessagesParams}
-     * @return The list of forwarded Message, Note.<br/>
+     * @param forwardMessagesParams - see {@link messageMethods.ForwardMessagesParams | ForwardMessagesParams}
+     * @returns The list of forwarded Message, Note.<br/>
      * if some messages failed to be forwarded the returned list will have them as undefined.
      * @example ```ts
      * // a single one
@@ -971,8 +941,8 @@ export class TelegramClient<
      *  @param entity - From which chat to edit the message.<br/>
      *  This can also be the message to be edited, and the entity will be inferred from it, so the next parameter will be assumed to be the message text.<br/>
      *  You may also pass a InputBotInlineMessageID, which is the only way to edit messages that were sent after the user selects an inline query result. Not supported yet!
-     *  @param editMessageParams - see {@link EditMessageParams}.
-     *  @return The edited Message.
+     *  @param editMessageParams - see {@link messageMethods.EditMessageParams | EditMessageParams}.
+     *  @returns The edited Message.
      *  @throws
      *  `MESSAGE_AUTHOR_REQUIRED` if you're not the author of the message but tried editing it anyway.
      *  `MESSAGE_NOT_MODIFIED` if the contents of the message were not modified at all.
@@ -998,7 +968,7 @@ export class TelegramClient<
     /**
      * Deletes the given messages, optionally "for everyone".
      *
-     * See also {@link Message.delete}`.
+     * See also {@link Api.Message.delete | Message.delete}.
      *
      * @remarks This method does **not** validate that the message IDs belong to the chat that you passed! It's possible for the method to delete messages from different private chats and small group chats at once, so make sure to pass the right IDs.
      * @param entity - From who the message will be deleted. This can actually be `undefined` for normal chats, but **must** be present for channels and megagroups.
@@ -1008,8 +978,8 @@ export class TelegramClient<
      * and it will delete the message for everyone.
      * Disabling this has no effect on channels or megagroups,
      * since it will unconditionally delete the message for everyone.
-     * @return
-     * A list of {@link AffectedMessages}, each item being the result for the delete calls of the messages in chunks of 100 each.
+     * @returns
+     * A list of {@link Api.messages.AffectedMessages | AffectedMessages}, each item being the result for the delete calls of the messages in chunks of 100 each.
      * @example
      *  ```ts
      *  await client.deleteMessages(chat, messages);
@@ -1031,14 +1001,14 @@ export class TelegramClient<
     /**
      * Pins a message in a chat.
      *
-     * See also {@link Message.pin}`.
+     * See also {@link Api.Message.pin | Message.pin}.
      *
      * @remarks The default behavior is to **not** notify members, unlike the official applications.
      * @param entity - The chat where the message should be pinned.
      * @param message - The message or the message ID to pin. If it's `undefined`, all messages will be unpinned instead.
-     * @param pinMessageParams - see {@link UpdatePinMessageParams}.
-     * @return
-     * The pinned message. if message is undefined the return will be {@link AffectedHistory}
+     * @param pinMessageParams - see {@link messageMethods.UpdatePinMessageParams | UpdatePinMessageParams}.
+     * @returns
+     * The pinned message. if message is undefined the return will be {@link Api.messages.AffectedHistory | AffectedHistory}
      * @example
      *  ```ts
      *  const message = await client.sendMessage(chat, 'teleproto is awesome!');
@@ -1073,14 +1043,14 @@ export class TelegramClient<
     /**
      * Unpins a message in a chat.
      *
-     * See also {@link Message.unpin}`.
+     * See also {@link Api.Message.unpin | Message.unpin}.
      *
      * @remarks The default behavior is to **not** notify members, unlike the official applications.
      * @param entity - The chat where the message should be unpinned.
      * @param message - The message or the message ID to unpin. If it's `undefined`, all messages will be unpinned instead.
-     * @param pinMessageParams - see {@link UpdatePinMessageParams}.
-     * @return
-     * The pinned message. if message is undefined the return will be {@link AffectedHistory}
+     * @param pinMessageParams - see {@link messageMethods.UpdatePinMessageParams | UpdatePinMessageParams}.
+     * @returns
+     * The pinned message. if message is undefined the return will be {@link Api.messages.AffectedHistory | AffectedHistory}
      * @example
      *  ```ts
      *  const message = await client.sendMessage(chat, 'teleproto is awesome!');
@@ -1122,13 +1092,13 @@ export class TelegramClient<
      * If a message or maximum ID is provided, all the messages up to and
      * including such ID will be marked as read (for all messages whose ID ≤ max_id).
      *
-     * See also {@link Message.markRead}`.
+     * See also {@link Api.Message.markAsRead | Message.markAsRead}.
      *
      * @remarks If neither message nor maximum ID are provided, all messages will be marked as read by assuming that `max_id = 0`.
      * @param entity - The chat where the message should be pinned.
      * @param message - The message or the message ID to pin. If it's `undefined`, all messages will be unpinned instead.
-     * @param markAsReadParams - see {@link MarkAsReadParams}.
-     * @return boolean
+     * @param markAsReadParams - see {@link messageMethods.MarkAsReadParams | MarkAsReadParams}.
+     * @returns boolean
      * @example
      *  ```ts
      *  // using a Message object
@@ -1217,7 +1187,7 @@ export class TelegramClient<
      * Sends a poll or quiz to the given chat.
      *
      * @param entity - The chat where the poll should be sent.
-     * @param poll - The poll definition, see {@link SendPollParams}.
+     * @param poll - The poll definition, see {@link messageMethods.SendPollParams | SendPollParams}.
      * @param params - Common send options (silent, schedule, replyTo, etc).
      * @example
      * ```ts
@@ -1317,7 +1287,7 @@ export class TelegramClient<
      * Same as {@link forwardMessages} with `dropAuthor` always set.
      *
      * @param entity - The chat the messages should be copied to.
-     * @param copyMessagesParams - see {@link ForwardMessagesParams}.
+     * @param copyMessagesParams - see {@link messageMethods.ForwardMessagesParams | ForwardMessagesParams}.
      * @category Messages
      */
     copyMessages(
@@ -1334,7 +1304,7 @@ export class TelegramClient<
      * Saves a message draft in the given chat.
      *
      * @param entity - The chat where the draft should be saved.
-     * @param params - see {@link SaveDraftParams}. Empty params clear the draft.
+     * @param params - see {@link messageMethods.SaveDraftParams | SaveDraftParams}. Empty params clear the draft.
      * @example
      * ```ts
      * await client.saveDraft(chat, { message: "answer this tomorrow", replyTo: 123 });
@@ -1410,8 +1380,8 @@ export class TelegramClient<
     /**
      * Iterator over the dialogs (open conversations/subscribed channels) sequentially.<br/>
      * The order is the same as the one seen in official applications. (dialogs that had recent messages come first)
-     * @param iterDialogsParams - see {@link IterDialogsParams}
-     * @yield instances of custom {@link Dialog}.
+     * @param iterDialogsParams - see {@link dialogMethods.IterDialogsParams | IterDialogsParams}
+     * @yield instances of custom `Dialog`.
      * @example
      * ```ts
      * // logs all dialog IDs and their title.
@@ -1427,7 +1397,7 @@ export class TelegramClient<
 
     /**
      * Same as iterDialogs but returns a TotalList instead of an iterator.
-     * @param params - {@link IterDialogsParams}
+     * @param params - {@link dialogMethods.IterDialogsParams | IterDialogsParams}
      * @example
      * ```ts
      * // Get all open conversation, print the title of the first
@@ -1460,7 +1430,7 @@ export class TelegramClient<
      * Channels can return a maximum of 200 users while supergroups can return up to 10 000.<br/>
      * You must be an admin to retrieve users from a channel.<br/>
      * @param entity - The entity from which to retrieve the participants list.
-     * @param params - {@link IterParticipantsParams}
+     * @param params - {@link chatMethods.IterParticipantsParams | IterParticipantsParams}
      * @remarks
      * The filter ChannelParticipantsBanned will return restricted users. If you want banned users you should use ChannelParticipantsKicked instead.
      * @yield The User objects returned by GetParticipants with an additional .participant attribute<br/>
@@ -1497,8 +1467,8 @@ export class TelegramClient<
      * Exact same as iterParticipants but returns a TotalList instead.<br/>
      * This can be used if you want to retrieve a list instead of iterating over the users.
      * @param entity - entity to get users from.
-     * @param params - {@link IterParticipantsParams}.
-     * @return
+     * @param params - {@link chatMethods.IterParticipantsParams | IterParticipantsParams}.
+     * @returns A {@link helpers.TotalList | TotalList} of participants.
      * @category Chats
      */
     getParticipants(
@@ -1512,7 +1482,7 @@ export class TelegramClient<
      *
      * Kicking yourself (`'me'`) will result in leaving the chat.
      *
-     * @note
+     * @remarks
      * Attempting to kick someone who was banned will remove their
      * restrictions (and thus unbanning them), since kicking is just
      * ban + unban.
@@ -1555,7 +1525,7 @@ export class TelegramClient<
      *
      * @param entity - The channel/supergroup.
      * @param participant - The participant to ban or restrict.
-     * @param params - The restrictions to apply, see {@link EditBannedParams}. A raw {@link Api.ChatBannedRights} is also accepted.
+     * @param params - The restrictions to apply, see {@link chatMethods.EditBannedParams | EditBannedParams}. A raw {@link Api.ChatBannedRights} is also accepted.
      * @example
      * ```ts
      * await client.editBanned(chat, user);                       // full ban
@@ -1579,7 +1549,7 @@ export class TelegramClient<
      *
      * @param entity - The chat where the rights should apply.
      * @param participant - The user to promote/demote.
-     * @param params - The rights to grant, see {@link EditAdminParams}. A raw {@link Api.ChatAdminRights} is also accepted.
+     * @param params - The rights to grant, see {@link chatMethods.EditAdminParams | EditAdminParams}. A raw {@link Api.ChatAdminRights} is also accepted.
      * @example
      * ```ts
      * await client.editAdmin(chat, user, { deleteMessages: true, banUsers: true, rank: "mod" });
@@ -1600,7 +1570,7 @@ export class TelegramClient<
      * (`messages.editChatDefaultBannedRights`).
      *
      * @param entity - The chat.
-     * @param params - The restrictions applying to every member, see {@link EditBannedParams}.
+     * @param params - The restrictions applying to every member, see {@link chatMethods.EditBannedParams | EditBannedParams}.
      * @category Chats
      */
     editChatDefaultBannedRights(
@@ -1660,7 +1630,7 @@ export class TelegramClient<
      * Creates a new broadcast channel or supergroup
      * (`channels.createChannel`).
      *
-     * @param params - see {@link CreateChannelParams}.
+     * @param params - see {@link chatMethods.CreateChannelParams | CreateChannelParams}.
      * @returns The created {@link Api.Channel}.
      * @example
      * ```ts
@@ -1676,7 +1646,7 @@ export class TelegramClient<
     /**
      * Creates a new small group chat (`messages.createChat`).
      *
-     * @param params - see {@link CreateChatParams}.
+     * @param params - see {@link chatMethods.CreateChatParams | CreateChatParams}.
      * @returns The created chat and the users that could not be invited.
      * @category Chats
      */
@@ -1720,7 +1690,7 @@ export class TelegramClient<
      * (`messages.deleteHistory` / `channels.deleteHistory`).
      *
      * @param entity - The chat whose history should be deleted.
-     * @param params - see {@link DeleteHistoryParams}.
+     * @param params - see {@link chatMethods.DeleteHistoryParams | DeleteHistoryParams}.
      * @category Chats
      */
     deleteHistory(
@@ -1752,7 +1722,7 @@ export class TelegramClient<
      * Requires admin rights.
      *
      * @param entity - The channel/supergroup.
-     * @param params - see {@link AdminLogParams}. Set filter fields to only receive those event types.
+     * @param params - see {@link chatMethods.AdminLogParams | AdminLogParams}. Set filter fields to only receive those event types.
      * @yield instances of {@link Api.ChannelAdminLogEvent}.
      * @example
      * ```ts
@@ -1771,7 +1741,7 @@ export class TelegramClient<
      * Same as {@link TelegramClient.iterAdminLog}, but returns a collected array.
      *
      * @param entity - The channel/supergroup.
-     * @param params - see {@link AdminLogParams}.
+     * @param params - see {@link chatMethods.AdminLogParams | AdminLogParams}.
      * @category Chats
      */
     getAdminLog(entity: EntityLike, params?: chatMethods.AdminLogParams) {
@@ -1807,7 +1777,7 @@ export class TelegramClient<
      * (`messages.getCommonChats`).
      *
      * @param entity - The user.
-     * @param params - see {@link GetCommonChatsParams}.
+     * @param params - see {@link userMethods.GetCommonChatsParams | GetCommonChatsParams}.
      * @category Chats
      */
     getCommonChats(
@@ -1824,7 +1794,7 @@ export class TelegramClient<
      * Creates a new invite link for a chat (`messages.exportChatInvite`).
      *
      * @param entity - The chat.
-     * @param params - see {@link ExportChatInviteParams}.
+     * @param params - see {@link inviteLinkMethods.ExportChatInviteParams | ExportChatInviteParams}.
      * @example
      * ```ts
      * const invite = await client.exportChatInvite(chat, { usageLimit: 10, requestNeeded: true });
@@ -1844,7 +1814,7 @@ export class TelegramClient<
      *
      * @param entity - The chat the link belongs to.
      * @param link - The invite link to edit.
-     * @param params - see {@link EditExportedChatInviteParams}. Pass `{ revoked: true }` to revoke.
+     * @param params - see {@link inviteLinkMethods.EditExportedChatInviteParams | EditExportedChatInviteParams}. Pass `{ revoked: true }` to revoke.
      * @category Invite Links
      */
     editExportedChatInvite(
@@ -1916,7 +1886,7 @@ export class TelegramClient<
      * (`messages.getExportedChatInvites`).
      *
      * @param entity - The chat.
-     * @param params - see {@link ExportedChatInvitesParams}.
+     * @param params - see {@link inviteLinkMethods.ExportedChatInvitesParams | ExportedChatInvitesParams}.
      * @yield instances of {@link Api.TypeExportedChatInvite}.
      * @category Invite Links
      */
@@ -1932,7 +1902,7 @@ export class TelegramClient<
      * but returns a collected array.
      *
      * @param entity - The chat.
-     * @param params - see {@link ExportedChatInvitesParams}.
+     * @param params - see {@link inviteLinkMethods.ExportedChatInvitesParams | ExportedChatInvitesParams}.
      * @category Invite Links
      */
     getExportedChatInvites(
@@ -1948,7 +1918,7 @@ export class TelegramClient<
      * (`messages.getChatInviteImporters`).
      *
      * @param entity - The chat.
-     * @param params - see {@link ChatInviteImportersParams}.
+     * @param params - see {@link inviteLinkMethods.ChatInviteImportersParams | ChatInviteImportersParams}.
      * @yield instances of {@link Api.ChatInviteImporter}.
      * @example
      * ```ts
@@ -1971,7 +1941,7 @@ export class TelegramClient<
      * but returns a collected array.
      *
      * @param entity - The chat.
-     * @param params - see {@link ChatInviteImportersParams}.
+     * @param params - see {@link inviteLinkMethods.ChatInviteImportersParams | ChatInviteImportersParams}.
      * @category Invite Links
      */
     getChatInviteImporters(
@@ -2037,7 +2007,7 @@ export class TelegramClient<
      * Updates your profile name and/or bio (`account.updateProfile`).
      * Only the fields you set are changed.
      *
-     * @param params - see {@link UpdateProfileParams}.
+     * @param params - see {@link accountMethods.UpdateProfileParams | UpdateProfileParams}.
      * @example
      * ```ts
      * await client.updateProfile({ about: "using teleproto" });
@@ -2072,7 +2042,7 @@ export class TelegramClient<
      * Uploads and sets a new profile photo or video
      * (`photos.uploadProfilePhoto`).
      *
-     * @param params - see {@link UploadProfilePhotoParams}.
+     * @param params - see {@link accountMethods.UploadProfilePhotoParams | UploadProfilePhotoParams}.
      * @example
      * ```ts
      * await client.uploadProfilePhoto({ file: "me.jpg" });
@@ -2113,7 +2083,7 @@ export class TelegramClient<
      * Gets the profile photos of a user (`photos.getUserPhotos`).
      *
      * @param entity - The user.
-     * @param params - see {@link GetUserPhotosParams}.
+     * @param params - see {@link accountMethods.GetUserPhotosParams | GetUserPhotosParams}.
      * @category Account
      */
     getUserPhotos(
@@ -2137,7 +2107,7 @@ export class TelegramClient<
      * Adds a user to your contact list (`contacts.addContact`).
      *
      * @param entity - The user to add.
-     * @param params - see {@link AddContactParams}.
+     * @param params - see {@link contactMethods.AddContactParams | AddContactParams}.
      * @category Account
      */
     addContact(entity: EntityLike, params: contactMethods.AddContactParams) {
@@ -2157,7 +2127,7 @@ export class TelegramClient<
     /**
      * Imports phone-book contacts (`contacts.importContacts`).
      *
-     * @param contacts - The entries to import, see {@link ImportContactEntry}.
+     * @param contacts - The entries to import, see {@link contactMethods.ImportContactEntry | ImportContactEntry}.
      * @returns Which entries were imported and which users were already on Telegram.
      * @category Account
      */
@@ -2190,7 +2160,7 @@ export class TelegramClient<
     /**
      * Gets your blocklist (`contacts.getBlocked`).
      *
-     * @param params - see {@link GetBlockedParams}.
+     * @param params - see {@link contactMethods.GetBlockedParams | GetBlockedParams}.
      * @category Account
      */
     getBlocked(params?: contactMethods.GetBlockedParams) {
@@ -2380,7 +2350,7 @@ export class TelegramClient<
      * Creates a topic in a forum (`messages.createForumTopic`).
      *
      * @param entity - The forum.
-     * @param params - see {@link CreateForumTopicParams}.
+     * @param params - see {@link forumMethods.CreateForumTopicParams | CreateForumTopicParams}.
      * @category Forums
      */
     createForumTopic(
@@ -2396,7 +2366,7 @@ export class TelegramClient<
      *
      * @param entity - The forum.
      * @param topicId - The topic ID (its top message ID).
-     * @param params - see {@link EditForumTopicParams}.
+     * @param params - see {@link forumMethods.EditForumTopicParams | EditForumTopicParams}.
      * @example
      * ```ts
      * await client.editForumTopic(forum, 123, { closed: true });
@@ -2444,7 +2414,7 @@ export class TelegramClient<
      * (`messages.getForumTopics`).
      *
      * @param entity - The forum.
-     * @param params - see {@link GetForumTopicsParams}.
+     * @param params - see {@link forumMethods.GetForumTopicsParams | GetForumTopicsParams}.
      * @category Forums
      */
     getForumTopics(
@@ -2476,7 +2446,7 @@ export class TelegramClient<
      * Posts a story (`stories.sendStory`).
      *
      * @param entity - Where to post: `"me"` or a channel you manage.
-     * @param params - see {@link SendStoryParams}.
+     * @param params - see {@link storyMethods.SendStoryParams | SendStoryParams}.
      * @example
      * ```ts
      * await client.sendStory("me", { media: "photo.jpg", caption: "hello" });
@@ -2686,8 +2656,8 @@ export class TelegramClient<
     /**
      * Bots only: sets the bot's command list (`bots.setBotCommands`).
      *
-     * @param commands - see {@link BotCommandEntry}.
-     * @param params - Scope and language, see {@link BotCommandScopeParams}.
+     * @param commands - see {@link botMethods.BotCommandEntry | BotCommandEntry}.
+     * @param params - Scope and language, see {@link botMethods.BotCommandScopeParams | BotCommandScopeParams}.
      * @example
      * ```ts
      * await client.setBotCommands([{ command: "start", description: "Start the bot" }]);
@@ -2829,7 +2799,7 @@ export class TelegramClient<
     /**
      * Translates messages or raw text (`messages.translateText`).
      *
-     * @param params - see {@link TranslateTextParams}.
+     * @param params - see {@link messageMethods.TranslateTextParams | TranslateTextParams}.
      * @example
      * ```ts
      * const t = await client.translateText({ entity: chat, ids: 123, toLang: "en" });
@@ -2873,7 +2843,7 @@ export class TelegramClient<
      * without buffering the whole file in memory (`upload.getFile`).
      *
      * @param file - A message with media, the media itself, or a raw {@link Api.TypeInputFileLocation}.
-     * @param params - see {@link IterDownloadParams}.
+     * @param params - see {@link downloadMethods.IterDownloadParams | IterDownloadParams}.
      * @example
      * ```ts
      * for await (const chunk of client.iterDownload(message)) {
@@ -2926,7 +2896,7 @@ export class TelegramClient<
      * **Note** the event type passed in the callback will change depending on the eventBuilder.
      * @param event -The event builder class or instance to be used,
      * for example ``new events.NewMessage({});``.
-     * If left unspecified, {@link Raw} (the {@link Api.TypeUpdate} objects with no further processing) will be passed instead.<br>
+     * If left unspecified, {@link events.Raw | Raw} (the {@link Api.TypeUpdate} objects with no further processing) will be passed instead.<br>
      *
      * @example
      *```ts
@@ -2983,7 +2953,7 @@ export class TelegramClient<
 
     /**
      * Lists all registered event handlers.
-     * @return pair of [eventBuilder,CallableFunction]
+     * @returns pair of [eventBuilder,CallableFunction]
      * @category Updates
      */
     listEventHandlers() {
@@ -3012,8 +2982,8 @@ export class TelegramClient<
      * Uploading a file will simply return a "handle" to the file stored remotely in the Telegram servers,
      * which can be later used on. This will not upload the file to your own chat or any chat at all.
      * This also can be used to update profile pictures
-     * @param fileParams see {@link UploadFileParams}
-     * @return {@link Api.InputFileBig} if the file size is larger than 10mb otherwise {@link Api.InputFile}
+     * @param fileParams see {@link uploadMethods.UploadFileParams | UploadFileParams}
+     * @returns {@link Api.InputFileBig} if the file size is larger than 10mb otherwise {@link Api.InputFile}
      * @example
      * ```ts
      * import { CustomFile } from "teleproto/client/uploads";
@@ -3036,7 +3006,7 @@ export class TelegramClient<
      * Sends message with the given file to the specified entity.
      * This uses {@link TelegramClient.uploadFile} internally so if you want more control over uploads you can use that.
      * @param entity - who will receive the file.
-     * @param sendFileParams - see {@link SendFileInterface}
+     * @param sendFileParams - see {@link uploadMethods.SendFileInterface | SendFileInterface}
      * @example
      * ```
      * // Normal files like photos
@@ -3089,7 +3059,7 @@ export class TelegramClient<
      * @param request - The request to send. this should be of type request.
      * @param dcId - Optional dc id to use when sending.
      * @param options - Per-call cancellation, timeout, retry and flood-wait policy.
-     * @return The response from Telegram.
+     * @returns The response from Telegram.
      * @example
      * ```ts
      * //
@@ -3149,7 +3119,7 @@ export class TelegramClient<
      * Gets the current logged in {@link Api.User}.
      * If the user has not logged in this will throw an error.
      * @param inputPeer - Whether to return the input peer version {@link Api.InputPeerUser} or the whole user {@link Api.User}.
-     * @return Your own {@link Api.User}
+     * @returns Your own {@link Api.User}
      * @example
      * ```ts
      * const me = await client.getMe();
@@ -3205,7 +3175,7 @@ export class TelegramClient<
      * which in turn needs the entity to be in cache, unless a InputPeer was passed.<br/>
      * <br/>
      * If the entity can't be found, ValueError will be raised.
-     * @return
+     * @returns
      * {@link Api.Chat},{@link Api.Chat} or {@link Api.Channel} corresponding to the input entity. A list will be returned if more than one was given.
      * @example
      * ```ts
@@ -3249,7 +3219,7 @@ export class TelegramClient<
      *  - If the given object can be turned into an input entity directly, said operation will be done.
      *<br/>
      *  -If the entity can't be found, this will throw an error.
-     * @return
+     * @returns
      * {@link Api.InputPeerUser} , {@link Api.InputPeerChat} , {@link Api.InputPeerChannel} or {@link Api.InputPeerSelf} if the parameter  is "me" or "self"
      * @example
      * ```ts
@@ -3274,7 +3244,7 @@ export class TelegramClient<
      * If addMark is false, then a positive ID will be returned instead. By default, bot-API style IDs (signed) are returned.
      * @param peer
      * @param addMark - whether to return a bot api style id.
-     * @return the ID of the entity.
+     * @returns the ID of the entity.
      * @example
      * ```ts
      * console.log(await client.getPeerId("me"));
@@ -3444,7 +3414,7 @@ export class TelegramClient<
 
     /** @hidden */
     static get events() {
-        return import("../events");
+        return events;
     }
 
     // endregion

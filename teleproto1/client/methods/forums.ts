@@ -5,7 +5,7 @@ import { generateRandomBigInt } from "../../Helpers";
 import { Api } from "../../tl";
 import { getInputChannel } from "../../Utils";
 
-/** Parameters for {@link createForumTopic}. */
+/** Parameters for {@link TelegramClient.createForumTopic}. */
 export interface CreateForumTopicParams {
     /** The topic title. */
     title: string;
@@ -107,7 +107,7 @@ export async function reorderPinnedForumTopics(
     );
 }
 
-/** Parameters for {@link getForumTopics}. */
+/** Parameters for {@link TelegramClient.getForumTopics}. */
 export interface GetForumTopicsParams {
     /** Search query for topic titles. */
     search?: string;

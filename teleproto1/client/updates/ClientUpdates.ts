@@ -59,6 +59,7 @@ type UpdateFields = {
     message?: { peerId?: Api.TypePeer };
     _entities?: Map<string, Api.TypeUser | Api.TypeChat>;
     state?: Record<string, unknown>;
+    missed?: boolean;
 };
 
 const fieldsOf = (update: unknown): UpdateFields => (update ?? {}) as UpdateFields;

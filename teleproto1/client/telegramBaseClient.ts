@@ -115,7 +115,7 @@ export interface DownloadPoolOptions {
 }
 
 export interface TelegramClientParams {
-    /** MTProto packet framing. Defaults to {@link ConnectionTCPObfuscated}. */
+    /** MTProto packet framing. Defaults to `ConnectionTCPObfuscated` from `teleproto/network/connection`. */
     connection?: typeof Connection;
     /**
      * Whether to connect to the servers through IPv6 or not. By default this is false.
@@ -178,9 +178,12 @@ export interface TelegramClientParams {
     autoReconnect?: boolean;
     /** Deliver updates one at a time, awaiting all handlers. Defaults to false. Slow handlers accumulate queued updates; destroy clears pending work. */
     sequentialUpdates?: boolean;
-    /** The threshold below which the library should automatically sleep on flood wait and slow mode wait errors (inclusive).<br/>
-     *  For instance, if a FloodWaitError for 17s occurs and floodSleepThreshold is 20s, the library will sleep automatically.<br/>
-     *  If the error was for 21s, it would raise FloodWaitError instead. defaults to 60 sec.*/
+    /**
+     * Fetch the updates missed while offline when the session has a saved update state.
+     * `false` starts from the current state instead, like the Bot API's `drop_pending_updates`. Defaults to true.
+     */
+    catchUp?: boolean;
+    /** Flood waits up to this many seconds (inclusive) are slept through and retried; longer ones throw `FloodWaitError`. Defaults to 60. */
     floodSleepThreshold?: number;
     /**
      * Device model to be sent when creating the initial connection. Defaults to os.type().toString().
@@ -264,6 +267,7 @@ const clientParamsDefault = {
     downloadRetries: 5,
     autoReconnect: true,
     sequentialUpdates: false,
+    catchUp: true,
     floodSleepThreshold: 60,
     deviceModel: "",
     systemVersion: "",
@@ -345,6 +349,8 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _channelPollConcurrency: number;
     /** @hidden */
     public readonly _sequentialUpdates: boolean;
+    /** @hidden */
+    public readonly _catchUp: boolean;
     public _lastRequest?: number;
     /**
      * Epoch ms of the last message decrypted on ANY session. Distinguishes a
@@ -432,6 +438,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._testServers = clientParams.testServers!;
         this._requestRetries = clientParams.requestRetries!;
         this._sequentialUpdates = !!clientParams.sequentialUpdates;
+        this._catchUp = clientParams.catchUp !== false;
         this._downloadRetries = clientParams.downloadRetries!;
         this._connectionRetries = clientParams.connectionRetries!;
         this._reconnectRetries = clientParams.reconnectRetries!;
