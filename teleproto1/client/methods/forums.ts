@@ -41,7 +41,7 @@ export async function createForumTopic(
     );
 }
 
-/** Parameters for {@link editForumTopic}. Only the fields you set are changed. */
+/** Parameters for {@link TelegramClient.editForumTopic}. Only the fields you set are changed. */
 export interface EditForumTopicParams {
     /** New topic title. */
     title?: string;

@@ -1513,6 +1513,6 @@ export class TelegramClient<
     }
 
     static get events() {
-        return import("../events");
+        return events;
     }
 }

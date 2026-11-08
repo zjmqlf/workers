@@ -562,7 +562,7 @@ export class ChannelUpdates {
         this.client._log.warn(`Channel ${channelId} difference is too long, delivering ${recent.length} recent messages and skipping to pts ${next}`);
         const entities = collectEntities(diff.users, diff.chats);
         for (const message of recent) {
-            this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
+            this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities, missed: true });
         }
         tracker.pts.init(next, true);
     }

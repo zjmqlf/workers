@@ -30,4 +30,7 @@ export class UpdateContext extends EventCommon {
     }
 }
 
-export type WithUpdateContext<T> = T & { readonly context: UpdateContext };
+export type WithUpdateContext<T> = T & {
+    readonly context: UpdateContext;
+    readonly missed: boolean;
+};

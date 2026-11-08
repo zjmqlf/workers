@@ -652,6 +652,9 @@ export class ClientUpdates {
 
     private attachContext(event: object, update: AnyUpdate = event as AnyUpdate): void {
         if ("context" in event) return;
+        if (!("missed" in event)) {
+            Object.defineProperty(event, "missed", { value: fieldsOf(update).missed === true, enumerable: false, configurable: true });
+        }
         let context: UpdateContext | undefined;
         Object.defineProperty(event, "context", {
             get: () => context ??= new UpdateContext(
@@ -785,6 +788,6 @@ async function runChain(
 
 function watchController(): AbortController {
     const controller = new AbortController();
-    setMaxListeners(0, controller.signal);
+    events.setMaxListeners(0, controller.signal);
     return controller;
 }

@@ -29,6 +29,7 @@ import {
     SendFileInterface,
 } from "./uploads";
 import { Buffer } from "../../platform";
+import { RichContent } from "../../tl/custom/RichContent";
 
 const _MAX_CHUNK_SIZE = 100;
 
@@ -476,7 +477,7 @@ export interface SendMessageParams {
     scheduleRepeatPeriod?: number;
     quickReplyShortcut?: string | number | Api.TypeInputQuickReplyShortcut;
     suggestedPost?: Api.TypeSuggestedPost;
-    richMessage?: Api.TypeInputRichMessage;
+    richMessage?: Api.TypeInputRichMessage | RichContent;
 }
 
 export interface ForwardMessagesParams {
@@ -514,7 +515,7 @@ export interface EditMessageParams {
     invertMedia?: boolean;
     scheduleRepeatPeriod?: number;
     quickReplyShortcutId?: number;
-    richMessage?: Api.TypeInputRichMessage;
+    richMessage?: Api.TypeInputRichMessage | RichContent;
 }
 
 export interface UpdatePinMessageParams {
@@ -626,6 +627,10 @@ export async function getMessages(
         return [];
     }
     return (await it.collect()) as TotalList<Api.Message>;
+}
+
+function _toRichMessage(value: Api.TypeInputRichMessage | RichContent | undefined): Api.TypeInputRichMessage | undefined {
+    return value instanceof RichContent ? value.build() : value;
 }
 
 export async function sendMessage(
@@ -772,7 +777,7 @@ export async function sendMessage(
             allowPaidStars: allowPaidStars,
             quickReplyShortcut: _toQuickReplyShortcut(quickReplyShortcut),
             suggestedPost: suggestedPost,
-            richMessage: richMessage,
+            richMessage: _toRichMessage(richMessage),
             sendAs: sendAs
                 ? await client.getInputEntity(sendAs)
                 : undefined,
@@ -812,7 +817,7 @@ export async function sendMessage(
             allowPaidStars: allowPaidStars,
             quickReplyShortcut: _toQuickReplyShortcut(quickReplyShortcut),
             suggestedPost: suggestedPost,
-            richMessage: richMessage,
+            richMessage: _toRichMessage(richMessage),
             sendAs: sendAs
                 ? await client.getInputEntity(sendAs)
                 : undefined,
@@ -1022,7 +1027,7 @@ export async function editMessage(
         scheduleDate: schedule,
         scheduleRepeatPeriod: scheduleRepeatPeriod,
         quickReplyShortcutId: quickReplyShortcutId,
-        richMessage: richMessage,
+        richMessage: _toRichMessage(richMessage),
         invertMedia: invertMedia,
     });
     const result = await client.invoke(request);
@@ -1576,7 +1581,7 @@ export interface SaveDraftParams {
     media?: Api.TypeInputMedia;
     effect?: BigInteger;
     suggestedPost?: Api.TypeSuggestedPost;
-    richMessage?: Api.TypeInputRichMessage;
+    richMessage?: Api.TypeInputRichMessage | RichContent;
 }
 
 export async function saveDraft(
@@ -1619,7 +1624,7 @@ export async function saveDraft(
             media: params.media,
             effect: params.effect,
             suggestedPost: params.suggestedPost,
-            richMessage: params.richMessage,
+            richMessage: _toRichMessage(params.richMessage),
         })
     );
 }

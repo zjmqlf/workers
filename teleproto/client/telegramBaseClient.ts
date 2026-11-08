@@ -79,6 +79,7 @@ export interface TelegramClientParams {
     retryDelay?: number;
     autoReconnect?: boolean;
     sequentialUpdates?: boolean;
+    catchUp?: boolean;
     floodSleepThreshold?: number;
     deviceModel?: string;
     systemVersion?: string;
@@ -109,6 +110,7 @@ const clientParamsDefault = {
     downloadRetries: 5,
     autoReconnect: true,
     sequentialUpdates: false,
+    catchUp: true,
     floodSleepThreshold: 60,
     deviceModel: "",
     systemVersion: "",
@@ -157,6 +159,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     public _channelPollRequestInterval: number;
     public _channelPollConcurrency: number;
     public readonly _sequentialUpdates: boolean;
+    public readonly _catchUp: boolean;
     public _lastRequest?: number;
     public _lastReceivedAt = 0;
     public _parseMode?: ParseInterface;
@@ -213,6 +216,7 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
         this._useIPV6 = clientParams.useIPV6!;
         this._requestRetries = clientParams.requestRetries!;
         this._sequentialUpdates = !!clientParams.sequentialUpdates;
+        this._catchUp = clientParams.catchUp !== false;
         this._downloadRetries = clientParams.downloadRetries!;
         this._connectionRetries = clientParams.connectionRetries!;
         this._reconnectRetries = clientParams.reconnectRetries!;

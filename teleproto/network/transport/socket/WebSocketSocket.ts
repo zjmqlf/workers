@@ -2,14 +2,14 @@ import { ByteStream, SocketClosedError } from "./ByteStream";
 import type { SocketInterface } from "./types";
 import { Buffer } from "../../../platform";
 
-interface WebSocketLike {
+export interface WebSocketLike {
     binaryType: string;
     send(data: Uint8Array): void;
     close(code?: number): void;
-    onopen: ((ev?: unknown) => void) | null;
-    onmessage: ((ev: { data: ArrayBuffer | string }) => void) | null;
-    onclose: ((ev?: unknown) => void) | null;
-    onerror: ((ev?: unknown) => void) | null;
+    onopen: ((event: never) => void) | null;
+    onmessage: ((event: never) => void) | null;
+    onclose: ((event: never) => void) | null;
+    onerror: ((event: never) => void) | null;
 }
 
 type WebSocketCtor = new (url: string, protocols?: string | string[]) => WebSocketLike;
@@ -28,20 +28,24 @@ export class WebSocketSocket implements SocketInterface {
         return this.stream.lastDataAt;
     }
 
-    async connect(port: number, ip: string) {
+    protected create(url: string, protocols: string | string[]): WebSocketLike {
         const impl = (this.constructor as typeof WebSocketSocket).webSocketImpl ?? WebSocketSocket.webSocketImpl ?? (globalThis as { WebSocket?: WebSocketCtor }).WebSocket;
         if (!impl) {
             throw new Error(
                 "No WebSocket implementation found: run on Node.js 22+ or a browser, " +
-                    'or set WebSocketSocket.webSocketImpl (e.g. require("ws").WebSocket)'
+                    "or override WebSocketTransport.webSocket() to return one"
             );
         }
+        return new impl(url, protocols);
+    }
+
+    async connect(port: number, ip: string, testServers = false) {
+        const url = `${port === 443 ? "wss" : "ws"}://${ip}:${port}/apiws${testServers ? "_test" : ""}`;
+        const socket = this.create(url, "binary");
         const stream = (this.stream = new ByteStream());
-        const url = `${port === 443 ? "wss" : "ws"}://${ip}:${port}/apiws`;
-        const socket = new impl(url, "binary");
         socket.binaryType = "arraybuffer";
         this.socket = socket;
-        socket.onmessage = (ev) =>
+        socket.onmessage = (ev: { data: ArrayBuffer | string }) =>
             stream.push(typeof ev.data === "string" ? Buffer.from(ev.data) : Buffer.from(new Uint8Array(ev.data)));
         await new Promise<void>((resolve, reject) => {
             socket.onopen = () => resolve();

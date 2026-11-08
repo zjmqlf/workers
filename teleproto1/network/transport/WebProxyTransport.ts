@@ -4,6 +4,7 @@ import { ByteQueue } from "./socket/ByteStream";
 import { Buffer, crypto, events, net, timers } from "../../platform";
 import { mtproxyConnection, parseProxySecret } from "./MTProxyTransport";
 import { Transport, ownFraming, type ResolvedTransport } from "./Transport";
+import { timers } from "../../platform";
 
 const WINDOW = 4 * 1024 * 1024;
 const MAX_BATCH = 2 * 1024 * 1024;

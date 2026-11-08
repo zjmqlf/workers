@@ -58,6 +58,7 @@ interface ChannelTracker {
     nextPollAt?: number;
     joined?: boolean;
     lastMessageId?: number;
+    catchingUp?: boolean;
 }
 
 interface StartPts {
@@ -171,6 +172,7 @@ export class ChannelUpdates {
             if (update.pts && update.pts <= known) return;
             const tracker = this.tracker(channelId);
             if (!tracker.pts.inited()) tracker.pts.init(known);
+            tracker.catchingUp = true;
             void this.fetchDifference(channelId);
             return;
         }
@@ -178,7 +180,9 @@ export class ChannelUpdates {
             this.host.requestDifference();
             return;
         }
-        this.tracker(channelId).pts.init(1);
+        const tracker = this.tracker(channelId);
+        tracker.pts.init(1);
+        tracker.catchingUp = true;
         void this.fetchDifference(channelId);
     }
 
@@ -198,6 +202,7 @@ export class ChannelUpdates {
         };
         if (!tracker.initializing && (watching === 0 || !tracker.pts.inited())) {
             const task = (async () => {
+                if (tracker.pts.inited() || this.stored.has(channelId)) tracker.catchingUp = true;
                 if (!tracker.pts.inited()) {
                     const pts = await this.readPts(channelId, tracker, inputChannel);
                     if (!this.host.isCurrent(generation) || !this.watched.has(channelId) || this.trackers.get(channelId) !== tracker) return;
@@ -287,6 +292,7 @@ export class ChannelUpdates {
                     if (ms < 0) return;
                     created.gapTimer = timers.setTimeout(() => {
                         created.gapTimer = undefined;
+                        created.catchingUp = true;
                         void this.fetchDifference(channelId);
                     }, Math.min(ms, 1));
                 },
@@ -485,6 +491,7 @@ export class ChannelUpdates {
                 this.host.saveState();
                 if (diff.final) break;
             }
+            tracker.catchingUp = false;
             tracker.retryDelayS = 0;
         } catch (error) {
             if (!current() || error instanceof ChannelPollCancelledError) return;
@@ -537,10 +544,11 @@ export class ChannelUpdates {
         await this.host.saveEntities(diff);
         if (diff instanceof Api.updates.ChannelDifference) {
             const entities = collectEntities(diff.users, diff.chats);
+            const missed = tracker.catchingUp;
             for (const message of diff.newMessages.filter(isMessage).sort((a, b) => a.id - b.id)) {
-                this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
+                this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities, missed });
             }
-            for (const update of diff.otherUpdates) this.host.dispatch(update, { others: diff.otherUpdates, entities });
+            for (const update of diff.otherUpdates) this.host.dispatch(update, { others: diff.otherUpdates, entities, missed });
             tracker.pts.init(diff.pts > requestPts ? diff.pts : requestPts + 1, true);
             return;
         }
@@ -554,7 +562,7 @@ export class ChannelUpdates {
         this.client._log.warn(`Channel ${channelId} difference is too long, delivering ${recent.length} recent messages and skipping to pts ${next}`);
         const entities = collectEntities(diff.users, diff.chats);
         for (const message of recent) {
-            this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities });
+            this.deliver(tracker, new Api.UpdateNewChannelMessage({ message, pts: 0, ptsCount: 0 }), { others: null, entities, missed: true });
         }
         tracker.pts.init(next, true);
     }

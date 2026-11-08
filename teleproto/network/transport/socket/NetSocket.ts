@@ -1,11 +1,11 @@
 import { Buffer, net } from "../../../platform";
 import { ByteStream, SocketClosedError } from "./ByteStream";
-import type { SocketInterface } from "./types";
+import type { SocketInterface, TransportStream } from "./types";
 
 const DEFAULT_KEEP_ALIVE_INTERVAL = 30_000;
 
 export class NetSocket implements SocketInterface {
-    private socket?: net.Socket;
+    private socket?: TransportStream;
     private stream = new ByteStream();
     private readonly keepAliveInterval: number;
 
@@ -20,7 +20,7 @@ export class NetSocket implements SocketInterface {
 
     async connect(port: number, ip: string) {
         const stream = (this.stream = new ByteStream());
-        const socket = net.createSocket();
+        const socket: TransportStream = net.createSocket();
         this.socket = socket;
         socket.on("data", (chunk: Buffer) => stream.push(chunk));
         socket.on("close", () => stream.end());
@@ -33,8 +33,8 @@ export class NetSocket implements SocketInterface {
             const ready = () => {
                 socket.off("error", fail);
                 socket.on("error", (error) => stream.end(error));
-                socket.setNoDelay(true);
-                socket.setKeepAlive(this.keepAliveInterval > 0, Math.max(0, this.keepAliveInterval));
+                socket.setNoDelay?.(true);
+                socket.setKeepAlive?.(this.keepAliveInterval > 0, Math.max(0, this.keepAliveInterval));
                 resolve();
             };
             socket.connect(port, ip, ready);
@@ -61,7 +61,7 @@ export class NetSocket implements SocketInterface {
         if (!socket || socket.destroyed) return;
         const closed = new Promise<void>((resolve) => socket.once("close", () => resolve()));
         socket.destroy();
-        socket.unref();
+        socket.unref?.();
         await closed;
     }
 

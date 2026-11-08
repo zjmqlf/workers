@@ -22,6 +22,7 @@ import { RequestQueue } from "./RequestQueue";
 import { SessionLink, type LinkClose, type LinkHost, type OutgoingPacket } from "./SessionLink";
 import { ConnectThrottle } from "./ConnectThrottle";
 import { UpdateConnectionState } from "./UpdateConnectionState";
+import { timers } from "../../platform";
 
 const DEFAULT_CONNECT_TIMEOUT_S = 10;
 const SEND_BYTES_PER_SECOND = 8192;

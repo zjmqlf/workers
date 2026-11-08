@@ -1,13 +1,33 @@
 import type { Connection } from "../connection/Connection";
-import type { SocketFactory } from "./socket/types";
+import { ConnectionTCPObfuscated } from "../connection/Obfuscation";
+import { NetSocket } from "./socket/NetSocket";
+import type { SocketFactory, TransportStream } from "./socket/types";
+
+export type { TransportStream } from "./socket/types";
 
 export interface ResolvedTransport {
     connection: typeof Connection;
     socket: SocketFactory;
 }
 
+export interface TransportAddress {
+    host: string;
+    port: number;
+}
+
 export abstract class Transport {
-    abstract resolve(connection?: typeof Connection): ResolvedTransport;
+    connect?(address: TransportAddress): Promise<TransportStream>;
+
+    resolve(connection?: typeof Connection): ResolvedTransport {
+        if (!this.connect) throw new Error(`${this.constructor.name} must implement connect()`);
+        const connect = this.connect.bind(this);
+        class StreamSocket extends NetSocket {
+            protected async openTunnel(port: number, host: string) {
+                return { socket: await connect({ host, port }) };
+            }
+        }
+        return { connection: connection ?? ConnectionTCPObfuscated, socket: StreamSocket };
+    }
 }
 
 export function ownFraming(

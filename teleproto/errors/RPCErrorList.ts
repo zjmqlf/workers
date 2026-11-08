@@ -6197,6 +6197,159 @@ export class StickersetNotModifiedError extends BadRequestError {
     }
 }
 
+export class AuthTokenInvalid2Error extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "An invalid authorization token was provided" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "AUTH_TOKEN_INVALID2";
+    }
+}
+
+export class BasePortLocInvalidError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "Base port location invalid" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "BASE_PORT_LOC_INVALID";
+    }
+}
+
+export class BotCommandsTooMuchError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "The provided commands are too many" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "BOT_COMMANDS_TOO_MUCH";
+    }
+}
+
+export class BotMissingError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "This method can only be run by a bot" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "BOT_MISSING";
+    }
+}
+
+export class BotPollsDisabledError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "You cannot create polls under a bot account" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "BOT_POLLS_DISABLED";
+    }
+}
+
+export class BroadcastCallsDisabledError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "BROADCAST_CALLS_DISABLED" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "BROADCAST_CALLS_DISABLED";
+    }
+}
+
+export class ChannelBannedError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "The channel is banned" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "CHANNEL_BANNED";
+    }
+}
+
+export class ExpireForbiddenError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "EXPIRE_FORBIDDEN" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "EXPIRE_FORBIDDEN";
+    }
+}
+
+export class FieldNameEmptyError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "The field with the name FIELD_NAME is missing" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "FIELD_NAME_EMPTY";
+    }
+}
+
+export class FieldNameInvalidError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "The field with the name FIELD_NAME is invalid" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "FIELD_NAME_INVALID";
+    }
+}
+
+export class FilePart0MissingError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "File part 0 missing" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "FILE_PART_0_MISSING";
+    }
+}
+
+export class GroupCallInvalidError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "Group call invalid" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "GROUP_CALL_INVALID";
+    }
+}
+
+export class PollUnsupportedError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "This layer does not support polls in the issued method" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "POLL_UNSUPPORTED";
+    }
+}
+
+export class ReflectorNotAvailableError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "Invalid call reflector server" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "REFLECTOR_NOT_AVAILABLE";
+    }
+}
+
+export class ShortnameOccupyFailedError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "An error occurred when trying to register the short-name used for the sticker pack. Try a different name" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "SHORTNAME_OCCUPY_FAILED";
+    }
+}
+
+export class TypeConstructorInvalidError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "The type constructor is invalid" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "TYPE_CONSTRUCTOR_INVALID";
+    }
+}
+
+export class UnknownErrorError extends BadRequestError {
+    constructor(args: ErrorArgs) {
+        const message = "UNKNOWN_ERROR" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "UNKNOWN_ERROR";
+    }
+}
+
 export class AuthKeyUnregisteredError extends UnauthorizedError {
     constructor(args: ErrorArgs) {
         const message = "The specified authorization key is not registered in the system (for example, a PFS temporary key has expired)." + RPCError._fmtRequest(args.request);
@@ -6266,6 +6419,15 @@ export class UserDeactivatedBanError extends UnauthorizedError {
         super(message, args.request);
         this.message = message;
         this.errorMessage = "USER_DEACTIVATED_BAN";
+    }
+}
+
+export class ActiveUserRequiredError extends UnauthorizedError {
+    constructor(args: ErrorArgs) {
+        const message = "The method is only available to already activated users" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "ACTIVE_USER_REQUIRED";
     }
 }
 
@@ -6659,6 +6821,15 @@ export class ChatForbiddenError extends ForbiddenError {
     }
 }
 
+export class NotAllowedError extends ForbiddenError {
+    constructor(args: ErrorArgs) {
+        const message = "NOT_ALLOWED" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "NOT_ALLOWED";
+    }
+}
+
 export class ApiGiftRestrictedUpdateAppError extends AuthKeyError {
     constructor(args: ErrorArgs) {
         const message = "Please update the app to access the gift API." + RPCError._fmtRequest(args.request);
@@ -6860,6 +7031,15 @@ export class AuthKeyDuplicatedError extends AuthKeyError {
     }
 }
 
+export class PreviousChatImportActiveWaitXminError extends AuthKeyError {
+    constructor(args: ErrorArgs) {
+        const message = "Similar to a flood wait, must wait %d minutes" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "PREVIOUS_CHAT_IMPORT_ACTIVE_WAIT_XMIN";
+    }
+}
+
 export class TwoFaConfirmWaitError extends FloodError {
     public value: number;
 
@@ -7028,6 +7208,219 @@ export class TranslationTimeoutError extends ServerError {
         super(message, args.request);
         this.message = message;
         this.errorMessage = "TRANSLATION_TIMEOUT";
+    }
+}
+
+export class ChatGetFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "CHAT_GET_FAILED" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "CHAT_GET_FAILED";
+    }
+}
+
+export class ChpCallFailError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The statistics cannot be retrieved at this time" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "CHP_CALL_FAIL";
+    }
+}
+
+export class EncryptionOccupyFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "TDLib developer claimed it is not an error while accepting secret chats and 500 is used instead of 420" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "ENCRYPTION_OCCUPY_FAILED";
+    }
+}
+
+export class GroupcallAddParticipantsFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "GROUPCALL_ADD_PARTICIPANTS_FAILED" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "GROUPCALL_ADD_PARTICIPANTS_FAILED";
+    }
+}
+
+export class HistoryGetFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Fetching of history failed" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "HISTORY_GET_FAILED";
+    }
+}
+
+export class InterdcCallErrorError extends ServerError {
+    public value: number;
+
+    constructor(args: ErrorArgs) {
+        const value = Number(args.capture || 0);
+        const message = "An error occurred while communicating with DC " + value + "" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.value = value;
+    }
+}
+
+export class InterdcCallRichErrorError extends ServerError {
+    public value: number;
+
+    constructor(args: ErrorArgs) {
+        const value = Number(args.capture || 0);
+        const message = "A rich error occurred while communicating with DC " + value + "" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.value = value;
+    }
+}
+
+export class MemberNoLocationError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "An internal failure occurred while fetching user info (couldn't find location)" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "MEMBER_NO_LOCATION";
+    }
+}
+
+export class MemberOccupyPrimaryLocFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Occupation of primary member location failed" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "MEMBER_OCCUPY_PRIMARY_LOC_FAILED";
+    }
+}
+
+export class MsgidDecreaseRetryError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The request should be retried with a lower message ID" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "MSGID_DECREASE_RETRY";
+    }
+}
+
+export class MtSendQueueTooLongError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "MT_SEND_QUEUE_TOO_LONG" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "MT_SEND_QUEUE_TOO_LONG";
+    }
+}
+
+export class NeedChatInvalidError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The provided chat is invalid" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "NEED_CHAT_INVALID";
+    }
+}
+
+export class NeedMemberInvalidError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The provided member is invalid or does not exist (for example a thumb size)" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "NEED_MEMBER_INVALID";
+    }
+}
+
+export class ParticipantCallFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Failure while making call" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "PARTICIPANT_CALL_FAILED";
+    }
+}
+
+export class PostponedTimeoutError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The postponed call has timed out" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "POSTPONED_TIMEOUT";
+    }
+}
+
+export class PtsChangeEmptyError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "No PTS change" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "PTS_CHANGE_EMPTY";
+    }
+}
+
+export class RegIdGenerateFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Failure while generating registration ID" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "REG_ID_GENERATE_FAILED";
+    }
+}
+
+export class RpcCallFailError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Telegram is having internal issues, please try again later." + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "RPC_CALL_FAIL";
+    }
+}
+
+export class RpcMcgetFailError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Telegram is having internal issues, please try again later." + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "RPC_MCGET_FAIL";
+    }
+}
+
+export class StorageCheckFailedError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Server storage check failed" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "STORAGE_CHECK_FAILED";
+    }
+}
+
+export class StoreInvalidScalarTypeError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "STORE_INVALID_SCALAR_TYPE" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "STORE_INVALID_SCALAR_TYPE";
+    }
+}
+
+export class UnknownMethodError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "The method you tried to call cannot be called on non-CDN DCs" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "UNKNOWN_METHOD";
+    }
+}
+
+export class WorkerBusyTooLongRetryError extends ServerError {
+    constructor(args: ErrorArgs) {
+        const message = "Telegram workers are too busy to respond immediately" + RPCError._fmtRequest(args.request);
+        super(message, args.request);
+        this.message = message;
+        this.errorMessage = "WORKER_BUSY_TOO_LONG_RETRY";
     }
 }
 
@@ -7739,6 +8132,23 @@ export const rpcErrorsDict: Map<string, any> = new Map<string, any>([
     ["INPUT_REQUEST_TOO_LONG", InputRequestTooLongError],
     ["PEER_FLOOD", PeerFloodError],
     ["STICKERSET_NOT_MODIFIED", StickersetNotModifiedError],
+    ["AUTH_TOKEN_INVALID2", AuthTokenInvalid2Error],
+    ["BASE_PORT_LOC_INVALID", BasePortLocInvalidError],
+    ["BOT_COMMANDS_TOO_MUCH", BotCommandsTooMuchError],
+    ["BOT_MISSING", BotMissingError],
+    ["BOT_POLLS_DISABLED", BotPollsDisabledError],
+    ["BROADCAST_CALLS_DISABLED", BroadcastCallsDisabledError],
+    ["CHANNEL_BANNED", ChannelBannedError],
+    ["EXPIRE_FORBIDDEN", ExpireForbiddenError],
+    ["FIELD_NAME_EMPTY", FieldNameEmptyError],
+    ["FIELD_NAME_INVALID", FieldNameInvalidError],
+    ["FILE_PART_0_MISSING", FilePart0MissingError],
+    ["GROUP_CALL_INVALID", GroupCallInvalidError],
+    ["POLL_UNSUPPORTED", PollUnsupportedError],
+    ["REFLECTOR_NOT_AVAILABLE", ReflectorNotAvailableError],
+    ["SHORTNAME_OCCUPY_FAILED", ShortnameOccupyFailedError],
+    ["TYPE_CONSTRUCTOR_INVALID", TypeConstructorInvalidError],
+    ["UNKNOWN_ERROR", UnknownErrorError],
     ["AUTH_KEY_UNREGISTERED", AuthKeyUnregisteredError],
     ["AUTH_KEY_INVALID", AuthKeyInvalidError],
     ["AUTH_KEY_PERM_EMPTY", AuthKeyPermEmptyError],
@@ -7747,6 +8157,7 @@ export const rpcErrorsDict: Map<string, any> = new Map<string, any>([
     ["SESSION_REVOKED", SessionRevokedError],
     ["USER_DEACTIVATED", UserDeactivatedError],
     ["USER_DEACTIVATED_BAN", UserDeactivatedBanError],
+    ["ACTIVE_USER_REQUIRED", ActiveUserRequiredError],
     ["ACCESS_DENIED", AccessDeniedError],
     ["ALLOW_PAYMENT_REQUIRED", AllowPaymentRequiredError],
     ["BOT_ACCESS_FORBIDDEN", BotAccessForbiddenError],
@@ -7790,6 +8201,7 @@ export const rpcErrorsDict: Map<string, any> = new Map<string, any>([
     ["USER_RESTRICTED", UserRestrictedError],
     ["YOUR_PRIVACY_RESTRICTED", YourPrivacyRestrictedError],
     ["CHAT_FORBIDDEN", ChatForbiddenError],
+    ["NOT_ALLOWED", NotAllowedError],
     ["API_GIFT_RESTRICTED_UPDATE_APP", ApiGiftRestrictedUpdateAppError],
     ["BUSINESS_ADDRESS_ACTIVE", BusinessAddressActiveError],
     ["CALL_PROTOCOL_COMPAT_LAYER_INVALID", CallProtocolCompatLayerInvalidError],
@@ -7811,6 +8223,7 @@ export const rpcErrorsDict: Map<string, any> = new Map<string, any>([
     ["UPDATE_APP_TO_LOGIN", UpdateAppToLoginError],
     ["USERPIC_PRIVACY_REQUIRED", UserpicPrivacyRequiredError],
     ["AUTH_KEY_DUPLICATED", AuthKeyDuplicatedError],
+    ["PREVIOUS_CHAT_IMPORT_ACTIVE_WAIT_XMIN", PreviousChatImportActiveWaitXminError],
     ["FROZEN_METHOD_INVALID", FrozenMethodInvalidError],
     ["AICOMPOSE_TIMEOUT", AicomposeTimeoutError],
     ["AUTH_KEY_UNSYNCHRONIZED", AuthKeyUnsynchronizedError],
@@ -7823,6 +8236,27 @@ export const rpcErrorsDict: Map<string, any> = new Map<string, any>([
     ["SIGN_IN_FAILED", SignInFailedError],
     ["TRANSLATE_REQ_FAILED", TranslateReqFailedError],
     ["TRANSLATION_TIMEOUT", TranslationTimeoutError],
+    ["CHAT_GET_FAILED", ChatGetFailedError],
+    ["CHP_CALL_FAIL", ChpCallFailError],
+    ["ENCRYPTION_OCCUPY_FAILED", EncryptionOccupyFailedError],
+    ["GROUPCALL_ADD_PARTICIPANTS_FAILED", GroupcallAddParticipantsFailedError],
+    ["HISTORY_GET_FAILED", HistoryGetFailedError],
+    ["MEMBER_NO_LOCATION", MemberNoLocationError],
+    ["MEMBER_OCCUPY_PRIMARY_LOC_FAILED", MemberOccupyPrimaryLocFailedError],
+    ["MSGID_DECREASE_RETRY", MsgidDecreaseRetryError],
+    ["MT_SEND_QUEUE_TOO_LONG", MtSendQueueTooLongError],
+    ["NEED_CHAT_INVALID", NeedChatInvalidError],
+    ["NEED_MEMBER_INVALID", NeedMemberInvalidError],
+    ["PARTICIPANT_CALL_FAILED", ParticipantCallFailedError],
+    ["POSTPONED_TIMEOUT", PostponedTimeoutError],
+    ["PTS_CHANGE_EMPTY", PtsChangeEmptyError],
+    ["REG_ID_GENERATE_FAILED", RegIdGenerateFailedError],
+    ["RPC_CALL_FAIL", RpcCallFailError],
+    ["RPC_MCGET_FAIL", RpcMcgetFailError],
+    ["STORAGE_CHECK_FAILED", StorageCheckFailedError],
+    ["STORE_INVALID_SCALAR_TYPE", StoreInvalidScalarTypeError],
+    ["UNKNOWN_METHOD", UnknownMethodError],
+    ["WORKER_BUSY_TOO_LONG_RETRY", WorkerBusyTooLongRetryError],
     ["Timeout", TimeoutError],
     ["MSG_WAIT_TIMEOUT", MsgWaitTimeoutError],
     ["ANONYMOUS_REACTIONS_DISABLED", AnonymousReactionsDisabledError],
@@ -7855,6 +8289,8 @@ export const rpcErrorsRe: Map<RegExp, any> = new Map<RegExp, any>([
     [/^SLOWMODE_WAIT_(\d+)$/, SlowModeWaitError],
     [/^TAKEOUT_INIT_DELAY_(\d+)$/, TakeoutInitDelayError],
     [/^AUTH_RESTART_(\d+)$/, AuthRestartError],
+    [/^INTERDC_(\d+)_CALL_ERROR$/, InterdcCallErrorError],
+    [/^INTERDC_(\d+)_CALL_RICH_ERROR$/, InterdcCallRichErrorError],
     [/^FLOOD_TEST_PHONE_WAIT_(\d+)$/, FloodTestPhoneWaitError],
 ]);
 
