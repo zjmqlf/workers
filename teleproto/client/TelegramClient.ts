@@ -964,8 +964,8 @@ export class TelegramClient<
         return forumMethods.getForumTopicsByID(this, entity, topicIds);
     }
 
-    toggleForum(entity: EntityLike, enabled: boolean, tabs?: boolean) {
-        return forumMethods.toggleForum(this, entity, enabled, tabs);
+    toggleForum(entity: EntityLike, enabled: boolean, tabs?: boolean, sidebar?: boolean) {
+        return forumMethods.toggleForum(this, entity, enabled, tabs, sidebar);
     }
 
     toggleViewForumAsMessages(entity: EntityLike, enabled: boolean) {
