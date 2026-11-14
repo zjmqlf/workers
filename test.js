@@ -41,7 +41,7 @@ import { DurableObject } from "cloudflare:workers";
 //     systemLangCode: "en-US",
 //   });
 //   // client[index].session.setDC(5, "91.108.56.128", 80);
-//   client[index].setLogLevel("error");
+//   client[index].setLogLevel(LogLevel.ERROR);
 //   await client[index].connect();
 //   console.log("连接服务器" + (index + 1) + "成功");  //测试
 //   // console.log(client[index]);  //测试

@@ -3,7 +3,7 @@ import { LegacySocketTransport } from "../compat/LegacySocketTransport";
 import type { SocketFactory as LegacySocketFactory } from "../compat/extensions/SocketInterface";
 import { isLegacyProxyConnection } from "../compat/network/connection/TCPMTProxy";
 import type { TelegramClient } from "./TelegramClient";
-import { net, timers } from "../platform";
+import { net } from "../platform";
 import { Session, StoreSession } from "../sessions";
 import { Logger } from "../extensions";
 import { Api } from "../tl";
@@ -592,8 +592,8 @@ export abstract class TelegramBaseClient<S extends Session = Session> {
     private _scheduleConfigReload(seconds: number) {
         clearTimeout(this._configTimer);
         if (this._destroyed) return;
-        this._configTimer = timers.setTimeout(() => void this._reloadConfig(), seconds * 1000);
-        this._configTimer?.unref?.();
+        this._configTimer = setTimeout(() => void this._reloadConfig(), seconds * 1000);
+        this._configTimer.unref?.();
     }
 
     async _reloadConfig() {

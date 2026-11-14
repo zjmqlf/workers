@@ -9,7 +9,7 @@ import { FileDownloader } from "../files/FileDownloader";
 import { transferKindFor } from "../files/FileTransfers";
 import { choosePartSize } from "../files/PartsManager";
 import { OrderedSink, openTarget, type DownloadTarget } from "../files/sinks";
-import { Buffer, crypto, fs, timers } from "../../platform";
+import { Buffer, crypto, fs } from "../../platform";
 
 export interface progressCallback {
     (
@@ -139,7 +139,7 @@ export async function downloadFile(
     const forward = () => abort.abort();
     if (signal?.aborted) abort.abort();
     else signal?.addEventListener("abort", forward, { once: true });
-    const timer = requestTimeout && requestTimeout > 0 ? timers.setTimeout(forward, requestTimeout) : undefined;
+    const timer = requestTimeout && requestTimeout > 0 ? setTimeout(forward, requestTimeout) : undefined;
 
     const dc = dcId ?? info.dcId ?? client.session.dcId;
     let release: (() => void) | undefined;

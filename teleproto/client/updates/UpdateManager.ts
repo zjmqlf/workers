@@ -16,7 +16,6 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
-import { timers } from "../../platform";
 
 export type { ChannelPollingState } from "./ChannelUpdates";
 
@@ -304,8 +303,8 @@ export class UpdateManager implements ChannelUpdatesHost {
 
     saveState() {
         if (this.saveTimer) return;
-        this.saveTimer = timers.setTimeout(() => this.flushState(), STATE_SAVE_DELAY_MS);
-        this.saveTimer?.unref?.();
+        this.saveTimer = setTimeout(() => this.flushState(), STATE_SAVE_DELAY_MS);
+        this.saveTimer.unref?.();
     }
 
     private flushState() {
@@ -383,7 +382,7 @@ export class UpdateManager implements ChannelUpdatesHost {
     private armSeqGapTimer(): void {
         clearTimeout(this.seqGapTimer);
         const firstReceivedAt = Math.min(...this.pendingSeq.slice(0, GAP_TIMEOUT_UPDATE_COUNT).map((entry) => entry.receivedAt));
-        this.seqGapTimer = timers.setTimeout(() => {
+        this.seqGapTimer = setTimeout(() => {
             this.seqGapTimer = undefined;
             this.client._log.debug("Seq gap was not filled in time, fetching difference");
             this.requestDifference();
@@ -470,7 +469,7 @@ export class UpdateManager implements ChannelUpdatesHost {
                     }
                     return;
                 }
-                this.gapTimers[kind] = timers.setTimeout(() => {
+                this.gapTimers[kind] = setTimeout(() => {
                     this.gapTimers[kind] = undefined;
                     this.client._log.debug(`${kind} gap was not filled in time, fetching difference`);
                     this.requestDifference();
@@ -480,7 +479,7 @@ export class UpdateManager implements ChannelUpdatesHost {
                 kind === "pts"
                     ? () => {
                           if (this.repairTimer) return;
-                          this.repairTimer = timers.setTimeout(() => {
+                          this.repairTimer = setTimeout(() => {
                               this.repairTimer = undefined;
                               void this.repairSingleGap();
                           }, SINGLE_GAP_REPAIR_MS);
@@ -553,7 +552,7 @@ export class UpdateManager implements ChannelUpdatesHost {
         if (failed && this.running) {
             this.retryDelayS = nextRetryDelaySeconds(this.retryDelayS);
             this.client._log.debug(`Retrying updates.getDifference in ${Math.round(this.retryDelayS)}s`);
-            this.retryTimer = timers.setTimeout(() => {
+            this.retryTimer = setTimeout(() => {
                 this.retryTimer = undefined;
                 void this.fetchDifference();
             }, this.retryDelayS * 1000);
@@ -640,7 +639,7 @@ function markNoDispatch(update: Api.TypeUpdate | Api.TypeUpdates): void {
 
 function withDeadline<T>(promise: Promise<T>, ms: number, what: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-        const timer = timers.setTimeout(() => {
+        const timer = setTimeout(() => {
             promise.catch(() => {});
             reject(new Error(`${what} timed out after ${ms}ms`));
         }, ms);

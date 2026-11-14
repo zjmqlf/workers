@@ -1,5 +1,4 @@
 import type { Api } from "../../tl";
-import timers from "node:timers";
 
 export class RpcCallControl {
     private readonly controller = new AbortController();
@@ -18,7 +17,7 @@ export class RpcCallControl {
         if (options.abortSignal?.aborted) this.onAbort();
         else options.abortSignal?.addEventListener("abort", this.onAbort, { once: true });
         if (options.timeout !== undefined) {
-            this.timer = timers.setTimeout(() => {
+            this.timer = setTimeout(() => {
                 const error = new Error(`RPC timed out after ${options.timeout}ms`);
                 error.name = "TimeoutError";
                 this.controller.abort(error);
@@ -48,7 +47,7 @@ export class RpcCallControl {
     async sleep(ms: number): Promise<void> {
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
-            await this.wait(new Promise<void>((resolve) => { timer = timers.setTimeout(resolve, ms); }));
+            await this.wait(new Promise<void>((resolve) => { timer = setTimeout(resolve, ms); }));
         } finally {
             if (timer) clearTimeout(timer);
         }

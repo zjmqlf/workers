@@ -1,5 +1,3 @@
-import { timers } from "../../platform";
-
 const MAX_GAP_FACTOR = 8;
 const GAP_RECOVERY = 0.9;
 
@@ -92,7 +90,7 @@ export class ChannelScheduler {
         if (index < 0) return;
         const delay = Math.max(this.nextStartAt, this.pausedUntil) - Date.now();
         if (delay > 0) {
-            this.timer = timers.setTimeout(() => {
+            this.timer = setTimeout(() => {
                 this.timer = undefined;
                 this.pump();
             }, Math.min(delay, 2147483647));

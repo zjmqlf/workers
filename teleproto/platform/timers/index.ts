@@ -1,5 +1,3 @@
-import timers from "node:timers";
-
 export interface SleepOptions {
     signal?: AbortSignal;
     ref?: boolean;
@@ -30,22 +28,4 @@ export function immediate(callback: () => void): void {
     const native = (globalThis as { setImmediate?: (callback: () => void) => unknown }).setImmediate;
     if (native) native(callback);
     else setTimeout(callback, 0);
-}
-
-export function setTimeout(callback: () => void, ms: number): ReturnType<typeof timers.setTimeout> {
-    const native = (globalThis as { setTimeout?: (callback: () => void) => unknown }).setTimeout;
-    if (native) native(callback);
-    return setTimeout(callback, ms);
-}
-
-export function clearTimeout(timer: ReturnType<typeof timers.setTimeout>): void {
-    const native = (globalThis as { clearTimeout?: (timer: ReturnType<typeof timers.setTimeout>) => unknown }).clearTimeout;
-    if (native) native(timer);
-    return timers.clearTimeout(timer);
-}
-
-export function setInterval(callback: () => void, ms: number): ReturnType<typeof timers.setInterval> {
-    const native = (globalThis as { setInterval?: (callback: () => void) => unknown }).setInterval;
-    if (native) native(callback);
-    return setInterval(callback, ms);
 }

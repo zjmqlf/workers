@@ -10,7 +10,6 @@ import { events } from "../../platform";
 import type { UpdateState, ChannelPollingState } from "./UpdateManager";
 import { UpdateConnectionState } from "../../network";
 import { UpdateContext, type WithUpdateContext } from "./UpdateContext";
-import { timers } from "../../platform";
 
 export type NextFn = () => Promise<void>;
 
@@ -325,11 +324,11 @@ export class ClientUpdates {
             }
             await Promise.all(pending);
             if (retry && active()) {
-                entry.retryTimer = timers.setTimeout(() => {
+                entry.retryTimer = setTimeout(() => {
                     entry.retryTimer = undefined;
                     void this.arm(entry);
                 }, entry.retryDelay);
-                entry.retryTimer?.unref?.();
+                entry.retryTimer.unref?.();
                 entry.retryDelay = Math.min(entry.retryDelay * 2, 64000);
             } else {
                 entry.retryDelay = 1000;

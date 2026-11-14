@@ -333,7 +333,7 @@ export class Session implements LinkHost, RouterHost {
             await Promise.race([
                 dial,
                 new Promise<never>((_, reject) => {
-                    timer = timers.setTimeout(
+                    timer = setTimeout(
                         () => reject(new Error(`Connection to ${connection} timed out after ${seconds}s`)),
                         seconds * 1000
                     );

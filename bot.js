@@ -20,7 +20,7 @@ export default {
         systemLangCode: "zh-CN",
       });
       client.session.setDC(5, "91.108.56.128", 80);
-      client.setLogLevel("error");
+      client.setLogLevel(LogLevel.ERROR);
       await client.connect();
       console.log("连接服务器成功");  //测试
       // console.log(client);  //测试

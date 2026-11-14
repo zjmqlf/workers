@@ -2,7 +2,6 @@ import { DefaultEventInterface, EventBuilder, EventCommon } from "./common";
 import { Entity, EntityLike } from "../define";
 import { Api } from "../tl";
 import type { TelegramClient } from "../client/TelegramClient";
-import { timers } from "../platform";
 
 const _ALBUM_DELAY = 500;
 
@@ -31,7 +30,7 @@ export class Album extends EventBuilder {
             oldValues.push(...oldTimeout[1]);
         }
         albums.set(groupedId.toString(), [
-            timers.setTimeout(() => {
+            setTimeout(() => {
                 const values = albums.get(groupedId.toString());
                 albums.delete(groupedId.toString());
                 if (!values) {

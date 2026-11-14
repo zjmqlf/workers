@@ -1,5 +1,4 @@
 import type { Session } from "../session/Session";
-//import { timers } from "../../platform";
 
 export type SenderSlotState = "idle" | "connecting" | "ready" | "dead";
 
@@ -115,8 +114,8 @@ export class SessionSlot {
     // private armIdle() {
     //     this.clearIdle();
     //     if (this.dead || this.opts.idleTimeoutMs <= 0) return;
-    //     this.idleTimer = timers.setTimeout(() => this.idle(), this.opts.idleTimeoutMs);
-    //     this.idleTimer?.unref?.();
+    //     this.idleTimer = setTimeout(() => this.idle(), this.opts.idleTimeoutMs);
+    //     this.idleTimer.unref?.();
     // }
 
     private idle() {

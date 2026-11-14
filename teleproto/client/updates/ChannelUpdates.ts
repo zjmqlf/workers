@@ -11,7 +11,6 @@ import {
     type DispatchPayload,
     type PtsUpdate,
 } from "./updateKinds";
-import { timers } from "../../platform";
 
 const DIFFERENCE_LIMIT_USER = 100;
 const DIFFERENCE_LIMIT_BOT = 100_000;
@@ -290,7 +289,7 @@ export class ChannelUpdates {
                     clearTimeout(created.gapTimer);
                     created.gapTimer = undefined;
                     if (ms < 0) return;
-                    created.gapTimer = timers.setTimeout(() => {
+                    created.gapTimer = setTimeout(() => {
                         created.gapTimer = undefined;
                         created.catchingUp = true;
                         void this.fetchDifference(channelId);
@@ -574,7 +573,7 @@ export class ChannelUpdates {
             (this.scheduler.state.pausedUntil ?? 0) - Date.now()
         );
         tracker.nextPollAt = Date.now() + delayMs;
-        tracker.retryTimer = timers.setTimeout(() => {
+        tracker.retryTimer = setTimeout(() => {
             tracker.retryTimer = undefined;
             void this.fetchDifference(channelId);
         }, delayMs);
@@ -586,7 +585,7 @@ export class ChannelUpdates {
         const baseMs = serverTimeoutS && serverTimeoutS > 0 ? serverTimeoutS * 1000 : this.client._channelPollInterval;
         const delayMs = tracker.joined ? Math.max(baseMs, JOINED_POLL_MS) : baseMs;
         tracker.nextPollAt = Date.now() + delayMs;
-        tracker.pollTimer = timers.setTimeout(() => {
+        tracker.pollTimer = setTimeout(() => {
             tracker.pollTimer = undefined;
             void this.fetchDifference(channelId);
         }, delayMs);
